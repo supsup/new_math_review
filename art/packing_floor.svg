@@ -46,7 +46,7 @@
 <text x="571.2" y="432" font-size="13" text-anchor="middle" fill="#1d1b18">12</text>
 <line x1="571.2" y1="227.4" x2="571.2" y2="231.4" stroke="#b7642d" stroke-width="2"/>
 <circle cx="571.2" cy="229.3" r="6" fill="#b7642d"/>
-<circle cx="571.2" cy="227.7" r="10" fill="none" stroke="#1d1b18" stroke-width="1.2" stroke-dasharray="3 2"/>
+<circle cx="571.2" cy="227.7" r="10" fill="none" stroke="#1d1b18" stroke-width="1.2"/>
 <text x="635.4" y="432" font-size="13" text-anchor="middle" fill="#1d1b18">13</text>
 <line x1="635.4" y1="304.8" x2="635.4" y2="340.7" stroke="#2b6cb0" stroke-width="2"/>
 <circle cx="635.4" cy="317.2" r="6" fill="#2b6cb0"/>
@@ -64,5 +64,5 @@
 <circle cx="470" cy="476" r="5" fill="#7b4ea3"/><text x="482" y="480" font-size="12" fill="#1d1b18">n = 5 mod 6: a 4-cycle</text>
 <circle cx="90" cy="494" r="5" fill="#b7642d"/><text x="102" y="498" font-size="12" fill="#1d1b18">n = 0, 2 mod 6: a perfect matching</text>
 <circle cx="470" cy="494" r="5" fill="#2f855a"/><text x="482" y="498" font-size="12" fill="#1d1b18">n = 4 mod 6: a star K1,3 plus separate edges (n/2 + 1 edges)</text>
-<text x="90" y="76" font-size="12" fill="#5a554d">dots: simulation with 2-sigma bars; rings: exact values; solid = recomputed independently (n &lt;= 11), dashed = by Lattice only (n = 12)</text>
+<text x="90" y="76" font-size="12" fill="#5a554d">dots: simulation with 2-sigma bars; rings: exact values (n &lt;= 12), each recomputed independently</text>
 </svg>
