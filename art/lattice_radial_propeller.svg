@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="650" viewBox="0 0 980 650" role="img" aria-labelledby="title desc">
+<title id="title">Why three Gaussian propeller blades?</title>
+<desc id="desc">Three equal radial sectors each have an unnormalized Gaussian first-moment vector. Their total squared moment is 9 over 8 pi. A bar chart shows the scores of equal-sector partitions with 2 through 8 cells; three wins within this family. A merge identity proves the stronger radial-wedge statement.</desc>
+<rect width="980" height="650" fill="#f5f1e8"/>
+<text x="60" y="57" fill="#254044" font-family="Georgia,serif" font-size="35">Why three propeller blades?</text>
+<text x="62" y="91" fill="#617478" font-family="Georgia,serif" font-size="17">A complete proof for radial wedges · a bounded slice of family 096</text>
+<text x="62" y="125" fill="#994f3e" font-family="Georgia,serif" font-size="18">score = Σ |∫cell x dγ₂|² = Σ sin²(width/2)/(2π)</text>
+<rect x="60" y="149" width="381" height="350" rx="13" fill="#fffdf9" stroke="#d6d2c8"/>
+<rect x="458" y="149" width="462" height="350" rx="13" fill="#fffdf9" stroke="#d6d2c8"/>
+<text x="251" y="184" text-anchor="middle" fill="#254044" font-family="Georgia,serif" font-size="21">three 120° sectors</text>
+<text x="689" y="184" text-anchor="middle" fill="#254044" font-family="Georgia,serif" font-size="21">equal m-sector partitions</text>
+
+<path d="M235.00,325.00 L302.50,441.91 L310.00,437.25 L317.18,432.10 L324.01,426.50 L330.46,420.46 L336.50,414.01 L342.10,407.18 L347.25,400.00 L351.91,392.50 L356.08,384.71 L359.72,376.66 L362.84,368.39 L365.40,359.94 L367.41,351.34 L368.85,342.62 L369.71,333.83 L370.00,325.00 L369.71,316.17 L368.85,307.38 L367.41,298.66 L365.40,290.06 L362.84,281.61 L359.72,273.34 L356.08,265.29 L351.91,257.50 L347.25,250.00 L342.10,242.82 L336.50,235.99 L330.46,229.54 L324.01,223.50 L317.18,217.90 L310.00,212.75 L302.50,208.09 Z" fill="#a9c4c4" stroke="#fffdf9" stroke-width="2"/>
+<line x1="235.00" y1="325.00" x2="318.00" y2="325.00" stroke="#31575e" stroke-width="3.2"/><polygon points="318.00,325.00 306.00,320.00 306.00,330.00" fill="#31575e"/>
+<path d="M235.00,325.00 L302.50,208.09 L294.71,203.92 L286.66,200.28 L278.39,197.16 L269.94,194.60 L261.34,192.59 L252.62,191.15 L243.83,190.29 L235.00,190.00 L226.17,190.29 L217.38,191.15 L208.66,192.59 L200.06,194.60 L191.61,197.16 L183.34,200.28 L175.29,203.92 L167.50,208.09 L160.00,212.75 L152.82,217.90 L145.99,223.50 L139.54,229.54 L133.50,235.99 L127.90,242.82 L122.75,250.00 L118.09,257.50 L113.92,265.29 L110.28,273.34 L107.16,281.61 L104.60,290.06 L102.59,298.66 L101.15,307.38 L100.29,316.17 L100.00,325.00 Z" fill="#d6a28e" stroke="#fffdf9" stroke-width="2"/>
+<line x1="235.00" y1="325.00" x2="193.50" y2="253.12" stroke="#9d503b" stroke-width="3.2"/><polygon points="193.50,253.12 195.17,266.01 203.83,261.01" fill="#9d503b"/>
+<path d="M235.00,325.00 L100.00,325.00 L100.29,333.83 L101.15,342.62 L102.59,351.34 L104.60,359.94 L107.16,368.39 L110.28,376.66 L113.92,384.71 L118.09,392.50 L122.75,400.00 L127.90,407.18 L133.50,414.01 L139.54,420.46 L145.99,426.50 L152.82,432.10 L160.00,437.25 L167.50,441.91 L175.29,446.08 L183.34,449.72 L191.61,452.84 L200.06,455.40 L208.66,457.41 L217.38,458.85 L226.17,459.71 L235.00,460.00 L243.83,459.71 L252.62,458.85 L261.34,457.41 L269.94,455.40 L278.39,452.84 L286.66,449.72 L294.71,446.08 L302.50,441.91 Z" fill="#d6c389" stroke="#fffdf9" stroke-width="2"/>
+<line x1="235.00" y1="325.00" x2="193.50" y2="396.88" stroke="#927633" stroke-width="3.2"/><polygon points="193.50,396.88 203.83,388.99 195.17,383.99" fill="#927633"/>
+<circle cx="235.0" cy="325.0" r="5" fill="#254044"/>
+<text x="251" y="482" text-anchor="middle" fill="#455b60" font-family="Arial,sans-serif" font-size="13">three moments of length 0.345494</text>
+<rect x="500" y="270.91" width="35" height="171.09" rx="3" fill="#708c91"/>
+<text x="517.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">2</text>
+<rect x="556" y="249.52" width="35" height="192.48" rx="3" fill="#b95d43"/>
+<text x="573.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">3</text>
+<rect x="612" y="270.91" width="35" height="171.09" rx="3" fill="#708c91"/>
+<text x="629.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">4</text>
+<rect x="668" y="294.22" width="35" height="147.78" rx="3" fill="#708c91"/>
+<text x="685.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">5</text>
+<rect x="724" y="313.68" width="35" height="128.32" rx="3" fill="#708c91"/>
+<text x="741.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">6</text>
+<rect x="780" y="329.27" width="35" height="112.73" rx="3" fill="#708c91"/>
+<text x="797.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">7</text>
+<rect x="836" y="341.78" width="35" height="100.22" rx="3" fill="#708c91"/>
+<text x="853.50" y="468" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="15">8</text>
+<text x="687" y="487" text-anchor="middle" fill="#667476" font-family="Arial,sans-serif" font-size="13">number of equal-width cells m</text>
+<text x="62" y="540" fill="#254044" font-family="Georgia,serif" font-size="22">The radial-wedge ceiling is 0.358099 = 9/(8π).</text>
+<text x="62" y="575" fill="#455b60" font-family="Arial,sans-serif" font-size="14">Merge adjacent widths a+b ≤ π: sin²((a+b)/2) ≥ sin²(a/2)+sin²(b/2).</text>
+<text x="62" y="599" fill="#455b60" font-family="Arial,sans-serif" font-size="14">Repeat until three wedges remain; their maximum is the equal 120° triple.</text>
+<text x="62" y="629" fill="#8c8d84" font-family="Arial,sans-serif" font-size="11">Lattice · 2026-10-08 · notes 6–7 cover planar/≤3-cell cases; manuscript treats arbitrary ≥4-cell partitions in d≥3</text>
+</svg>
