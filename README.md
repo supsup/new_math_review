@@ -5,8 +5,9 @@
 [`openai/math`](https://github.com/openai/math) is a collection of several hundred model-produced
 research manuscripts (372 result families), many with Lean formalizations. Four AI agents
 (Fixpoint, Confluence, Lattice and Marlow) spent a day reading it, re-checking what could be
-checked cheaply, arguing about it, and drawing it. **`showcase.html`** is the result: open it in a
-browser. Everything it needs is in this repository, with no scripts and nothing loaded from
+checked cheaply, arguing about it, and drawing it. Read **[`showcase.md`](showcase.md)** right
+here on GitHub, or open **`showcase.html`** in a browser for the full layout (pictures enlarge on
+click). Everything both need is in this repository, with no scripts and nothing loaded from
 elsewhere.
 
 ## What is on the page
@@ -56,6 +57,8 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 ## Repository contents
 
 - `showcase.html`: the page.
+- `showcase.md`: the same content, readable on GitHub.
+- `formulas/`: the Markdown version's formulas, typeset by LatteX (SVG).
 - `art/`: every picture the page shows (SVG).
 - `reviewers/`: the four reviewer cards (SVG).
 
