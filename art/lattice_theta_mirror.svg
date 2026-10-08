@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="690" viewBox="0 0 1040 690" role="img" aria-labelledby="title desc">
+<title id="title">A scaled Gaussian energy gap reflected through alpha equals pi</title>
+<desc id="desc">The scaled square-minus-triangle energy gap has exact reflection symmetry in log alpha. Two sample pairs are connected; the low pair has a raised bracket for visibility. Small square and triangular lattices have equal area cells.</desc>
+<rect width="1040" height="690" fill="#f5f1e8"/>
+<text x="64" y="57" fill="#254044" font-family="Georgia,serif" font-size="34">The scaled lattice gap has a mirror</text>
+<text x="66" y="91" fill="#627477" font-family="Georgia,serif" font-size="17">Square minus triangular Gaussian energy · equal-area cells · family 090</text>
+<text x="66" y="124" fill="#944e3c" font-family="Georgia,serif" font-size="18">F(α) = √(α/π) [E_sq(α) − E_tri(α)] = F(π²/α)</text>
+<rect x="65" y="145" width="910" height="310" rx="13" fill="#fffdf9" stroke="#d6d2c8"/>
+
+<line x1="88" x2="964" y1="444.00" y2="444.00" stroke="#e3e4df"/><text x="74" y="449.00" text-anchor="end" fill="#667476" font-family="Arial,sans-serif" font-size="12">0.000</text>
+<line x1="88" x2="964" y1="381.39" y2="381.39" stroke="#e3e4df"/><text x="74" y="386.39" text-anchor="end" fill="#667476" font-family="Arial,sans-serif" font-size="12">0.005</text>
+<line x1="88" x2="964" y1="318.78" y2="318.78" stroke="#e3e4df"/><text x="74" y="323.78" text-anchor="end" fill="#667476" font-family="Arial,sans-serif" font-size="12">0.010</text>
+<line x1="88" x2="964" y1="256.17" y2="256.17" stroke="#e3e4df"/><text x="74" y="261.17" text-anchor="end" fill="#667476" font-family="Arial,sans-serif" font-size="12">0.015</text>
+<line x1="88" x2="964" y1="193.57" y2="193.57" stroke="#e3e4df"/><text x="74" y="198.57" text-anchor="end" fill="#667476" font-family="Arial,sans-serif" font-size="12">0.020</text>
+<line x1="526.00" x2="526.00" y1="156" y2="444" stroke="#b18067" stroke-dasharray="5 5"/>
+<path d="M238.27,440.90 L238.27,417.90 L813.73,417.90 L813.73,440.90" fill="none" stroke="#87a6ad" stroke-width="1.6" opacity=".8"/>
+<path d="M412.49,304.91 L412.49,304.91 L639.51,304.91 L639.51,304.91" fill="none" stroke="#87a6ad" stroke-width="1.6" opacity=".8"/>
+<path d="M88.00,444.00 L90.74,444.00 L93.48,444.00 L96.21,444.00 L98.95,444.00 L101.69,444.00 L104.42,443.99 L107.16,443.99 L109.90,443.99 L112.64,443.99 L115.37,443.99 L118.11,443.99 L120.85,443.99 L123.59,443.98 L126.33,443.98 L129.06,443.98 L131.80,443.97 L134.54,443.97 L137.27,443.96 L140.01,443.96 L142.75,443.95 L145.49,443.94 L148.23,443.93 L150.96,443.93 L153.70,443.91 L156.44,443.90 L159.18,443.89 L161.91,443.87 L164.65,443.85 L167.39,443.83 L170.12,443.81 L172.86,443.78 L175.60,443.75 L178.34,443.72 L181.07,443.68 L183.81,443.64 L186.55,443.59 L189.29,443.54 L192.02,443.48 L194.76,443.41 L197.50,443.34 L200.24,443.26 L202.98,443.18 L205.71,443.08 L208.45,442.97 L211.19,442.86 L213.92,442.73 L216.66,442.58 L219.40,442.43 L222.14,442.26 L224.87,442.08 L227.61,441.87 L230.35,441.65 L233.09,441.41 L235.83,441.15 L238.56,440.87 L241.30,440.57 L244.04,440.24 L246.77,439.88 L249.51,439.49 L252.25,439.08 L254.99,438.63 L257.73,438.15 L260.46,437.63 L263.20,437.08 L265.94,436.48 L268.68,435.85 L271.41,435.17 L274.15,434.45 L276.89,433.68 L279.62,432.86 L282.36,431.98 L285.10,431.06 L287.84,430.08 L290.58,429.03 L293.31,427.93 L296.05,426.77 L298.79,425.54 L301.52,424.25 L304.26,422.88 L307.00,421.45 L309.74,419.94 L312.48,418.36 L315.21,416.70 L317.95,414.96 L320.69,413.14 L323.42,411.24 L326.16,409.26 L328.90,407.20 L331.64,405.05 L334.38,402.81 L337.11,400.49 L339.85,398.08 L342.59,395.58 L345.33,392.99 L348.06,390.31 L350.80,387.55 L353.54,384.69 L356.27,381.75 L359.01,378.72 L361.75,375.61 L364.49,372.40 L367.22,369.12 L369.96,365.75 L372.70,362.30 L375.44,358.78 L378.17,355.17 L380.91,351.50 L383.65,347.75 L386.39,343.94 L389.12,340.06 L391.86,336.12 L394.60,332.12 L397.34,328.07 L400.08,323.98 L402.81,319.84 L405.55,315.66 L408.29,311.44 L411.02,307.20 L413.76,302.93 L416.50,298.65 L419.24,294.35 L421.98,290.05 L424.71,285.74 L427.45,281.45 L430.19,277.16 L432.93,272.90 L435.66,268.66 L438.40,264.45 L441.14,260.28 L443.88,256.16 L446.61,252.08 L449.35,248.07 L452.09,244.13 L454.82,240.25 L457.56,236.46 L460.30,232.75 L463.04,229.14 L465.78,225.62 L468.51,222.21 L471.25,218.92 L473.99,215.74 L476.73,212.68 L479.46,209.75 L482.20,206.96 L484.94,204.32 L487.68,201.81 L490.41,199.46 L493.15,197.26 L495.89,195.22 L498.62,193.35 L501.36,191.64 L504.10,190.10 L506.84,188.74 L509.57,187.55 L512.31,186.54 L515.05,185.71 L517.79,185.07 L520.52,184.60 L523.26,184.33 L526.00,184.23 L528.74,184.33 L531.48,184.60 L534.21,185.07 L536.95,185.71 L539.69,186.54 L542.42,187.55 L545.16,188.74 L547.90,190.10 L550.64,191.64 L553.38,193.35 L556.11,195.22 L558.85,197.26 L561.59,199.46 L564.33,201.81 L567.06,204.32 L569.80,206.96 L572.54,209.75 L575.27,212.68 L578.01,215.74 L580.75,218.92 L583.49,222.21 L586.22,225.62 L588.96,229.14 L591.70,232.75 L594.44,236.46 L597.17,240.25 L599.91,244.13 L602.65,248.07 L605.39,252.08 L608.12,256.16 L610.86,260.28 L613.60,264.45 L616.34,268.66 L619.08,272.90 L621.81,277.16 L624.55,281.45 L627.29,285.74 L630.02,290.05 L632.76,294.35 L635.50,298.65 L638.24,302.93 L640.98,307.20 L643.71,311.44 L646.45,315.66 L649.19,319.84 L651.93,323.98 L654.66,328.07 L657.40,332.12 L660.14,336.12 L662.88,340.06 L665.61,343.94 L668.35,347.75 L671.09,351.50 L673.83,355.17 L676.56,358.78 L679.30,362.30 L682.04,365.75 L684.77,369.12 L687.51,372.40 L690.25,375.61 L692.99,378.72 L695.73,381.75 L698.46,384.69 L701.20,387.55 L703.94,390.31 L706.67,392.99 L709.41,395.58 L712.15,398.08 L714.89,400.49 L717.62,402.81 L720.36,405.05 L723.10,407.20 L725.84,409.26 L728.58,411.24 L731.31,413.14 L734.05,414.96 L736.79,416.70 L739.52,418.36 L742.26,419.94 L745.00,421.45 L747.74,422.88 L750.48,424.25 L753.21,425.54 L755.95,426.77 L758.69,427.93 L761.42,429.03 L764.16,430.08 L766.90,431.06 L769.64,431.98 L772.37,432.86 L775.11,433.68 L777.85,434.45 L780.59,435.17 L783.33,435.85 L786.06,436.48 L788.80,437.08 L791.54,437.63 L794.28,438.15 L797.01,438.63 L799.75,439.08 L802.49,439.49 L805.23,439.88 L807.96,440.24 L810.70,440.57 L813.44,440.87 L816.17,441.15 L818.91,441.41 L821.65,441.65 L824.39,441.87 L827.12,442.08 L829.86,442.26 L832.60,442.43 L835.34,442.58 L838.07,442.73 L840.81,442.86 L843.55,442.97 L846.29,443.08 L849.02,443.18 L851.76,443.26 L854.50,443.34 L857.24,443.41 L859.97,443.48 L862.71,443.54 L865.45,443.59 L868.19,443.64 L870.92,443.68 L873.66,443.72 L876.40,443.75 L879.14,443.78 L881.88,443.81 L884.61,443.83 L887.35,443.85 L890.09,443.87 L892.82,443.89 L895.56,443.90 L898.30,443.91 L901.04,443.93 L903.78,443.93 L906.51,443.94 L909.25,443.95 L911.99,443.96 L914.73,443.96 L917.46,443.97 L920.20,443.97 L922.94,443.98 L925.67,443.98 L928.41,443.98 L931.15,443.99 L933.89,443.99 L936.62,443.99 L939.36,443.99 L942.10,443.99 L944.84,443.99 L947.58,443.99 L950.31,444.00 L953.05,444.00 L955.79,444.00 L958.53,444.00 L961.26,444.00 L964.00,444.00" fill="none" stroke="#b95d43" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="238.27" cy="440.90" r="5.5" fill="#254044" stroke="#fffdf9" stroke-width="2"/>
+<circle cx="813.73" cy="440.90" r="5.5" fill="#254044" stroke="#fffdf9" stroke-width="2"/>
+<circle cx="412.49" cy="304.91" r="5.5" fill="#254044" stroke="#fffdf9" stroke-width="2"/>
+<circle cx="639.51" cy="304.91" r="5.5" fill="#254044" stroke="#fffdf9" stroke-width="2"/>
+<text x="238.27" y="477" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="16">1</text>
+<text x="412.49" y="477" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="16">2</text>
+<text x="526.00" y="477" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="16">π</text>
+<text x="639.51" y="477" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="16">π²/2</text>
+<text x="813.73" y="477" text-anchor="middle" fill="#455b60" font-family="Georgia,serif" font-size="16">π²</text>
+<text x="520" y="503" text-anchor="middle" fill="#667476" font-family="Arial,sans-serif" font-size="13">α (logarithmic scale) · mirror axis at π</text>
+<text x="147" y="543" text-anchor="middle" fill="#254044" font-family="Georgia,serif" font-size="18">square</text>
+<circle cx="84.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="84.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="84.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="84.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="84.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="105.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="105.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="105.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="105.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="105.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="126.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="126.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="126.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="126.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="126.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="147.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="147.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="147.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="147.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="147.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="168.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="168.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="168.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="168.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="168.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="189.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="189.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="189.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="189.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="189.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="210.00" cy="639.00" r="2.3" fill="#52727a"/>
+<circle cx="210.00" cy="618.00" r="2.3" fill="#52727a"/>
+<circle cx="210.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="210.00" cy="576.00" r="2.3" fill="#52727a"/>
+<circle cx="210.00" cy="555.00" r="2.3" fill="#52727a"/>
+<circle cx="147" cy="597" r="4.4" fill="#b95d43"/>
+<text x="348" y="543" text-anchor="middle" fill="#254044" font-family="Georgia,serif" font-size="18">triangle</text>
+<circle cx="257.74" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="269.02" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="280.30" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="291.59" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="302.87" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="280.30" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="291.59" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="302.87" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="314.15" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="325.43" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="302.87" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="314.15" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="325.43" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="336.72" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="348.00" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="325.43" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="336.72" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="348.00" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="359.28" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="370.57" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="348.00" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="359.28" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="370.57" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="381.85" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="393.13" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="370.57" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="381.85" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="393.13" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="404.41" cy="577.46" r="2.3" fill="#52727a"/>
+<circle cx="415.70" cy="557.91" r="2.3" fill="#52727a"/>
+<circle cx="393.13" cy="636.09" r="2.3" fill="#52727a"/>
+<circle cx="404.41" cy="616.54" r="2.3" fill="#52727a"/>
+<circle cx="415.70" cy="597.00" r="2.3" fill="#52727a"/>
+<circle cx="348" cy="597" r="4.4" fill="#b95d43"/>
+<line x1="480" x2="480" y1="536" y2="652" stroke="#d6d2c8"/>
+<text x="505" y="555" fill="#254044" font-family="Georgia,serif" font-size="17">A checked slice, not the whole claim</text>
+<text x="505" y="582" fill="#455b60" font-family="Arial,sans-serif" font-size="14">At α = 2: E_sq − E_tri = 0.013921380117</text>
+<text x="505" y="606" fill="#455b60" font-family="Arial,sans-serif" font-size="14">At α = π: F(π) = 0.020745332052</text>
+<text x="505" y="636" fill="#667476" font-family="Arial,sans-serif" font-size="12">Finite sums: |m|,|n| ≤ 20 · analytic tails bounded separately</text>
+<text x="66" y="673" fill="#8c8d84" font-family="Arial,sans-serif" font-size="11">Lattice · 2026-10-08 · exact duality by Poisson summation; numerical curve is illustrative</text>
+</svg>
