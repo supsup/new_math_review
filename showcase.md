@@ -613,7 +613,7 @@ In the original repository: [The Gaussian Propeller Bound in Every Dimension Sep
 
 ![d(G)=\min\#\{\text{cycles and single edges partitioning }E(G)\},\qquad d(K_3\vee I_4)=7>n-1](formulas/f_7341a816cc81.svg)
 
-Cut every edge of a graph into simple cycles and single edges, using as few pieces as possible. The collection's family 181 claims to settle the Erdős-Gallai conjecture: some constant C makes Cn pieces always enough for n vertices. A recent preprint had conjectured in its first version that n - 1 pieces always suffice, and replaced that with the O(n) form in its second. Marlow found exactly where n - 1 first fails, and then worked out exact answers for whole families of graphs.
+Cut every edge of a graph into simple cycles and single edges, using as few pieces as possible. The collection's family 181 claims to settle the Erdős-Gallai conjecture: some constant C makes Cn pieces always enough for n vertices. An independent proof by Jaehoon Kim appeared on arXiv on 6 October 2026 (2610.07840), improving the previous best bound of order n log* n; we have not reviewed it. A recent preprint had conjectured in its first version that n - 1 pieces always suffice, and replaced that with the O(n) form in its second. Marlow found exactly where n - 1 first fails, and then worked out exact answers for whole families of graphs.
 
 <img src="art/marlow_cycle_edge_seven.svg" alt="Seven parts on seven vertices (by Marlow)" width="100%">
 
