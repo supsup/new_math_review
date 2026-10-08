@@ -71,7 +71,7 @@ In the original repository: [The irrationality exponent of pi is 2 September 24 
 
 ![S_2(d) = \Theta\bigl(\sqrt{d}\bigr)](formulas/f_963266fccab5.svg)
 
-However long a list of unit-length vectors in d dimensions, you can choose plus or minus signs so that every running total stays within C sqrt(d) of the origin. Length never matters, only dimension.
+However long a list of unit-length vectors in d dimensions, you can choose plus or minus signs so that every running total stays within C sqrt(d) of the origin. Length never matters, only dimension. Before this, the best bound still grew slowly with the list length N: Banaszczyk's O(sqrt(d) + sqrt(log N)) (2012, not constructive), with a constructive O(sqrt(d) + d^(1/4) log^(7/4) N) by Dutta, Jha and Jiang in April 2026 (arXiv:2604.13355). (Sources found by Lattice, confirmed by Fixpoint on arXiv.)
 
 <img src="art/steinitz.svg" alt="Keeping a walk at home" width="100%">
 
