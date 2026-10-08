@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="600" viewBox="0 0 1050 600" role="img" aria-labelledby="title desc">
+<title id="title">A nine-eighths propeller edge across dimensions</title>
+<desc id="desc">For a uniform unit sphere in dimensions two through five, sharp two-label halfspace and three-label propeller scores fall as dimension grows, but the three-to-two ratio is always nine eighths. Any rotationally invariant law with mean radius one shares the plotted optima. For arbitrary many labels the three-dimensional propeller is sharp by the known Gaussian theorem plus radial transfer; higher-dimensional many-label cases are not established here.</desc>
+<rect width="1050" height="600" fill="#f4f1e9"/>
+<text x="46" y="55" fill="#24434a" font-family="Georgia,serif" font-size="30">A 9/8 edge across dimensions</text>
+<text x="47" y="85" fill="#617579" font-family="Arial,sans-serif" font-size="15">Unit spheres shown; every radial law with E R = 1 shares these optima · family 096 · Lattice</text>
+<rect x="43" y="116" width="964" height="377" rx="13" fill="#fffdf9" stroke="#d7d2c8"/>
+<text x="76" y="158" fill="#24434a" font-family="Georgia,serif" font-size="20">dimension</text>
+<text x="254" y="158" fill="#24434a" font-family="Georgia,serif" font-size="20">2 halfspaces</text>
+<text x="597" y="158" fill="#24434a" font-family="Georgia,serif" font-size="20">3 propeller cones</text>
+
+<text x="95" y="221" fill="#24434a" font-family="Georgia,serif" font-size="24">d = 2</text>
+<rect x="254" y="200" width="253.30" height="26" rx="4" fill="#708f94"/>
+<rect x="597" y="200" width="284.97" height="26" rx="4" fill="#b96047"/>
+<text x="517.30" y="220" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.202642</text>
+<text x="891.97" y="220" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.227973</text>
+<text x="95" y="301" fill="#24434a" font-family="Georgia,serif" font-size="24">d = 3</text>
+<rect x="254" y="280" width="156.25" height="26" rx="4" fill="#708f94"/>
+<rect x="597" y="280" width="175.78" height="26" rx="4" fill="#b96047"/>
+<text x="420.25" y="300" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.125000</text>
+<text x="782.78" y="300" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.140625</text>
+<text x="875" y="306" fill="#9d513d" font-family="Arial,sans-serif" font-size="12">all k: proven</text>
+<text x="95" y="381" fill="#24434a" font-family="Georgia,serif" font-size="24">d = 4</text>
+<rect x="254" y="360" width="112.58" height="26" rx="4" fill="#708f94"/>
+<rect x="597" y="360" width="126.65" height="26" rx="4" fill="#b96047"/>
+<text x="376.58" y="380" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.090063</text>
+<text x="733.65" y="380" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.101321</text>
+<text x="95" y="461" fill="#24434a" font-family="Georgia,serif" font-size="24">d = 5</text>
+<rect x="254" y="440" width="87.89" height="26" rx="4" fill="#708f94"/>
+<rect x="597" y="440" width="98.88" height="26" rx="4" fill="#b96047"/>
+<text x="351.89" y="460" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.070313</text>
+<text x="705.88" y="460" fill="#455e63" font-family="Arial,sans-serif" font-size="15">0.079102</text>
+<text x="47" y="529" fill="#405960" font-family="Georgia,serif" font-size="19">Every row: three-cone score ÷ two-halfspace score = 9/8.</text>
+<text x="47" y="558" fill="#868e89" font-family="Arial,sans-serif" font-size="12">d=2: any finite k; d=3: any finite k by Heilman–Jagannath–Naor; d≥4: only k≤3 asserted here.</text>
+</svg>
