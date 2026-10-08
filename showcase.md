@@ -45,7 +45,7 @@ In the original repository: [The Euclidean plane is not five colorable September
 
 ![\left\|\pi - \frac{p}{q}\right\| \ge q^{-2-\varepsilon}\quad (q \ge q_0(\varepsilon)),\qquad \sum_{n\ge 1} \frac{1}{n^{3}\sin^{2} n} < \infty](formulas/f_11b33251f498.svg)
 
-Pi cannot be approximated by fractions noticeably better than a typical number can. As a consequence the Flint Hills series, a famous 'does this even converge?' sum, converges.
+Pi cannot be approximated by fractions noticeably better than a typical number can. As a consequence the Flint Hills series, a famous 'does this even converge?' sum, converges. The best proved upper bound on pi's irrationality measure before this was about 7.10 (Bai, arXiv:2609.11276, September 2026), far from 2.
 
 <img src="art/flint_hills.svg" alt="Pi, seen through a series" width="100%">
 
@@ -105,7 +105,7 @@ In the original repository: [The Euclidean Steinitz Bergstrom theorem September 
 
 ![\omega \le \tfrac{9}{4},\qquad n \times n \text{ matrices in } O_{\varepsilon}\bigl(n^{9/4+\varepsilon}\bigr) \text{ operations}](formulas/f_2f9dd660363e.svg)
 
-Over the complex numbers, two n by n matrices can be multiplied with about n^2.25 arithmetic operations, below the long-standing barrier near 2.37.
+Over the complex numbers, two n by n matrices can be multiplied with about n^2.25 arithmetic operations, below the long-standing barrier near 2.37 (the previous record, from August 2026, was omega &lt; 2.371177, arXiv:2608.16884).
 
 <img src="art/omega_history.svg" alt="Fifty-seven years of omega" width="100%">
 
@@ -145,7 +145,7 @@ In the original repository: [An Isolated Particle Pole for the Two Dimensional O
 
 ![K \subset \mathbb{R}^4 \text{ contains a unit segment in every direction} \;\Longrightarrow\; \dim_{H} K = 4](formulas/f_dbf9fa84912a.svg)
 
-A set in 4D space that contains a line segment pointing in every direction cannot be 'thin': it has full Hausdorff dimension. The family also claims the Kakeya maximal conjecture in 3D.
+A set in 4D space that contains a line segment pointing in every direction cannot be 'thin': it has full Hausdorff dimension. The family also claims the Kakeya maximal conjecture in 3D. For context: Wang and Zahl proved the Kakeya SET conjecture in 3D in 2025 (arXiv:2502.17655); the maximal-function form is stronger, and in 4D the best earlier bound was Hausdorff dimension at least 3.059 (Katz and Zahl, arXiv:1902.00989).
 
 <img src="art/perron_tree.svg" alt="Needles in less and less room" width="100%">
 
@@ -247,7 +247,7 @@ In the original repository: [The crossing number of complete bipartite graphs Se
 
 ![\\|p(A)\\|\le 2\max_{z\in W(A)}\|p(z)\|,\qquad W(A)=\{\langle x,Ax\rangle:\ \\|x\\|=1\}](formulas/f_95710832c16a.svg)
 
-For any square matrix (or bounded operator) A and any polynomial p, the norm of p(A) is at most twice the largest value of |p| on A's numerical range, the set of all values &lt;x, Ax&gt; over unit vectors. Crouzeix conjectured the constant 2 in 2004 and it is sharp; the best proved constant had been 1 + sqrt 2 (Crouzeix and Palencia, 2017). The paper also covers matrix-valued polynomials.
+For any square matrix (or bounded operator) A and any polynomial p, the norm of p(A) is at most twice the largest value of |p| on A's numerical range, the set of all values &lt;x, Ax&gt; over unit vectors. Crouzeix conjectured the constant 2 in 2004 and it is sharp; Crouzeix and Palencia proved 1 + sqrt 2 in 2017, and in August 2026 Lorist and Schwenninger posted an independent proof of the constant 2 for matrices (arXiv:2608.03841, not reviewed by us). The collection's claim is the complete version: matrix-valued polynomials, every bounded operator on any Hilbert space, with the constant 2 and its sharpness.
 
 <img src="art/crouzeix.svg" alt="Numerical ranges" width="100%">
 
