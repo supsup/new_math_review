@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1250" height="670" viewBox="0 0 1250 670" role="img" aria-labelledby="title desc">
+<title id="title">Only the final repeated-simplex round may change sign</title>
+<desc id="desc">For three fixed-order rounds of fifteen regular-simplex vertices, a signing with constant first two rounds and a final-sign flip in the last round stays at the optimal squared peak four. If the first round instead flips its final sign, even the best choice of the first seven signs in round two reaches squared norm six, exceeding the optimum.</desc>
+<rect width="1250" height="670" fill="#f4f0e8"/>
+<text x="42" y="51" font-family="Georgia,serif" font-size="29" fill="#173d4a">An optimal sign change cannot survive another round</text>
+<text x="44" y="80" font-family="Arial,sans-serif" font-size="15" fill="#547079">Three fixed-order rounds of the same 15 regular-simplex vertices · squared prefix norm</text>
+<rect x="39" y="108" width="1170" height="470" rx="12" fill="#fffdf9" stroke="#d8d4ca"/>
+<line x1="98" y1="490.00" x2="1135" y2="490.00" stroke="#e0e7e5" stroke-width="1"/>
+<text x="85" y="495.00" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">0</text>
+<line x1="98" y1="391.54" x2="1135" y2="391.54" stroke="#e0e7e5" stroke-width="1"/>
+<text x="85" y="396.54" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">2</text>
+<line x1="98" y1="293.08" x2="1135" y2="293.08" stroke="#b89b5b" stroke-width="2"/>
+<text x="85" y="298.08" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">4</text>
+<line x1="98" y1="194.62" x2="1135" y2="194.62" stroke="#e0e7e5" stroke-width="1"/>
+<text x="85" y="199.62" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">6</text>
+<line x1="98.00" y1="170" x2="98.00" y2="490" stroke="#c5d4d0" stroke-dasharray="5 5"/>
+<text x="98.00" y="516" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">0</text>
+<line x1="443.67" y1="170" x2="443.67" y2="490" stroke="#c5d4d0" stroke-dasharray="5 5"/>
+<text x="443.67" y="516" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">15</text>
+<line x1="789.33" y1="170" x2="789.33" y2="490" stroke="#c5d4d0" stroke-dasharray="5 5"/>
+<text x="789.33" y="516" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">30</text>
+<line x1="1135.00" y1="170" x2="1135.00" y2="490" stroke="#c5d4d0" stroke-dasharray="5 5"/>
+<text x="1135.00" y="516" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#617d7d">45</text>
+<text x="270.83" y="193" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#56767b">round 1</text>
+<text x="616.50" y="193" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#56767b">round 2</text>
+<text x="962.17" y="193" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#56767b">round 3</text>
+<polyline points="98.00,490.00 121.04,440.77 144.09,398.57 167.13,363.41 190.18,335.27 213.22,314.18 236.27,300.11 259.31,293.08 282.36,293.08 305.40,300.11 328.44,314.18 351.49,335.27 374.53,363.41 397.58,398.57 420.62,440.77 443.67,490.00 466.71,440.77 489.76,398.57 512.80,363.41 535.84,335.27 558.89,314.18 581.93,300.11 604.98,293.08 628.02,293.08 651.07,300.11 674.11,314.18 697.16,335.27 720.20,363.41 743.24,398.57 766.29,440.77 789.33,490.00 812.38,440.77 835.42,398.57 858.47,363.41 881.51,335.27 904.56,314.18 927.60,300.11 950.64,293.08 973.69,293.08 996.73,300.11 1019.78,314.18 1042.82,335.27 1065.87,363.41 1088.91,398.57 1111.96,440.77 1135.00,293.08" fill="none" stroke="#397f81" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="98.00,490.00 121.04,440.77 144.09,398.57 167.13,363.41 190.18,335.27 213.22,314.18 236.27,300.11 259.31,293.08 282.36,293.08 305.40,300.11 328.44,314.18 351.49,335.27 374.53,363.41 397.58,398.57 420.62,440.77 443.67,293.08 466.71,257.91 489.76,229.78 512.80,208.68 535.84,194.62 558.89,187.58 581.93,187.58 604.98,194.62" fill="none" stroke="#b96047" stroke-width="3" stroke-dasharray="8 5" stroke-linejoin="round"/>
+<circle cx="604.98" cy="194.62" r="5" fill="#b96047"/>
+<text x="621.98" y="236.62" font-family="Arial,sans-serif" font-size="13" fill="#9a503c">next midpoint: 6 &gt; 4</text>
+<text x="920" y="278.08" font-family="Arial,sans-serif" font-size="14" fill="#806a34">optimal ceiling = 4</text>
+<text x="615" y="556" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#496770">prefix length k · each round visits the same 15 vertices</text>
+<line x1="74" y1="609" x2="115" y2="609" stroke="#397f81" stroke-width="3"/>
+<text x="127" y="614" font-family="Arial,sans-serif" font-size="14" fill="#36575f">allowed: + round, − round, final-sign flip</text>
+<line x1="661" y1="609" x2="702" y2="609" stroke="#b96047" stroke-width="3" stroke-dasharray="8 5"/>
+<text x="714" y="614" font-family="Arial,sans-serif" font-size="14" fill="#36575f">first-round flip cannot continue optimally</text>
+<text x="43" y="651" font-family="Arial,sans-serif" font-size="12" fill="#738589">Exact obstruction and minimizer count 2^(r−1)C_n in note 33 · idea prompted by Marlow · Lattice</text>
+</svg>
