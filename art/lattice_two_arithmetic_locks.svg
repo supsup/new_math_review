@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="590" viewBox="0 0 1300 590" role="img" aria-labelledby="title desc">
+<title id="title">Two arithmetic locks target different failures</title>
+<desc id="desc">An 11-point finite-field parabola has 165 distinct-label triples and no zero determinants modulo eleven. A 49-point elliptic quadratic cap over F7 has 18,424 triples and no three affinely collinear, but 2,968 triples have zero linear determinant. A highlighted triple illustrates the distinction. These finite examples do not prove a power improvement in Heilbronn's triangle problem.</desc>
+<rect width="1300" height="590" fill="#f4f1e9"/>
+<text x="37" y="48" fill="#24434a" font-family="Georgia,serif" font-size="29">Two arithmetic locks target different failures</text>
+<text x="38" y="77" fill="#617579" font-family="Arial,sans-serif" font-size="15">Small exact models of the determinant and cap ingredients in family 191 · not the power-bound construction</text>
+<rect x="34" y="103" width="533" height="402" rx="12" fill="#fffdf9" stroke="#d7d2c8"/>
+<rect x="582" y="103" width="683" height="402" rx="12" fill="#fffdf9" stroke="#d7d2c8"/>
+<text x="54" y="142" fill="#24434a" font-family="Georgia,serif" font-size="21">F₁₁ parabola: determinant lock</text>
+<text x="54" y="165" fill="#617579" font-family="Arial,sans-serif" font-size="14">(1, t, t²) · distinct labels t</text>
+<text x="601" y="142" fill="#24434a" font-family="Georgia,serif" font-size="21">F₇ quadratic cap: line lock</text>
+<text x="601" y="165" fill="#617579" font-family="Arial,sans-serif" font-size="14">(x, y, x² − 3y²) · tile color/number = height mod 7</text>
+<line x1="92" y1="192" x2="92" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="192" x2="342" y2="192" stroke="#e8eae5" stroke-width="1"/>
+<line x1="117" y1="192" x2="117" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="217" x2="342" y2="217" stroke="#e8eae5" stroke-width="1"/>
+<line x1="142" y1="192" x2="142" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="242" x2="342" y2="242" stroke="#e8eae5" stroke-width="1"/>
+<line x1="167" y1="192" x2="167" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="267" x2="342" y2="267" stroke="#e8eae5" stroke-width="1"/>
+<line x1="192" y1="192" x2="192" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="292" x2="342" y2="292" stroke="#e8eae5" stroke-width="1"/>
+<line x1="217" y1="192" x2="217" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="317" x2="342" y2="317" stroke="#e8eae5" stroke-width="1"/>
+<line x1="242" y1="192" x2="242" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="342" x2="342" y2="342" stroke="#e8eae5" stroke-width="1"/>
+<line x1="267" y1="192" x2="267" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="367" x2="342" y2="367" stroke="#e8eae5" stroke-width="1"/>
+<line x1="292" y1="192" x2="292" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="392" x2="342" y2="392" stroke="#e8eae5" stroke-width="1"/>
+<line x1="317" y1="192" x2="317" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="417" x2="342" y2="417" stroke="#e8eae5" stroke-width="1"/>
+<line x1="342" y1="192" x2="342" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<line x1="92" y1="442" x2="342" y2="442" stroke="#e8eae5" stroke-width="1"/>
+<polygon points="92,442 117,417 192,317" fill="#ecd8ce" stroke="#b96047" stroke-width="2"/>
+<circle cx="92" cy="442" r="6" fill="#b96047"/>
+<circle cx="117" cy="417" r="6" fill="#b96047"/>
+<circle cx="142" cy="342" r="4" fill="#537b7c"/>
+<circle cx="167" cy="217" r="4" fill="#537b7c"/>
+<circle cx="192" cy="317" r="6" fill="#b96047"/>
+<circle cx="217" cy="367" r="4" fill="#537b7c"/>
+<circle cx="242" cy="367" r="4" fill="#537b7c"/>
+<circle cx="267" cy="317" r="4" fill="#537b7c"/>
+<circle cx="292" cy="217" r="4" fill="#537b7c"/>
+<circle cx="317" cy="342" r="4" fill="#537b7c"/>
+<circle cx="342" cy="417" r="4" fill="#537b7c"/>
+<text x="367" y="247" fill="#24434a" font-family="Arial,sans-serif" font-size="17">165 triples</text>
+<text x="367" y="281" fill="#a34f3e" font-family="Arial,sans-serif" font-size="17">0 singular mod 11</text>
+<text x="367" y="326" fill="#647579" font-family="Arial,sans-serif" font-size="13">highlight: t = 0, 1, 4</text>
+<text x="367" y="350" fill="#647579" font-family="Arial,sans-serif" font-size="13">integer det = 1</text>
+<text x="367" y="385" fill="#647579" font-family="Arial,sans-serif" font-size="13">scaled min area = 1/200</text>
+<rect x="610" y="426" width="37" height="37" rx="3" fill="#e1e9e5" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">0</text>
+<rect x="610" y="387" width="37" height="37" rx="3" fill="#90b0b4" stroke="#b96047" stroke-width="3"/>
+<text x="628.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="610" y="348" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="610" y="309" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="610" y="270" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="610" y="231" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="610" y="192" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="628.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="649" y="426" width="37" height="37" rx="3" fill="#d3e1df" stroke="#b96047" stroke-width="3"/>
+<text x="667.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="649" y="387" width="37" height="37" rx="3" fill="#759ba1" stroke="#b96047" stroke-width="3"/>
+<text x="667.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="649" y="348" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="667.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="649" y="309" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="667.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="649" y="270" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="667.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="649" y="231" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="667.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="649" y="192" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="667.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="688" y="426" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="688" y="387" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="688" y="348" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="688" y="309" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="688" y="270" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="688" y="231" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="688" y="192" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="706.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="727" y="426" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="727" y="387" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="727" y="348" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="727" y="309" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="727" y="270" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="727" y="231" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="727" y="192" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="745.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="766" y="426" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="766" y="387" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="766" y="348" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="766" y="309" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="766" y="270" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="766" y="231" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="766" y="192" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="784.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="805" y="426" width="37" height="37" rx="3" fill="#90b0b4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">4</text>
+<rect x="805" y="387" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="805" y="348" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="805" y="309" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="805" y="270" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="805" y="231" width="37" height="37" rx="3" fill="#5d858c" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">6</text>
+<rect x="805" y="192" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="823.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="844" y="426" width="37" height="37" rx="3" fill="#d3e1df" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="451" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">1</text>
+<rect x="844" y="387" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="412" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<rect x="844" y="348" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="373" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="844" y="309" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="334" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="844" y="270" width="37" height="37" rx="3" fill="#bdd2d1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="295" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">2</text>
+<rect x="844" y="231" width="37" height="37" rx="3" fill="#a7c3c4" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="256" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">3</text>
+<rect x="844" y="192" width="37" height="37" rx="3" fill="#759ba1" stroke="#f6f5ef" stroke-width="1"/>
+<text x="862.5" y="217" text-anchor="middle" fill="#24434a" font-family="Arial,sans-serif" font-size="16">5</text>
+<text x="911" y="225" fill="#24434a" font-family="Arial,sans-serif" font-size="17">18,424 triples</text>
+<text x="911" y="263" fill="#a34f3e" font-family="Arial,sans-serif" font-size="17">0 collinear in F₇³</text>
+<text x="911" y="301" fill="#a34f3e" font-family="Arial,sans-serif" font-size="17">2,968 det ≡ 0 mod 7</text>
+<text x="911" y="326" fill="#647579" font-family="Arial,sans-serif" font-size="13">1,840 of these avoid the origin</text>
+<text x="911" y="352" fill="#647579" font-family="Arial,sans-serif" font-size="14">outlined cells:</text>
+<text x="911" y="377" fill="#647579" font-family="Arial,sans-serif" font-size="14">a=(1,0,1), b=(0,1,4)</text>
+<text x="911" y="400" fill="#647579" font-family="Arial,sans-serif" font-size="14">c=(1,1,5): a+b=c</text>
+<text x="911" y="431" fill="#647579" font-family="Arial,sans-serif" font-size="13">but not collinear mod 7</text>
+<text x="38" y="548" fill="#405960" font-family="Georgia,serif" font-size="19">An affine cap still permits zero determinants; the paper adds a restricted shift to exclude short relations.</text>
+<text x="38" y="578" fill="#87908a" font-family="Arial,sans-serif" font-size="12">Exact finite censuses · field arithmetic, not Euclidean geometry on the cap tile · no claim about the asymptotic theorem · Lattice</text>
+</svg>
