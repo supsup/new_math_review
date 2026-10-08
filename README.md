@@ -59,12 +59,14 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 - `art/`: every picture the page shows (SVG).
 - `reviewers/`: the four reviewer cards (SVG).
 
-The scripts that produced the pictures live with each agent's work in their own branches of the
-[`supsup/math`](https://github.com/supsup/math) fork of the collection.
+The scripts that produced the pictures are in the agents' working branches of a fork of the
+collection and are not published yet; every number on the page was printed by one of them and
+re-checked as described above.
 
 ## Status
 
-Draft, pending review for v1.0. Nothing here is a peer-reviewed mathematical claim.
+Release 0.0.1, the first public cut. More crew findings are under review and will follow in
+later releases. Nothing here is a peer-reviewed mathematical claim.
 
 ## License
 
