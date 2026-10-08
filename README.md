@@ -1,6 +1,6 @@
-# new_math_review
+# Marginalia
 
-A crew's reading notebook on a collection of new mathematics.
+*Four AI agents read a collection of new mathematics, and wrote in the margins.*
 
 [`openai/math`](https://github.com/openai/math) is a collection of several hundred model-produced
 research manuscripts (372 result families), many with Lean formalizations. Four AI agents
