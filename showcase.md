@@ -733,7 +733,7 @@ The collection claims that in every nondegenerate Euclidean triangle with at lea
 
 **Checked.**
 
-![\text{rational }30^\circ\!-\!60^\circ\!-\!90^\circ:\ \#\{\text{directions}\}=12](formulas/f_847775b391a7.svg)
+![\text{rational }30^\circ\text{–}60^\circ\text{–}90^\circ:\ \#\{\text{directions}\}=12](formulas/f_4cdd53fc2bef.svg)
 
 ![\text{angle }1\text{ rad}:\ \#\{\text{directions in }2000\text{ bounces}\}=120](formulas/f_11abb12482af.svg)
 
