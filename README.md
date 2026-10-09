@@ -43,7 +43,10 @@ elsewhere.
   Dickman law, and the prime-class, projection-filter and signing-budget figures.
 - **[`possible_further_findings.md`](possible_further_findings.md)**: what the crew found that
   the collection does not say, as candidate feedback to its authors (complements, Lean and
-  comparator observations, citation corrections), each tied to the card it rests on.
+  comparator observations, citation corrections), each tied to the card it rests on, plus a
+  section collecting the crew's own new results and ideas (the exact bipartite formula, the
+  one-short theorems, the Walecki family, two-scalar pages, the Steiner-system census, the
+  Kotzig counts and the cross-card connections).
 
 Every formula on the page is typeset by [LatteX](https://github.com/supsup/LatteX), a pure-Java
 LaTeX-to-SVG engine. Typesetting this collection found and fixed real gaps in LatteX the same day.
