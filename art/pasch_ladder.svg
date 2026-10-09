@@ -1,0 +1,239 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 700" width="880" height="700" role="img" aria-label="Seventh-prefix triangle-removal probability against Pasch count for the 80 classes of cyclic Steiner triple systems on 31 points" font-family="Georgia, 'Times New Roman', serif">
+<rect x="0" y="0" width="880" height="700" rx="0" fill="#f6f2ea"/>
+<text x="28" y="38" font-size="22" fill="#242320">How random triangle removal sees a Steiner system (31 points)</text>
+<text x="28" y="60" font-size="13" fill="#625e57">Delete random triangles from K₃₁. The chance the first seven all lie in a given triple system T is set by its Pasch count.</text>
+<rect x="20" y="78" width="238" height="402" rx="6" fill="#fbf8f2" stroke="#e4ddd1"/>
+<text x="32" y="100" font-size="15" fill="#242320" font-weight="bold">A</text>
+<text x="50" y="100" font-size="13" fill="#625e57">the pattern that decides</text>
+<polygon points="139,268.58 164.48,224.45 113.52,224.45" fill="#e6b8a2" fill-opacity="0.85" stroke="#242320" stroke-width="1.1" stroke-linejoin="round"/>
+<polygon points="139,268.58 237,295.74 41,295.74" fill="#a9c4a4" fill-opacity="0.85" stroke="#242320" stroke-width="1.1" stroke-linejoin="round"/>
+<polygon points="139,126 164.48,224.45 237,295.74" fill="#a9bdd8" fill-opacity="0.85" stroke="#242320" stroke-width="1.1" stroke-linejoin="round"/>
+<polygon points="139,126 113.52,224.45 41,295.74" fill="#e5cf8e" fill-opacity="0.85" stroke="#242320" stroke-width="1.1" stroke-linejoin="round"/>
+<circle cx="139" cy="268.58" r="3.4" fill="#242320"/>
+<text x="139" y="287.58" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">a</text>
+<circle cx="164.48" cy="224.45" r="3.4" fill="#242320"/>
+<text x="173.48" y="225.45" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">b</text>
+<circle cx="113.52" cy="224.45" r="3.4" fill="#242320"/>
+<text x="104.52" y="225.45" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">c</text>
+<circle cx="237" cy="295.74" r="3.4" fill="#242320"/>
+<text x="247" y="305.74" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">d</text>
+<circle cx="41" cy="295.74" r="3.4" fill="#242320"/>
+<text x="31" y="305.74" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">e</text>
+<circle cx="139" cy="126" r="3.4" fill="#242320"/>
+<text x="139" y="121" font-size="13" fill="#242320" text-anchor="middle" font-style="italic">f</text>
+<text x="139" y="329.74" font-size="12.5" fill="#242320" text-anchor="middle">Pasch: four triangles on six points</text>
+<text x="139" y="346.74" font-size="11" fill="#625e57" text-anchor="middle">abc, ade, fbd, fce: any two share one point</text>
+<line x1="34" y1="361.74" x2="244" y2="361.74" stroke="#e4ddd1" stroke-width="1"/>
+<text x="34" y="381.74" font-size="12" fill="#242320">The formula counts only these:</text>
+<circle cx="38" cy="395.74" r="2.6" fill="#9a948a"/>
+<text x="46" y="399.74" font-size="12" fill="#242320">mitre</text>
+<text x="84" y="399.74" font-size="10.5" fill="#625e57">5 on 7</text>
+<circle cx="150" cy="395.74" r="2.6" fill="#9a948a"/>
+<text x="158" y="399.74" font-size="12" fill="#242320">grid</text>
+<text x="189.6" y="399.74" font-size="10.5" fill="#625e57">6 on 9</text>
+<circle cx="38" cy="413.74" r="2.6" fill="#9a948a"/>
+<text x="46" y="417.74" font-size="12" fill="#242320">prism</text>
+<text x="84" y="417.74" font-size="10.5" fill="#625e57">6 on 9</text>
+<circle cx="150" cy="413.74" r="2.6" fill="#9a948a"/>
+<text x="158" y="417.74" font-size="12" fill="#242320">hexagon</text>
+<text x="208.8" y="417.74" font-size="10.5" fill="#625e57">6 on 9</text>
+<circle cx="38" cy="431.74" r="2.6" fill="#9a948a"/>
+<text x="46" y="435.74" font-size="12" fill="#242320">crown</text>
+<text x="84" y="435.74" font-size="10.5" fill="#625e57">6 on 9</text>
+<circle cx="150" cy="431.74" r="2.6" fill="#9a948a"/>
+<text x="158" y="435.74" font-size="12" fill="#242320">Fano line</text>
+<text x="221.6" y="435.74" font-size="10.5" fill="#625e57">6 on 7</text>
+<text x="34" y="455.74" font-size="11" fill="#625e57">plus a constant; nothing else enters q₇.</text>
+<rect x="272" y="78" width="590" height="402" rx="6" fill="#fbf8f2" stroke="#e4ddd1"/>
+<text x="284" y="100" font-size="15" fill="#242320" font-weight="bold">B</text>
+<text x="302" y="100" font-size="12" fill="#625e57">80 classes of cyclic STS(31), one dot each (dot area ∝ number of systems)</text>
+<line x1="320" y1="417.76" x2="854" y2="417.76" stroke="#e4ddd1" stroke-width="1"/>
+<text x="314" y="421.76" font-size="11" fill="#625e57" text-anchor="end">0</text>
+<line x1="320" y1="332.45" x2="854" y2="332.45" stroke="#e4ddd1" stroke-width="1"/>
+<text x="314" y="336.45" font-size="11" fill="#625e57" text-anchor="end">1</text>
+<line x1="320" y1="247.14" x2="854" y2="247.14" stroke="#e4ddd1" stroke-width="1"/>
+<text x="314" y="251.14" font-size="11" fill="#625e57" text-anchor="end">2</text>
+<line x1="320" y1="161.83" x2="854" y2="161.83" stroke="#e4ddd1" stroke-width="1"/>
+<text x="314" y="165.83" font-size="11" fill="#625e57" text-anchor="end">3</text>
+<line x1="320" y1="375.11" x2="854" y2="375.11" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 3"/>
+<line x1="320" y1="289.8" x2="854" y2="289.8" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 3"/>
+<line x1="320" y1="204.49" x2="854" y2="204.49" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 3"/>
+<text transform="translate(294 277) rotate(-90)" font-size="11.5" fill="#625e57" text-anchor="middle">q₇(T) − q₇(PG(4,2)), in units of 10<tspan baseline-shift="super" font-size="8">−22</tspan></text>
+<line x1="320" y1="428" x2="854" y2="428" stroke="#625e57" stroke-width="1"/>
+<line x1="338" y1="428" x2="338" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="338" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">0</text>
+<line x1="376" y1="428" x2="376" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="376" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">31</text>
+<line x1="414" y1="428" x2="414" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="414" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">62</text>
+<line x1="452" y1="428" x2="452" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="452" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">93</text>
+<line x1="490" y1="428" x2="490" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="490" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">124</text>
+<line x1="528" y1="428" x2="528" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="528" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">155</text>
+<line x1="604" y1="428" x2="604" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="604" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">217</text>
+<line x1="718" y1="428" x2="718" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="718" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">310</text>
+<line x1="794" y1="428" x2="794" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="794" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">372</text>
+<line x1="840" y1="428" x2="840" y2="432" stroke="#625e57" stroke-width="1"/>
+<text x="840" y="444" font-size="10.5" fill="#625e57" text-anchor="middle">1085</text>
+<line x1="812" y1="433" x2="818" y2="423" stroke="#625e57" stroke-width="1.1"/>
+<line x1="818" y1="433" x2="824" y2="423" stroke="#625e57" stroke-width="1.1"/>
+<rect x="816" y="426.5" width="4" height="3" rx="0" fill="#fbf8f2"/>
+<text x="589" y="462" font-size="11.5" fill="#625e57" text-anchor="middle">Pasch count of T (axis broken between 372 and 1085)</text>
+<circle cx="322" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="324.67" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="327.33" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="330" cy="153.36" r="2.28" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="332.67" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="335.33" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="338" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="340.67" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="343.33" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="346" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="348.67" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="351.33" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="354" cy="153.36" r="3.94" fill="#3e8b7f" fill-opacity="0.55" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="360" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="361.1" cy="160.92" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="362.21" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="363.31" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="364.41" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="365.52" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="366.62" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="367.72" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="368.83" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="369.93" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="371.03" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="372.14" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="373.24" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="374.34" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="375.45" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="376.55" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="377.66" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="378.76" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="379.86" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="380.97" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="382.07" cy="160.92" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="383.17" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="384.28" cy="160.92" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="385.38" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="386.48" cy="160.92" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="387.59" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="388.69" cy="160.92" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="389.79" cy="160.91" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="390.9" cy="160.91" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="392" cy="160.91" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="376" y="151.91" font-size="9.5" fill="#9a948a" text-anchor="middle">820</text>
+<circle cx="398" cy="168.47" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="399.88" cy="168.47" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="401.76" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="403.65" cy="168.47" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="405.53" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="407.41" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="409.29" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="411.18" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="413.06" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="414.94" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="416.82" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="418.71" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="420.59" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="422.47" cy="168.47" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="424.35" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="426.24" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="428.12" cy="168.47" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="430" cy="168.47" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="414" y="159.47" font-size="9.5" fill="#9a948a" text-anchor="middle">440</text>
+<circle cx="436" cy="176.02" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="440.57" cy="176.02" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="445.14" cy="176.02" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="449.71" cy="176.02" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="454.29" cy="176.02" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="458.86" cy="176.02" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="463.43" cy="176.02" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="468" cy="176.02" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="452" y="167.02" font-size="9.5" fill="#9a948a" text-anchor="middle">180</text>
+<circle cx="485" cy="183.58" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="490" cy="183.58" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="495" cy="183.58" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="490" y="174.58" font-size="9.5" fill="#9a948a" text-anchor="middle">90</text>
+<circle cx="525.5" cy="191.13" r="1.3" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="530.5" cy="191.13" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="528" y="182.13" font-size="9.5" fill="#9a948a" text-anchor="middle">32</text>
+<circle cx="599" cy="206.24" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="604" cy="206.24" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<circle cx="609" cy="206.24" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="604" y="197.24" font-size="9.5" fill="#9a948a" text-anchor="middle">70</text>
+<circle cx="718" cy="228.9" r="2.28" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="718" y="219.9" font-size="9.5" fill="#9a948a" text-anchor="middle">10</text>
+<circle cx="794" cy="244.01" r="3.94" fill="#586aa2" fill-opacity="0.55" stroke="#586aa2" stroke-width="0.8"/>
+<text x="794" y="235.01" font-size="9.5" fill="#9a948a" text-anchor="middle">30</text>
+<circle cx="840" cy="417.76" r="1.76" fill="#aa6545" fill-opacity="0.55" stroke="#aa6545" stroke-width="0.8"/>
+<text x="330" y="127.36" font-size="12" fill="#3e8b7f">Pasch-free: every one beats every system with a Pasch</text>
+<text x="330" y="141.36" font-size="9.5" fill="#9a948a">370 systems</text>
+<text x="830" y="391.76" font-size="12" fill="#aa6545" text-anchor="end">PG(4,2): least likely (unique)</text>
+<text x="830" y="405.76" font-size="9.5" fill="#9a948a" text-anchor="end">6 systems, Pasch count 1085</text>
+<line x1="834" y1="408.76" x2="837" y2="413.76" stroke="#aa6545" stroke-width="0.9"/>
+<text x="854" y="127.36" font-size="9.5" fill="#9a948a" text-anchor="end">grey numbers: systems in that column</text>
+<rect x="332" y="220" width="292" height="202" rx="5" fill="#ffffff" stroke="#e4ddd1" fill-opacity="0.9"/>
+<text x="342" y="236" font-size="11.5" fill="#242320">Zoom: the Pasch-free column holds</text>
+<text x="342" y="250" font-size="11.5" fill="#242320">13 classes with 13 different values</text>
+<text x="342" y="414" font-size="9.5" fill="#625e57">excess over the lowest, units of 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<text x="614" y="236" font-size="9.5" fill="#625e57" text-anchor="end">gap above next</text>
+<line x1="348" y1="260" x2="348" y2="383.2" stroke="#e4ddd1" stroke-width="0.8"/>
+<line x1="348" y1="260" x2="348" y2="383.2" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 2"/>
+<text x="348" y="394.2" font-size="9.5" fill="#625e57" text-anchor="middle">0</text>
+<line x1="401.89" y1="260" x2="401.89" y2="383.2" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 2"/>
+<text x="401.89" y="394.2" font-size="9.5" fill="#625e57" text-anchor="middle">5</text>
+<line x1="455.78" y1="260" x2="455.78" y2="383.2" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 2"/>
+<text x="455.78" y="394.2" font-size="9.5" fill="#625e57" text-anchor="middle">10</text>
+<line x1="509.67" y1="260" x2="509.67" y2="383.2" stroke="#e4ddd1" stroke-width="0.6" stroke-dasharray="2 2"/>
+<text x="509.67" y="394.2" font-size="9.5" fill="#625e57" text-anchor="middle">15</text>
+<circle cx="348" cy="379.2" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<circle cx="348.01" cy="369.6" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="372.6" font-size="9.5" fill="#625e57" text-anchor="end">+8.5 × 10<tspan baseline-shift="super" font-size="7">−32</tspan></text>
+<circle cx="348.02" cy="360" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="363" font-size="9.5" fill="#625e57" text-anchor="end">+7.2 × 10<tspan baseline-shift="super" font-size="7">−32</tspan></text>
+<circle cx="348.07" cy="350.4" r="1.58" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="353.4" font-size="9.5" fill="#625e57" text-anchor="end">+5.2 × 10<tspan baseline-shift="super" font-size="7">−31</tspan></text>
+<circle cx="370.8" cy="340.8" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="343.8" font-size="9.5" fill="#625e57" text-anchor="end">+2.1 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="370.83" cy="331.2" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="334.2" font-size="9.5" fill="#625e57" text-anchor="end">+3.0 × 10<tspan baseline-shift="super" font-size="7">−31</tspan></text>
+<circle cx="393.64" cy="321.6" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="324.6" font-size="9.5" fill="#625e57" text-anchor="end">+2.1 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="393.64" cy="312" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="315" font-size="9.5" fill="#625e57" text-anchor="end">+2.0 × 10<tspan baseline-shift="super" font-size="7">−32</tspan></text>
+<circle cx="462.14" cy="302.4" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="305.4" font-size="9.5" fill="#625e57" text-anchor="end">+6.4 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="484.99" cy="292.8" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="295.8" font-size="9.5" fill="#625e57" text-anchor="end">+2.1 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="507.83" cy="283.2" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="286.2" font-size="9.5" fill="#625e57" text-anchor="end">+2.1 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="530.65" cy="273.6" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="276.6" font-size="9.5" fill="#625e57" text-anchor="end">+2.1 × 10<tspan baseline-shift="super" font-size="7">−28</tspan></text>
+<circle cx="530.67" cy="264" r="2.74" fill="#3e8b7f" fill-opacity="0.6" stroke="#3e8b7f" stroke-width="0.8"/>
+<text x="614" y="267" font-size="9.5" fill="#625e57" text-anchor="end">+1.8 × 10<tspan baseline-shift="super" font-size="7">−31</tspan></text>
+<rect x="20" y="494" width="842" height="150" rx="6" fill="#fbf8f2" stroke="#e4ddd1"/>
+<text x="32" y="516" font-size="15" fill="#242320" font-weight="bold">C</text>
+<text x="50" y="516" font-size="12" fill="#625e57">why the Pasch count decides, for every STS(31): change in q₇ per unit, same linear scale</text>
+<line x1="310" y1="532" x2="310" y2="596" stroke="#e4ddd1" stroke-width="0.7" stroke-dasharray="2 3"/>
+<text x="310" y="608" font-size="9.5" fill="#9a948a" text-anchor="middle">0</text>
+<line x1="486.67" y1="532" x2="486.67" y2="596" stroke="#e4ddd1" stroke-width="0.7" stroke-dasharray="2 3"/>
+<text x="486.67" y="608" font-size="9.5" fill="#9a948a" text-anchor="middle">1 × 10<tspan baseline-shift="super" font-size="7">−25</tspan></text>
+<line x1="663.33" y1="532" x2="663.33" y2="596" stroke="#e4ddd1" stroke-width="0.7" stroke-dasharray="2 3"/>
+<text x="663.33" y="608" font-size="9.5" fill="#9a948a" text-anchor="middle">2 × 10<tspan baseline-shift="super" font-size="7">−25</tspan></text>
+<line x1="840" y1="532" x2="840" y2="596" stroke="#e4ddd1" stroke-width="0.7" stroke-dasharray="2 3"/>
+<text x="840" y="608" font-size="9.5" fill="#9a948a" text-anchor="middle">3 × 10<tspan baseline-shift="super" font-size="7">−25</tspan></text>
+<text x="34" y="551" font-size="12.5" fill="#242320">one Pasch configuration</text>
+<rect x="310" y="536" width="504.64" height="22" rx="3" fill="#586aa2"/>
+<text x="806.64" y="551.5" font-size="12" fill="#ffffff" text-anchor="end">2.86 × 10<tspan baseline-shift="super" font-size="9">−25</tspan></text>
+<text x="34" y="583" font-size="12.5" fill="#242320">all other patterns, worst case combined</text>
+<rect x="310" y="568" width="27.19" height="22" rx="3" fill="#b9a78d"/>
+<text x="345.19" y="583.5" font-size="12" fill="#242320">1.54 × 10<tspan baseline-shift="super" font-size="9">−26</tspan></text>
+<text x="34" y="630" font-size="12.5" fill="#242320">so fewer Pasch always wins (theorem, order 31): even the worst case leaves a margin of 2.70 × 10<tspan baseline-shift="super" font-size="9">−25</tspan></text>
+<text x="28" y="678" font-size="11" fill="#625e57">Data: Lattice's exact census of the 2048 cyclic systems (80 classes); theorem covers all STS(31). Seven-step prefix only; equal Pasch counts not ranked.</text>
+</svg>
