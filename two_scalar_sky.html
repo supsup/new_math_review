@@ -18,8 +18,15 @@
   button { background: #4a0a52; color: var(--ink); border: 1px solid #8a3a8e; border-radius: 6px;
     padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
   button[aria-pressed="true"] { background: #8a2a8e; border-color: var(--accent); }
-  .lab { position: fixed; font: 10.5px Georgia, serif; color: #ffd6ff; pointer-events: none;
-    transform: translate(-50%, -50%); text-shadow: 0 0 3px #0a0110; display: none; }
+  #ov { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 1; }
+  #hud, #state, #bar, #legend, #tip, #err { z-index: 2; }
+  #tip { position: fixed; display: none; pointer-events: none; background: rgba(20,2,26,0.92); color: var(--ink);
+    border: 1px solid #c87ac8; border-radius: 5px; padding: 4px 8px; font: 13px Georgia, serif; white-space: nowrap; }
+  #legend { position: fixed; right: 16px; bottom: 16px; max-width: 300px; background: rgba(20,2,26,0.78);
+    border: 1px solid #8a3a8e; border-radius: 6px; padding: 8px 11px; font-size: 12.5px; line-height: 1.45;
+    color: var(--dim); pointer-events: none; }
+  #legend b { color: var(--ink); font-weight: normal; }
+  @media (max-width: 760px) { #legend { display: none; } }
   #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
     border-radius: 6px; display: none; font: 14px monospace; }
 </style>
@@ -28,13 +35,17 @@
 <canvas id="c" aria-label="Animated 3D relief of the primes p = 1 mod 4 up to 3000 on a sunflower spiral, height log(1 + N(p)), with nine dark pits"></canvas>
 <div id="hud">
   <h1>The two-scalar sky</h1>
-  <p>Every prime p = 1 mod 4 up to 3000 sits on a sunflower spiral (the k-th at angle k times the golden angle, radius
-  proportional to sqrt k). Its height and glow are log(1 + N(p)), where N(p) counts the ordered two-scalar pages
-  (lambda, mu): nonsquares in one odd coset of the odd-order subgroup H with chi((lambda-1)(mu-1)) = -1,
-  (1+mu)/(1+lambda) in H, and (lambda mu)^(M/2) generating H. Nine primes have no page and sink as pits.
-  Drag to orbit, scroll to zoom. The page recomputes every N(p) and checks the empty set before it draws.</p>
+  <p>Each star is one prime p = 1 mod 4, from 5 up to 3000. Small primes sit near the centre and larger ones further
+  out; the angle carries no meaning, it is only a sunflower layout that spreads the stars evenly. The brighter and
+  taller a star, the more two-scalar pages its prime has. Nine primes have none at all by this method, and they sink
+  as dark pits. Hover or tap a star for its count; drag to orbit, scroll to zoom. The page recomputes every count and
+  checks the nine before it draws. (Height is log(1 + N(p)); N(p) counts ordered nonsquare pairs (lambda, mu) in one odd
+  coset of H with chi((lambda-1)(mu-1)) = -1, (1+mu)/(1+lambda) in H, (lambda mu)^(M/2) generating H.)</p>
 </div>
-<div id="labels"></div>
+<canvas id="ov" aria-hidden="true"></canvas>
+<div id="tip" role="status"></div>
+<div id="legend"><b>each star:</b> a prime p = 1 mod 4<br><b>brighter and taller:</b> more two-scalar pages<br>
+<b>dark pit:</b> none<br><b>distance from the centre</b> grows with p (the angle means nothing, it is only a sunflower layout)</div>
 <div id="state"></div>
 <div id="bar">
   <button id="bRelief" aria-pressed="true">Relief</button>
@@ -161,12 +172,46 @@ if (typeof document !== "undefined") (function () {
   revealUpTo(n);
   for (let i = 0; i < n; i++) revealAt[i] = -100;
 
-  // hole labels as DOM spans (identical in both renderers)
-  const labs = STARS.map(s => {
-    if (!s.hole) return null;
-    const el = document.createElement("span"); el.className = "lab"; el.textContent = s.p;
-    document.getElementById("labels").appendChild(el); return el;
-  });
+  // overlay canvas: pits, rings and labels drawn last, on top of the relief and glow, in both renderers
+  const ov = document.getElementById("ov"), octx = ov.getContext("2d"), tip = document.getElementById("tip");
+  let SCREEN = [];   // [x, y, star index] in CSS pixels, refreshed every frame for the tooltip
+  function drawOverlay(proj, scale, dpr, w, h) {
+    if (ov.width !== w || ov.height !== h) { ov.width = w; ov.height = h; ov.style.width = (w / dpr) + "px"; ov.style.height = (h / dpr) + "px"; }
+    octx.clearRect(0, 0, w, h);
+    SCREEN = [];
+    for (let i = 0; i < revealed; i++) { const s = STARS[i], q = proj(s.x, s.y, s.z * lift); SCREEN.push([q[0] / dpr, q[1] / dpr, i, q[2]]); }
+    octx.textAlign = "center"; octx.textBaseline = "middle"; octx.lineJoin = "round";
+    for (const [x, y, i, cw] of SCREEN) {
+      const s = STARS[i]; if (!s.hole) continue;
+      const X = x * dpr, Y = y * dpr, R = Math.max(7 * dpr, 13 * scale / cw);
+      const gh2 = octx.createRadialGradient(X, Y, 0, X, Y, R);
+      gh2.addColorStop(0, "#0a0110"); gh2.addColorStop(0.7, "#1a0322"); gh2.addColorStop(1, "#3a0646");
+      octx.fillStyle = gh2; octx.beginPath(); octx.arc(X, Y, R, 0, 2 * Math.PI); octx.fill();
+      octx.strokeStyle = "rgba(255,214,255,0.95)"; octx.lineWidth = 1.4 * dpr; octx.beginPath(); octx.arc(X, Y, R * 1.19, 0, 2 * Math.PI); octx.stroke();
+      octx.font = (12 * dpr) + "px Georgia, serif";
+      const ty = Y - R * 1.19 - 9 * dpr;
+      octx.strokeStyle = "#14021a"; octx.lineWidth = 3.5 * dpr; octx.strokeText(String(s.p), X, ty);
+      octx.fillStyle = "#ffe6ff"; octx.fillText(String(s.p), X, ty);
+    }
+    if (hoverI >= 0 && hoverI < revealed) {   // ring the star the tooltip describes
+      const q = proj(STARS[hoverI].x, STARS[hoverI].y, STARS[hoverI].z * lift);
+      octx.strokeStyle = "rgba(255,210,122,0.95)"; octx.lineWidth = 1.5 * dpr;
+      octx.beginPath(); octx.arc(q[0], q[1], 11 * dpr, 0, 2 * Math.PI); octx.stroke();
+    }
+  }
+  // tooltip: the nearest star to the pointer (hover with a mouse, tap on touch)
+  let hoverI = -1;
+  function pick(cx, cy) {
+    let best = -1, bd = 24 * 24;
+    for (const [x, y, i] of SCREEN) { const d = (x - cx) * (x - cx) + (y - cy) * (y - cy); if (d < bd) { bd = d; best = i; } }
+    hoverI = best;
+    if (best < 0) { tip.style.display = "none"; return; }
+    const s = STARS[best];
+    tip.textContent = "p = " + s.p + ", " + (s.hole ? "no page by this method" : "N(p) = " + s.N + " two-scalar pages");
+    tip.style.display = "block";
+    tip.style.left = Math.min(cx + 14, window.innerWidth - tip.offsetWidth - 8) + "px";
+    tip.style.top = Math.max(8, cy - 34) + "px";
+  }
 
   // ---- WebGL setup: background quad, lines (grid, stems, spiral), point sprites (stars, holes)
   let P, Q, lineBuf, lineCount = 0, starBuf;
@@ -205,7 +250,7 @@ if (typeof document !== "undefined") (function () {
     const push = (x, y, z, r, g, b, a) => { out[o++] = x; out[o++] = y; out[o++] = z; out[o++] = r; out[o++] = g; out[o++] = b; out[o++] = a; out[o++] = 1; };
     for (const [u, v] of GRID) {
       const hu = gh(u), hv = gh(v), hm = 0.5 * (hu + hv);
-      const a = 0.10 + 0.55 * Math.max(0, hm) / HMAX, c = hm < -0.01 ? [0.35, 0.08, 0.45] : [1.0, 0.62, 0.95];
+      const a = 0.06 + 0.34 * Math.max(0, hm) / HMAX, c = hm < -0.01 ? [0.35, 0.08, 0.45] : [1.0, 0.62, 0.95];
       push(gx[u], gy[u], hu, c[0], c[1], c[2], a); push(gx[v], gy[v], hv, c[0], c[1], c[2], a);
     }
     for (let i = 0; i < revealed; i++) {   // a faint stem under each star, and the spiral order on the floor
@@ -244,7 +289,9 @@ if (typeof document !== "undefined") (function () {
   canvas.addEventListener("pointermove", e => { if (!drag) return;
     yaw += (e.clientX - drag[0]) * 0.008; pitch = Math.max(-1.55, Math.min(0, pitch + (e.clientY - drag[1]) * 0.008));
     drag = [e.clientX, e.clientY]; });
-  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("pointerup", e => { drag = null; if (e.pointerType !== "mouse") pick(e.clientX, e.clientY); });
+  canvas.addEventListener("pointermove", e => { if (!drag && e.pointerType === "mouse") pick(e.clientX, e.clientY); });
+  canvas.addEventListener("pointerleave", () => { hoverI = -1; tip.style.display = "none"; });
   canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(1.8, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
 
   const GROW_RATE = reduced ? 1e9 : 9;   // primes per second in grow mode
@@ -277,10 +324,6 @@ if (typeof document !== "undefined") (function () {
     order.sort((a, b) => b[1] - a[1]);
     const flash = i => Math.max(0, 1 - (simT - revealAt[i]) / 0.8);
 
-    STARS.forEach((s, i) => { const el = labs[i]; if (!el) return;
-      if (i >= revealed) { el.style.display = "none"; return; }
-      const q = proj(s.x, s.y, s.z * lift); el.style.display = "block";
-      el.style.left = (q[0] / dpr) + "px"; el.style.top = (q[1] / dpr) + "px"; });
 
     if (!gl) {
       const g0 = ctx.createRadialGradient(w / 2, h * 0.49, 0, w / 2, h * 0.49, 0.68 * Math.hypot(w, h) / 1.414);
@@ -303,23 +346,15 @@ if (typeof document !== "undefined") (function () {
       });
       for (const [i] of order) {
         const s = STARS[i], q = proj(s.x, s.y, s.z * lift);
-        if (s.hole) {
-          const R = 13 * scale / q[2];
-          ctx.globalCompositeOperation = "source-over";
-          const gh2 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
-          gh2.addColorStop(0, "#0a0110"); gh2.addColorStop(0.7, "#1a0322"); gh2.addColorStop(1, "#3a0646");
-          ctx.fillStyle = gh2; ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 2 * Math.PI); ctx.fill();
-          ctx.strokeStyle = "rgba(255,214,255,0.9)"; ctx.lineWidth = dpr; ctx.beginPath(); ctx.arc(q[0], q[1], R * 1.19, 0, 2 * Math.PI); ctx.stroke();
-          continue;
-        }
-        const R = (10 + 26 * s.b) * (1 + 1.5 * flash(i)) * scale / q[2], op = 0.6 * (0.25 + 0.75 * s.b);
+        if (s.hole) continue;   // pits are drawn on the overlay, above everything
+        const R = (10 + 26 * s.b) * (1 + 1.5 * flash(i)) * scale / q[2], op = 0.45 * (0.25 + 0.75 * s.b);
         ctx.globalCompositeOperation = "lighter";
         const g1 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
         g1.addColorStop(0, "rgba(255,255,255," + op + ")"); g1.addColorStop(0.18, "rgba(255,208,255," + (0.9 * op) + ")");
         g1.addColorStop(0.45, "rgba(255,64,255," + (0.45 * op) + ")"); g1.addColorStop(1, "rgba(255,64,255,0)");
         ctx.fillStyle = g1; ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 2 * Math.PI); ctx.fill();
       }
-      requestAnimationFrame(frame); return;
+      drawOverlay(proj, scale, dpr, w, h); requestAnimationFrame(frame); return;
     }
 
     gl.disable(gl.BLEND);
@@ -341,17 +376,12 @@ if (typeof document !== "undefined") (function () {
       gl.bufferData(gl.ARRAY_BUFFER, LINE_DATA.subarray(0, lineCount * 8), gl.DYNAMIC_DRAW); dirty = false; }
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);   // additive glow
     bindV(lineBuf); gl.uniform1f(uMode, 0); gl.drawArrays(gl.LINES, 0, lineCount);
-    const sd = [], hd = [];
+    const sd = [];
     for (const [i] of order) { const s = STARS[i];
-      if (s.hole) hd.push(s.x, s.y, s.z, 0, 0, 0, 1, 31);
-      else sd.push(s.x, s.y, s.z, 1, 1, 1, 0.6 * (0.25 + 0.75 * s.b), (10 + 26 * s.b) * 2 * (1 + 1.5 * flash(i))); }
+      if (!s.hole) sd.push(s.x, s.y, s.z, 1, 1, 1, 0.45 * (0.25 + 0.75 * s.b), (10 + 26 * s.b) * 2 * (1 + 1.5 * flash(i))); }
     gl.bindBuffer(gl.ARRAY_BUFFER, starBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sd), gl.STREAM_DRAW);
     bindV(starBuf); gl.uniform1f(uMode, 1); gl.drawArrays(gl.POINTS, 0, sd.length / 8);
-    if (hd.length) {   // holes on top, ordinary alpha blending so they read dark
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(hd), gl.STREAM_DRAW);
-      bindV(starBuf); gl.uniform1f(uMode, 2); gl.drawArrays(gl.POINTS, 0, hd.length / 8);
-    }
+    drawOverlay(proj, scale, dpr, w, h);   // pits, rings, labels: a final pass above the WebGL relief
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
