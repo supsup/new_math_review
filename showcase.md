@@ -649,6 +649,8 @@ Cut every edge of a graph into simple cycles and single edges, using as few piec
 
 [Open the animated 3D version](shift_pair_dial.html) (drag to orbit)
 
+[Watch this p = 13 construction row by row (Marlow)](prime_shift_pair_p13_animated.html)
+
 **Checked.**
 
 ![d(K_3\vee I_t)=t+\lceil t/3\rceil+1,\qquad d(K_5\vee I_t)=t+2+\lceil 2t/5\rceil+\[t=1\]](formulas/f_86dc8ea400d4.svg)

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two orbits, one short cycle &mdash; p = 13</title>
+<style>
+  :root { color-scheme: dark; --bg:#080f1d; --ink:#eff3f7; --muted:#a5b7ca; --gold:#f6c65e; --teal:#5ce1d5; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:Arial,Helvetica,sans-serif; }
+  main { min-height:100vh; display:grid; place-items:center; padding:14px; }
+  #stage { position:relative; width:min(calc(100vw - 28px),calc((100vh - 28px)*1.5),1200px); aspect-ratio:3/2;
+    overflow:hidden; border:1px solid #344c65; border-radius:18px; box-shadow:0 24px 70px #0009;
+    background:radial-gradient(circle at 34% 52%,#1a3045 0,#0b1628 56%,#080f1d 100%); }
+  #lines,#diagram { position:absolute; inset:0; width:100%; height:100%; }
+  #lines { pointer-events:none; }
+  #diagram { pointer-events:none; }
+  #controls { position:absolute; left:5.5%; bottom:2.1%; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  button { color:#edf3f8; background:#21364b; border:1px solid #5a7690; border-radius:7px;
+    padding:8px 12px; font-size:13px; cursor:pointer; }
+  button:hover,button:focus-visible { border-color:var(--gold); outline:2px solid transparent; background:#304c64; }
+  button:disabled { opacity:.45; cursor:default; }
+  #status { position:absolute; right:4%; bottom:2.5%; max-width:52%; color:#ffdf91; font-size:14px; text-align:right; }
+  #error { display:none; position:absolute; inset:auto 5% 12% 5%; padding:14px; background:#671b30; color:white; z-index:3; }
+  .row { fill:#a8b9c9; font-size:19px; }
+  .row.active { fill:#fff4c8; font-weight:bold; }
+  .nodeLabel { fill:#f3f7fa; font-size:18px; font-weight:bold; text-anchor:middle; }
+  .nodeSquare { stroke:var(--gold); }
+  .nodeOutside { stroke:var(--teal); }
+  @media (max-width:750px) {
+    main { padding:0 0 48px; align-items:start; }
+    #stage { width:100vw; border-radius:0; border:0; overflow:visible; }
+    #controls { left:4%; right:4%; top:calc(100% + 8px); bottom:auto; gap:4px; }
+    button { padding:5px 7px; font-size:10px; }
+    #status { display:none; }
+  }
+</style>
+</head>
+<body>
+<main><div id="stage">
+  <canvas id="lines" aria-hidden="true"></canvas>
+  <svg id="diagram" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+    <title id="title">Two orbits, one short cycle at p = 13</title>
+    <desc id="description">Six gold successor links join the quadratic residues under multiplication by four. Six teal links send those residues to the six outside hubs under multiplication by six. A six-row table records the two shift offsets; together they use every nonzero field element exactly once.</desc>
+    <defs>
+      <linearGradient id="panel" x2="1" y2="1"><stop stop-color="#22364b"/><stop offset="1" stop-color="#101d2e"/></linearGradient>
+    </defs>
+    <text x="60" y="72" fill="#f5f3ec" font-family="Georgia,serif" font-size="39">Two orbits, one short cycle</text>
+    <text x="62" y="105" fill="#a5b7ca" font-size="17">The p = 13 shift pair: a = 4, b = 6</text>
+    <circle cx="360" cy="400" r="264" fill="none" stroke="#59718b" stroke-width="1" opacity=".5"/>
+    <circle cx="360" cy="400" r="183" fill="none" stroke="#3d566c" stroke-width="1" stroke-dasharray="3 8"/>
+    <g id="nodes"></g>
+    <rect x="720" y="141" width="423" height="529" rx="20" fill="url(#panel)" stroke="#4c657a"/>
+    <text x="755" y="190" fill="#f6f1e6" font-family="Georgia,serif" font-size="27">Six shifts, no repeats</text>
+    <text x="755" y="221" fill="#afc2d3" font-size="16">Gold: s &#8594; 4s   &middot;   Teal: s &#8594; 6s</text>
+    <text x="762" y="267" fill="#aebed0" font-size="13" letter-spacing="1">ROW s</text>
+    <text x="858" y="267" fill="#f6c65e" font-size="13">d = &minus;3s</text>
+    <text x="1012" y="267" fill="#5ce1d5" font-size="13">e = &minus;5s</text>
+    <path d="M 755 285 H 1109" stroke="#566e84"/>
+    <g id="rows"></g>
+    <path d="M 755 600 H 1109" stroke="#566e84"/>
+    <text x="755" y="636" fill="#cbd9e5" font-size="16">6 &times; 26 + 12 + 14 = 182 edges</text>
+    <text x="60" y="709" fill="#f6c65e" font-size="16">Squares: 1, 3, 4, 9, 10, 12</text>
+    <text x="360" y="709" fill="#5ce1d5" font-size="16">Outside: 2, 5, 6, 7, 8, 11</text>
+    <text x="60" y="741" fill="#9eb2c6" font-size="15">Gold draws the hub successor orbit; the actual short cycle alternates hub and leaf.</text>
+  </svg>
+  <div id="controls">
+    <button id="prev" type="button">Previous</button>
+    <button id="next" type="button">Next row</button>
+    <button id="play" type="button" aria-pressed="false">Play</button>
+    <button id="reset" type="button">Reset</button>
+  </div>
+  <div id="status" aria-live="polite"></div>
+  <div id="error" role="alert"></div>
+</div></main>
+<script>
+"use strict";
+/* Pure mathematics. It runs before either renderer and exports under Node. */
+const P13 = (function () {
+  const p = 13, a = 4, b = 6, n = 6;
+  const mod = x => ((x % p) + p) % p;
+  const square = new Set(Array.from({length:p-1},(_,i)=>mod((i+1)*(i+1))));
+  function checkCycle(edges, expectedLength) {
+    if (edges.length !== expectedLength) return false;
+    const adj = new Map(), used = new Set();
+    for (const [h,l] of edges) {
+      const id = h*(p+1)+l;
+      if (used.has(id)) return false; used.add(id);
+      const u = h, v = p+l;
+      if (!adj.has(u)) adj.set(u,[]);
+      if (!adj.has(v)) adj.set(v,[]);
+      adj.get(u).push(v); adj.get(v).push(u);
+    }
+    if (adj.size !== expectedLength || [...adj.values()].some(x=>x.length!==2)) return false;
+    const seen = new Set(), todo = [adj.keys().next().value];
+    while (todo.length) { const v=todo.pop(); if(seen.has(v)) continue; seen.add(v); todo.push(...adj.get(v)); }
+    return seen.size===expectedLength;
+  }
+  function build(opts) {
+    opts=opts||{};
+    const aa=opts.a===undefined?a:opts.a, bb=opts.b===undefined?b:opts.b;
+    const fail=[];
+    if (square.size!==n) fail.push("quadratic-residue count");
+    const order=[]; for(let j=0,s=1;j<n;j++,s=mod(s*aa)) order.push(s);
+    if (new Set(order).size!==n || new Set(order).size!==square.size ||
+        order.some(s=>!square.has(s)) || mod(order[n-1]*aa)!==1) fail.push("gold orbit");
+    const outside=order.map(s=>mod(bb*s));
+    if (new Set(outside).size!==n || outside.some(x=>square.has(x) || x===0)) fail.push("outside hubs");
+    const rows=order.map(s=>({s,h:mod(aa*s),g:mod(bb*s),d:mod((1-aa)*s),e:mod((1-bb)*s)}));
+    const shifts=rows.flatMap(r=>[r.d,r.e]).sort((x,y)=>x-y);
+    if (shifts.join(",")!==Array.from({length:p-1},(_,i)=>i+1).join(",")) fail.push("shift partition");
+    const colours=[];
+    for (const r of rows) {
+      const before=[], after=[];
+      for(let h=0;h<p;h++) for(const d of [r.d,r.e]) {
+        const l=mod(h+d); before.push([h,l]); after.push([h,l===r.s?p:l]);
+      }
+      if (!checkCycle(before,2*p) || !checkCycle(after,2*p)) fail.push("Hamilton colour "+r.s);
+      colours.push(after);
+    }
+    const short=rows.flatMap(r=>[[r.h,r.s],[r.s,r.s]]);
+    if(!checkCycle(short,p-1)) fail.push("short cycle");
+    const singles=rows.map(r=>[r.g,r.s]);
+    for(let h=0;h<p;h++) if(!square.has(h)) singles.push([h,h]);
+    singles.push([0,p]);
+    if(singles.length!==p+1) fail.push("singleton count");
+    const edgeCount=new Uint8Array(p*(p+1));
+    for(const e of colours.flat().concat(short,singles)) edgeCount[e[0]*(p+1)+e[1]]++;
+    if([...edgeCount].some(x=>x!==1)) fail.push("edge partition");
+    return {p,a:aa,b:bb,rows,colours,short,singles,fail};
+  }
+  return {build,model:build()};
+})();
+if(typeof module!=="undefined") module.exports=P13;
+/* No art is built if the exact page fails its checks. */
+if(typeof document!=="undefined") (function(){
+  const m=P13.model, error=document.getElementById("error");
+  if(m.fail.length){error.textContent="Refusing to draw: "+m.fail.join("; ");error.style.display="block";return;}
+  const svgNS="http://www.w3.org/2000/svg", nodes=document.getElementById("nodes"), rowsEl=document.getElementById("rows");
+  const nodePoint=x=>{const theta=-Math.PI/2+(x-1)*Math.PI/6;return [360+264*Math.cos(theta),400+264*Math.sin(theta)];};
+  const el=(name,attrs,text)=>{const e=document.createElementNS(svgNS,name);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;return e;};
+  for(let x=1;x<13;x++){const q=nodePoint(x),sq=m.rows.some(r=>r.s===x);
+    nodes.appendChild(el("circle",{cx:q[0],cy:q[1],r:22,fill:"#101e2e",stroke:sq?"#f6c65e":"#5ce1d5","stroke-width":2.5}));
+    nodes.appendChild(el("text",{x:q[0],y:q[1]+6,class:"nodeLabel"},String(x)));
+  }
+  nodes.appendChild(el("circle",{cx:360,cy:400,r:18,fill:"#15283a",stroke:"#d7e5ed"}));
+  nodes.appendChild(el("text",{x:360,y:406,class:"nodeLabel"},"0"));
+  const rowEls=[];
+  m.rows.forEach((r,j)=>{const y=328+47*j;
+    const group=el("g",{class:"row","data-row":j});
+    group.appendChild(el("text",{x:777,y:y},String(r.s)));
+    group.appendChild(el("text",{x:881,y:y,fill:"#f6c65e"},String(r.d)));
+    group.appendChild(el("text",{x:1029,y:y,fill:"#5ce1d5"},String(r.e)));
+    rowsEl.appendChild(group);rowEls.push(group);
+  });
+  let canvas=document.getElementById("lines");
+  let gl=null,ctx=null,program=null,buffer=null,locPos=null,locCol=null,locSize=null;
+  try{gl=canvas.getContext("webgl",{alpha:true,antialias:true});}catch(_){}
+  if(gl){
+    const shader=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s));return s;};
+    try{
+      program=gl.createProgram();
+      gl.attachShader(program,shader(gl.VERTEX_SHADER,"attribute vec2 aPos;attribute vec4 aCol;uniform vec2 uSize;varying vec4 vCol;void main(){gl_Position=vec4(aPos.x/uSize.x*2.0-1.0,1.0-aPos.y/uSize.y*2.0,0.0,1.0);vCol=aCol;}"));
+      gl.attachShader(program,shader(gl.FRAGMENT_SHADER,"precision mediump float;varying vec4 vCol;void main(){gl_FragColor=vCol;}"));
+      gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+      buffer=gl.createBuffer();locPos=gl.getAttribLocation(program,"aPos");locCol=gl.getAttribLocation(program,"aCol");locSize=gl.getUniformLocation(program,"uSize");
+    }catch(_){
+      // A failed shader leaves this canvas bound to WebGL; replace it before asking for 2D.
+      const fresh=canvas.cloneNode(false);canvas.replaceWith(fresh);canvas=fresh;gl=null;
+    }
+  }
+  if(!gl)ctx=canvas.getContext("2d");
+  if(!gl&&!ctx){error.textContent="No WebGL or 2D canvas renderer is available.";error.style.display="block";return;}
+  window.__p13Renderer=gl?"webgl":"2d";
+  const reduced=!!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let step=reduced?6:0,playing=!reduced,last=0,progress=0;
+  const status=document.getElementById("status"),play=document.getElementById("play");
+  const C={gold:[.965,.776,.369],teal:[.361,.882,.835]};
+  function segments(){
+    const out=[];
+    for(let j=0;j<6;j++){const r=m.rows[j],f=j<step?1:j===step?progress:0;if(f<=0)continue;
+      const s=nodePoint(r.s),h=nodePoint(r.h),g=nodePoint(r.g);
+      out.push({a:s,b:h,c:C.gold,alpha:.16*f,w:13});
+      out.push({a:s,b:h,c:C.gold,alpha:.94*f,w:3.5});
+      out.push({a:s,b:g,c:C.teal,alpha:.12*f,w:10});
+      out.push({a:s,b:g,c:C.teal,alpha:.72*f,w:2});
+    }
+    return out;
+  }
+  function draw(){
+    const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(1,Math.round(canvas.clientWidth*dpr)),h=Math.max(1,Math.round(canvas.clientHeight*dpr));
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+    const sx=w/1200,sy=h/800,segs=segments();
+    if(ctx){ctx.clearRect(0,0,w,h);ctx.lineCap="round";ctx.globalCompositeOperation="lighter";
+      for(const s of segs){ctx.beginPath();ctx.moveTo(s.a[0]*sx,s.a[1]*sy);ctx.lineTo(s.b[0]*sx,s.b[1]*sy);
+        ctx.strokeStyle="rgba("+s.c.map(x=>Math.round(x*255)).join(",")+","+s.alpha+")";ctx.lineWidth=s.w*sx;ctx.stroke();}
+      ctx.globalCompositeOperation="source-over";
+    }else{
+      const verts=[];
+      for(const s of segs){const ax=s.a[0]*sx,ay=s.a[1]*sy,bx=s.b[0]*sx,by=s.b[1]*sy,dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1,
+        nx=-dy/L*s.w*sx/2,ny=dx/L*s.w*sx/2,col=s.c.concat(s.alpha);
+        for(const v of [[ax-nx,ay-ny],[ax+nx,ay+ny],[bx-nx,by-ny],[bx-nx,by-ny],[ax+nx,ay+ny],[bx+nx,by+ny]])verts.push(v[0],v[1],...col);
+      }
+      gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE,gl.ONE,gl.ONE);
+      gl.useProgram(program);gl.uniform2f(locSize,w,h);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(locPos);gl.vertexAttribPointer(locPos,2,gl.FLOAT,false,24,0);
+      gl.enableVertexAttribArray(locCol);gl.vertexAttribPointer(locCol,4,gl.FLOAT,false,24,8);
+      gl.drawArrays(gl.TRIANGLES,0,verts.length/6);
+    }
+    rowEls.forEach((e,j)=>e.setAttribute("class",j===step&&step<6?"row active":"row"));
+    status.textContent=step<6?"Row "+(step+1)+" of 6: s = "+m.rows[step].s+", d = "+m.rows[step].d+", e = "+m.rows[step].e:
+      "All 12 shifts appear once; gold orbit 1 -> 4 -> 3 -> 12 -> 9 -> 10 -> 1.";
+    document.getElementById("prev").disabled=step===0;
+    document.getElementById("next").disabled=step===6;
+    play.setAttribute("aria-pressed",playing?"true":"false");play.textContent=playing?"Pause":"Play";
+  }
+  function tick(now){
+    if(!playing)return;
+    if(last){progress+=(now-last)/850;}
+    last=now;
+    if(progress>=1){progress=0;step++;if(step>6){step=0;}}
+    draw();requestAnimationFrame(tick);
+  }
+  function stop(){playing=false;last=0;draw();}
+  document.getElementById("prev").onclick=()=>{stop();step=Math.max(0,step-1);progress=0;draw();};
+  document.getElementById("next").onclick=()=>{stop();step=Math.min(6,step+1);progress=0;draw();};
+  document.getElementById("reset").onclick=()=>{stop();step=0;progress=0;draw();};
+  play.onclick=()=>{playing=!playing;last=0;draw();if(playing)requestAnimationFrame(tick);};
+  window.addEventListener("resize",draw);
+  draw();if(playing)requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
