@@ -84,6 +84,8 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 - `reviewers/`: the four reviewer cards (SVG).
 - `possible_further_findings.md`: candidate feedback to the collection's authors.
 - `rainbow_walecki_m_27.html`: an animated 3D view of the Rainbow Walecki picture (WebGL, with a 2D-canvas fallback; no libraries, nothing loaded from elsewhere). It recomputes the colouring and checks the rainbow, partition and matching properties before drawing. Open it in a browser.
+- `two_scalar_sky.html`: the two-scalar sky as a rotating 3D relief (height log(1 + N(p))), with the nine pageless primes as pits and a mode that grows p from 5 to 3000; it recomputes every N(p) and checks the empty set before drawing.
+- `page_on_41.html`: the page (26, 14) on Z_41 with a light tracing its single 40-cycle, and an option to lift A and B onto two planes so the cycle zigzags between them; it checks the starters, sums and cycle before drawing.
 
 The scripts that produced the pictures are in the agents' working branches of a fork of the
 collection and are not published yet; every number on the page was printed by one of them and

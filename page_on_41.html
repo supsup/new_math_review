@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Page on 41</title>
+<style>
+  :root { --bg: #0d0f1a; --ink: #eef0f8; --dim: #9aa3b8; --gold: #f6c453; --cyan: #5fe0d8; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 780px; line-height: 1.4; }
+  .g { color: var(--gold); } .c { color: var(--cyan); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 64px; font-size: 15px; color: var(--ink); pointer-events: none; }
+  #bar { position: fixed; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: #1c2036; color: var(--ink); border: 1px solid #39406e; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #39406e; border-color: var(--gold); }
+  .lab { position: fixed; font: 10.5px Georgia, serif; color: var(--dim); pointer-events: none;
+    transform: translate(-50%, -50%); }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated view of the two-scalar page on Z_41: gold A chords and cyan B chords whose union is one Hamilton 40-cycle, traced by a moving light"></canvas>
+<div id="hud">
+  <h1>A page on 41</h1>
+  <p>(lambda, mu) = (26, 14) in C_1, g = 6, M = 8, t = 5, H = &lt;6^8&gt;. The 41 hubs of Z_41 sit on a circle with 0 at the
+  top, each nonzero hub tinted by its coset C_j = 6^j H. <span class="g">A = {x, 26x} on C_0 u C_2, {x, 14x} on C_4 u C_6</span>;
+  <span class="c">B likewise on C_1 u C_3, C_5 u C_7</span>. Each is a perfect matching on Z_41 minus 0 and a strong starter,
+  their edge sums split Z_41^* in two, and A u B is one 40-cycle, traced here by a moving light. Lift puts A and B on
+  two planes joined at the hubs, so the cycle zigzags between them. Drag to orbit, scroll to zoom.
+  The page recomputes the page and checks every one of these facts before it draws.</p>
+</div>
+<div id="labels"></div>
+<div id="state"></div>
+<div id="bar">
+  <button id="bLift" aria-pressed="false">Lift A and B</button>
+  <button id="bTrace" aria-pressed="true">Trace</button>
+  <button id="bSpin" aria-pressed="true">Spin</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const PAGE41 = (function () {
+  const p = 41, g = 6, lam = 26, mu = 14, M = 8, t = 5;
+  const fail = [];
+  const mod = (a, n) => ((a % n) + n) % n;
+  function powmod(b, e, m) { let r = 1; b = mod(b, m); while (e > 0) { if (e & 1) r = r * b % m; b = b * b % m; e >>= 1; } return r; }
+  if (p - 1 !== M * t || t % 2 !== 1 || (M & (M - 1)) !== 0) fail.push("p - 1 = M t with M a power of two, t odd");
+  const log = new Array(p).fill(-1);
+  for (let i = 0, x = 1; i < p - 1; i++, x = x * g % p) { if (log[x] >= 0) fail.push("6 is not a primitive root mod 41"); log[x] = i; }
+  const H = []; for (let i = 0; i < t; i++) H.push(powmod(g, M * i, p));
+  H.sort((a, b) => a - b);
+  if (new Set(H).size !== t) fail.push("H = <6^8> should have order 5");
+  const coset = [-1]; for (let x = 1; x < p; x++) coset.push(log[x] % M);
+  if (coset[lam] !== 1 || coset[mu] !== 1) fail.push("26 and 14 should lie in C_1");
+  if (log[lam] % 2 !== 1 || log[mu] % 2 !== 1) fail.push("26 and 14 should be nonsquares");
+  const s = log[lam] % M;
+  const chi = x => (mod(x, p) === 0 ? 0 : (log[mod(x, p)] % 2 === 0 ? 1 : -1));
+  if (chi((lam - 1) * (mu - 1)) !== -1) fail.push("condition (i) fails");
+  if (!H.includes((1 + mu) * powmod(1 + lam, p - 2, p) % p)) fail.push("condition (ii) fails");
+  const rho = powmod(lam * mu % p, M / 2, p);
+  if (!H.includes(rho) || rho === 1) fail.push("condition (iii) fails: rho must generate H (prime order 5)");
+
+  // build the page as the probe does: walk j_i = i s mod M, lambda on the first half, mu on the second
+  const A = [], B = [], cosetScalar = {};
+  for (let i = 0; i < M; i++) {
+    const j = i * s % M, sc = i < M / 2 ? lam : mu;
+    cosetScalar[j] = [sc, i % 2 === 0 ? "A" : "B"];
+    for (let x = 1; x < p; x++) if (coset[x] === j) (i % 2 === 0 ? A : B).push([x, sc * x % p]);
+  }
+  const want = { 0: "26A", 2: "26A", 4: "14A", 6: "14A", 1: "26B", 3: "26B", 5: "14B", 7: "14B" };
+  for (let j = 0; j < M; j++) if (cosetScalar[j].join("") !== want[j]) fail.push("coset assignment differs at C_" + j);
+
+  function checkMatching(E, name) {
+    const v = E.flat().sort((a, b) => a - b);
+    if (E.length !== (p - 1) / 2 || v.join(",") !== Array.from({ length: p - 1 }, (_, i) => i + 1).join(","))
+      fail.push(name + " is not a perfect matching on Z_41 minus 0");
+  }
+  function checkStrongStarter(E, name) {
+    const cls = E.map(([u, v]) => Math.min(mod(u - v, p), mod(v - u, p))).sort((a, b) => a - b);
+    if (cls.join(",") !== Array.from({ length: (p - 1) / 2 }, (_, i) => i + 1).join(","))
+      fail.push(name + " is not a starter (difference classes)");
+    const sums = E.map(([u, v]) => (u + v) % p);
+    if (new Set(sums).size !== sums.length || sums.includes(0)) fail.push(name + " is not strong (sums distinct and nonzero)");
+    return sums;
+  }
+  checkMatching(A, "A"); checkMatching(B, "B");
+  const sumsA = checkStrongStarter(A, "A"), sumsB = checkStrongStarter(B, "B");
+  if (sumsA.concat(sumsB).sort((a, b) => a - b).join(",") !== Array.from({ length: p - 1 }, (_, i) => i + 1).join(","))
+    fail.push("edge sums of A and B are not complementary in Z_41^*");
+  const key = ([u, v]) => Math.min(u, v) * 64 + Math.max(u, v);
+  const keyA = new Set(A.map(key));
+  if (B.some(e => keyA.has(key(e)))) fail.push("A and B share an edge");
+  // the union as one 40-cycle, alternating A, B from hub 1
+  const nbA = {}, nbB = {};
+  A.forEach(([u, v]) => { nbA[u] = v; nbA[v] = u; }); B.forEach(([u, v]) => { nbB[u] = v; nbB[v] = u; });
+  const cycle = [1]; let cur = 1, useA = true;
+  for (let k = 0; k < p - 1; k++) { cur = (useA ? nbA : nbB)[cur]; cycle.push(cur); useA = !useA; }
+  if (cycle[p - 1] !== 1 || new Set(cycle.slice(0, p - 1)).size !== p - 1 || cycle.slice(0, p - 1).includes(0))
+    fail.push("A u B is not a single 40-cycle");
+  cycle.pop();
+  return { p, g, lam, mu, M, t, H, coset, cosetScalar, A, B, sumsA, sumsB, cycle, rho, fail };
+})();
+if (typeof module !== "undefined") module.exports = PAGE41;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const P = PAGE41, err = document.getElementById("err");
+  if (P.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + P.fail.join("; "); return; }
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl", { antialias: true, alpha: false });
+  const ctx = gl ? null : canvas.getContext("2d");   // fallback: same projection, drawn with the 2D canvas
+  if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+
+  // palette from 47_page_on_41.py: coset hues hsl(j/8 + 0.02, 0.75, 0.62); gold, cyan, background, dim
+  function hsl(h, s, l) {
+    h = ((h % 1) + 1) % 1;
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s, pp = 2 * l - q;
+    const f = tt => { tt = ((tt % 1) + 1) % 1;
+      return tt < 1 / 6 ? pp + (q - pp) * 6 * tt : tt < 0.5 ? q : tt < 2 / 3 ? pp + (q - pp) * (2 / 3 - tt) * 6 : pp; };
+    return [f(h + 1 / 3), f(h), f(h - 1 / 3)];
+  }
+  const COSET = []; for (let j = 0; j < P.M; j++) COSET.push(hsl(j / P.M + 0.02, 0.75, 0.62));
+  const GOLD = [0.965, 0.769, 0.325], CYAN = [0.373, 0.878, 0.847], WHITE = [1, 1, 1], DIM = [0.604, 0.639, 0.722];
+  const BGc = [0.051, 0.059, 0.102];
+  const css = (c, a) => "rgba(" + Math.round(c[0] * 255) + "," + Math.round(c[1] * 255) + "," + Math.round(c[2] * 255) + "," + (a === undefined ? 1 : a) + ")";
+  const LZ = 0.48;   // half the gap between the A plane (z = +LZ) and the B plane (z = -LZ) when lifted
+  const pos = (x, side) => [Math.sin(2 * Math.PI * x / P.p), Math.cos(2 * Math.PI * x / P.p), side * LZ];
+
+  // static segments: [a(3), b(3), colour(3), alpha, width]
+  const SEG = [];
+  P.A.forEach(([u, v]) => SEG.push([pos(u, 1), pos(v, 1), GOLD, 0.55, 3.2]));
+  P.B.forEach(([u, v]) => SEG.push([pos(u, -1), pos(v, -1), CYAN, 0.55, 3.2]));
+  for (let x = 1; x < P.p; x++) SEG.push([pos(x, 1), pos(x, -1), COSET[P.coset[x]], 0.45, 1.6]);   // posts joining the planes
+  for (const side of [1, -1]) for (let k = 0; k < 120; k++) {   // the circle on each plane
+    const a0 = 2 * Math.PI * k / 120, a1 = 2 * Math.PI * (k + 1) / 120;
+    SEG.push([[Math.sin(a0), Math.cos(a0), side * LZ], [Math.sin(a1), Math.cos(a1), side * LZ], [0.17, 0.19, 0.31], 1, 1]);
+  }
+
+  // the traced route: 80 legs, chord then post, alternating A (top) and B (bottom), back to the start
+  const LEGS = [];
+  for (let k = 0; k < P.p - 1; k++) {
+    const u = P.cycle[k], v = P.cycle[(k + 1) % (P.p - 1)], side = k % 2 === 0 ? 1 : -1;
+    LEGS.push({ a: pos(u, side), b: pos(v, side), dur: 1, chord: true, k, u, v, side });
+    LEGS.push({ a: pos(v, side), b: pos(v, -side), dur: 0.35, chord: false, k, u: v, v, side });
+  }
+  const TOTAL = LEGS.reduce((s, L) => s + L.dur, 0);
+
+  // hub labels as DOM spans (identical in both renderers)
+  const labs = [];
+  for (let x = 0; x < P.p; x++) {
+    const el = document.createElement("span"); el.className = "lab"; el.textContent = x;
+    document.getElementById("labels").appendChild(el); labs.push(el);
+  }
+
+  let RB, PT, Q, segBuf, segN = 0, dynBuf, ptBuf;
+  const FL = 13;   // floats per ribbon vertex
+  function ribbon(out, S) {   // S = [a, b, colour, alpha, width] -> 4 vertices, 2 triangles
+    for (let q = 0; q < 4; q++) out.push(S[0][0], S[0][1], S[0][2], S[1][0], S[1][1], S[1][2],
+      S[2][0], S[2][1], S[2][2], S[3], q < 2 ? -1 : 1, q % 2, S[4]);
+  }
+  function ribbonIdx(nSeg) { const idx = []; for (let e = 0; e < nSeg; e++) { const o = 4 * e; idx.push(o, o + 1, o + 2, o + 1, o + 3, o + 2); } return idx; }
+  let idxBuf;
+  if (gl) {
+    function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+    function prog(vs, fs) { const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); return pr; }
+    Q = prog(`attribute vec2 aP; varying vec2 vP; void main() { vP = aP; gl_Position = vec4(aP, 0.0, 1.0); }`,
+      `precision mediump float; varying vec2 vP; uniform vec2 uRes;
+       void main() { vec2 q = vP * vec2(uRes.x / uRes.y, 1.0); float r = clamp(length(q) / 1.5, 0.0, 1.0);
+         gl_FragColor = vec4(mix(vec3(0.110,0.125,0.212), vec3(0.051,0.059,0.102), r), 1.0); }`);
+    Q.buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, Q.buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    RB = prog(`attribute vec3 aA, aB, aCol; attribute float aAl, aSide, aEnd, aW;
+      uniform mat4 uM; uniform vec2 uRes; uniform float uLift, uDpr; varying vec4 vC;
+      void main() {
+        vec4 ca = uM * vec4(aA.xy, aA.z * uLift, 1.0), cb = uM * vec4(aB.xy, aB.z * uLift, 1.0);
+        vec2 sa = ca.xy / ca.w * uRes * 0.5, sb = cb.xy / cb.w * uRes * 0.5;
+        vec2 d = sb - sa; float L = length(d); d = L > 1e-6 ? d / L : vec2(1.0, 0.0);
+        vec2 nrm = vec2(-d.y, d.x);
+        vec4 c = mix(ca, cb, aEnd);
+        c.xy += nrm * aSide * aW * uDpr * 0.5 / (uRes * 0.5) * c.w;
+        gl_Position = c; vC = vec4(aCol * aAl, 1.0); }`,
+      `precision mediump float; varying vec4 vC; void main() { gl_FragColor = vC; }`);
+    PT = prog(`attribute vec3 aP, aCol; attribute float aS; uniform mat4 uM; uniform float uLift, uDpr; varying vec3 vC;
+      void main() { gl_Position = uM * vec4(aP.xy, aP.z * uLift, 1.0); gl_PointSize = aS * uDpr; vC = aCol; }`,
+      `precision mediump float; varying vec3 vC; uniform float uGlow;
+       void main() { float r = length(gl_PointCoord - 0.5) * 2.0; if (r > 1.0) discard;
+         if (uGlow > 0.5) { float a = exp(-r * r * 5.0); gl_FragColor = vec4(vC * a, a); return; }
+         float rim = smoothstep(0.78, 0.86, r);
+         gl_FragColor = vec4(mix(vC, vec3(0.051,0.059,0.102), rim), 1.0 - smoothstep(0.94, 1.0, r)); }`);
+    const st = []; SEG.forEach(S => ribbon(st, S)); segN = SEG.length;
+    segBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, segBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(st), gl.STATIC_DRAW);
+    idxBuf = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(ribbonIdx(Math.max(segN, 4 * LEGS.length + 8))), gl.STATIC_DRAW);
+    dynBuf = gl.createBuffer(); ptBuf = gl.createBuffer();
+  }
+
+  // tiny matrix helpers (column-major)
+  const mul = (a, b) => { const o = new Array(16).fill(0);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) o[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return o; };
+  const persp = (fov, asp, nr, fr) => { const t = 1 / Math.tan(fov / 2);
+    return [t / asp,0,0,0, 0,t,0,0, 0,0,(fr + nr) / (nr - fr),-1, 0,0,2 * fr * nr / (nr - fr),0]; };
+  const rotX = t => [1,0,0,0, 0,Math.cos(t),Math.sin(t),0, 0,-Math.sin(t),Math.cos(t),0, 0,0,0,1];
+  const rotZ = t => [Math.cos(t),Math.sin(t),0,0, -Math.sin(t),Math.cos(t),0,0, 0,0,1,0, 0,0,0,1];
+  const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let yaw = 0, pitch = 0, pitchTarget = 0, dragged = false, dist = 4.3, spin = !reduced;
+  let liftTarget = 0, lift = 0, tracing = !reduced, traceT = 0;
+  const stateEl = document.getElementById("state");
+  function toggle(id, on) { document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false"); }
+  document.getElementById("bLift").onclick = () => { liftTarget = liftTarget ? 0 : 1; toggle("bLift", liftTarget);
+    if (!dragged) pitchTarget = liftTarget ? -1.05 : 0; };
+  document.getElementById("bTrace").onclick = () => { tracing = !tracing; traceT = 0; toggle("bTrace", tracing); };
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  toggle("bSpin", spin); toggle("bTrace", tracing);
+  if (reduced) { lift = liftTarget; pitch = pitchTarget; }
+
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; dragged = true; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!drag) return;
+    yaw += (e.clientX - drag[0]) * 0.008; pitch = pitchTarget = Math.max(-1.55, Math.min(0, pitch + (e.clientY - drag[1]) * 0.008));
+    drag = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(2, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+  const SPEED = 2.2;   // chords per second
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;   // a rAF stamp can precede the start time
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (gl) gl.viewport(0, 0, w, h);
+    if (spin && !drag) yaw -= dt * 0.08;
+    const ease = reduced ? 1 : Math.min(1, dt * 1.8);
+    lift += (liftTarget - lift) * ease; if (!drag) pitch += (pitchTarget - pitch) * ease;
+
+    // the trail: completed legs plus the partial current one, and the light's position
+    const trail = []; let light = null, curLeg = null;
+    if (tracing) {
+      traceT += dt * SPEED;
+      if (traceT > TOTAL + 2.5) traceT = 0;
+      let tt = Math.min(traceT, TOTAL);
+      for (const L of LEGS) {
+        if (tt >= L.dur) { trail.push([L.a, L.b]); tt -= L.dur; continue; }
+        const f = tt / L.dur, m = [0, 1, 2].map(i => L.a[i] + (L.b[i] - L.a[i]) * f);
+        trail.push([L.a, m]); light = m; curLeg = L; break;
+      }
+      if (!light) light = LEGS[0].a;
+    } else LEGS.forEach(L => trail.push([L.a, L.b]));
+    const done = trail.length;
+    if (tracing && curLeg) {
+      const nA = Math.floor(curLeg.k / 2) + (curLeg.k % 2 === 0 ? 1 : 0), visited = curLeg.k + 1;
+      stateEl.innerHTML = "edge " + (curLeg.k + 1) + " of 40: " + (curLeg.side > 0 ? "<span class=\"g\">A</span>" : "<span class=\"c\">B</span>") +
+        " chord " + curLeg.u + " - " + curLeg.v + (curLeg.chord ? "" : ", then across the hub to the " + (curLeg.side > 0 ? "B" : "A") + " plane") +
+        "   |   " + visited + " of 40 hubs visited";
+    } else stateEl.innerHTML = "the union A u B, one 40-cycle: " + P.cycle.join(" - ") + " - 1";
+
+    const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, -0.16, -dist), mul(rotX(pitch), rotZ(yaw))));
+    const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
+      Wc = M[3]*x + M[7]*y + M[11]*z + M[15]; return [(X / Wc * 0.5 + 0.5) * w, (0.5 - Y / Wc * 0.5) * h, Wc]; };
+    for (let x = 0; x < P.p; x++) {
+      const a = 2 * Math.PI * x / P.p, q = proj(1.1 * Math.sin(a), 1.1 * Math.cos(a), (lift > 0.02 ? LZ * 1.0 : 0) * lift);
+      labs[x].style.left = (q[0] / dpr) + "px"; labs[x].style.top = (q[1] / dpr) + "px";
+    }
+    // hub dots on both planes (they coincide when flat); hub 0 is dark with a dim ring
+    const HUBS = [];
+    for (const side of [1, -1]) for (let x = 0; x < P.p; x++) HUBS.push([pos(x, side), x === 0 ? BGc : COSET[P.coset[x]], x]);
+
+    if (!gl) {
+      const g0 = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 0.75 * Math.max(w, h));
+      g0.addColorStop(0, "#1c2036"); g0.addColorStop(1, "#0d0f1a");
+      ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = g0; ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+      const line = (a, b, col, al, wd) => { const pa = proj(a[0], a[1], a[2] * lift), pb = proj(b[0], b[1], b[2] * lift);
+        ctx.strokeStyle = css([col[0] * al, col[1] * al, col[2] * al]); ctx.lineWidth = wd * dpr;
+        ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke(); };
+      SEG.forEach(S => line(S[0], S[1], S[2], S[3], S[4]));
+      trail.forEach(([a, b]) => { line(a, b, WHITE, 0.30, 5); line(a, b, WHITE, 0.85, 1.4); });
+      ctx.globalCompositeOperation = "source-over";
+      HUBS.forEach(([pp, col, x]) => { const q = proj(pp[0], pp[1], pp[2] * lift);
+        ctx.fillStyle = css(col); ctx.strokeStyle = x === 0 ? css(DIM) : "#0d0f1a"; ctx.lineWidth = (x === 0 ? 2 : 1.5) * dpr;
+        ctx.beginPath(); ctx.arc(q[0], q[1], 9.5 * dpr * 4.3 / q[2] * Math.min(w, h) / (1000 * dpr) * 1.25, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); });
+      if (light) { const q = proj(light[0], light[1], light[2] * lift), R = 26 * dpr;
+        ctx.globalCompositeOperation = "lighter";
+        const g1 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
+        g1.addColorStop(0, "rgba(255,255,255,1)"); g1.addColorStop(0.25, "rgba(255,250,220,0.7)"); g1.addColorStop(1, "rgba(255,240,200,0)");
+        ctx.fillStyle = g1; ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 2 * Math.PI); ctx.fill(); }
+      requestAnimationFrame(frame); return;
+    }
+
+    gl.disable(gl.BLEND);
+    gl.useProgram(Q); gl.bindBuffer(gl.ARRAY_BUFFER, Q.buf);
+    let loc = gl.getAttribLocation(Q, "aP"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(gl.getUniformLocation(Q, "uRes"), w, h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disableVertexAttribArray(loc);
+
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);   // additive glow
+    gl.useProgram(RB);
+    gl.uniformMatrix4fv(gl.getUniformLocation(RB, "uM"), false, new Float32Array(M));
+    gl.uniform2f(gl.getUniformLocation(RB, "uRes"), w, h);
+    gl.uniform1f(gl.getUniformLocation(RB, "uLift"), lift); gl.uniform1f(gl.getUniformLocation(RB, "uDpr"), dpr);
+    const bindRB = buf => { gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      [["aA", 3, 0], ["aB", 3, 3], ["aCol", 3, 6], ["aAl", 1, 9], ["aSide", 1, 10], ["aEnd", 1, 11], ["aW", 1, 12]].forEach(([nm, sz, off]) => {
+        const l = gl.getAttribLocation(RB, nm); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, sz, gl.FLOAT, false, FL * 4, off * 4); }); };
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+    bindRB(segBuf); gl.drawElements(gl.TRIANGLES, segN * 6, gl.UNSIGNED_SHORT, 0);
+    const dyn = []; trail.forEach(([a, b]) => { ribbon(dyn, [a, b, WHITE, 0.30, 5]); ribbon(dyn, [a, b, WHITE, 0.85, 1.4]); });
+    if (dyn.length) { gl.bindBuffer(gl.ARRAY_BUFFER, dynBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(dyn), gl.STREAM_DRAW);
+      bindRB(dynBuf); gl.drawElements(gl.TRIANGLES, done * 2 * 6, gl.UNSIGNED_SHORT, 0); }
+    [["aA"], ["aB"], ["aCol"], ["aAl"], ["aSide"], ["aEnd"], ["aW"]].forEach(([nm]) => gl.disableVertexAttribArray(gl.getAttribLocation(RB, nm)));
+
+    gl.useProgram(PT);
+    gl.uniformMatrix4fv(gl.getUniformLocation(PT, "uM"), false, new Float32Array(M));
+    gl.uniform1f(gl.getUniformLocation(PT, "uLift"), lift); gl.uniform1f(gl.getUniformLocation(PT, "uDpr"), dpr);
+    const uGlow = gl.getUniformLocation(PT, "uGlow");
+    const aP = gl.getAttribLocation(PT, "aP"), aC = gl.getAttribLocation(PT, "aCol"), aS = gl.getAttribLocation(PT, "aS");
+    const drawPts = (data, glow) => { gl.bindBuffer(gl.ARRAY_BUFFER, ptBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STREAM_DRAW);
+      gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 3, gl.FLOAT, false, 28, 0);
+      gl.enableVertexAttribArray(aC); gl.vertexAttribPointer(aC, 3, gl.FLOAT, false, 28, 12);
+      gl.enableVertexAttribArray(aS); gl.vertexAttribPointer(aS, 1, gl.FLOAT, false, 28, 24);
+      gl.uniform1f(uGlow, glow); gl.drawArrays(gl.POINTS, 0, data.length / 7); };
+    const hubSize = 19 * Math.min(w, h) / (1000 * dpr) * 1.25;
+    const hd = []; HUBS.forEach(([pp, col, x]) => hd.push(pp[0], pp[1], pp[2], x === 0 ? DIM[0] * 0.25 : col[0], x === 0 ? DIM[1] * 0.25 : col[1], x === 0 ? DIM[2] * 0.25 : col[2], hubSize));
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); drawPts(hd, 0);
+    if (light) { gl.blendFunc(gl.ONE, gl.ONE); drawPts([light[0], light[1], light[2], 1, 0.97, 0.85, 52], 1); }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Two-Scalar Sky</title>
+<style>
+  :root { --bg: #2a0330; --ink: #ffe6ff; --dim: #f3c2f0; --accent: #ffd27a; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 780px; line-height: 1.4; }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 64px; font-size: 15px; color: var(--accent); pointer-events: none; }
+  #bar { position: fixed; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: #4a0a52; color: var(--ink); border: 1px solid #8a3a8e; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #8a2a8e; border-color: var(--accent); }
+  .lab { position: fixed; font: 10.5px Georgia, serif; color: #ffd6ff; pointer-events: none;
+    transform: translate(-50%, -50%); text-shadow: 0 0 3px #0a0110; display: none; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated 3D relief of the primes p = 1 mod 4 up to 3000 on a sunflower spiral, height log(1 + N(p)), with nine dark pits"></canvas>
+<div id="hud">
+  <h1>The two-scalar sky</h1>
+  <p>Every prime p = 1 mod 4 up to 3000 sits on a sunflower spiral (the k-th at angle k times the golden angle, radius
+  proportional to sqrt k). Its height and glow are log(1 + N(p)), where N(p) counts the ordered two-scalar pages
+  (lambda, mu): nonsquares in one odd coset of the odd-order subgroup H with chi((lambda-1)(mu-1)) = -1,
+  (1+mu)/(1+lambda) in H, and (lambda mu)^(M/2) generating H. Nine primes have no page and sink as pits.
+  Drag to orbit, scroll to zoom. The page recomputes every N(p) and checks the empty set before it draws.</p>
+</div>
+<div id="labels"></div>
+<div id="state"></div>
+<div id="bar">
+  <button id="bRelief" aria-pressed="true">Relief</button>
+  <button id="bSpin" aria-pressed="true">Spin</button>
+  <button id="bGrow" aria-pressed="false">Grow p from 5</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const SKY = (function () {
+  const LIMIT = 3000;
+  const EXPECTED_EMPTY = [5, 13, 17, 97, 193, 257, 577, 641, 769];
+  const KNOWN = { 41: 4, 73: 20, 89: 16, 113: 12, 29: 12, 197: 532 };   // spot values from the probe's own output
+  const fail = [];
+  const isPrime = n => { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+  function primeFactors(n) {
+    const fs = []; let d = 2;
+    while (d * d <= n) { if (n % d === 0) { fs.push(d); while (n % d === 0) n /= d; } d++; }
+    if (n > 1) fs.push(n);
+    return fs;
+  }
+  function powmod(b, e, m) {   // all values < 3000, so products stay far below 2^53
+    let r = 1; b %= m;
+    while (e > 0) { if (e & 1) r = r * b % m; b = b * b % m; e >>= 1; }
+    return r;
+  }
+  function primRoot(p) {
+    const fs = primeFactors(p - 1);
+    for (let g = 2; g < p; g++) if (fs.every(f => powmod(g, (p - 1) / f, p) !== 1)) return g;
+    return -1;
+  }
+  // exact count of ordered pairs (lambda, mu) satisfying (i), (ii), (iii); a line-by-line port of
+  // two_scalar_count in 46_two_scalar_sky.py
+  function twoScalarCount(p) {
+    const g = primRoot(p);
+    let q = p - 1, M = 1;
+    while (q % 2 === 0) { q /= 2; M *= 2; }
+    const t = q;
+    const log = new Int32Array(p);
+    for (let i = 0, x = 1; i < p - 1; i++, x = x * g % p) log[x] = i;
+    const H = [];
+    for (let i = 0; i < t; i++) H.push(powmod(g, M * i, p));
+    if (new Set(H).size !== t || !H.every(h => powmod(h, t, p) === 1)) fail.push("H wrong at p = " + p);
+    const tf = primeFactors(t);
+    let count = 0;
+    for (let lam = 2; lam < p - 1; lam++) {
+      if (log[lam] % 2 === 0) continue;                 // lambda must be a nonsquare
+      const s = log[lam] % M;                           // its coset index, odd
+      for (const h of H) {
+        const mu = ((1 + lam) * h - 1) % p;             // (ii) by construction
+        if (mu === 0 || log[mu] % M !== s) continue;    // mu in the same coset lambda H
+        if (log[(lam - 1) * (mu - 1) % p] % 2 === 0) continue;   // (i) chi((lambda-1)(mu-1)) = -1
+        const rho = powmod(lam * mu % p, M / 2, p);
+        if (log[rho] % M !== 0) fail.push("rho outside H at p = " + p);
+        if (tf.some(f => powmod(rho, t / f, p) === 1)) continue;  // (iii) rho has order exactly t
+        count++;
+      }
+    }
+    return { N: count, M, t };
+  }
+  const data = [];
+  for (let p = 5; p <= LIMIT; p++) if (p % 4 === 1 && isPrime(p)) {
+    const r = twoScalarCount(p);
+    data.push({ p, N: r.N, M: r.M, t: r.t });
+  }
+  const empty = data.filter(d => d.N === 0).map(d => d.p);
+  if (empty.join(",") !== EXPECTED_EMPTY.join(","))
+    fail.push("empty set is {" + empty.join(", ") + "}, expected {" + EXPECTED_EMPTY.join(", ") + "}");
+  data.forEach(d => {
+    if (d.t === 1 && d.N !== 0) fail.push("Fermat prime " + d.p + " carries a page");
+    if (d.N % 2 !== 0) fail.push("odd count at p = " + d.p + " (pairs come in swapped twins)");
+  });
+  const byP = {}; data.forEach(d => { byP[d.p] = d.N; });
+  Object.keys(KNOWN).forEach(p => { if (byP[p] !== KNOWN[p]) fail.push("N(" + p + ") = " + byP[p] + ", probe says " + KNOWN[p]); });
+  if (data.length !== 211) fail.push("expected 211 primes p = 1 mod 4 up to 3000, got " + data.length);
+  let nmax = 0, pmax = 0;
+  data.forEach(d => { if (d.N > nmax) { nmax = d.N; pmax = d.p; } });
+  return { LIMIT, data, empty, nmax, pmax, byP, twoScalarCount, fail };
+})();
+if (typeof module !== "undefined") module.exports = SKY;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const S = SKY, err = document.getElementById("err");
+  if (S.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + S.fail.join("; "); return; }
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl", { antialias: true, alpha: false });
+  const ctx = gl ? null : canvas.getContext("2d");   // fallback: same projection, drawn with the 2D canvas
+  if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+
+  const n = S.data.length, GOLDEN = Math.PI * (3 - Math.sqrt(5)), lmax = Math.log1p(S.nmax);
+  const HMAX = 0.5, PIT = -0.2;
+  const STARS = S.data.map((d, i) => {
+    const k = i + 1, r = Math.sqrt(k / n), a = k * GOLDEN;
+    const b = d.N ? Math.log1p(d.N) / lmax : 0;
+    return { p: d.p, N: d.N, b, hole: d.N === 0, x: r * Math.cos(a), y: -r * Math.sin(a), z: d.N ? HMAX * b : PIT };
+  });
+
+  // the relief: a grid whose height is the max of a bump under each revealed star, minus a pit under each hole
+  const GN = 60, EXT = 1.12, SIG2 = 0.007;
+  const gx = [], gy = [], hPos = new Float32Array((GN + 1) * (GN + 1)), hNeg = new Float32Array((GN + 1) * (GN + 1));
+  for (let j = 0; j <= GN; j++) for (let i = 0; i <= GN; i++) { gx.push(-EXT + 2 * EXT * i / GN); gy.push(-EXT + 2 * EXT * j / GN); }
+  const inside = v => gx[v] * gx[v] + gy[v] * gy[v] <= 1.1 * 1.1;
+  function addStar(s) {
+    for (let v = 0; v < gx.length; v++) {
+      const dx = gx[v] - s.x, dy = gy[v] - s.y, w = Math.exp(-(dx * dx + dy * dy) / SIG2);
+      if (w < 1e-3) continue;
+      if (s.hole) hNeg[v] = Math.min(hNeg[v], PIT * 1.2 * w); else hPos[v] = Math.max(hPos[v], s.z * w);
+    }
+  }
+  const GRID = [];   // segments [v1, v2]
+  for (let j = 0; j <= GN; j++) for (let i = 0; i <= GN; i++) {
+    const v = j * (GN + 1) + i;
+    if (i < GN && inside(v) && inside(v + 1)) GRID.push([v, v + 1]);
+    if (j < GN && inside(v) && inside(v + GN + 1)) GRID.push([v, v + GN + 1]);
+  }
+  const gh = v => hPos[v] + hNeg[v];
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let revealed = 0, revealAt = new Float32Array(n), growing = false, growT = 0, simT = 0;
+  function revealUpTo(k) { while (revealed < k) { addStar(STARS[revealed]); revealAt[revealed] = simT; revealed++; } }
+  function resetGrow() { revealed = 0; hPos.fill(0); hNeg.fill(0); growT = 0; }
+  revealUpTo(n);
+  for (let i = 0; i < n; i++) revealAt[i] = -100;
+
+  // hole labels as DOM spans (identical in both renderers)
+  const labs = STARS.map(s => {
+    if (!s.hole) return null;
+    const el = document.createElement("span"); el.className = "lab"; el.textContent = s.p;
+    document.getElementById("labels").appendChild(el); return el;
+  });
+
+  // ---- WebGL setup: background quad, lines (grid, stems, spiral), point sprites (stars, holes)
+  let P, Q, lineBuf, lineCount = 0, starBuf;
+  if (gl) {
+    function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+    function prog(vs, fs) { const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); return pr; }
+    Q = prog(`attribute vec2 aP; varying vec2 vP; void main() { vP = aP; gl_Position = vec4(aP, 0.0, 1.0); }`,
+      `precision mediump float; varying vec2 vP; uniform vec2 uRes;
+       void main() { vec2 q = vP * vec2(uRes.x / uRes.y, 1.0); float r = length(q - vec2(0.0, 0.03)) / 1.36;
+         vec3 c0 = vec3(0.753,0.157,0.478), c1 = vec3(0.604,0.078,0.502), c2 = vec3(0.478,0.039,0.478), c3 = vec3(0.165,0.012,0.188);
+         vec3 c = r < 0.22 ? mix(c0, c1, r / 0.22) : r < 0.6 ? mix(c1, c2, (r - 0.22) / 0.38) : mix(c2, c3, clamp((r - 0.6) / 0.4, 0.0, 1.0));
+         gl_FragColor = vec4(c, 1.0); }`);
+    Q.buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, Q.buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    P = prog(`attribute vec3 aP; attribute vec4 aC; attribute float aS;
+       uniform mat4 uM; uniform float uLift, uScale; varying vec4 vC;
+       void main() { vec4 c = uM * vec4(aP.xy, aP.z * uLift, 1.0); gl_Position = c; vC = aC; gl_PointSize = aS * uScale / c.w; }`,
+      `precision mediump float; varying vec4 vC; uniform float uMode;
+       void main() {
+         if (uMode < 0.5) { gl_FragColor = vec4(vC.rgb * vC.a, 1.0); return; }   // additive lines
+         float r = length(gl_PointCoord - 0.5) * 2.0; if (r > 1.0) discard;
+         if (uMode < 1.5) {   // a star: white core, pink, magenta, fading (the SVG's glow gradient)
+           vec3 c = r < 0.18 ? mix(vec3(1.0), vec3(1.0,0.816,1.0), r / 0.18) : r < 0.45 ? mix(vec3(1.0,0.816,1.0)*0.9, vec3(1.0,0.25,1.0)*0.45, (r - 0.18) / 0.27) : vec3(1.0,0.25,1.0) * 0.45 * (1.0 - (r - 0.45) / 0.55);
+           gl_FragColor = vec4(c * vC.a, 1.0); return; }
+         float ring = smoothstep(0.80, 0.86, r) * (1.0 - smoothstep(0.92, 0.99, r));   // a hole: dark disc, thin rim
+         vec3 d = mix(vec3(0.039,0.004,0.063), vec3(0.227,0.024,0.275), smoothstep(0.0, 0.8, r));
+         gl_FragColor = vec4(mix(d, vec3(1.0,0.84,1.0), ring), r < 0.84 ? 1.0 : ring * 0.9); }`);
+    lineBuf = gl.createBuffer(); starBuf = gl.createBuffer();
+  }
+
+  // line geometry: [x, y, z, r, g, b, a, size] per vertex
+  function buildLines(out) {
+    let o = 0;
+    const push = (x, y, z, r, g, b, a) => { out[o++] = x; out[o++] = y; out[o++] = z; out[o++] = r; out[o++] = g; out[o++] = b; out[o++] = a; out[o++] = 1; };
+    for (const [u, v] of GRID) {
+      const hu = gh(u), hv = gh(v), hm = 0.5 * (hu + hv);
+      const a = 0.10 + 0.55 * Math.max(0, hm) / HMAX, c = hm < -0.01 ? [0.35, 0.08, 0.45] : [1.0, 0.62, 0.95];
+      push(gx[u], gy[u], hu, c[0], c[1], c[2], a); push(gx[v], gy[v], hv, c[0], c[1], c[2], a);
+    }
+    for (let i = 0; i < revealed; i++) {   // a faint stem under each star, and the spiral order on the floor
+      const s = STARS[i];
+      if (!s.hole) { push(s.x, s.y, 0, 1, 0.75, 1, 0.12); push(s.x, s.y, s.z, 1, 0.75, 1, 0.35); }
+      if (i > 0) { const q = STARS[i - 1]; push(q.x, q.y, 0, 1, 0.62, 0.95, 0.10); push(s.x, s.y, 0, 1, 0.62, 0.95, 0.10); }
+    }
+    return o / 8;
+  }
+  const LINE_DATA = new Float32Array((GRID.length * 2 + n * 4) * 8);
+  let dirty = true;
+
+  // tiny matrix helpers (column-major)
+  const mul = (a, b) => { const o = new Array(16).fill(0);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) o[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return o; };
+  const persp = (fov, asp, nr, fr) => { const t = 1 / Math.tan(fov / 2);
+    return [t / asp,0,0,0, 0,t,0,0, 0,0,(fr + nr) / (nr - fr),-1, 0,0,2 * fr * nr / (nr - fr),0]; };
+  const rotX = t => [1,0,0,0, 0,Math.cos(t),Math.sin(t),0, 0,-Math.sin(t),Math.cos(t),0, 0,0,0,1];
+  const rotZ = t => [Math.cos(t),Math.sin(t),0,0, -Math.sin(t),Math.cos(t),0,0, 0,0,1,0, 0,0,0,1];
+  const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
+
+  let yaw = 0, pitch = -0.95, dist = 3.6, spin = !reduced, liftTarget = 1, lift = reduced ? 1 : 0;
+  const stateEl = document.getElementById("state");
+  function toggle(id, on) { document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false"); }
+  document.getElementById("bRelief").onclick = () => { liftTarget = liftTarget ? 0 : 1; toggle("bRelief", liftTarget); };
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  document.getElementById("bGrow").onclick = () => {
+    growing = !growing; toggle("bGrow", growing);
+    if (growing) resetGrow(); else revealUpTo(n);
+    dirty = true;
+  };
+  toggle("bSpin", spin);
+
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!drag) return;
+    yaw += (e.clientX - drag[0]) * 0.008; pitch = Math.max(-1.55, Math.min(0, pitch + (e.clientY - drag[1]) * 0.008));
+    drag = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(1.8, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+  const GROW_RATE = reduced ? 1e9 : 9;   // primes per second in grow mode
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;   // a rAF stamp can precede the start time simT += dt;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (gl) gl.viewport(0, 0, w, h);
+    if (spin && !drag) yaw += dt * 0.12;
+    lift += (liftTarget - lift) * Math.min(1, dt * 1.6);
+    if (growing) {
+      growT += dt;
+      const k = Math.max(1, Math.min(n, Math.floor(growT * GROW_RATE) + 1));
+      if (k > revealed) { revealUpTo(k); dirty = true; }
+      if (revealed === n && growT > n / GROW_RATE + 4) { resetGrow(); dirty = true; }
+      const cur = STARS[revealed - 1], holes = STARS.slice(0, revealed).filter(s => s.hole).map(s => s.p);
+      stateEl.textContent = "p = " + cur.p + ", N(p) = " + cur.N + (cur.hole ? "  (a hole)" : "") + "   |   " + revealed + " of " + n +
+        " primes   |   holes so far: " + (holes.length ? holes.join(", ") : "none");
+    } else stateEl.textContent = "brightest: N(" + S.pmax + ") = " + S.nmax + "   |   holes: " + S.empty.join(", ");
+
+    const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, 0.05, -dist), mul(rotX(pitch), rotZ(yaw))));
+    const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
+      Wc = M[3]*x + M[7]*y + M[11]*z + M[15]; return [(X / Wc * 0.5 + 0.5) * w, (0.5 - Y / Wc * 0.5) * h, Wc]; };
+    const scale = dpr * Math.min(w, h) / 1000 * 2.8;   // sprite size factor (divided by clip w)
+    // star sprites in back-to-front order: [x, y, z, r, g, b, a, size]
+    const order = [];
+    for (let i = 0; i < revealed; i++) order.push([i, proj(STARS[i].x, STARS[i].y, STARS[i].z * lift)[2]]);
+    order.sort((a, b) => b[1] - a[1]);
+    const flash = i => Math.max(0, 1 - (simT - revealAt[i]) / 0.8);
+
+    STARS.forEach((s, i) => { const el = labs[i]; if (!el) return;
+      if (i >= revealed) { el.style.display = "none"; return; }
+      const q = proj(s.x, s.y, s.z * lift); el.style.display = "block";
+      el.style.left = (q[0] / dpr) + "px"; el.style.top = (q[1] / dpr) + "px"; });
+
+    if (!gl) {
+      const g0 = ctx.createRadialGradient(w / 2, h * 0.49, 0, w / 2, h * 0.49, 0.68 * Math.hypot(w, h) / 1.414);
+      g0.addColorStop(0, "#c0287a"); g0.addColorStop(0.22, "#9a1480"); g0.addColorStop(0.6, "#7a0a7a"); g0.addColorStop(1, "#2a0330");
+      ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = g0; ctx.fillRect(0, 0, w, h);
+      if (dirty) { lineCount = buildLines(LINE_DATA); dirty = false; }
+      ctx.globalCompositeOperation = "lighter"; ctx.lineWidth = dpr;
+      const buckets = [[], [], [], [], []];
+      for (let v = 0; v < lineCount; v += 2) {
+        const o = v * 8, a = LINE_DATA[o + 6];
+        buckets[Math.min(4, Math.floor(a * 7))].push(v);
+      }
+      buckets.forEach((bk, bi) => {
+        if (!bk.length) return;
+        ctx.strokeStyle = "rgba(255,160,240," + (0.08 + bi * 0.12).toFixed(2) + ")"; ctx.beginPath();
+        for (const v of bk) { const o = v * 8;
+          const pa = proj(LINE_DATA[o], LINE_DATA[o + 1], LINE_DATA[o + 2] * lift), pb = proj(LINE_DATA[o + 8], LINE_DATA[o + 9], LINE_DATA[o + 10] * lift);
+          ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); }
+        ctx.stroke();
+      });
+      for (const [i] of order) {
+        const s = STARS[i], q = proj(s.x, s.y, s.z * lift);
+        if (s.hole) {
+          const R = 13 * scale / q[2];
+          ctx.globalCompositeOperation = "source-over";
+          const gh2 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
+          gh2.addColorStop(0, "#0a0110"); gh2.addColorStop(0.7, "#1a0322"); gh2.addColorStop(1, "#3a0646");
+          ctx.fillStyle = gh2; ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 2 * Math.PI); ctx.fill();
+          ctx.strokeStyle = "rgba(255,214,255,0.9)"; ctx.lineWidth = dpr; ctx.beginPath(); ctx.arc(q[0], q[1], R * 1.19, 0, 2 * Math.PI); ctx.stroke();
+          continue;
+        }
+        const R = (10 + 26 * s.b) * (1 + 1.5 * flash(i)) * scale / q[2], op = 0.6 * (0.25 + 0.75 * s.b);
+        ctx.globalCompositeOperation = "lighter";
+        const g1 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
+        g1.addColorStop(0, "rgba(255,255,255," + op + ")"); g1.addColorStop(0.18, "rgba(255,208,255," + (0.9 * op) + ")");
+        g1.addColorStop(0.45, "rgba(255,64,255," + (0.45 * op) + ")"); g1.addColorStop(1, "rgba(255,64,255,0)");
+        ctx.fillStyle = g1; ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 2 * Math.PI); ctx.fill();
+      }
+      requestAnimationFrame(frame); return;
+    }
+
+    gl.disable(gl.BLEND);
+    gl.useProgram(Q); gl.bindBuffer(gl.ARRAY_BUFFER, Q.buf);
+    let loc = gl.getAttribLocation(Q, "aP"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(gl.getUniformLocation(Q, "uRes"), w, h);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disableVertexAttribArray(loc);
+
+    gl.useProgram(P);
+    gl.uniformMatrix4fv(gl.getUniformLocation(P, "uM"), false, new Float32Array(M));
+    gl.uniform1f(gl.getUniformLocation(P, "uLift"), lift); gl.uniform1f(gl.getUniformLocation(P, "uScale"), scale);
+    const uMode = gl.getUniformLocation(P, "uMode");
+    const aP = gl.getAttribLocation(P, "aP"), aC = gl.getAttribLocation(P, "aC"), aS = gl.getAttribLocation(P, "aS");
+    const bindV = buf => { gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 3, gl.FLOAT, false, 32, 0);
+      gl.enableVertexAttribArray(aC); gl.vertexAttribPointer(aC, 4, gl.FLOAT, false, 32, 12);
+      gl.enableVertexAttribArray(aS); gl.vertexAttribPointer(aS, 1, gl.FLOAT, false, 32, 28); };
+    if (dirty) { lineCount = buildLines(LINE_DATA); gl.bindBuffer(gl.ARRAY_BUFFER, lineBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, LINE_DATA.subarray(0, lineCount * 8), gl.DYNAMIC_DRAW); dirty = false; }
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);   // additive glow
+    bindV(lineBuf); gl.uniform1f(uMode, 0); gl.drawArrays(gl.LINES, 0, lineCount);
+    const sd = [], hd = [];
+    for (const [i] of order) { const s = STARS[i];
+      if (s.hole) hd.push(s.x, s.y, s.z, 0, 0, 0, 1, 31);
+      else sd.push(s.x, s.y, s.z, 1, 1, 1, 0.6 * (0.25 + 0.75 * s.b), (10 + 26 * s.b) * 2 * (1 + 1.5 * flash(i))); }
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sd), gl.STREAM_DRAW);
+    bindV(starBuf); gl.uniform1f(uMode, 1); gl.drawArrays(gl.POINTS, 0, sd.length / 8);
+    if (hd.length) {   // holes on top, ordinary alpha blending so they read dark
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(hd), gl.STREAM_DRAW);
+      bindV(starBuf); gl.uniform1f(uMode, 2); gl.drawArrays(gl.POINTS, 0, hd.length / 8);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
