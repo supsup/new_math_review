@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rainbow Walecki 27</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #ffd36e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 760px; line-height: 1.4; }
+  #state { position: fixed; left: 16px; bottom: 64px; font-size: 15px; color: var(--accent); pointer-events: none; }
+  #bar { position: fixed; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid #39406e; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #39406e; border-color: var(--accent); }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated 3D view of K_27 split into 13 rainbow Walecki Hamilton cycles"></canvas>
+<div id="hud">
+  <h1>Rainbow Walecki, m = 27</h1>
+  <p>K_27 is a hub (inf, at the centre) and 26 vertices on a circle. Walecki's 13 zigzag Hamilton cycles split its
+  351 edges; the affine Anderson and Leonard colouring gives the edges 27 colours, each colour a near-perfect matching,
+  and every cycle shows all 27 colours exactly once. Unfold lifts each cycle to its own level. Drag to orbit, scroll to zoom.
+  The page recomputes the colouring and checks every one of these facts before it draws.</p>
+</div>
+<div id="state"></div>
+<div id="bar">
+  <button id="bUnfold" aria-pressed="true">Unfold</button>
+  <button id="bSpin" aria-pressed="true">Spin</button>
+  <button id="bRows" aria-pressed="false">Spotlight cycles</button>
+  <button id="bCols" aria-pressed="false">Spotlight colours</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const WALECKI = (function () {
+  const p = 13, G = 2 * p, INF = G, m = 2 * p + 1;
+  // affine Anderson-Leonard starter for y = 2, u = 11 (values from 48_rainbow_walecki_27.py)
+  const f = [0, 9, 17, 22, 14, 21, 4, 6, 13, 3, 2, 12, 23];
+  const mod = (a, n) => ((a % n) + n) % n;
+  function color(a, b) {
+    if (a === INF || b === INF) return a === INF ? b : a;
+    let d = mod(b - a, G);
+    if (d === p) return G;
+    if (d > p) { const t = a; a = b; b = t; d = G - d; }
+    return mod(a + f[d], G);
+  }
+  const rows = [];
+  for (let i = 0; i < p; i++) {
+    const H = [INF, mod(i, G)];
+    for (let j = 1; j < p; j++) H.push(mod(i - j, G), mod(i + j, G));
+    H.push(mod(i - p, G));
+    rows.push(H);
+  }
+  // checks: every row Hamiltonian and rainbow; rows partition the 351 edges; colour classes near-perfect matchings
+  const fail = [];
+  const key = (a, b) => (a < b ? a * 64 + b : b * 64 + a);
+  const seen = new Set();
+  rows.forEach((H, i) => {
+    if (new Set(H).size !== m) fail.push("row " + i + " not Hamiltonian");
+    const cols = new Set();
+    for (let k = 0; k < m; k++) {
+      const a = H[k], b = H[(k + 1) % m];
+      cols.add(color(a, b)); seen.add(key(a, b));
+    }
+    if (cols.size !== m) fail.push("row " + i + " not rainbow");
+  });
+  if (seen.size !== m * (m - 1) / 2) fail.push("rows do not partition the 351 edges");
+  const missed = new Set();
+  for (let c = 0; c < m; c++) {
+    const ends = [];
+    for (let a = 0; a < m; a++) for (let b = a + 1; b < m; b++) if (color(a, b) === c) ends.push(a, b);
+    if (ends.length !== m - 1 || new Set(ends).size !== m - 1) fail.push("colour " + c + " not a near-perfect matching");
+    for (let v = 0; v < m; v++) if (!ends.includes(v)) missed.add(v);
+  }
+  if (missed.size !== m) fail.push("missed vertices not distinct");
+  return { p, G, INF, m, rows, color, fail };
+})();
+if (typeof module !== "undefined") module.exports = WALECKI;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const W = WALECKI, err = document.getElementById("err");
+  if (W.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + W.fail.join("; "); return; }
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl", { antialias: true, premultipliedAlpha: false });
+  const ctx = gl ? null : canvas.getContext("2d");   // fallback: same projection, drawn with the 2D canvas
+  if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+
+  // 27 colours, the same hues as the SVG (hsl(c/27, 0.82, 0.58 or 0.70))
+  const COL = [[0.9244,0.2356,0.2356],[0.946,0.5633,0.454],[0.9244,0.5417,0.2356],[0.946,0.782,0.454],[0.9244,0.8479,0.2356],[0.8913,0.946,0.454],[0.6948,0.9244,0.2356],[0.6727,0.946,0.454],[0.3887,0.9244,0.2356],[0.454,0.946,0.454],[0.2356,0.9244,0.3887],[0.454,0.946,0.6727],[0.2356,0.9244,0.6948],[0.454,0.946,0.8913],[0.2356,0.8479,0.9244],[0.454,0.782,0.946],[0.2356,0.5417,0.9244],[0.454,0.5633,0.946],[0.2356,0.2356,0.9244],[0.5633,0.454,0.946],[0.5417,0.2356,0.9244],[0.782,0.454,0.946],[0.8479,0.2356,0.9244],[0.946,0.454,0.8913],[0.9244,0.2356,0.6948],[0.946,0.454,0.6727],[0.9244,0.2356,0.3887]];
+  const pos = v => v === W.INF ? [0, 0] : [Math.sin(2 * Math.PI * v / W.G), Math.cos(2 * Math.PI * v / W.G)];
+  const LAYER = 0.16;   // vertical gap between cycles when unfolded
+
+  // one screen-space ribbon (4 vertices, 2 triangles) per edge
+  const A = [], B = [], side = [], end = [], col = [], row = [], cls = [], wid = [], idx = [];
+  let n = 0;
+  W.rows.forEach((H, i) => {
+    const z = (i - (W.p - 1) / 2) * LAYER;
+    for (let k = 0; k < W.m; k++) {
+      const a = H[k], b = H[(k + 1) % W.m], c = W.color(a, b);
+      const pa = pos(a), pb = pos(b);
+      const perim = a !== W.INF && b !== W.INF && (Math.abs(a - b) === 1 || Math.abs(a - b) === W.G - 1);
+      for (let q = 0; q < 4; q++) {
+        A.push(pa[0], pa[1], z); B.push(pb[0], pb[1], z);
+        side.push(q < 2 ? -1 : 1); end.push(q % 2);
+        col.push(...COL[c]); row.push(i); cls.push(c); wid.push(perim ? 4.2 : 2.0);
+      }
+      idx.push(n, n + 1, n + 2, n + 1, n + 3, n + 2); n += 4;
+    }
+  });
+
+  // edge list for the 2D fallback: [ax, ay, az, bx, by, bz, colour, row, width]
+  const EDGES = [];
+  for (let e = 0; e < idx.length / 6; e++) {
+    const o = e * 4;
+    EDGES.push([A[3*o], A[3*o+1], A[3*o+2], B[3*o], B[3*o+1], B[3*o+2], cls[o], row[o], wid[o]]);
+  }
+  let uM, uRes, uUnfold, uDpr, uRow, uCls;
+  if (gl) {
+  const vs = `
+    attribute vec3 aA, aB, aCol; attribute float aSide, aEnd, aRow, aCls, aW;
+    uniform mat4 uM; uniform vec2 uRes; uniform float uUnfold, uDpr, uRow, uCls;
+    varying vec3 vCol; varying float vA;
+    void main() {
+      vec3 a = vec3(aA.xy, aA.z * uUnfold), b = vec3(aB.xy, aB.z * uUnfold);
+      vec4 ca = uM * vec4(a, 1.0), cb = uM * vec4(b, 1.0);
+      vec2 sa = ca.xy / ca.w * uRes * 0.5, sb = cb.xy / cb.w * uRes * 0.5;
+      vec2 d = sb - sa; float L = length(d); d = L > 1e-6 ? d / L : vec2(1.0, 0.0);
+      vec2 nrm = vec2(-d.y, d.x);
+      vec4 c = mix(ca, cb, aEnd);
+      c.xy += nrm * aSide * aW * uDpr * 0.5 / (uRes * 0.5) * c.w;
+      gl_Position = c;
+      bool on = (uRow < 0.0 || abs(aRow - uRow) < 0.5) && (uCls < 0.0 || abs(aCls - uCls) < 0.5);
+      vCol = aCol; vA = on ? 0.62 : 0.06;
+    }`;
+  const fs = `precision mediump float; varying vec3 vCol; varying float vA;
+    void main() { gl_FragColor = vec4(vCol * vA, vA); }`;
+  function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  function attr(name, data, size) {
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, name); gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+  }
+  attr("aA", A, 3); attr("aB", B, 3); attr("aCol", col, 3); attr("aSide", side, 1); attr("aEnd", end, 1);
+  attr("aRow", row, 1); attr("aCls", cls, 1); attr("aW", wid, 1);
+  const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+  const U = name => gl.getUniformLocation(prog, name);
+  uM = U("uM"); uRes = U("uRes"); uUnfold = U("uUnfold"); uDpr = U("uDpr"); uRow = U("uRow"); uCls = U("uCls");
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);   // additive glow on the dark background
+  gl.clearColor(0.051, 0.063, 0.125, 1);
+  }
+
+  // tiny matrix helpers (column-major)
+  const mul = (a, b) => { const o = new Array(16).fill(0);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) o[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return o; };
+  const persp = (fov, asp, nr, fr) => { const t = 1 / Math.tan(fov / 2);
+    return [t / asp,0,0,0, 0,t,0,0, 0,0,(fr + nr) / (nr - fr),-1, 0,0,2 * fr * nr / (nr - fr),0]; };
+  const rotX = t => [1,0,0,0, 0,Math.cos(t),Math.sin(t),0, 0,-Math.sin(t),Math.cos(t),0, 0,0,0,1];
+  const rotZ = t => [Math.cos(t),Math.sin(t),0,0, -Math.sin(t),Math.cos(t),0,0, 0,0,1,0, 0,0,0,1];
+  const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let yaw = 0, pitch = -1.05, dist = 4.2, spin = !reduced, unfoldTarget = 1, unfold = reduced ? 1 : 0;
+  let spotRows = false, spotCols = false, spotT = 0;
+  const stateEl = document.getElementById("state");
+  function toggle(id, on) { document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false"); }
+  document.getElementById("bUnfold").onclick = () => { unfoldTarget = unfoldTarget ? 0 : 1; toggle("bUnfold", unfoldTarget); };
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  document.getElementById("bRows").onclick = () => { spotRows = !spotRows; spotCols = false; spotT = 0; toggle("bRows", spotRows); toggle("bCols", false); };
+  document.getElementById("bCols").onclick = () => { spotCols = !spotCols; spotRows = false; spotT = 0; toggle("bCols", spotCols); toggle("bRows", false); };
+  toggle("bSpin", spin);
+
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!drag) return;
+    yaw += (e.clientX - drag[0]) * 0.008; pitch = Math.max(-1.55, Math.min(0, pitch + (e.clientY - drag[1]) * 0.008));
+    drag = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(2.2, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (gl) gl.viewport(0, 0, w, h);
+    if (spin && !drag) yaw += dt * 0.25;
+    unfold += (unfoldTarget - unfold) * Math.min(1, dt * 1.6);
+    let r = -1, c = -1;
+    if (spotRows || spotCols) {
+      spotT += dt;
+      const k = Math.floor(spotT / 1.6);
+      if (spotRows) { r = k % W.p; stateEl.textContent = "cycle " + r + " of 13: 27 edges, 27 different colours"; }
+      else { c = k % W.m; stateEl.textContent = "colour " + c + " of 27: one edge in every cycle, 13 edges meeting 26 of the 27 vertices"; }
+    } else stateEl.textContent = "";
+    const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, 0, -dist), mul(rotX(pitch), rotZ(yaw))));
+    if (!gl) {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "#0d1020"; ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+      const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
+        Wc = M[3]*x + M[7]*y + M[11]*z + M[15]; return [(X / Wc * 0.5 + 0.5) * w, (0.5 - Y / Wc * 0.5) * h]; };
+      for (const E of EDGES) {
+        const on = (r < 0 || E[7] === r) && (c < 0 || E[6] === c), a = on ? 0.62 : 0.06, rgb = COL[E[6]];
+        const pa = proj(E[0], E[1], E[2] * unfold), pb = proj(E[3], E[4], E[5] * unfold);
+        ctx.strokeStyle = "rgba(" + Math.round(rgb[0] * 255 * a) + "," + Math.round(rgb[1] * 255 * a) + "," + Math.round(rgb[2] * 255 * a) + ",1)";
+        ctx.lineWidth = E[8] * dpr; ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
+      }
+      requestAnimationFrame(frame); return;
+    }
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniformMatrix4fv(uM, false, new Float32Array(M));
+    gl.uniform2f(uRes, w, h); gl.uniform1f(uUnfold, unfold); gl.uniform1f(uDpr, dpr);
+    gl.uniform1f(uRow, r); gl.uniform1f(uCls, c);
+    gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
