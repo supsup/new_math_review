@@ -1,0 +1,346 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='880' height='520' viewBox='0 0 880 520'>
+<rect width='880' height='520' fill='#fbf8f2'/>
+<text x='24.0' y='30.0' font-family='Helvetica, Arial, sans-serif' font-size='17' fill='#1d1b18' text-anchor='start' font-weight='bold' >How few distances can n points have? The integer grid {1..m}<tspan font-size='9' dy='-6'>d</tspan><tspan dy='6'>, n = m</tspan><tspan font-size='9' dy='-6'>d</tspan></text>
+<text x='24.0' y='50.0' font-family='Helvetica, Arial, sans-serif' font-size='12' fill='#6f685d' text-anchor='start' font-weight='normal' >Exact counts D of distinct distances. The theorem says D is at least c<tspan font-size='9' dy='3'>d</tspan><tspan dy='-3'> n</tspan><tspan font-size='9' dy='-6'>2/d</tspan><tspan dy='6'> for d at least 3; the grid shows the exponent 2/d cannot be raised.</tspan></text>
+<line x1='78.0' y1='86' x2='78.0' y2='396' stroke='#e6e0d5'/>
+<text x='78.0' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>2</tspan></text>
+<line x1='153.4' y1='86' x2='153.4' y2='396' stroke='#e6e0d5'/>
+<text x='153.4' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>3</tspan></text>
+<line x1='228.7' y1='86' x2='228.7' y2='396' stroke='#e6e0d5'/>
+<text x='228.7' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>4</tspan></text>
+<line x1='304.1' y1='86' x2='304.1' y2='396' stroke='#e6e0d5'/>
+<text x='304.1' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>5</tspan></text>
+<line x1='379.4' y1='86' x2='379.4' y2='396' stroke='#e6e0d5'/>
+<text x='379.4' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>6</tspan></text>
+<line x1='454.8' y1='86' x2='454.8' y2='396' stroke='#e6e0d5'/>
+<text x='454.8' y='412.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='middle' font-weight='normal' >10<tspan font-size='9' dy='-5'>7</tspan></text>
+<line x1='78' y1='396.0' x2='500' y2='396.0' stroke='#e6e0d5'/>
+<text x='72.0' y='400.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >0.2</text>
+<line x1='78' y1='334.3' x2='500' y2='334.3' stroke='#e6e0d5'/>
+<text x='72.0' y='338.3' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >0.5</text>
+<line x1='78' y1='287.7' x2='500' y2='287.7' stroke='#e6e0d5'/>
+<text x='72.0' y='291.7' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >1</text>
+<line x1='78' y1='241.0' x2='500' y2='241.0' stroke='#e6e0d5'/>
+<text x='72.0' y='245.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >2</text>
+<line x1='78' y1='179.3' x2='500' y2='179.3' stroke='#e6e0d5'/>
+<text x='72.0' y='183.3' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >5</text>
+<line x1='78' y1='132.7' x2='500' y2='132.7' stroke='#e6e0d5'/>
+<text x='72.0' y='136.7' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >10</text>
+<line x1='78' y1='86.0' x2='500' y2='86.0' stroke='#e6e0d5'/>
+<text x='72.0' y='90.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='normal' >20</text>
+<rect x='78' y='86' width='422' height='310' fill='none' stroke='#b9b2a6'/>
+<text x='289.0' y='432.0' font-family='Helvetica, Arial, sans-serif' font-size='12' fill='#1d1b18' text-anchor='middle' font-weight='normal' >number of points n (log scale)</text>
+<text x='24.0' y='241.0' font-family='Helvetica, Arial, sans-serif' font-size='12' fill='#1d1b18' text-anchor='middle' font-weight='normal' transform='rotate(-90 24 241.0)'>D / n<tspan font-size='9' dy='-5'>2/d</tspan></text>
+<polyline points='78.0,334.3 116.5,340.9 154.1,346.1 190.8,351.0 228.7,355.3 266.5,359.3 304.0,362.8 341.7,366.0 379.4,368.9' fill='none' stroke='#6f685d' stroke-width='2'/>
+<circle cx='78.0' cy='334.3' r='3' fill='#6f685d'/>
+<circle cx='116.5' cy='340.9' r='3' fill='#6f685d'/>
+<circle cx='154.1' cy='346.1' r='3' fill='#6f685d'/>
+<circle cx='190.8' cy='351.0' r='3' fill='#6f685d'/>
+<circle cx='228.7' cy='355.3' r='3' fill='#6f685d'/>
+<circle cx='266.5' cy='359.3' r='3' fill='#6f685d'/>
+<circle cx='304.0' cy='362.8' r='3' fill='#6f685d'/>
+<circle cx='341.7' cy='366.0' r='3' fill='#6f685d'/>
+<circle cx='379.4' cy='368.9' r='3' fill='#6f685d'/>
+<polyline points='85.3,273.2 118.3,267.6 153.4,263.1 186.4,259.2 230.8,253.7 267.6,250.3 303.2,247.1 341.6,244.2 379.4,241.7 419.2,239.4 454.6,237.5 487.3,236.1' fill='none' stroke='#2f5d8a' stroke-width='2'/>
+<circle cx='85.3' cy='273.2' r='3' fill='#2f5d8a'/>
+<circle cx='118.3' cy='267.6' r='3' fill='#2f5d8a'/>
+<circle cx='153.4' cy='263.1' r='3' fill='#2f5d8a'/>
+<circle cx='186.4' cy='259.2' r='3' fill='#2f5d8a'/>
+<circle cx='230.8' cy='253.7' r='3' fill='#2f5d8a'/>
+<circle cx='267.6' cy='250.3' r='3' fill='#2f5d8a'/>
+<circle cx='303.2' cy='247.1' r='3' fill='#2f5d8a'/>
+<circle cx='341.6' cy='244.2' r='3' fill='#2f5d8a'/>
+<circle cx='379.4' cy='241.7' r='3' fill='#2f5d8a'/>
+<circle cx='419.2' cy='239.4' r='3' fill='#2f5d8a'/>
+<circle cx='454.6' cy='237.5' r='3' fill='#2f5d8a'/>
+<circle cx='487.3' cy='236.1' r='3' fill='#2f5d8a'/>
+<polyline points='108.8,250.0 138.0,242.4 161.8,240.1 199.5,231.2 228.7,227.1 263.1,221.7 305.7,217.9 343.3,214.9 381.0,211.7 434.1,208.3 471.7,206.2' fill='none' stroke='#b4471f' stroke-width='2'/>
+<circle cx='108.8' cy='250.0' r='3' fill='#b4471f'/>
+<circle cx='138.0' cy='242.4' r='3' fill='#b4471f'/>
+<circle cx='161.8' cy='240.1' r='3' fill='#b4471f'/>
+<circle cx='199.5' cy='231.2' r='3' fill='#b4471f'/>
+<circle cx='228.7' cy='227.1' r='3' fill='#b4471f'/>
+<circle cx='263.1' cy='221.7' r='3' fill='#b4471f'/>
+<circle cx='305.7' cy='217.9' r='3' fill='#b4471f'/>
+<circle cx='343.3' cy='214.9' r='3' fill='#b4471f'/>
+<circle cx='381.0' cy='211.7' r='3' fill='#b4471f'/>
+<circle cx='434.1' cy='208.3' r='3' fill='#b4471f'/>
+<circle cx='471.7' cy='206.2' r='3' fill='#b4471f'/>
+<polyline points='85.3,170.7 118.3,166.1 153.4,163.4 186.4,158.4 230.8,154.3' fill='none' stroke='#2f5d8a' stroke-width='1.2' stroke-dasharray='4 3'/>
+<circle cx='85.3' cy='170.7' r='3.5' fill='#fbf8f2' stroke='#2f5d8a' stroke-width='1.5'/>
+<circle cx='118.3' cy='166.1' r='3.5' fill='#fbf8f2' stroke='#2f5d8a' stroke-width='1.5'/>
+<circle cx='153.4' cy='163.4' r='3.5' fill='#fbf8f2' stroke='#2f5d8a' stroke-width='1.5'/>
+<circle cx='186.4' cy='158.4' r='3.5' fill='#fbf8f2' stroke='#2f5d8a' stroke-width='1.5'/>
+<circle cx='230.8' cy='154.3' r='3.5' fill='#fbf8f2' stroke='#2f5d8a' stroke-width='1.5'/>
+<polyline points='108.8,139.8 138.0,135.4 161.8,132.1 199.5,127.1 228.7,123.8' fill='none' stroke='#b4471f' stroke-width='1.2' stroke-dasharray='4 3'/>
+<circle cx='108.8' cy='139.8' r='3.5' fill='#fbf8f2' stroke='#b4471f' stroke-width='1.5'/>
+<circle cx='138.0' cy='135.4' r='3.5' fill='#fbf8f2' stroke='#b4471f' stroke-width='1.5'/>
+<circle cx='161.8' cy='132.1' r='3.5' fill='#fbf8f2' stroke='#b4471f' stroke-width='1.5'/>
+<circle cx='199.5' cy='127.1' r='3.5' fill='#fbf8f2' stroke='#b4471f' stroke-width='1.5'/>
+<circle cx='228.7' cy='123.8' r='3.5' fill='#fbf8f2' stroke='#b4471f' stroke-width='1.5'/>
+<text x='467.7' y='196.2' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#b4471f' text-anchor='end' font-weight='bold' >d = 4 grid: 3.35</text>
+<text x='483.3' y='254.1' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#2f5d8a' text-anchor='end' font-weight='bold' >d = 3 grid: 2.15</text>
+<text x='375.4' y='386.9' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='end' font-weight='bold' >d = 2 grid: D/n = 0.30, falling</text>
+<text x='236.7' y='127.8' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#b4471f' text-anchor='start' font-weight='normal' >d = 4, random</text>
+<text x='238.8' y='158.3' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#2f5d8a' text-anchor='start' font-weight='normal' >d = 3, random</text>
+<text x='86.0' y='102.0' font-family='Helvetica, Arial, sans-serif' font-size='10.5' fill='#6f685d' text-anchor='start' font-weight='normal' >hollow, dashed: n random points of the doubled box {1..2m}<tspan font-size='8' dy='-5'>d</tspan></text>
+<text x='86.0' y='116.0' font-family='Helvetica, Arial, sans-serif' font-size='10.5' fill='#6f685d' text-anchor='start' font-weight='normal' >generic points: every pair distinct, D = n(n-1)/2, far off this scale</text>
+<text x='560.0' y='96.0' font-family='Helvetica, Arial, sans-serif' font-size='13' fill='#1d1b18' text-anchor='start' font-weight='bold' >d = 3, grid {1..10}<tspan font-size='9' dy='-5'>3</tspan><tspan dy='5'>, n = 1000</tspan></text>
+<text x='560.0' y='112.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='start' font-weight='normal' >squared distances 1 to 243, 27 per row</text>
+<rect x='560' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='571' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='604' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='626' y='120' width='10' height='10' fill='#d9a441'/>
+<rect x='637' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='681' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='692' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='703' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='714' y='120' width='10' height='10' fill='#d9a441'/>
+<rect x='725' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='736' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='747' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='791' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='802' y='120' width='10' height='10' fill='#d9a441'/>
+<rect x='813' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='824' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='835' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='120' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='131' width='10' height='10' fill='#d9a441'/>
+<rect x='571' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='131' width='10' height='10' fill='#d9a441'/>
+<rect x='604' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='626' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='637' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='681' y='131' width='10' height='10' fill='#d9a441'/>
+<rect x='692' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='703' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='714' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='725' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='736' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='747' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='131' width='10' height='10' fill='#d9a441'/>
+<rect x='780' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='791' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='802' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='813' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='824' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='835' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='131' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='142' width='10' height='10' fill='#d9a441'/>
+<rect x='571' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='604' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='142' width='10' height='10' fill='#d9a441'/>
+<rect x='626' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='637' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='142' width='10' height='10' fill='#d9a441'/>
+<rect x='659' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='681' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='692' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='703' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='714' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='725' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='736' y='142' width='10' height='10' fill='#d9a441'/>
+<rect x='747' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='791' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='802' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='813' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='824' y='142' width='10' height='10' fill='#d9a441'/>
+<rect x='835' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='142' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='571' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='604' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='153' width='10' height='10' fill='#d9a441'/>
+<rect x='626' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='637' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='153' width='10' height='10' fill='#d9a441'/>
+<rect x='681' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='692' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='703' y='153' width='10' height='10' fill='#d9a441'/>
+<rect x='714' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='725' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='736' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='747' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='791' y='153' width='10' height='10' fill='#d9a441'/>
+<rect x='802' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='813' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='824' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='835' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='153' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='571' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='593' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='604' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='626' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='637' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='681' y='164' width='10' height='10' fill='#e6e0d5'/>
+<rect x='692' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='703' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='714' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='725' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='736' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='747' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='769' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='791' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='802' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='813' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='824' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='835' y='164' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='164' width='10' height='10' fill='#d9a441'/>
+<rect x='560' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='571' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='604' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='615' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='626' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='637' y='175' width='10' height='10' fill='#d9a441'/>
+<rect x='648' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='681' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='692' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='703' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='714' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='725' y='175' width='10' height='10' fill='#d9a441'/>
+<rect x='736' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='747' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='758' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='175' width='10' height='10' fill='#d9a441'/>
+<rect x='791' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='802' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='813' y='175' width='10' height='10' fill='#d9a441'/>
+<rect x='824' y='175' width='10' height='10' fill='#e6e0d5'/>
+<rect x='835' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='846' y='175' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='571' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='582' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='593' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='604' y='186' width='10' height='10' fill='#d9a441'/>
+<rect x='615' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='626' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='637' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='648' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='670' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='681' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='692' y='186' width='10' height='10' fill='#d9a441'/>
+<rect x='703' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='714' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='725' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='736' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='747' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='758' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='769' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='780' y='186' width='10' height='10' fill='#d9a441'/>
+<rect x='791' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='802' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='813' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='824' y='186' width='10' height='10' fill='#2f5d8a'/>
+<rect x='835' y='186' width='10' height='10' fill='#d9a441'/>
+<rect x='846' y='186' width='10' height='10' fill='#e6e0d5'/>
+<rect x='560' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='571' y='197' width='10' height='10' fill='#d9a441'/>
+<rect x='582' y='197' width='10' height='10' fill='#2f5d8a'/>
+<rect x='593' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='604' y='197' width='10' height='10' fill='#2f5d8a'/>
+<rect x='615' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='626' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='637' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='648' y='197' width='10' height='10' fill='#2f5d8a'/>
+<rect x='659' y='197' width='10' height='10' fill='#d9a441'/>
+<rect x='670' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='681' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='692' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='703' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='714' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='725' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='736' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='747' y='197' width='10' height='10' fill='#d9a441'/>
+<rect x='758' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='769' y='197' width='10' height='10' fill='#2f5d8a'/>
+<rect x='780' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='791' y='197' width='10' height='10' fill='#2f5d8a'/>
+<rect x='802' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='813' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='824' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='835' y='197' width='10' height='10' fill='#d9a441'/>
+<rect x='846' y='197' width='10' height='10' fill='#e6e0d5'/>
+<rect x='560' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='571' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='582' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='593' y='208' width='10' height='10' fill='#d9a441'/>
+<rect x='604' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='615' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='626' y='208' width='10' height='10' fill='#d9a441'/>
+<rect x='637' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='648' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='659' y='208' width='10' height='10' fill='#2f5d8a'/>
+<rect x='670' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='681' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='692' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='703' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='714' y='208' width='10' height='10' fill='#d9a441'/>
+<rect x='725' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='736' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='747' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='758' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='769' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='780' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='791' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='802' y='208' width='10' height='10' fill='#d9a441'/>
+<rect x='813' y='208' width='10' height='10' fill='#d9a441'/>
+<rect x='824' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='835' y='208' width='10' height='10' fill='#e6e0d5'/>
+<rect x='846' y='208' width='10' height='10' fill='#2f5d8a'/>
+<rect x='560' y='231' width='12' height='12' fill='#2f5d8a' stroke='#b9b2a6' stroke-width='0.5'/>
+<text x='578.0' y='241.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#1d1b18' text-anchor='start' font-weight='normal' >144  occurs as a distance</text>
+<rect x='560' y='251' width='12' height='12' fill='#d9a441' stroke='#b9b2a6' stroke-width='0.5'/>
+<text x='578.0' y='261.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#1d1b18' text-anchor='start' font-weight='normal' > 39  never a sum of 3 squares: 4^a(8b+7)</text>
+<rect x='560' y='271' width='12' height='12' fill='#e6e0d5' stroke='#b9b2a6' stroke-width='0.5'/>
+<text x='578.0' y='281.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#1d1b18' text-anchor='start' font-weight='normal' > 60  a sum of 3 squares, but needs a gap above 9</text>
+<text x='560.0' y='311.0' font-family='Helvetica, Arial, sans-serif' font-size='13' fill='#2f5d8a' text-anchor='start' font-weight='bold' >D = 144 = 1.44 n<tspan font-size='9' dy='-5'>2/3</tspan></text>
+<text x='560.0' y='329.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='start' font-weight='normal' >Legendre's theorem removes about 1/6 of the</text>
+<text x='560.0' y='343.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='start' font-weight='normal' >integers; the box removes more near the top.</text>
+<text x='560.0' y='357.0' font-family='Helvetica, Arial, sans-serif' font-size='11' fill='#6f685d' text-anchor='start' font-weight='normal' >Always D is at most 3(m-1)<tspan font-size='9' dy='-5'>2</tspan><tspan dy='5'>, below 3 n</tspan><tspan font-size='9' dy='-5'>2/3</tspan><tspan dy='5'>.</tspan></text>
+<text x='24.0' y='470.0' font-family='Helvetica, Arial, sans-serif' font-size='10.5' fill='#6f685d' text-anchor='start' font-weight='normal' >Grid counts: exact sumset of squares, matched by brute-force pair enumeration (d = 2 to 5, n up to 2401) and, on 1 to (m-1)<tspan font-size='8' dy='-5'>2</tspan><tspan dy='5'>,</tspan></text>
+<text x='24.0' y='485.0' font-family='Helvetica, Arial, sans-serif' font-size='10.5' fill='#6f685d' text-anchor='start' font-weight='normal' >by the two-, three- and four-square theorems. Random subsets seeded (166). Largest grids: n = 27,000,000 (d = 3), 16,777,216 (d = 4).</text>
+<text x='24.0' y='504.0' font-family='Helvetica, Arial, sans-serif' font-size='10.5' fill='#1d1b18' text-anchor='start' font-weight='normal' >Illustration of the statement only: grids are the conjectured extremal sets, and no finite computation bears on the lower bound.</text>
+</svg>
