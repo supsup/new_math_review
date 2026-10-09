@@ -1,0 +1,282 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="560" viewBox="0 0 880 560">
+<rect width="880" height="560" fill="#fcfcfb"/>
+<text x="40.0" y="40.0" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#0b0b0b" text-anchor="start" font-weight="bold">No finite change of the primes is a sumset A + B with |A|, |B| &gt;= 2</text>
+<text x="40.0" y="78.0" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">A. A two-element summand covers a vanishing share</text>
+<text x="40.0" y="96.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">Share of primes p &lt;= N with p - d or p + d prime</text>
+<line x1="70" y1="420.0" x2="395" y2="420.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="424.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.0</text>
+<line x1="70" y1="386.7" x2="395" y2="386.7" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="390.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.1</text>
+<line x1="70" y1="353.3" x2="395" y2="353.3" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="357.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.2</text>
+<line x1="70" y1="320.0" x2="395" y2="320.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="324.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.3</text>
+<line x1="70" y1="286.7" x2="395" y2="286.7" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="290.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.4</text>
+<line x1="70" y1="253.3" x2="395" y2="253.3" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="257.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="70" y1="220.0" x2="395" y2="220.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="224.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.6</text>
+<line x1="70" y1="186.7" x2="395" y2="186.7" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="190.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.7</text>
+<line x1="70" y1="153.3" x2="395" y2="153.3" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="157.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.8</text>
+<line x1="70" y1="120.0" x2="395" y2="120.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="62.0" y="124.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.9</text>
+<line x1="70.0" y1="420" x2="70.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="70.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^3</text>
+<line x1="135.0" y1="420" x2="135.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="135.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^4</text>
+<line x1="200.0" y1="420" x2="200.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="200.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^5</text>
+<line x1="265.0" y1="420" x2="265.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="265.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^6</text>
+<line x1="330.0" y1="420" x2="330.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="330.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^7</text>
+<line x1="395.0" y1="420" x2="395.0" y2="425" stroke="#52514e" stroke-width="1"/>
+<text x="395.0" y="439.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">10^8</text>
+<line x1="70" y1="420" x2="395" y2="420" stroke="#52514e" stroke-width="1"/>
+<text x="232.5" y="458.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">N (log scale)</text>
+<path d="M70.0,283.1 L135.0,309.1 L200.0,335.0 L265.0,350.6 L330.0,360.8 L395.0,369.1" fill="none" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="70.0" cy="283.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 1000: 69 of 168 primes</title></circle>
+<circle cx="135.0" cy="309.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 10000: 409 of 1229 primes</title></circle>
+<circle cx="200.0" cy="335.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 100000: 2447 of 9592 primes</title></circle>
+<circle cx="265.0" cy="350.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 1000000: 16337 of 78498 primes</title></circle>
+<circle cx="330.0" cy="360.8" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 10000000: 117959 of 664579 primes</title></circle>
+<circle cx="395.0" cy="369.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>d = 2, N = 100000000: 880623 of 5761455 primes</title></circle>
+<path d="M70.0,181.9 L135.0,229.1 L200.0,268.3 L265.0,293.2 L330.0,311.0 L395.0,324.6" fill="none" stroke="#eb6834" stroke-width="2"/>
+<circle cx="70.0" cy="181.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 1000: 120 of 168 primes</title></circle>
+<circle cx="135.0" cy="229.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 10000: 704 of 1229 primes</title></circle>
+<circle cx="200.0" cy="268.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 100000: 4364 of 9592 primes</title></circle>
+<circle cx="265.0" cy="293.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 1000000: 29872 of 78498 primes</title></circle>
+<circle cx="330.0" cy="311.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 10000000: 217220 of 664579 primes</title></circle>
+<circle cx="395.0" cy="324.6" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>d = 6, N = 100000000: 1649424 of 5761455 primes</title></circle>
+<path d="M70.0,140.2 L135.0,189.7 L200.0,226.4 L265.0,257.7 L330.0,280.1 L395.0,297.0" fill="none" stroke="#1baf7a" stroke-width="2"/>
+<circle cx="70.0" cy="140.2" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 1000: 141 of 168 primes</title></circle>
+<circle cx="135.0" cy="189.7" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 10000: 849 of 1229 primes</title></circle>
+<circle cx="200.0" cy="226.4" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 100000: 5571 of 9592 primes</title></circle>
+<circle cx="265.0" cy="257.7" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 1000000: 38214 of 78498 primes</title></circle>
+<circle cx="330.0" cy="280.1" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 10000000: 278845 of 664579 primes</title></circle>
+<circle cx="395.0" cy="297.0" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>d = 30, N = 100000000: 2125860 of 5761455 primes</title></circle>
+<path d="M70.0,140.2 L135.0,161.3 L200.0,201.5 L265.0,233.6 L330.0,257.5 L395.0,276.2" fill="none" stroke="#eda100" stroke-width="2"/>
+<circle cx="70.0" cy="140.2" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 1000: 141 of 168 primes</title></circle>
+<circle cx="135.0" cy="161.3" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 10000: 954 of 1229 primes</title></circle>
+<circle cx="200.0" cy="201.5" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 100000: 6288 of 9592 primes</title></circle>
+<circle cx="265.0" cy="233.6" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 1000000: 43897 of 78498 primes</title></circle>
+<circle cx="330.0" cy="257.5" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 10000000: 324015 of 664579 primes</title></circle>
+<circle cx="395.0" cy="276.2" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>d = 210, N = 100000000: 2485327 of 5761455 primes</title></circle>
+<path d="M70.0,229.5 L135.0,171.3 L200.0,189.6 L265.0,217.9 L330.0,242.8 L395.0,262.9" fill="none" stroke="#e87ba4" stroke-width="2"/>
+<circle cx="70.0" cy="229.5" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 1000: 96 of 168 primes</title></circle>
+<circle cx="135.0" cy="171.3" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 10000: 917 of 1229 primes</title></circle>
+<circle cx="200.0" cy="189.6" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 100000: 6631 of 9592 primes</title></circle>
+<circle cx="265.0" cy="217.9" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 1000000: 47591 of 78498 primes</title></circle>
+<circle cx="330.0" cy="242.8" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 10000000: 353322 of 664579 primes</title></circle>
+<circle cx="395.0" cy="262.9" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>d = 2310, N = 100000000: 2715609 of 5761455 primes</title></circle>
+<path d="M70.0,259.3 L135.0,258.9 L200.0,205.0 L265.0,208.1 L330.0,230.7 L395.0,251.3" fill="none" stroke="#008300" stroke-width="2"/>
+<circle cx="70.0" cy="259.3" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 1000: 81 of 168 primes</title></circle>
+<circle cx="135.0" cy="258.9" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 10000: 594 of 1229 primes</title></circle>
+<circle cx="200.0" cy="205.0" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 100000: 6187 of 9592 primes</title></circle>
+<circle cx="265.0" cy="208.1" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 1000000: 49901 of 78498 primes</title></circle>
+<circle cx="330.0" cy="230.7" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 10000000: 377423 of 664579 primes</title></circle>
+<circle cx="395.0" cy="251.3" r="4" fill="#008300" stroke="#fcfcfb" stroke-width="2"><title>d = 30030, N = 100000000: 2915024 of 5761455 primes</title></circle>
+<rect x="403" y="247.3" width="10" height="3" rx="1" fill="#008300"/>
+<text x="417.0" y="255.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 30030: 0.506</text>
+<rect x="403" y="261.3" width="10" height="3" rx="1" fill="#e87ba4"/>
+<text x="417.0" y="269.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 2310: 0.471</text>
+<rect x="403" y="275.3" width="10" height="3" rx="1" fill="#eda100"/>
+<text x="417.0" y="283.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 210: 0.431</text>
+<rect x="403" y="293.0" width="10" height="3" rx="1" fill="#1baf7a"/>
+<text x="417.0" y="301.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 30: 0.369</text>
+<rect x="403" y="320.6" width="10" height="3" rx="1" fill="#eb6834"/>
+<text x="417.0" y="328.6" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 6: 0.286</text>
+<rect x="403" y="365.1" width="10" height="3" rx="1" fill="#2a78d6"/>
+<text x="417.0" y="373.1" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">d = 2: 0.153</text>
+<text x="530.0" y="78.0" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">B. Residues mod 13 split into two sides</text>
+<text x="530.0" y="96.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">S = A mod 13, T = B mod 13, S + T = all nonzero residues</text>
+<rect x="611" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="308" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="287" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="611" y="119" width="19" height="19" rx="2" fill="#9ec5f4" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 1, |T| = 12: 13 pairs</title></rect>
+<rect x="632" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="632" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="632" y="308" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="632" y="287" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="632" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="632" y="245" width="19" height="19" rx="2" fill="#6da7ec" stroke="#fcfcfb" stroke-width="2"><title>|S| = 2, |T| = 6: 78 pairs</title></rect>
+<rect x="632" y="224" width="19" height="19" rx="2" fill="#3987e5" stroke="#fcfcfb" stroke-width="2"><title>|S| = 2, |T| = 7: 1170 pairs</title></rect>
+<rect x="632" y="203" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 2, |T| = 8: 2730 pairs</title></rect>
+<rect x="632" y="182" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 2, |T| = 9: 2184 pairs</title></rect>
+<rect x="632" y="161" width="19" height="19" rx="2" fill="#3987e5" stroke="#fcfcfb" stroke-width="2"><title>|S| = 2, |T| = 10: 702 pairs</title></rect>
+<rect x="632" y="140" width="19" height="19" rx="2" fill="#6da7ec" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 2, |T| = 11: 78 pairs</title></rect>
+<rect x="632" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="653" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="653" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="653" y="308" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="653" y="287" width="19" height="19" rx="2" fill="#6da7ec" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 4: 78 pairs</title></rect>
+<rect x="653" y="266" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 5: 3120 pairs</title></rect>
+<rect x="653" y="245" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 6: 14742 pairs</title></rect>
+<rect x="653" y="224" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 7: 18720 pairs</title></rect>
+<rect x="653" y="203" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 8: 10296 pairs</title></rect>
+<rect x="653" y="182" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 3, |T| = 9: 2704 pairs</title></rect>
+<rect x="653" y="161" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 3, |T| = 10: 286 pairs</title></rect>
+<rect x="653" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="653" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="674" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="674" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="674" y="308" width="19" height="19" rx="2" fill="#6da7ec" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 3: 78 pairs</title></rect>
+<rect x="674" y="287" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 4: 6318 pairs</title></rect>
+<rect x="674" y="266" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 5: 32838 pairs</title></rect>
+<rect x="674" y="245" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 6: 41184 pairs</title></rect>
+<rect x="674" y="224" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 7: 22854 pairs</title></rect>
+<rect x="674" y="203" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 4, |T| = 8: 6279 pairs</title></rect>
+<rect x="674" y="182" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 4, |T| = 9: 715 pairs</title></rect>
+<rect x="674" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="674" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="674" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="308" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 5, |T| = 3: 3120 pairs</title></rect>
+<rect x="695" y="287" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 5, |T| = 4: 32838 pairs</title></rect>
+<rect x="695" y="266" width="19" height="19" rx="2" fill="#0d366b" stroke="#fcfcfb" stroke-width="2"><title>|S| = 5, |T| = 5: 52104 pairs</title></rect>
+<rect x="695" y="245" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 5, |T| = 6: 32994 pairs</title></rect>
+<rect x="695" y="224" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 5, |T| = 7: 10140 pairs</title></rect>
+<rect x="695" y="203" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 5, |T| = 8: 1287 pairs</title></rect>
+<rect x="695" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="695" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="329" width="19" height="19" rx="2" fill="#6da7ec" stroke="#fcfcfb" stroke-width="2"><title>|S| = 6, |T| = 2: 78 pairs</title></rect>
+<rect x="716" y="308" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 6, |T| = 3: 14742 pairs</title></rect>
+<rect x="716" y="287" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 6, |T| = 4: 41184 pairs</title></rect>
+<rect x="716" y="266" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 6, |T| = 5: 32994 pairs</title></rect>
+<rect x="716" y="245" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 6, |T| = 6: 11856 pairs</title></rect>
+<rect x="716" y="224" width="19" height="19" rx="2" fill="#256abf" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 6, |T| = 7: 1716 pairs</title></rect>
+<rect x="716" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="716" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="329" width="19" height="19" rx="2" fill="#3987e5" stroke="#fcfcfb" stroke-width="2"><title>|S| = 7, |T| = 2: 1170 pairs</title></rect>
+<rect x="737" y="308" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 7, |T| = 3: 18720 pairs</title></rect>
+<rect x="737" y="287" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 7, |T| = 4: 22854 pairs</title></rect>
+<rect x="737" y="266" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 7, |T| = 5: 10140 pairs</title></rect>
+<rect x="737" y="245" width="19" height="19" rx="2" fill="#256abf" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 7, |T| = 6: 1716 pairs</title></rect>
+<rect x="737" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="737" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="329" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 8, |T| = 2: 2730 pairs</title></rect>
+<rect x="758" y="308" width="19" height="19" rx="2" fill="#184f95" stroke="#fcfcfb" stroke-width="2"><title>|S| = 8, |T| = 3: 10296 pairs</title></rect>
+<rect x="758" y="287" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 8, |T| = 4: 6279 pairs</title></rect>
+<rect x="758" y="266" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 8, |T| = 5: 1287 pairs</title></rect>
+<rect x="758" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="758" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="329" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 9, |T| = 2: 2184 pairs</title></rect>
+<rect x="779" y="308" width="19" height="19" rx="2" fill="#256abf" stroke="#fcfcfb" stroke-width="2"><title>|S| = 9, |T| = 3: 2704 pairs</title></rect>
+<rect x="779" y="287" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 9, |T| = 4: 715 pairs</title></rect>
+<rect x="779" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="779" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="329" width="19" height="19" rx="2" fill="#3987e5" stroke="#fcfcfb" stroke-width="2"><title>|S| = 10, |T| = 2: 702 pairs</title></rect>
+<rect x="800" y="308" width="19" height="19" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 10, |T| = 3: 286 pairs</title></rect>
+<rect x="800" y="287" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="800" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="350" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="329" width="19" height="19" rx="2" fill="#6da7ec" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 11, |T| = 2: 78 pairs</title></rect>
+<rect x="821" y="308" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="287" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="821" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="350" width="19" height="19" rx="2" fill="#9ec5f4" stroke="#0b0b0b" stroke-width="1.5"><title>|S| = 12, |T| = 1: 13 pairs</title></rect>
+<rect x="842" y="329" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="308" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="287" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="266" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="245" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="224" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="203" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="182" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="161" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="140" width="19" height="19" rx="2" fill="#f0efec"/>
+<rect x="842" y="119" width="19" height="19" rx="2" fill="#f0efec"/>
+<text x="620.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">1</text>
+<text x="604.0" y="363.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">1</text>
+<text x="641.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">2</text>
+<text x="604.0" y="342.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">2</text>
+<text x="662.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">3</text>
+<text x="604.0" y="321.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">3</text>
+<text x="683.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">4</text>
+<text x="604.0" y="300.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">4</text>
+<text x="704.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">5</text>
+<text x="604.0" y="279.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">5</text>
+<text x="725.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">6</text>
+<text x="604.0" y="258.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">6</text>
+<text x="746.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">7</text>
+<text x="604.0" y="237.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">7</text>
+<text x="767.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">8</text>
+<text x="604.0" y="216.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">8</text>
+<text x="788.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">9</text>
+<text x="604.0" y="195.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">9</text>
+<text x="809.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">10</text>
+<text x="604.0" y="174.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">10</text>
+<text x="830.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">11</text>
+<text x="604.0" y="153.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">11</text>
+<text x="851.5" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="middle" font-weight="normal">12</text>
+<text x="604.0" y="132.5" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="end" font-weight="normal">12</text>
+<text x="736.0" y="402.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">|S| (classes used by A)</text>
+<text x="580.0" y="244.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal" transform="rotate(-90 580 244)">|T| (classes used by B)</text>
+<rect x="530" y="430" width="12" height="12" rx="2" fill="#3987e5" stroke="#0b0b0b" stroke-width="1.5"/>
+<text x="548.0" y="440.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">outlined: |S| + |T| = 13, a partition; all 8,190 occur</text>
+<rect x="530" y="448" width="12" height="12" rx="2" fill="#f0efec"/>
+<text x="548.0" y="458.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#0b0b0b" text-anchor="start" font-weight="normal">grey: impossible (none above the diagonal)</text>
+<rect x="548" y="468" width="14" height="10" fill="#cde2fb"/>
+<rect x="564" y="468" width="14" height="10" fill="#9ec5f4"/>
+<rect x="580" y="468" width="14" height="10" fill="#6da7ec"/>
+<rect x="596" y="468" width="14" height="10" fill="#3987e5"/>
+<rect x="612" y="468" width="14" height="10" fill="#256abf"/>
+<rect x="628" y="468" width="14" height="10" fill="#184f95"/>
+<rect x="644" y="468" width="14" height="10" fill="#0d366b"/>
+<text x="666.0" y="477.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">pair count, 1 to 52,104 (log)</text>
+<text x="40.0" y="498.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">A: exact sieve counts to 10^8, cross-checked by trial division at 10^5. For d = 2 the count 880,623 is 2 x 440,312 - 1, twice the</text>
+<text x="40.0" y="513.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">known twin-prime pair count. Each curve eventually falls like c_d / log N (large d only starts falling later), so A must be infinite.</text>
+<text x="40.0" y="528.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">B: all 484,094 admissible pairs mod 13. T avoids -S, so |S| + |T| &lt;= 13 and one side uses at most 6 of 13 classes, at every</text>
+<text x="40.0" y="543.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">prime at once; this squeezes A and B to about sqrt(x) elements up to x. Finite data illustrate the obstruction; they prove nothing.</text>
+</svg>
