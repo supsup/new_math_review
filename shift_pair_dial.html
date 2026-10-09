@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One short cycle, every prime</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #ffd36e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 780px; line-height: 1.4; }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 64px; font-size: 15px; color: var(--accent); pointer-events: none; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid #39406e; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #39406e; border-color: var(--accent); }
+  label { font-size: 13px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+  #pOut { color: var(--accent); min-width: 2.5em; font-size: 15px; }
+  input[type=range] { width: 170px; accent-color: #ffd36e; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; z-index: 2; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated view of K_(p,p+1) split into Hamilton cycles, singletons and one short gold cycle"></canvas>
+<div id="hud">
+  <h1>One short cycle, every prime</h1>
+  <p>For every prime p &gt;= 5, K_(p,p+1) splits into p+1 single edges, (p-1)/2 Hamilton 2p-cycles and exactly one
+  cycle of length p-1. Hubs (inner ring) and leaves (outer ring) are both F_p; the extra leaf sits at the centre.
+  Colour s, for each nonzero square s, uses the leaf-minus-hub offsets (1-a)s (bright) and (1-b)s (dark): the two
+  quadratic cosets. The trade reroutes each colour from leaf s to the new leaf; the freed edges (as, s) and the
+  diagonals (s, s) close into the gold short cycle. Drag to orbit, scroll to zoom. The page rebuilds the construction
+  and checks every one of these facts before it draws.</p>
+</div>
+<div id="state"></div>
+<div id="bar">
+  <label for="pDial">prime p <input id="pDial" type="range" min="0" max="15" step="1" value="3"><span id="pOut"></span></label>
+  <button id="bPlay" aria-pressed="true">Play trade</button>
+  <button id="bTower" aria-pressed="false">Tower</button>
+  <button id="bSpin" aria-pressed="false">Spin</button>
+  <button id="bRestart">Restart</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const SHIFTPAIR = (function () {
+  const PRIMES = [5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61];
+  const mod = (x, p) => ((x % p) + p) % p;
+  function pow(x, e, p) { let r = 1; x = mod(x, p); while (e > 0) { if (e & 1) r = r * x % p; x = x * x % p; e >>= 1; } return r; }
+  function isPrime(p) { if (p < 2) return false; for (let d = 2; d * d <= p; d++) if (p % d === 0) return false; return true; }
+  // chi(x): +1 nonzero square, -1 nonresidue, 0 for x = 0 (Euler's criterion)
+  const chi = (x, p) => { x = mod(x, p); if (x === 0) return 0; return pow(x, (p - 1) / 2, p) === 1 ? 1 : -1; };
+
+  // vertex ids: hub h -> h, leaf l -> p + l, new leaf (l = p) -> 2p. Edge (h, l) with l in 0..p (p = new leaf).
+  function oneCycle(edges, verts, len, p) {
+    const adj = new Map(), seen = new Set();
+    for (const [h, l] of edges) {
+      const k = h * (p + 1) + l; if (seen.has(k)) return "repeated edge"; seen.add(k);
+      const u = h, v = p + l;
+      if (!adj.has(u)) adj.set(u, []); if (!adj.has(v)) adj.set(v, []);
+      adj.get(u).push(v); adj.get(v).push(u);
+    }
+    if (edges.length !== len) return "has " + edges.length + " edges, wanted " + len;
+    if (adj.size !== len) return "touches " + adj.size + " vertices, wanted " + len;
+    for (const v of verts) if (!adj.has(v)) return "misses vertex " + v;
+    for (const [v, nb] of adj) if (nb.length !== 2) return "vertex " + v + " has degree " + nb.length;
+    let prev = -1, cur = edges[0][0], steps = 0;
+    do { const nb = adj.get(cur), nx = nb[0] === prev ? nb[1] : nb[0]; prev = cur; cur = nx; steps++; }
+    while (cur !== edges[0][0] && steps <= len);
+    return steps === len ? null : "splits into several cycles";
+  }
+
+  function build(p, opts) {
+    opts = opts || {};
+    const fail = [];
+    if (!isPrime(p) || p < 5) return { p, fail: ["p = " + p + " is not a prime >= 5"] };
+    const n = (p - 1) / 2;
+    const S = [], N = [];
+    for (let x = 1; x < p; x++) (chi(x, p) === 1 ? S : N).push(x);
+    if (S.length !== n) fail.push("square count wrong");
+    // a: a generator of S (multiplicative order exactly n)
+    let a = opts.a;
+    if (a === undefined) for (const s of S) { let o = 1, y = s; while (y !== 1) { y = y * s % p; o++; } if (o === n) { a = s; break; } }
+    const order = x => { let o = 1, y = mod(x, p); if (y === 0) return 0; while (y !== 1) { y = y * x % p; o++; } return o; };
+    if (a === undefined || chi(a, p) !== 1 || order(a) !== n) fail.push("a = " + a + " does not generate the squares");
+    // b: nonresidue with chi(1-b) = -chi(1-a)
+    let b = opts.b;
+    if (b === undefined) for (const x of N) if (chi(1 - x, p) === -chi(1 - a, p)) { b = x; break; }
+    if (b === undefined) fail.push("no nonresidue b with chi(1-b) = -chi(1-a)");
+    else {
+      if (chi(b, p) !== -1) fail.push("b = " + b + " is not a nonresidue");
+      if (chi(1 - b, p) === 0 || chi(1 - a, p) === 0 || chi(1 - b, p) !== -chi(1 - a, p)) fail.push("chi(1-b) != -chi(1-a) for b = " + b);
+    }
+    if (fail.length) return { p, n, a, b, fail };
+    // the two offset classes (1-a)S and (1-b)S partition F_p^*
+    const cA = S.map(s => mod((1 - a) * s, p)), cB = S.map(s => mod((1 - b) * s, p));
+    const offs = new Set(cA.concat(cB));
+    if (offs.size !== p - 1 || offs.has(0) || new Set(cA).size !== n || new Set(cB).size !== n)
+      fail.push("offset classes do not partition F_p^*");
+    if (!S.every(s => mod((b - a) * s, p) !== 0)) fail.push("(b-a)s not a unit");
+    // colours in generator order s = a^k, so the short cycle walks the stack
+    const order_S = []; for (let k = 0, s = 1; k < n; k++, s = s * a % p) order_S.push(s);
+    if (new Set(order_S).size !== n) fail.push("powers of a do not fill S");
+    const hubs = [], leaves = []; for (let x = 0; x < p; x++) { hubs.push(x); leaves.push(p + x); }
+    const colours = order_S.map(s => {
+      const before = [];
+      for (let h = 0; h < p; h++) {
+        before.push([h, mod(h + (1 - a) * s, p), 0]);
+        before.push([h, mod(h + (1 - b) * s, p), 1]);
+      }
+      // trade: at leaf s the colour meets hubs as and bs; send both through the new leaf instead
+      const atS = before.filter(e => e[1] === s).map(e => e[0]).sort((x, y) => x - y);
+      const want = [mod(a * s, p), mod(b * s, p)].sort((x, y) => x - y);
+      if (atS.length !== 2 || atS[0] !== want[0] || atS[1] !== want[1]) fail.push("colour " + s + " does not meet hubs as, bs at leaf s");
+      const after = before.map(e => e[1] === s ? [e[0], p, e[2]] : e);
+      const e1 = oneCycle(before, hubs.concat(leaves), 2 * p, p);
+      if (e1) fail.push("colour " + s + " before trade: " + e1);
+      const vAfter = hubs.concat(leaves.filter(v => v !== p + s), [2 * p]);
+      const e2 = oneCycle(after, vAfter, 2 * p, p);
+      if (e2) fail.push("colour " + s + " after trade: " + e2);
+      return { s, before, after };
+    });
+    // the short cycle: freed edges (as, s) plus diagonals (s, s), s in S
+    const short = [];
+    for (const s of S) { short.push([mod(a * s, p), s, 0]); short.push([s, s, 1]); }
+    const es = oneCycle(short, S.concat(S.map(s => p + s)), p - 1, p);
+    if (es) fail.push("short cycle: " + es);
+    // singletons: (bs, s) for s in S, diagonals off S, and (0, new)
+    const singles = [];
+    for (const s of S) singles.push([mod(b * s, p), s, 0]);
+    for (let h = 0; h < p; h++) if (chi(h, p) !== 1) singles.push([h, h, 1]);
+    singles.push([0, p, 2]);
+    // the pieces partition all p(p+1) edges of K_(p,p+1)
+    const cnt = new Array(p * (p + 1)).fill(0);
+    const mark = e => { if (e[0] < 0 || e[0] >= p || e[1] < 0 || e[1] > p) fail.push("edge out of range"); else cnt[e[0] * (p + 1) + e[1]]++; };
+    colours.forEach(c => c.after.forEach(mark)); short.forEach(mark); singles.forEach(mark);
+    if (!cnt.every(x => x === 1)) fail.push("pieces do not partition the " + p * (p + 1) + " edges");
+    if (singles.length !== p + 1) fail.push(singles.length + " singletons, wanted " + (p + 1));
+    if (colours.length !== n) fail.push(colours.length + " Hamilton cycles, wanted " + n);
+    if (short.length !== p - 1) fail.push("short cycle has length " + short.length);
+    return { p, n, a, b, S, colours, short, singles, fail };
+  }
+  const DEFAULT = build(13);
+  return { PRIMES, build, chi, fail: DEFAULT.fail, DEFAULT };
+})();
+if (typeof module !== "undefined") module.exports = SHIFTPAIR;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const err = document.getElementById("err");
+  function refuse(msg) { err.style.display = "block"; err.textContent = "Refusing to draw: " + msg; }
+  if (SHIFTPAIR.fail.length) { refuse(SHIFTPAIR.fail.join("; ")); return; }
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl", { antialias: true, premultipliedAlpha: false });
+  const ctx = gl ? null : canvas.getContext("2d");   // fallback: same edge list, same projection, 2D canvas
+  if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+
+  function hsl(h, s, l) {
+    const k = m => (m + h / 30) % 12, A = s * Math.min(l, 1 - l);
+    const f = m => l - A * Math.max(-1, Math.min(k(m) - 3, Math.min(9 - k(m), 1)));
+    return [f(0), f(8), f(4)];
+  }
+  const GOLD = [1.0, 0.80, 0.30], GREY = [0.62, 0.62, 0.72];
+  const RH = 0.5, RL = 1.0;
+
+  let W = null, hues = [], LAYER = 0.1;
+  function load(p) {
+    const B = SHIFTPAIR.build(p);
+    if (B.fail.length) { W = null; refuse("p = " + p + ": " + B.fail.join("; ")); return; }
+    err.style.display = "none"; W = B;
+    hues = W.colours.map((c, k) => 110 + 235 * k / Math.max(1, W.n - 1));   // green..rose, clear of the gold band
+    LAYER = 1.7 / (W.n + 1);
+  }
+  const posH = h => { const t = 2 * Math.PI * h / W.p - Math.PI / 2; return [RH * Math.cos(t), RH * Math.sin(t)]; };
+  const posL = l => { if (l === W.p) return [0, 0]; const t = 2 * Math.PI * l / W.p - Math.PI / 2; return [RL * Math.cos(t), RL * Math.sin(t)]; };
+
+  // per-frame edge list shared by both renderers: ax ay az bx by bz r g b (premultiplied) width
+  let E = [];
+  const seg = (a, za, b, zb, rgb, alpha, w) => E.push([a[0], a[1], za, b[0], b[1], zb, rgb[0] * alpha, rgb[1] * alpha, rgb[2] * alpha, w]);
+
+  // tiny matrix helpers (column-major)
+  const mul = (a, b) => { const o = new Array(16).fill(0);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) o[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return o; };
+  const persp = (fov, asp, nr, fr) => { const t = 1 / Math.tan(fov / 2);
+    return [t / asp,0,0,0, 0,t,0,0, 0,0,(fr + nr) / (nr - fr),-1, 0,0,2 * fr * nr / (nr - fr),0]; };
+  const rotX = t => [1,0,0,0, 0,Math.cos(t),Math.sin(t),0, 0,-Math.sin(t),Math.cos(t),0, 0,0,0,1];
+  const rotZ = t => [Math.cos(t),Math.sin(t),0,0, -Math.sin(t),Math.cos(t),0,0, 0,0,1,0, 0,0,0,1];
+  const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
+
+  let prog, uM, uRes, uDpr, bufs = {}, ib = null, ibCap = 0;
+  if (gl) {
+    const vs = `
+      attribute vec3 aA, aB, aCol; attribute float aSide, aEnd, aW;
+      uniform mat4 uM; uniform vec2 uRes; uniform float uDpr;
+      varying vec3 vCol;
+      void main() {
+        vec4 ca = uM * vec4(aA, 1.0), cb = uM * vec4(aB, 1.0);
+        vec2 sa = ca.xy / ca.w * uRes * 0.5, sb = cb.xy / cb.w * uRes * 0.5;
+        vec2 d = sb - sa; float L = length(d); d = L > 1e-6 ? d / L : vec2(1.0, 0.0);
+        vec2 nrm = vec2(-d.y, d.x);
+        vec4 c = mix(ca, cb, aEnd);
+        c.xy += nrm * aSide * aW * uDpr * 0.5 / (uRes * 0.5) * c.w;
+        gl_Position = c; vCol = aCol;
+      }`;
+    const fs = `precision mediump float; varying vec3 vCol;
+      void main() { gl_FragColor = vec4(vCol, 1.0); }`;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog); gl.useProgram(prog);
+    for (const [name, size] of [["aA", 3], ["aB", 3], ["aCol", 3], ["aSide", 1], ["aEnd", 1], ["aW", 1]]) {
+      const buf = gl.createBuffer(), loc = gl.getAttribLocation(prog, name);
+      bufs[name] = { buf, loc, size };
+    }
+    uM = gl.getUniformLocation(prog, "uM"); uRes = gl.getUniformLocation(prog, "uRes"); uDpr = gl.getUniformLocation(prog, "uDpr");
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);   // additive glow on the dark background
+    gl.clearColor(0.051, 0.063, 0.125, 1);
+  }
+  function drawGL(M, w, h, dpr) {
+    const m = E.length, A = new Float32Array(m * 12), B = new Float32Array(m * 12), C = new Float32Array(m * 12),
+      SD = new Float32Array(m * 4), EN = new Float32Array(m * 4), WD = new Float32Array(m * 4);
+    for (let e = 0; e < m; e++) { const x = E[e];
+      for (let q = 0; q < 4; q++) { const v = e * 4 + q;
+        A.set([x[0], x[1], x[2]], 3 * v); B.set([x[3], x[4], x[5]], 3 * v); C.set([x[6], x[7], x[8]], 3 * v);
+        SD[v] = q < 2 ? -1 : 1; EN[v] = q % 2; WD[v] = x[9]; } }
+    const put = (name, data) => { const b = bufs[name]; gl.bindBuffer(gl.ARRAY_BUFFER, b.buf);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(b.loc);
+      gl.vertexAttribPointer(b.loc, b.size, gl.FLOAT, false, 0, 0); };
+    put("aA", A); put("aB", B); put("aCol", C); put("aSide", SD); put("aEnd", EN); put("aW", WD);
+    if (m > ibCap) {   // 4 vertices per edge; p <= 61 keeps this under the 16-bit index limit
+      ibCap = m; const idx = new Uint16Array(m * 6);
+      for (let e = 0; e < m; e++) { const n = 4 * e; idx.set([n, n + 1, n + 2, n + 1, n + 3, n + 2], 6 * e); }
+      if (!ib) ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+    }
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniformMatrix4fv(uM, false, new Float32Array(M)); gl.uniform2f(uRes, w, h); gl.uniform1f(uDpr, dpr);
+    gl.drawElements(gl.TRIANGLES, m * 6, gl.UNSIGNED_SHORT, 0);
+  }
+  function draw2D(M, w, h, dpr) {
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#0d1020"; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+    const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
+      Wc = M[3]*x + M[7]*y + M[11]*z + M[15]; return [(X / Wc * 0.5 + 0.5) * w, (0.5 - Y / Wc * 0.5) * h]; };
+    const c255 = v => Math.max(0, Math.min(255, Math.round(v * 255)));
+    for (const x of E) {
+      const pa = proj(x[0], x[1], x[2]), pb = proj(x[3], x[4], x[5]);
+      ctx.strokeStyle = "rgb(" + c255(x[6]) + "," + c255(x[7]) + "," + c255(x[8]) + ")";
+      ctx.lineWidth = x[9] * dpr; ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
+    }
+  }
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const TS = 1.3, TG = 1.6, THOLD = 3.5;   // seconds per colour trade, gold fade-in, hold before looping
+  let yaw = 0, pitch = -0.55, dist = 3.6, spin = false, tower = 0, towerTarget = 0, playing = !reduced, t = 0;
+  const endT = () => W ? W.n * TS + TG : 0;
+  const stateEl = document.getElementById("state");
+  const toggle = (id, on) => document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false");
+  const dial = document.getElementById("pDial"), pOut = document.getElementById("pOut");
+  function setPrime() {
+    const p = SHIFTPAIR.PRIMES[+dial.value]; pOut.textContent = String(p);
+    dial.setAttribute("aria-valuetext", "p = " + p);
+    load(p); t = reduced ? endT() : 0;
+  }
+  dial.addEventListener("input", setPrime);
+  document.getElementById("bPlay").onclick = () => { playing = !playing; toggle("bPlay", playing); };
+  document.getElementById("bTower").onclick = () => { towerTarget = towerTarget ? 0 : 1; toggle("bTower", towerTarget);
+    if (towerTarget && pitch > -0.9) pitch = -1.15; };
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  document.getElementById("bRestart").onclick = () => { t = 0; };
+  toggle("bPlay", playing); setPrime();
+  if (reduced) { tower = towerTarget; }
+
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!drag) return;
+    yaw += (e.clientX - drag[0]) * 0.008; pitch = Math.max(-1.55, Math.min(0, pitch + (e.clientY - drag[1]) * 0.008));
+    drag = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(1.8, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+  const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+  function buildEdges() {
+    E = [];
+    const p = W.p, n = W.n, tr = Math.min(n, t / TS), g = ease((t - n * TS) / TG);
+    const zc = k => (k - (n - 1) / 2) * LAYER * tower, zb = -((n - 1) / 2 + 1.3) * LAYER * tower;
+    const cur = tr < n && t > 0 ? Math.floor(tr) : -1;
+    const pulse = g > 0 ? 0.85 + 0.15 * Math.sin(t * 3.0) : 1;
+    // vertex marks on the base level
+    const dot = (q, z, rgb, al, wd) => { const d = 0.006; seg([q[0] - d, q[1]], z, [q[0] + d, q[1]], z, rgb, al, wd); };
+    for (let x = 0; x < p; x++) { dot(posH(x), zb, [0.8, 0.82, 0.95], 0.9, 5); dot(posL(x), zb, [0.8, 0.82, 0.95], 0.9, 5); }
+    dot(posL(p), zb, GOLD, 1, 8);
+    // star edges at the new leaf that no piece holds yet
+    const claimed = new Set([0]);
+    W.colours.forEach((c, k) => { if (tr - k > 0) for (const e of c.after) if (e[1] === p) claimed.add(e[0]); });
+    for (let h = 1; h < p; h++) if (!claimed.has(h)) seg(posH(h), zb, posL(p), zb, GREY, 0.08, 1);
+    // colour cycles, each on its own level, the two offset classes in two tones
+    W.colours.forEach((c, k) => {
+      const f = ease(tr - k), z = zc(k), base = hsl(hues[k], 0.85, 0.6);
+      let al = cur < 0 ? 0.75 : (k === cur ? 1 : 0.32);
+      if (g > 0) al *= 1 - 0.55 * g;
+      for (const e of c.before) {
+        const tone = e[2] === 0 ? 1 : 0.42, wd = e[2] === 0 ? 2.2 : 1.6;
+        let L = posL(e[1]);
+        if (e[1] === c.s && f > 0) { const Lp = posL(p); L = [L[0] + (Lp[0] - L[0]) * f, L[1] + (Lp[1] - L[1]) * f]; }
+        seg(posH(e[0]), z, L, z, base, al * tone, e[1] === c.s && f > 0 && f < 1 ? 3.2 : wd);
+      }
+      // what the trade frees at leaf s, left behind on the base level
+      if (f > 0) {
+        seg(posH((W.a * c.s) % p), zb, posL(c.s), zb, GOLD, (0.35 + 0.65 * g) * f * pulse, 1.6 + 2 * g);
+        seg(posH((W.b * c.s) % p), zb, posL(c.s), zb, GREY, 0.55 * f, 1.4);
+      }
+    });
+    // diagonals: (s, s) for squares join the gold cycle; the rest stay single, with (0, new)
+    for (let h = 0; h < p; h++) {
+      const sq = SHIFTPAIR.chi(h, p) === 1;
+      if (sq && g > 0) seg(posH(h), zb, posL(h), zb, GOLD, g * pulse, 1.6 + 2 * g);
+      else seg(posH(h), zb, posL(h), zb, GREY, sq ? 0.55 * (1 - g) : 0.55, 1.4);
+    }
+    seg(posH(0), zb, posL(p), zb, GREY, 0.55, 1.4);
+    // state line
+    let phase;
+    if (t <= 0) phase = "before the trade";
+    else if (cur >= 0) phase = "trading colour s = " + W.colours[cur].s + " (" + (cur + 1) + " of " + n + "): leaf " + W.colours[cur].s + " -> new leaf";
+    else phase = g < 1 ? "the freed edges close up" : "the short cycle: " + (p - 1) + " edges in gold";
+    stateEl.textContent = "p = " + p + ", a = " + W.a + ", b = " + W.b + "  |  " + (p + 1) + " singletons, " + n +
+      " Hamilton " + (2 * p) + "-cycles, one " + (p - 1) + "-cycle  |  " + phase;
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (gl) gl.viewport(0, 0, w, h);
+    if (spin && !drag) yaw += dt * 0.25;
+    tower = reduced ? towerTarget : tower + (towerTarget - tower) * Math.min(1, dt * 1.8);
+    if (W && playing) { t += dt; if (t > endT() + THOLD) t = 0; }
+    const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, -0.1, -dist), mul(rotX(pitch), rotZ(yaw))));
+    if (W) buildEdges(); else { E = []; stateEl.textContent = ""; }
+    if (gl) drawGL(M, w, h, dpr); else draw2D(M, w, h, dpr);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
