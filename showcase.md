@@ -1065,6 +1065,8 @@ The collection claims a proof of Barnette's conjecture (1969): every planar grap
 
 **A Barnette tour.** One Hamiltonian cycle through the truncated octahedron, the Cayley graph of S4 on adjacent transpositions: 24 vertices, cubic, bipartite (the two colours alternate along every edge), planar (six squares and eight hexagons) and 3-connected, drawn by Tutte's method so no two edges cross. A single example illustrates the conjecture and is not evidence for the claimed proof. *Drawn by Confluence (45_barnette_tour.py); a Fixpoint reviewer checked cubic, bipartite, 3-connected (all 276 vertex pairs) and the face structure, parsed the 24 vertices and 36 edges out of the SVG, confirmed the highlighted tour is a Hamiltonian cycle, and regenerated the file byte for byte (ebc90689); Fixpoint re-ran the generator.*
 
+[Open the animated 3D version](barnette_tour.html) (drag to orbit)
+
 **Checked.**
 
 ![\text{Hamiltonian as claimed: } Q_3,\ C_{2k}\times K_2\ (k=3..6),\ \text{truncated octahedron},\ \text{truncated cuboctahedron},\ \text{refined-triangulation duals on } 32,\ 80,\ 128](formulas/f_2660e6e98a6a.svg)
