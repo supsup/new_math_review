@@ -138,11 +138,11 @@ if (typeof document !== "undefined") (function () {
   if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
 
   const n = S.data.length, GOLDEN = Math.PI * (3 - Math.sqrt(5)), lmax = Math.log1p(S.nmax);
-  const HMAX = 0.5, PIT = -0.2;
+  const HMAX = 0.5;   // a hole sits at floor height z = 0, as a dip in the relief, never below the base plane
   const STARS = S.data.map((d, i) => {
     const k = i + 1, r = Math.sqrt(k / n), a = k * GOLDEN;
     const b = d.N ? Math.log1p(d.N) / lmax : 0;
-    return { p: d.p, N: d.N, b, hole: d.N === 0, x: r * Math.cos(a), y: -r * Math.sin(a), z: d.N ? HMAX * b : PIT };
+    return { p: d.p, N: d.N, b, hole: d.N === 0, x: r * Math.cos(a), y: -r * Math.sin(a), z: d.N ? HMAX * b : 0 };
   });
 
   // the relief: a grid whose height is the max of a bump under each revealed star, minus a pit under each hole
@@ -154,7 +154,7 @@ if (typeof document !== "undefined") (function () {
     for (let v = 0; v < gx.length; v++) {
       const dx = gx[v] - s.x, dy = gy[v] - s.y, w = Math.exp(-(dx * dx + dy * dy) / SIG2);
       if (w < 1e-3) continue;
-      if (s.hole) hNeg[v] = Math.min(hNeg[v], PIT * 1.2 * w); else hPos[v] = Math.max(hPos[v], s.z * w);
+      if (s.hole) hNeg[v] = Math.max(hNeg[v], Math.min(1, 1.3 * w)); else hPos[v] = Math.max(hPos[v], s.z * w);
     }
   }
   const GRID = [];   // segments [v1, v2]
@@ -163,7 +163,7 @@ if (typeof document !== "undefined") (function () {
     if (i < GN && inside(v) && inside(v + 1)) GRID.push([v, v + 1]);
     if (j < GN && inside(v) && inside(v + GN + 1)) GRID.push([v, v + GN + 1]);
   }
-  const gh = v => hPos[v] + hNeg[v];
+  const gh = v => hPos[v] * (1 - hNeg[v]);   // a pit flattens the surrounding relief down to the floor
 
   const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let revealed = 0, revealAt = new Float32Array(n), growing = false, growT = 0, simT = 0;
@@ -181,17 +181,53 @@ if (typeof document !== "undefined") (function () {
     SCREEN = [];
     for (let i = 0; i < revealed; i++) { const s = STARS[i], q = proj(s.x, s.y, s.z * lift); SCREEN.push([q[0] / dpr, q[1] / dpr, i, q[2]]); }
     octx.textAlign = "center"; octx.textBaseline = "middle"; octx.lineJoin = "round";
+    // pits: modest markers at the hole's true floor position, sized with perspective (about 3 to 9 CSS px radius)
+    const minCss = Math.min(w, h) / dpr, PITS = [];
     for (const [x, y, i, cw] of SCREEN) {
       const s = STARS[i]; if (!s.hole) continue;
-      const X = x * dpr, Y = y * dpr, R = Math.max(7 * dpr, 13 * scale / cw);
-      const gh2 = octx.createRadialGradient(X, Y, 0, X, Y, R);
+      const R = Math.max(3, Math.min(9, 4.2 * (3.6 / cw) * Math.sqrt(minCss / 800)));
+      PITS.push({ i, x, y, R, p: s.p });
+      const X = x * dpr, Y = y * dpr, Rd = R * dpr;
+      const gh2 = octx.createRadialGradient(X, Y, 0, X, Y, Rd);
       gh2.addColorStop(0, "#0a0110"); gh2.addColorStop(0.7, "#1a0322"); gh2.addColorStop(1, "#3a0646");
-      octx.fillStyle = gh2; octx.beginPath(); octx.arc(X, Y, R, 0, 2 * Math.PI); octx.fill();
-      octx.strokeStyle = "rgba(255,214,255,0.95)"; octx.lineWidth = 1.4 * dpr; octx.beginPath(); octx.arc(X, Y, R * 1.19, 0, 2 * Math.PI); octx.stroke();
-      octx.font = (12 * dpr) + "px Georgia, serif";
-      const ty = Y - R * 1.19 - 9 * dpr;
-      octx.strokeStyle = "#14021a"; octx.lineWidth = 3.5 * dpr; octx.strokeText(String(s.p), X, ty);
-      octx.fillStyle = "#ffe6ff"; octx.fillText(String(s.p), X, ty);
+      octx.fillStyle = gh2; octx.beginPath(); octx.arc(X, Y, Rd, 0, 2 * Math.PI); octx.fill();
+      octx.strokeStyle = "rgba(255,214,255,0.95)"; octx.lineWidth = 1.2 * dpr; octx.beginPath(); octx.arc(X, Y, Rd * 1.25, 0, 2 * Math.PI); octx.stroke();
+    }
+    // labels: none dropped, all nine nudged apart; near edge-on they shrink and fade (the hovered one stays full)
+    const tilt = 1.55 - Math.abs(pitch), fs = tilt < 0.3 ? 9 : tilt < 0.6 ? 10 : 12, fade = tilt < 0.3 ? 0.75 : 1;
+    const shown = PITS;
+    octx.font = (fs * dpr) + "px Georgia, serif";
+    const L = shown.map(P => { const lw = octx.measureText(String(P.p)).width / dpr + 6, lh = fs + 3;
+      return { P, w: lw, h: lh, hx: P.x, hy: P.y - P.R * 1.25 - lh / 2 - 3, x: P.x, y: P.y - P.R * 1.25 - lh / 2 - 3 }; });
+    for (let it = 0; it < 60; it++) {   // simple screen-space relaxation: labels push off each other and off every pit
+      let moved = false;
+      for (let a = 0; a < L.length; a++) {
+        for (let b = a + 1; b < L.length; b++) {
+          const A = L[a], B = L[b], ox = (A.w + B.w) / 2 - Math.abs(A.x - B.x), oy = (A.h + B.h) / 2 - Math.abs(A.y - B.y);
+          if (ox <= 0 || oy <= 0) continue;
+          moved = true;
+          if (oy <= ox) { const d = (A.y < B.y || (A.y === B.y && a < b) ? -1 : 1) * (oy / 2 + 0.5); A.y += d; B.y -= d; }
+          else { const d = (A.x < B.x || (A.x === B.x && a < b) ? -1 : 1) * (ox / 2 + 0.5); A.x += d; B.x -= d; }
+        }
+        for (const P of PITS) {
+          const A = L[a], r = P.R * 1.25 + 1, ox = A.w / 2 + r - Math.abs(A.x - P.x), oy = A.h / 2 + r - Math.abs(A.y - P.y);
+          if (ox <= 0 || oy <= 0) continue;
+          moved = true; A.y += (A.y <= P.y ? -1 : 1) * (oy + 0.5);
+        }
+      }
+      if (!moved) break;
+    }
+    for (const l of L) {
+      l.x = Math.max(l.w / 2 + 2, Math.min(w / dpr - l.w / 2 - 2, l.x)); l.y = Math.max(l.h / 2 + 2, Math.min(h / dpr - l.h / 2 - 2, l.y));
+      if (Math.hypot(l.x - l.hx, l.y - l.hy) > 3) {   // a thin leader line back to the pit when the label was moved
+        octx.strokeStyle = "rgba(255,214,255,0.7)"; octx.lineWidth = 1 * dpr; octx.beginPath();
+        octx.moveTo(l.x * dpr, (l.y + (l.y < l.P.y ? l.h / 2 : -l.h / 2)) * dpr); octx.lineTo(l.P.x * dpr, l.P.y * dpr); octx.stroke();
+      }
+      octx.globalAlpha = l.P.i === hoverI ? 1 : fade;
+      octx.fillStyle = "rgba(20,2,26,0.78)";
+      octx.fillRect((l.x - l.w / 2) * dpr, (l.y - l.h / 2) * dpr, l.w * dpr, l.h * dpr);
+      octx.fillStyle = "#ffe6ff"; octx.fillText(String(l.P.p), l.x * dpr, (l.y + 0.5) * dpr);
+      octx.globalAlpha = 1;
     }
     if (hoverI >= 0 && hoverI < revealed) {   // ring the star the tooltip describes
       const q = proj(STARS[hoverI].x, STARS[hoverI].y, STARS[hoverI].z * lift);
@@ -249,8 +285,8 @@ if (typeof document !== "undefined") (function () {
     let o = 0;
     const push = (x, y, z, r, g, b, a) => { out[o++] = x; out[o++] = y; out[o++] = z; out[o++] = r; out[o++] = g; out[o++] = b; out[o++] = a; out[o++] = 1; };
     for (const [u, v] of GRID) {
-      const hu = gh(u), hv = gh(v), hm = 0.5 * (hu + hv);
-      const a = 0.06 + 0.34 * Math.max(0, hm) / HMAX, c = hm < -0.01 ? [0.35, 0.08, 0.45] : [1.0, 0.62, 0.95];
+      const hu = gh(u), hv = gh(v), hm = 0.5 * (hu + hv), pw = 0.5 * (hNeg[u] + hNeg[v]);
+      const a = 0.06 + 0.34 * Math.max(0, hm) / HMAX, c = pw > 0.5 ? [0.35, 0.08, 0.45] : [1.0, 0.62, 0.95];
       push(gx[u], gy[u], hu, c[0], c[1], c[2], a); push(gx[v], gy[v], hv, c[0], c[1], c[2], a);
     }
     for (let i = 0; i < revealed; i++) {   // a faint stem under each star, and the spiral order on the floor
@@ -273,6 +309,12 @@ if (typeof document !== "undefined") (function () {
   const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
 
   let yaw = 0, pitch = -0.95, dist = 3.6, spin = !reduced, liftTarget = 1, lift = reduced ? 1 : 0;
+  (function () {   // optional view in the URL, e.g. #pitch=-0.05&yaw=1 (pitch 0 is top-down, -1.55 is edge-on)
+    const h = (typeof location !== "undefined" && location.hash) || "";
+    const mp = /pitch=(-?[0-9.]+)/.exec(h), my = /yaw=(-?[0-9.]+)/.exec(h);
+    if (mp && isFinite(+mp[1])) pitch = Math.max(-1.55, Math.min(0, +mp[1]));
+    if (my && isFinite(+my[1])) yaw = +my[1];
+  })();
   const stateEl = document.getElementById("state");
   function toggle(id, on) { document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false"); }
   document.getElementById("bRelief").onclick = () => { liftTarget = liftTarget ? 0 : 1; toggle("bRelief", liftTarget); };
