@@ -32,20 +32,23 @@
 </style>
 </head>
 <body>
-<canvas id="c" aria-label="Animated 3D relief of the primes p = 1 mod 4 up to 3000 on a sunflower spiral, height log(1 + N(p)), with nine dark pits"></canvas>
+<canvas id="c" aria-label="Animated 3D relief of the 766 primes p = 1 mod 4 up to 13000 on a sunflower spiral, height log(1 + N(p)), with ten dark pits"></canvas>
 <div id="hud">
   <h1>The two-scalar sky</h1>
-  <p>Each star is one prime p = 1 mod 4, from 5 up to 3000. Small primes sit near the centre and larger ones further
-  out; the angle carries no meaning, it is only a sunflower layout that spreads the stars evenly. The brighter and
-  taller a star, the more two-scalar pages its prime has. Nine primes have none at all by this method, and they sink
-  as dark pits. Hover or tap a star for its count; drag to orbit, scroll to zoom. The page recomputes every count and
-  checks the nine before it draws. (Height is log(1 + N(p)); N(p) counts ordered nonsquare pairs (lambda, mu) in one odd
-  coset of H with chi((lambda-1)(mu-1)) = -1, (1+mu)/(1+lambda) in H, (lambda mu)^(M/2) generating H.)</p>
+  <p>Each star is a prime p = 1 mod 4 up to 13000 (766 of them); larger primes sit further out, so 3000 to 13000 is the
+  wide outer band. Brighter and taller means more two-scalar pages. Ten primes have none and sink as dark pits: the
+  Fermat primes and the primes 3 * 2^k + 1, where the count is provably zero, plus the unexplained 577 and 641. The
+  outermost pit, 12289 = 3 * 2^12 + 1, was predicted by the rule and the count confirms it; no other prime past 3000 is
+  a pit. Counts: an exact C table (it matched the Python reference on all 211 primes to 3000), re-derived live here for
+  every pit, every prime to 300 and every 25th above before drawing. Hover for a count; drag to orbit, scroll to zoom.</p>
 </div>
 <canvas id="ov" aria-hidden="true"></canvas>
 <div id="tip" role="status"></div>
 <div id="legend"><b>each star:</b> a prime p = 1 mod 4<br><b>brighter and taller:</b> more two-scalar pages<br>
-<b>dark pit:</b> none<br><b>distance from the centre</b> grows with p (the angle means nothing, it is only a sunflower layout)</div>
+<b>dark pit:</b> none: a Fermat prime (5, 17, 257), a prime 3 * 2^k + 1 (13, 97, 193, 769, 12289), or the unexplained 577, 641<br>
+<b>distance from the centre</b> grows with p, out to 13000 (the angle means nothing, it is only a sunflower layout)<br>
+<b>counts:</b> exact C table, re-derived live on a sample<br>
+<b>N(p):</b> ordered nonsquare pairs (lambda, mu) in one odd coset of H with chi((lambda-1)(mu-1)) = -1, (1+mu)/(1+lambda) in H, (lambda mu)^(M/2) generating H; height log(1 + N(p))</div>
 <div id="state"></div>
 <div id="bar">
   <button id="bRelief" aria-pressed="true">Relief</button>
@@ -57,9 +60,110 @@
 "use strict";
 /* ---------- the mathematics (no drawing) ---------- */
 const SKY = (function () {
-  const LIMIT = 3000;
-  const EXPECTED_EMPTY = [5, 13, 17, 97, 193, 257, 577, 641, 769];
-  const KNOWN = { 41: 4, 73: 20, 89: 16, 113: 12, 29: 12, 197: 532 };   // spot values from the probe's own output
+  const LIMIT = 13000;
+  // the pits: Fermat primes (t = 1), primes 3 * 2^k + 1 (t = 3), and the unexplained 577 (t = 9) and 641 (t = 5)
+  const EXPECTED_EMPTY = [5, 13, 17, 97, 193, 257, 577, 641, 769, 12289];
+  const KNOWN = { 41: 4, 73: 20, 89: 16, 113: 12, 29: 12, 197: 532, 2957: 136240 };   // probe and reference values
+  // N(p) for every prime p = 1 mod 4 up to 13000, as flat pairs p, N(p). Computed by an exact C port of
+  // two_scalar_count (46_two_scalar_sky.py), which matched the Python reference on all 211 primes up to 3000.
+  const TABLE = [
+    5,0,13,0,17,0,29,12,37,12,41,4,53,40,61,28,
+    73,20,89,16,97,0,101,140,109,84,113,12,137,64,149,340,
+    157,236,173,408,181,284,193,0,197,532,229,500,233,228,241,24,
+    257,0,269,1120,277,740,281,216,293,1240,313,148,317,1572,337,44,
+    349,1156,353,8,373,1372,389,2332,397,1492,401,112,409,424,421,1200,
+    433,108,449,4,457,528,461,2496,509,3940,521,724,541,2384,557,4840,
+    569,1188,577,0,593,324,601,696,613,3632,617,1112,641,0,653,6560,
+    661,3256,673,64,677,6388,701,5324,709,5088,733,5288,757,5044,761,1676,
+    769,0,773,9252,797,9884,809,2432,821,8208,829,6924,853,7388,857,2788,
+    877,7844,881,552,929,168,937,2120,941,10768,953,2820,977,872,997,10180,
+    1009,576,1013,13848,1021,7928,1033,2704,1049,4188,1061,13704,1069,11676,1093,9804,
+    1097,4576,1109,19028,1117,12580,1129,3156,1153,4,1181,17208,1193,5448,1201,672,
+    1213,15080,1217,72,1229,23360,1237,15768,1249,224,1277,22296,1289,5180,1297,1096,
+    1301,19288,1321,3396,1361,1368,1373,25068,1381,15312,1409,8,1429,16960,1433,7908,
+    1453,20008,1481,6704,1489,1292,1493,34828,1549,24240,1553,2280,1597,20988,1601,84,
+    1609,6396,1613,36400,1621,21684,1637,41740,1657,6848,1669,28760,1693,28948,1697,576,
+    1709,38728,1721,8832,1733,46780,1741,24144,1753,7836,1777,1980,1789,33028,1801,6760,
+    1861,27416,1873,2064,1877,46232,1889,796,1901,42764,1913,14044,1933,31952,1949,59116,
+    1973,55136,1993,10128,1997,62304,2017,524,2029,39304,2053,41724,2069,59716,2081,728,
+    2089,10800,2113,160,2129,3400,2137,11496,2141,56360,2153,17944,2161,2532,2213,64420,
+    2221,40020,2237,70888,2269,45684,2273,1176,2281,10296,2293,54340,2297,16792,2309,82596,
+    2333,75920,2341,42624,2357,79760,2377,13560,2381,57304,2389,58924,2393,19228,2417,5616,
+    2437,51240,2441,18376,2473,15836,2477,95880,2521,11368,2549,79916,2557,67192,2593,1092,
+    2609,6308,2617,17364,2621,85212,2633,22416,2657,1504,2677,74328,2689,92,2693,113244,
+    2713,18760,2729,25236,2741,93360,2749,78076,2753,296,2777,29696,2789,111860,2797,80496,
+    2801,5464,2833,5020,2837,125376,2857,16940,2861,86032,2897,8008,2909,131020,2917,87944,
+    2953,22136,2957,136240,2969,29044,3001,19060,3037,84144,3041,1620,3049,23584,3061,72580,
+    3089,9112,3109,83884,3121,4560,3137,512,3169,1420,3181,83024,3209,40128,3217,6644,
+    3221,106084,3229,108068,3253,109872,3257,36760,3301,82464,3313,6752,3329,36,3361,1212,
+    3373,118136,3389,139356,3413,181804,3433,25932,3449,46312,3457,124,3461,148684,3469,117696,
+    3517,128268,3529,27780,3533,194784,3541,102716,3557,167876,3581,158960,3593,50020,3613,113640,
+    3617,2908,3637,136188,3673,32672,3677,210892,3697,6952,3701,166744,3709,140724,3733,143876,
+    3761,10740,3769,36772,3793,9028,3797,204528,3821,181160,3833,57180,3853,153040,3877,139504,
+    3881,46380,3889,9772,3917,214780,3929,59264,3989,248676,4001,3016,4013,232640,4021,132248,
+    4049,14052,4057,39444,4073,64784,4093,152964,4129,2700,4133,266752,4153,44760,4157,268820,
+    4177,10788,4201,30972,4217,62996,4229,238068,4241,13768,4253,282220,4261,148252,4273,11500,
+    4289,1008,4297,47456,4337,18212,4349,294484,4357,179332,4373,298168,4397,257876,4409,69216,
+    4421,210876,4441,40204,4457,76548,4481,148,4493,315088,4513,3008,4517,318480,4549,215012,
+    4561,10180,4597,219444,4621,138108,4637,312776,4649,71548,4657,13576,4673,1276,4721,17004,
+    4729,58384,4733,276512,4789,193620,4793,89648,4801,916,4813,239796,4817,18632,4861,196664,
+    4877,349032,4889,84392,4909,249096,4933,251484,4937,94240,4957,215832,4969,61404,4973,348128,
+    4993,224,5009,23620,5021,313040,5077,262680,5081,79972,5101,203560,5113,67228,5153,5352,
+    5189,420612,5197,280332,5209,58492,5233,17696,5237,315284,5261,343452,5273,108460,5281,3132,
+    5297,27196,5309,438340,5333,418640,5381,361872,5393,28216,5413,269672,5417,113376,5437,306092,
+    5441,1308,5449,77076,5477,455572,5501,343916,5521,15040,5557,319952,5569,1172,5573,413020,
+    5581,250736,5641,64124,5653,329740,5657,105480,5669,458988,5689,83056,5693,505812,5701,256580,
+    5717,510044,5737,85808,5741,345036,5749,341956,5801,101796,5813,527532,5821,279484,5849,122660,
+    5857,5316,5861,427052,5869,356604,5881,60980,5897,120256,5953,1612,5981,394556,6029,512708,
+    6037,378964,6053,532996,6073,84312,6089,144072,6101,456832,6113,8788,6121,73616,6133,331916,
+    6173,594172,6197,598824,6217,84120,6221,482492,6229,400944,6257,34256,6269,613364,6277,409908,
+    6301,281872,6317,623592,6329,132532,6337,1420,6353,38408,6361,83536,6373,415724,6389,636316,
+    6397,383632,6421,338880,6449,35996,6469,339020,6473,162884,6481,21312,6521,132536,6529,428,
+    6553,87568,6569,168000,6577,27588,6581,452652,6637,388640,6653,691012,6661,360344,6673,28400,
+    6689,8964,6701,552820,6709,422808,6733,404352,6737,43828,6761,131820,6781,378988,6793,119496,
+    6829,484124,6833,38376,6841,92080,6857,183176,6869,685204,6917,559628,6949,499736,6961,24504,
+    6977,2932,6997,453044,7001,131400,7013,765880,7057,27516,7069,477200,7109,789716,7121,39172,
+    7129,119492,7177,118380,7193,187820,7213,541284,7229,748336,7237,536640,7253,686120,7297,452,
+    7309,460664,7321,110152,7333,505740,7349,763604,7369,140860,7393,6640,7417,141516,7433,214056,
+    7457,13236,7477,493652,7481,148484,7489,2108,7517,881260,7529,220884,7537,36020,7541,631912,
+    7549,542976,7561,102356,7573,596272,7577,223560,7589,769492,7621,480296,7649,13948,7669,604116,
+    7673,195684,7681,28,7717,618048,7741,487248,7753,138472,7757,801568,7789,565372,7793,58820,
+    7817,237880,7829,898820,7841,10212,7853,883636,7873,2440,7877,876508,7901,770264,7933,653524,
+    7937,216,7949,986800,7993,160908,8009,179716,8017,40748,8053,603944,8069,1015288,8081,50060,
+    8089,170332,8093,825344,8101,546104,8117,1028272,8161,8080,8209,41252,8221,557448,8233,150640,
+    8237,1007260,8269,644668,8273,58656,8293,715196,8297,248196,8317,561188,8329,180520,8353,10896,
+    8369,67672,8377,181416,8389,729496,8429,926932,8461,584748,8501,849768,8513,3596,8521,148964,
+    8537,255420,8573,1147252,8581,514328,8597,985752,8609,17712,8629,774788,8641,2192,8669,1061176,
+    8677,780216,8681,195424,8689,48816,8693,1130308,8713,179224,8737,9088,8741,864508,8753,74612,
+    8761,157200,8821,555244,8837,1194632,8849,63980,8861,978672,8893,719904,8929,12284,8933,937728,
+    8941,662044,8969,292808,9001,168384,9013,844620,9029,1215144,9041,63428,9049,190624,9109,751136,
+    9133,867764,9137,81512,9157,740940,9161,261296,9173,1313112,9181,658560,9209,331540,9221,1058264,
+    9241,137656,9257,305792,9277,894464,9281,4064,9293,1277716,9337,226964,9341,1087724,9349,840696,
+    9377,21268,9397,888580,9413,1271140,9421,735208,9433,229452,9437,1189604,9461,992380,9473,356,
+    9497,352480,9521,56668,9533,1420068,9601,716,9613,954520,9629,1380116,9649,59160,9661,636924,
+    9677,1401044,9689,311484,9697,14696,9721,196216,9733,984812,9749,1484272,9769,220136,9781,791748,
+    9817,251432,9829,796264,9833,377960,9857,1140,9901,741772,9929,357608,9941,1043944,9949,1028724,
+    9973,1030416,10009,257840,10037,1443480,10061,1261072,10069,1053748,10093,1024860,10133,1500740,10141,792116,
+    10169,380928,10177,3892,10181,1292580,10193,80504,10253,1486404,10273,16920,10289,103200,10301,1313008,
+    10313,413912,10321,54492,10333,929244,10337,23164,10357,1115688,10369,1072,10429,1017104,10433,6500,
+    10453,1035324,10457,426236,10477,1129164,10501,788348,10513,70500,10529,22692,10589,1750956,10597,1170508,
+    10601,344976,10613,1501828,10657,18040,10709,1790716,10729,298016,10733,1794648,10753,64,10781,1132948,
+    10789,1130728,10837,1024296,10853,1838844,10861,975140,10889,461532,10909,1223864,10937,465148,10949,1447864,
+    10957,1122284,10973,1726632,10993,78204,11057,118656,11069,1912660,11093,1849656,11113,322520,11117,1649532,
+    11149,1294064,11161,250404,11173,1055836,11177,439620,11197,1300040,11213,1961760,11257,278976,11261,1582408,
+    11273,496560,11317,1243896,11321,398236,11329,4976,11353,296300,11369,418308,11393,1660,11437,1358276,
+    11489,32068,11497,344304,11549,2082396,11593,286912,11597,1930276,11617,20056,11621,1430440,11633,131852,
+    11657,501876,11677,1206416,11681,25924,11689,355652,11701,1053792,11717,2050020,11777,112,11789,1858852,
+    11801,429316,11813,2178144,11821,1159080,11833,332272,11897,552192,11909,2031644,11933,2094080,11941,1182096,
+    11953,92112,11969,7520,11981,1792176,12037,1390920,12041,380292,12049,93960,12073,378764,12097,5200,
+    12101,1664792,12109,1521744,12113,142996,12149,2306176,12157,1536236,12161,1656,12197,2324164,12241,72996,
+    12253,1562332,12269,2351880,12277,1379252,12281,468480,12289,0,12301,1228164,12329,559420,12373,1594724,
+    12377,445272,12401,115172,12409,356092,12413,2303684,12421,1230104,12433,84196,12437,2414940,12457,400240,
+    12473,607040,12497,136704,12517,1389156,12541,1127932,12553,410496,12569,617252,12577,25268,12589,1647004,
+    12601,283868,12613,1656276,12637,1534732,12641,30232,12653,2500504,12689,140864,12697,402216,12713,539180,
+    12721,82280,12757,1694000,12781,1342868,12809,638728,12821,2053128,12829,1712160,12841,338884,12853,1387272,
+    12889,428560,12893,2348196,12917,2605324,12941,2089300,12953,654504,12973,1640764
+  ];
   const fail = [];
   const isPrime = n => { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
   function primeFactors(n) {
@@ -68,7 +172,7 @@ const SKY = (function () {
     if (n > 1) fs.push(n);
     return fs;
   }
-  function powmod(b, e, m) {   // all values < 3000, so products stay far below 2^53
+  function powmod(b, e, m) {   // all values < 13000, so products stay below 2^28, far below 2^53
     let r = 1; b %= m;
     while (e > 0) { if (e & 1) r = r * b % m; b = b * b % m; e >>= 1; }
     return r;
@@ -78,53 +182,65 @@ const SKY = (function () {
     for (let g = 2; g < p; g++) if (fs.every(f => powmod(g, (p - 1) / f, p) !== 1)) return g;
     return -1;
   }
+  function split(p) { let q = p - 1, M = 1; while (q % 2 === 0) { q /= 2; M *= 2; } return { M, t: q }; }
   // exact count of ordered pairs (lambda, mu) satisfying (i), (ii), (iii); a line-by-line port of
   // two_scalar_count in 46_two_scalar_sky.py
   function twoScalarCount(p) {
     const g = primRoot(p);
-    let q = p - 1, M = 1;
-    while (q % 2 === 0) { q /= 2; M *= 2; }
-    const t = q;
+    const { M, t } = split(p);
     const log = new Int32Array(p);
     for (let i = 0, x = 1; i < p - 1; i++, x = x * g % p) log[x] = i;
-    const H = [];
-    for (let i = 0; i < t; i++) H.push(powmod(g, M * i, p));
+    const H = new Int32Array(t);
+    for (let i = 0; i < t; i++) H[i] = powmod(g, M * i, p);
     if (new Set(H).size !== t || !H.every(h => powmod(h, t, p) === 1)) fail.push("H wrong at p = " + p);
-    const tf = primeFactors(t);
+    const tf = primeFactors(t), mm = M - 1;   // M is a power of two, so x % M is x & (M - 1) for x >= 0
+    // (iii) tabulated once per p: gen[h] = 1 exactly when h in H has order t (h^(t/f) != 1 for every prime f | t)
+    const gen = new Uint8Array(p);
+    for (let j = 0; j < t; j++) gen[H[j]] = tf.some(f => powmod(H[j], t / f, p) === 1) ? 0 : 1;
     let count = 0;
     for (let lam = 2; lam < p - 1; lam++) {
-      if (log[lam] % 2 === 0) continue;                 // lambda must be a nonsquare
-      const s = log[lam] % M;                           // its coset index, odd
-      for (const h of H) {
-        const mu = ((1 + lam) * h - 1) % p;             // (ii) by construction
-        if (mu === 0 || log[mu] % M !== s) continue;    // mu in the same coset lambda H
-        if (log[(lam - 1) * (mu - 1) % p] % 2 === 0) continue;   // (i) chi((lambda-1)(mu-1)) = -1
+      if ((log[lam] & 1) === 0) continue;               // lambda must be a nonsquare
+      const s = log[lam] & mm, l1 = 1 + lam;            // its coset index (log mod M), odd
+      for (let j = 0; j < t; j++) {
+        const mu = (l1 * H[j] - 1) % p;                 // (ii) by construction: (1 + mu)/(1 + lambda) = H[j] in H
+        if (mu === 0 || (log[mu] & mm) !== s) continue; // mu in the same coset lambda H
+        if ((log[(lam - 1) * (mu - 1) % p] & 1) === 0) continue; // (i) chi((lambda-1)(mu-1)) = -1
         const rho = powmod(lam * mu % p, M / 2, p);
-        if (log[rho] % M !== 0) fail.push("rho outside H at p = " + p);
-        if (tf.some(f => powmod(rho, t / f, p) === 1)) continue;  // (iii) rho has order exactly t
+        if ((log[rho] & mm) !== 0) fail.push("rho outside H at p = " + p);
+        if (!gen[rho]) continue;                        // (iii) rho has order exactly t
         count++;
       }
     }
     return { N: count, M, t };
   }
+  // the embedded table, checked against the primes it should list
   const data = [];
-  for (let p = 5; p <= LIMIT; p++) if (p % 4 === 1 && isPrime(p)) {
-    const r = twoScalarCount(p);
-    data.push({ p, N: r.N, M: r.M, t: r.t });
-  }
+  for (let i = 0; i < TABLE.length; i += 2) { const p = TABLE[i], st = split(p); data.push({ p, N: TABLE[i + 1], M: st.M, t: st.t }); }
+  const primes = [];
+  for (let p = 5; p <= LIMIT; p++) if (p % 4 === 1 && isPrime(p)) primes.push(p);
+  if (data.map(d => d.p).join(",") !== primes.join(",")) fail.push("table does not list exactly the primes p = 1 mod 4 up to " + LIMIT);
+  if (data.length !== 766) fail.push("expected 766 primes p = 1 mod 4 up to 13000, got " + data.length);
   const empty = data.filter(d => d.N === 0).map(d => d.p);
   if (empty.join(",") !== EXPECTED_EMPTY.join(","))
     fail.push("empty set is {" + empty.join(", ") + "}, expected {" + EXPECTED_EMPTY.join(", ") + "}");
   data.forEach(d => {
     if (d.t === 1 && d.N !== 0) fail.push("Fermat prime " + d.p + " carries a page");
+    if (d.t === 3 && d.N !== 0) fail.push("3 * 2^k + 1 prime " + d.p + " carries a page");
     if (d.N % 2 !== 0) fail.push("odd count at p = " + d.p + " (pairs come in swapped twins)");
+    if (d.N === 0 && d.t !== 1 && d.t !== 3 && d.p !== 577 && d.p !== 641) fail.push("unexplained new pit at p = " + d.p);
   });
   const byP = {}; data.forEach(d => { byP[d.p] = d.N; });
-  Object.keys(KNOWN).forEach(p => { if (byP[p] !== KNOWN[p]) fail.push("N(" + p + ") = " + byP[p] + ", probe says " + KNOWN[p]); });
-  if (data.length !== 211) fail.push("expected 211 primes p = 1 mod 4 up to 3000, got " + data.length);
+  Object.keys(KNOWN).forEach(p => { if (byP[p] !== KNOWN[p]) fail.push("N(" + p + ") = " + byP[p] + ", reference says " + KNOWN[p]); });
+  // live cross-check: recompute every pit, every prime up to 300, and every 25th prime above 300
+  const t0 = (typeof performance !== "undefined" ? performance : Date).now();
+  const sample = [];
+  let above = 0;
+  data.forEach(d => { if (d.N === 0 || d.p <= 300) sample.push(d.p); else if (above++ % 25 === 0) sample.push(d.p); });
+  sample.forEach(p => { const r = twoScalarCount(p); if (r.N !== byP[p]) fail.push("live N(" + p + ") = " + r.N + ", table says " + byP[p]); });
+  const checkMs = (typeof performance !== "undefined" ? performance : Date).now() - t0;
   let nmax = 0, pmax = 0;
   data.forEach(d => { if (d.N > nmax) { nmax = d.N; pmax = d.p; } });
-  return { LIMIT, data, empty, nmax, pmax, byP, twoScalarCount, fail };
+  return { LIMIT, data, empty, nmax, pmax, byP, twoScalarCount, sample, checkMs, fail };
 })();
 if (typeof module !== "undefined") module.exports = SKY;   // lets node test the block above
 
@@ -138,6 +254,7 @@ if (typeof document !== "undefined") (function () {
   if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
 
   const n = S.data.length, GOLDEN = Math.PI * (3 - Math.sqrt(5)), lmax = Math.log1p(S.nmax);
+  const DENS = Math.sqrt(211 / n);   // halo size shrinks with star density so the outer band does not saturate
   const HMAX = 0.5;   // a hole sits at floor height z = 0, as a dip in the relief, never below the base plane
   const STARS = S.data.map((d, i) => {
     const k = i + 1, r = Math.sqrt(k / n), a = k * GOLDEN;
@@ -146,7 +263,7 @@ if (typeof document !== "undefined") (function () {
   });
 
   // the relief: a grid whose height is the max of a bump under each revealed star, minus a pit under each hole
-  const GN = 60, EXT = 1.12, SIG2 = 0.007;
+  const GN = 60, EXT = 1.12, SIG2 = 0.0035;   // narrower bumps: 766 stars are 3.6 times denser than 211
   const gx = [], gy = [], hPos = new Float32Array((GN + 1) * (GN + 1)), hNeg = new Float32Array((GN + 1) * (GN + 1));
   for (let j = 0; j <= GN; j++) for (let i = 0; i <= GN; i++) { gx.push(-EXT + 2 * EXT * i / GN); gy.push(-EXT + 2 * EXT * j / GN); }
   const inside = v => gx[v] * gx[v] + gy[v] * gy[v] <= 1.1 * 1.1;
@@ -193,7 +310,7 @@ if (typeof document !== "undefined") (function () {
       octx.fillStyle = gh2; octx.beginPath(); octx.arc(X, Y, Rd, 0, 2 * Math.PI); octx.fill();
       octx.strokeStyle = "rgba(255,214,255,0.95)"; octx.lineWidth = 1.2 * dpr; octx.beginPath(); octx.arc(X, Y, Rd * 1.25, 0, 2 * Math.PI); octx.stroke();
     }
-    // labels: none dropped, all nine nudged apart; near edge-on they shrink and fade (the hovered one stays full)
+    // labels: none dropped, all ten nudged apart; near edge-on they shrink and fade (the hovered one stays full)
     const tilt = 1.55 - Math.abs(pitch), fs = tilt < 0.3 ? 9 : tilt < 0.6 ? 10 : 12, fade = tilt < 0.3 ? 0.75 : 1;
     const shown = PITS;
     octx.font = (fs * dpr) + "px Georgia, serif";
@@ -336,10 +453,10 @@ if (typeof document !== "undefined") (function () {
   canvas.addEventListener("pointerleave", () => { hoverI = -1; tip.style.display = "none"; });
   canvas.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(1.8, Math.min(9, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
 
-  const GROW_RATE = reduced ? 1e9 : 9;   // primes per second in grow mode
+  const GROW_RATE = reduced ? 1e9 : 24;   // primes per second in grow mode
   let last = performance.now();
   function frame(now) {
-    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;   // a rAF stamp can precede the start time simT += dt;
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now; simT += dt;   // a rAF stamp can precede the start time
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
@@ -354,7 +471,8 @@ if (typeof document !== "undefined") (function () {
       const cur = STARS[revealed - 1], holes = STARS.slice(0, revealed).filter(s => s.hole).map(s => s.p);
       stateEl.textContent = "p = " + cur.p + ", N(p) = " + cur.N + (cur.hole ? "  (a hole)" : "") + "   |   " + revealed + " of " + n +
         " primes   |   holes so far: " + (holes.length ? holes.join(", ") : "none");
-    } else stateEl.textContent = "brightest: N(" + S.pmax + ") = " + S.nmax + "   |   holes: " + S.empty.join(", ");
+    } else stateEl.textContent = "brightest: N(" + S.pmax + ") = " + S.nmax + "   |   holes: " + S.empty.join(", ") +
+      "   |   " + S.sample.length + " counts re-derived live in " + Math.round(S.checkMs) + " ms";
 
     const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, 0.05, -dist), mul(rotX(pitch), rotZ(yaw))));
     const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
@@ -389,7 +507,7 @@ if (typeof document !== "undefined") (function () {
       for (const [i] of order) {
         const s = STARS[i], q = proj(s.x, s.y, s.z * lift);
         if (s.hole) continue;   // pits are drawn on the overlay, above everything
-        const R = (10 + 26 * s.b) * (1 + 1.5 * flash(i)) * scale / q[2], op = 0.45 * (0.25 + 0.75 * s.b);
+        const R = DENS * (10 + 26 * s.b) * (1 + 1.5 * flash(i)) * scale / q[2], op = 0.45 * (0.25 + 0.75 * s.b);
         ctx.globalCompositeOperation = "lighter";
         const g1 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
         g1.addColorStop(0, "rgba(255,255,255," + op + ")"); g1.addColorStop(0.18, "rgba(255,208,255," + (0.9 * op) + ")");
@@ -420,7 +538,7 @@ if (typeof document !== "undefined") (function () {
     bindV(lineBuf); gl.uniform1f(uMode, 0); gl.drawArrays(gl.LINES, 0, lineCount);
     const sd = [];
     for (const [i] of order) { const s = STARS[i];
-      if (!s.hole) sd.push(s.x, s.y, s.z, 1, 1, 1, 0.45 * (0.25 + 0.75 * s.b), (10 + 26 * s.b) * 2 * (1 + 1.5 * flash(i))); }
+      if (!s.hole) sd.push(s.x, s.y, s.z, 1, 1, 1, 0.45 * (0.25 + 0.75 * s.b), DENS * (10 + 26 * s.b) * 2 * (1 + 1.5 * flash(i))); }
     gl.bindBuffer(gl.ARRAY_BUFFER, starBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sd), gl.STREAM_DRAW);
     bindV(starBuf); gl.uniform1f(uMode, 1); gl.drawArrays(gl.POINTS, 0, sd.length / 8);
     drawOverlay(proj, scale, dpr, w, h);   // pits, rings, labels: a final pass above the WebGL relief
