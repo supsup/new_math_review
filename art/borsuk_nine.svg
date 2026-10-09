@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="470" viewBox="0 0 880 470">
+<rect width="880" height="470" fill="#fcfcfb"/>
+<text x="24.0" y="30.0" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#0b0b0b" text-anchor="start" font-weight="bold">Family 156: Borsuk's conjecture fails in dimension nine (as claimed)</text>
+<text x="24.0" y="46.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">Rank-one projectors of R^4 in the trace-one symmetric 4 x 4 matrices, Frobenius metric</text>
+<text x="24.0" y="62.0" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">A. Where Borsuk's bound fails</text>
+<text x="24.0" y="80.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">Record dimension (log scale) and the claimed 9</text>
+<line x1="60" y1="346.7" x2="250" y2="346.7" stroke="#e4e3df"/>
+<text x="54.0" y="350.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">10</text>
+<line x1="60" y1="244.7" x2="250" y2="244.7" stroke="#e4e3df"/>
+<text x="54.0" y="248.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">100</text>
+<line x1="60" y1="142.7" x2="250" y2="142.7" stroke="#e4e3df"/>
+<text x="54.0" y="146.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">1000</text>
+<line x1="60" y1="112" x2="60" y2="400" stroke="#52514e"/>
+<rect x="60" y="391.9" width="190" height="8.1" fill="#e8f3ec"/>
+<text x="66.0" y="394.0" font-family="Helvetica, Arial, sans-serif" font-size="9.5" fill="#1b6b3a" text-anchor="start" font-weight="normal">true for d = 1, 2, 3 (Perkal 1947, Eggleston 1955)</text>
+<circle cx="100" cy="130.2" r="4" fill="#2a78d6"/>
+<line x1="100" y1="130.2" x2="100" y2="145.2" stroke="#2a78d6" stroke-width="1.5"/>
+<circle cx="100" cy="145.2" r="4" fill="#2a78d6"/>
+<line x1="100" y1="145.2" x2="100" y2="196.3" stroke="#2a78d6" stroke-width="1.5"/>
+<circle cx="100" cy="196.3" r="4" fill="#2a78d6"/>
+<line x1="100" y1="196.3" x2="100" y2="263.8" stroke="#2a78d6" stroke-width="1.5"/>
+<circle cx="100" cy="263.8" r="4" fill="#2a78d6"/>
+<line x1="100" y1="263.8" x2="100" y2="264.5" stroke="#2a78d6" stroke-width="1.5"/>
+<circle cx="100" cy="264.5" r="4" fill="#2a78d6"/>
+<line x1="100" y1="264.5" x2="100" y2="265.2" stroke="#2a78d6" stroke-width="1.5"/>
+<circle cx="100" cy="265.2" r="4" fill="#2a78d6"/>
+<line x1="100" y1="265.2" x2="100" y2="351.3" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,3"/>
+<circle cx="100" cy="351.3" r="5" fill="#c0392b"/>
+<text x="112.0" y="134.2" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">1325  Kahn, Kalai 1993</text>
+<text x="112.0" y="149.2" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">946  Nilli 1994</text>
+<text x="112.0" y="200.3" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">298  Hinrichs, Richter 2003</text>
+<text x="112.0" y="267.8" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">65  Bondarenko 2014</text>
+<text x="112.0" y="280.8" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">64  Jenrich, Brouwer 2014</text>
+<text x="112.0" y="293.8" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#2a78d6" text-anchor="start" font-weight="normal">63  Grinsztajn 2026 (note)</text>
+<text x="112.0" y="355.3" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#c0392b" text-anchor="start" font-weight="bold">9  this preprint, claimed</text>
+<text x="24.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">Finite sets gave every record since 1993; the claimed</text>
+<text x="24.0" y="442.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">witness is the whole compact projector image of RP^3.</text>
+<text x="24.0" y="456.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#c0392b" text-anchor="start" font-weight="normal">Unverified outside the collection.</text>
+<text x="300.0" y="62.0" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">B. Distance between two projectors</text>
+<text x="300.0" y="80.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">||uu^T - vv^T||_F = sqrt(2 - 2 cos^2 theta)</text>
+<line x1="340" y1="290.7" x2="560" y2="290.7" stroke="#e4e3df"/>
+<text x="334.0" y="294.7" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="340" y1="201.3" x2="560" y2="201.3" stroke="#e4e3df"/>
+<text x="334.0" y="205.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">1.0</text>
+<line x1="340" y1="127.3" x2="560" y2="127.3" stroke="#e4e3df"/>
+<text x="334.0" y="131.3" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="end" font-weight="normal">sqrt 2</text>
+<line x1="340.0" y1="380" x2="340.0" y2="385" stroke="#52514e"/>
+<text x="340.0" y="399.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">0</text>
+<line x1="413.3" y1="380" x2="413.3" y2="385" stroke="#52514e"/>
+<text x="413.3" y="399.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">30</text>
+<line x1="486.7" y1="380" x2="486.7" y2="385" stroke="#52514e"/>
+<text x="486.7" y="399.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">60</text>
+<line x1="560.0" y1="380" x2="560.0" y2="385" stroke="#52514e"/>
+<text x="560.0" y="399.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">90</text>
+<line x1="340" y1="380" x2="560" y2="380" stroke="#52514e"/>
+<line x1="340" y1="112" x2="340" y2="380" stroke="#52514e"/>
+<text x="450.0" y="418.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="middle" font-weight="normal">angle theta between the lines (degrees)</text>
+<path d="M340.0,380.0 L352.2,358.0 L364.4,336.1 L376.7,314.6 L388.9,293.6 L401.1,273.2 L413.3,253.7 L425.6,235.1 L437.8,217.6 L450.0,201.3 L462.2,186.4 L474.4,173.0 L486.7,161.2 L498.9,151.0 L511.1,142.6 L523.3,135.9 L535.6,131.2 L547.8,128.3 L560.0,127.3" fill="none" stroke="#eb6834" stroke-width="2.5"/>
+<circle cx="560.0" cy="127.3" r="5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="552.0" y="117.3" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#eb6834" text-anchor="end" font-weight="normal">diameter, orthogonal lines</text>
+<text x="300.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">Checked on 5000 random pairs in R^4</text>
+<text x="300.0" y="442.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">(max error 3.0e-15) and on</text>
+<text x="300.0" y="456.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">28 rational pairs exactly. Set lives in R^9.</text>
+<text x="600.0" y="62.0" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">C. Peres' 24 rays: 5 pieces suffice</text>
+<text x="600.0" y="80.0" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">orthogonality graph: 108 edges, chromatic number 5</text>
+<line x1="735.0" y1="130.0" x2="849.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="794.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="651.6" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="849.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="621.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="837.2" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="632.8" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="651.6" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="130.0" x2="735.0" y2="366.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="794.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="651.6" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="794.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="765.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="818.4" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="632.8" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="651.6" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="217.5" x2="735.0" y2="366.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="651.6" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="765.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="853.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="818.4" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="632.8" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="837.2" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="350.2" x2="632.8" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="765.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="853.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="794.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="765.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="849.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="331.4" x2="621.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="853.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="651.6" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="735.0" y2="366.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="134.0" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="651.6" y2="164.6" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="735.0" y2="366.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="853.0" y1="248.0" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="765.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="837.2" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="632.8" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="794.0" y1="145.8" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="837.2" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="632.8" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="765.5" y1="362.0" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="632.8" y2="307.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="849.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="621.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="818.4" y1="164.6" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="849.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="621.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="307.0" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="278.5" x2="621.0" y2="217.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="278.5" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="278.5" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="278.5" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="849.0" y1="278.5" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="217.5" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="217.5" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="217.5" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="217.5" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="307.0" x2="632.8" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="307.0" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="307.0" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="307.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="307.0" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="189.0" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="189.0" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="189.0" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="632.8" y1="189.0" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="164.6" x2="735.0" y2="366.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="164.6" x2="621.0" y2="278.5" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="164.6" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="164.6" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="651.6" y1="164.6" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="366.0" x2="837.2" y2="189.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="366.0" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="366.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="735.0" y1="366.0" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="189.0" x2="676.0" y2="145.8" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="189.0" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="837.2" y1="189.0" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="278.5" x2="704.5" y2="362.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="278.5" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="621.0" y1="278.5" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="704.5" y1="362.0" x2="704.5" y2="134.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="704.5" y1="362.0" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="676.0" y1="145.8" x2="617.0" y2="248.0" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="676.0" y1="145.8" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="704.5" y1="134.0" x2="818.4" y2="331.4" stroke="#b9b8b3" stroke-width="0.8"/>
+<line x1="617.0" y1="248.0" x2="676.0" y2="350.2" stroke="#b9b8b3" stroke-width="0.8"/>
+<circle cx="735.0" cy="130.0" r="7" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 0, 0, 0), piece 1</title></circle>
+<circle cx="849.0" cy="217.5" r="7" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 1, 0, 0), piece 2</title></circle>
+<circle cx="794.0" cy="350.2" r="7" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 0, 1, 0), piece 3</title></circle>
+<circle cx="651.6" cy="331.4" r="7" fill="#eda100" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 0, 0, 1), piece 4</title></circle>
+<circle cx="765.5" cy="134.0" r="7" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 1, 0, 0), piece 1</title></circle>
+<circle cx="853.0" cy="248.0" r="7" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, -1, 0, 0), piece 2</title></circle>
+<circle cx="794.0" cy="145.8" r="7" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 0, 1, 0), piece 1</title></circle>
+<circle cx="765.5" cy="362.0" r="7" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 0, -1, 0), piece 3</title></circle>
+<circle cx="818.4" cy="164.6" r="7" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 0, 0, 1), piece 1</title></circle>
+<circle cx="632.8" cy="307.0" r="7" fill="#eda100" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 0, 0, -1), piece 4</title></circle>
+<circle cx="849.0" cy="278.5" r="7" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 1, 1, 0), piece 2</title></circle>
+<circle cx="621.0" cy="217.5" r="7" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 1, -1, 0), piece 5</title></circle>
+<circle cx="837.2" cy="307.0" r="7" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 1, 0, 1), piece 2</title></circle>
+<circle cx="632.8" cy="189.0" r="7" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 1, 0, -1), piece 5</title></circle>
+<circle cx="651.6" cy="164.6" r="7" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 0, 1, 1), piece 5</title></circle>
+<circle cx="735.0" cy="366.0" r="7" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"><title>ray (0, 0, 1, -1), piece 3</title></circle>
+<circle cx="837.2" cy="189.0" r="7" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 1, 1, 1), piece 1</title></circle>
+<circle cx="621.0" cy="278.5" r="7" fill="#eda100" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 1, 1, -1), piece 4</title></circle>
+<circle cx="704.5" cy="362.0" r="7" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 1, -1, 1), piece 3</title></circle>
+<circle cx="676.0" cy="145.8" r="7" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, 1, -1, -1), piece 5</title></circle>
+<circle cx="704.5" cy="134.0" r="7" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, -1, 1, 1), piece 5</title></circle>
+<circle cx="617.0" cy="248.0" r="7" fill="#eda100" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, -1, 1, -1), piece 4</title></circle>
+<circle cx="676.0" cy="350.2" r="7" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, -1, -1, 1), piece 3</title></circle>
+<circle cx="818.4" cy="331.4" r="7" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"><title>ray (1, -1, -1, -1), piece 2</title></circle>
+<text x="600.0" y="396.0" font-family="Helvetica, Arial, sans-serif" font-size="9.5" fill="#52514e" text-anchor="start" font-weight="normal">Rays up to sign: 4 of type (1,0,0,0), 12 of type (1,+-1,0,0),</text>
+<text x="600.0" y="409.0" font-family="Helvetica, Arial, sans-serif" font-size="9.5" fill="#52514e" text-anchor="start" font-weight="normal">8 of type (1,+-1,+-1,+-1). Colour = piece with no orthogonal pair.</text>
+<text x="600.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">No 4-colouring (exact search); independence number 5</text>
+<text x="600.0" y="442.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">gives the same bound 24/5. These 24 lines need 5 pieces;</text>
+<text x="600.0" y="456.0" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#52514e" text-anchor="start" font-weight="normal">the claim is that the full set of lines needs 11.</text>
+</svg>
