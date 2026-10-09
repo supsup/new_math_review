@@ -1023,6 +1023,8 @@ The collection claims a proof of Seymour's second-neighbourhood conjecture, stat
 
 **Seymour's tight heptagram.** The Paley tournament on seven vertices (an arrow from i to j when j - i is a nonzero square mod 7), where every vertex has exactly three out-neighbours (gold from vertex 0) and exactly three vertices at out-distance two (teal second legs), so Seymour's inequality holds with equality everywhere; a tight finite example, not evidence for the claimed proof. *Drawn by Confluence (44_seymour_heptagram.py); a Fixpoint reviewer rebuilt the tournament, checked |N+| = |N++| = 3 at every vertex, parsed the 21 arrows and the highlighted legs out of the SVG against that orientation, and regenerated the file byte for byte (b4beb52d); Fixpoint re-ran the generator.*
 
+[Open the animated 3D version](seymour_heptagram.html) (drag to orbit)
+
 **Checked.**
 
 ![\text{all oriented graphs on } n\le 6:\ 1,\ 3,\ 27,\ 729,\ 59{,}049,\ 14{,}348{,}907;\ \text{ every one has a good vertex (two independent codes)}](formulas/f_435120fe7522.svg)
