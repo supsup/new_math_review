@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760"
+ viewBox="0 0 1280 760" role="img" aria-labelledby="title description">
+<title id="title">Two cycle switches through the order-31 Steiner-system frontier</title>
+<desc id="description">A ranked path from the root-eight one-Pasch design to the
+root-six one-Pasch design via a six-block switch, then to a noncyclic
+anti-Pasch design via a ten-block switch. The best cyclic anti-Pasch
+design ranks above them but is connected by a rank-only dotted line.
+Switch counts are exhaustive only for the specified point-pair cycle move.</desc>
+<defs>
+ <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#081321"/><stop offset="1" stop-color="#152343"/>
+ </linearGradient>
+ <linearGradient id="path" x1="0" y1="1" x2="1" y2="0">
+  <stop stop-color="#6bd3fa"/><stop offset="1" stop-color="#9ff5d0"/>
+ </linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="9"/></filter>
+ <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6"
+  orient="auto" markerUnits="userSpaceOnUse">
+  <path d="M1 1 L10 6 L1 11" fill="none" stroke="#a2ecdf" stroke-width="2.4"/>
+ </marker>
+ <style>
+  text { font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif; }
+  .card { fill:#132c43; stroke:#60aabf; stroke-width:1.5; }
+  .faint { stroke:#7190b2; opacity:.12; }
+  .small { letter-spacing:1.8px; }
+ </style>
+</defs>
+<rect width="1280" height="760" fill="url(#background)"/>
+<g class="faint" fill="none">
+<path d="M75 0 V760"/>
+<path d="M150 0 V760"/>
+<path d="M225 0 V760"/>
+<path d="M300 0 V760"/>
+<path d="M375 0 V760"/>
+<path d="M450 0 V760"/>
+<path d="M525 0 V760"/>
+<path d="M600 0 V760"/>
+<path d="M675 0 V760"/>
+<path d="M750 0 V760"/>
+<path d="M825 0 V760"/>
+<path d="M900 0 V760"/>
+<path d="M975 0 V760"/>
+<path d="M1050 0 V760"/>
+<path d="M1125 0 V760"/>
+<path d="M1200 0 V760"/>
+<path d="M0 75 H1280"/>
+<path d="M0 150 H1280"/>
+<path d="M0 225 H1280"/>
+<path d="M0 300 H1280"/>
+<path d="M0 375 H1280"/>
+<path d="M0 450 H1280"/>
+<path d="M0 525 H1280"/>
+<path d="M0 600 H1280"/>
+<path d="M0 675 H1280"/>
+<path d="M0 750 H1280"/>
+</g><circle cx="660" cy="383" r="345" fill="#3a80c0" opacity=".055"/>
+<text x="64" y="59" fill="#f1f7ff" font-size="31" font-weight="700" class="small">THE CYCLE-SWITCH ATLAS</text>
+<text x="66" y="88" fill="#a8bed5" font-size="17" font-weight="400" >Steiner triple systems on 31 points  ·  seventh-prefix score</text>
+<path d="M66 108 H1212" stroke="#83b7c7" opacity=".35"/>
+<path d="M318 527 C353 504 371 469 401 449" stroke="#50d6c5" stroke-width="18" opacity=".16" fill="none" filter="url(#glow)"/>
+<path d="M318 527 C353 504 371 469 401 449" stroke="url(#path)" stroke-width="3.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M632 409 C660 384 689 356 713 328" stroke="#50d6c5" stroke-width="18" opacity=".16" fill="none" filter="url(#glow)"/>
+<path d="M632 409 C660 384 689 356 713 328" stroke="url(#path)" stroke-width="3.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M946 286 C978 262 1004 237 1030 210" stroke="#d2a4ed" stroke-width="2.5" stroke-dasharray="5 9" fill="none"/>
+<rect x="65" y="492" width="255" height="120" rx="17" class="card"/>
+<rect x="65" y="492" width="6" height="120" rx="3" fill="#68d2f7"/>
+<text x="86" y="519" fill="#68d2f7" font-size="12" font-weight="700" class="small">RANK 4 · ROOT EIGHT</text>
+<text x="86" y="550" fill="#f3f9ff" font-size="21" font-weight="650" >one Pasch</text>
+<text x="86" y="575" fill="#b4cbdc" font-size="15" font-weight="400" >volume 18  ·  199 mitres</text>
+<text x="86" y="596" fill="#d5e5ee" font-size="13" font-weight="400" >632 proper  ·  0 anti-Pasch</text>
+<rect x="400" y="370" width="255" height="120" rx="17" class="card"/>
+<rect x="400" y="370" width="6" height="120" rx="3" fill="#9deccf"/>
+<text x="421" y="397" fill="#9deccf" font-size="12" font-weight="700" class="small">RANK 3 · ROOT SIX</text>
+<text x="421" y="428" fill="#f3f9ff" font-size="21" font-weight="650" >one Pasch</text>
+<text x="421" y="453" fill="#b4cbdc" font-size="15" font-weight="400" >volume 18  ·  200 mitres</text>
+<text x="421" y="474" fill="#d5e5ee" font-size="13" font-weight="400" >664 proper  ·  2 anti-Pasch</text>
+<rect x="714" y="249" width="255" height="120" rx="17" class="card"/>
+<rect x="714" y="249" width="6" height="120" rx="3" fill="#ffd480"/>
+<text x="735" y="276" fill="#ffd480" font-size="12" font-weight="700" class="small">RANK 2 · NONCYCLIC</text>
+<text x="735" y="307" fill="#f3f9ff" font-size="21" font-weight="650" >anti-Pasch</text>
+<text x="735" y="332" fill="#b4cbdc" font-size="15" font-weight="400" >182 mitres</text>
+<text x="735" y="353" fill="#d5e5ee" font-size="13" font-weight="400" >666 proper  ·  0 anti-Pasch</text>
+<rect x="995" y="128" width="255" height="120" rx="17" class="card"/>
+<rect x="995" y="128" width="6" height="120" rx="3" fill="#d5aaf0"/>
+<text x="1016" y="155" fill="#d5aaf0" font-size="12" font-weight="700" class="small">RANK 1 · CYCLIC</text>
+<text x="1016" y="186" fill="#f3f9ff" font-size="21" font-weight="650" >anti-Pasch</text>
+<text x="1016" y="211" fill="#b4cbdc" font-size="15" font-weight="400" >279 mitres</text>
+<text x="1016" y="232" fill="#d5e5ee" font-size="13" font-weight="400" >best cyclic score</text>
+<text x="326" y="570" fill="#b7f2eb" font-size="15" font-weight="600" >6-block move</text>
+<text x="326" y="590" fill="#a6d3dc" font-size="12" font-weight="400" >Δq₇ ≈ +6.84×10⁻³⁰</text>
+<text x="661" y="400" fill="#b7f2eb" font-size="15" font-weight="600" >10-block move</text>
+<text x="661" y="420" fill="#a6d3dc" font-size="12" font-weight="400" >Δq₇ ≈ +2.86×10⁻²⁵</text>
+<text x="976" y="280" fill="#d5b7ec" font-size="13" font-weight="600" >rank only</text>
+<text x="976" y="299" fill="#c6abd9" font-size="12" font-weight="400" >Δq₇ ≈ +6.63×10⁻²⁸</text>
+<rect x="65" y="639" width="1150" height="77" rx="14" fill="#0c1c31" stroke="#506a83" stroke-width="1"/>
+<text x="86" y="667" fill="#90c7d3" font-size="12" font-weight="700" class="small">EXACT ORDER</text>
+<text x="208" y="667" fill="#e2eff6" font-size="18" font-weight="550" >root eight  &lt;  root six  &lt;  noncyclic P=0  &lt;  best cyclic P=0</text>
+<text x="86" y="697" fill="#a4b9cd" font-size="14" font-weight="400" >Ranks are not to scale. Exhaustion covers proper point-pair cycle switches only.</text>
+</svg>
