@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Around STS(31)</title>
+<style>
+  :root { --bg: #0b0d1c; --ink: #ebe8f4; --dim: #9d9ab8; --gold: #ffd36e; --rose: #ff7fa6; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 780px; line-height: 1.4; }
+  #hud b { color: var(--ink); font-weight: normal; }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 60px; font-size: 14.5px; color: var(--gold);
+    pointer-events: none; max-width: 640px; line-height: 1.35; }
+  #bar { position: fixed; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: #1b1f3d; color: var(--ink); border: 1px solid #3a4170; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #3a4170; border-color: var(--gold); }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .lab { position: fixed; pointer-events: none; font-size: 12px; color: var(--ink); white-space: nowrap;
+    transform: translate(-50%, -150%); text-shadow: 0 0 4px #000, 0 0 2px #000; }
+  .lab.ring { color: #6f6c92; font-size: 11px; transform: translate(4px, -50%); }
+  .lab.move { color: #b9e4ff; font-style: italic; font-size: 11.5px; }
+  .lab.p0 { color: var(--gold); } .lab.p1 { color: var(--rose); }
+  .lab.inset { transform: translate(-50%, 0); color: var(--dim); font-size: 12px; text-align: center; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 640px) {
+    #hud h1 { font-size: 20px; } #hud p { font-size: 11.5px; }
+    .lab { font-size: 10.5px; } #state { font-size: 12.5px; bottom: 96px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated view: the cyclic Steiner triple system on 31 points as a core, with six rival systems orbiting at radii set by the logarithm of their probability gap, and an inset point cloud of the selected system's 155 triples"></canvas>
+<div id="hud">
+  <h1>Around the best Steiner system on 31 points</h1>
+  <p>Card 188. The core is the cyclic STS(31), the system with the largest q7 we know. Each orbiting body is another whole
+  STS(31) (155 triples); its orbit radius is the <b>log</b> of how far its q7 probability falls below the core's
+  (log scale, not linear; the rings mark powers of ten). <b>Gold</b>: no Pasch configuration. <b>Rose</b>: exactly one.
+  The travelling light follows the moves cyclic to root eight (18-block swap) to root six (6-block switch) to the
+  noncyclic Pasch-free system (10-block switch). The gaps are <b>reviewed values</b> from exact arithmetic, embedded as
+  data; this page cannot recompute q7. It does recompute every system's pair cover, Pasch count and mitre count, and
+  refuses to draw if any disagrees. Whether the cyclic system is the global maximum over all STS(31) is <b>open</b>.
+  The five one-Pasch systems sit at almost the same gap (log10 gap about -24.54), so they share one ring; their
+  order is given in the state line, not by radius.
+  Click a body (or spotlight) to see its triples; drag to orbit, scroll to zoom.</p>
+</div>
+<div id="labels"></div>
+<div id="state"></div>
+<div id="bar">
+  <button id="bSpin" aria-pressed="true">Spin</button>
+  <button id="bMoves" aria-pressed="true">Travelling light</button>
+  <button id="bSpot" aria-pressed="false">Spotlight systems</button>
+  <button id="bNext">Next system</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const STS31 = (function () {
+  const v = 31, ALPHA = "0123456789abcdefghijklmnopqrstu";
+  // block lists, 3 base-31 digits per triple, from the reviewer scratch folders:
+  // cyclic = bases (0,1,4),(0,2,10),(0,5,17),(0,6,15),(0,7,20) mod 31; root8/root6/v17 = cyclic plus the
+  // trades in rev35341 root8.out/root6.out; two_step_v4/v10 = rev35255 start2/start3 plus the LOW_ROWS trades
+  // of rev35325 run116v; noncyclic = endpoint 0 (the 10-block switch) of rev35330 p0.pkl.
+  const DATA = {
+    cyclic: "01402a03u05h06f07k08t09p0bi0cq0do0ej0gm0ln0rs12513b16i17g18l19u1aq1cj1dr1ep1fk1hn1mo1st23624c" +
+      "27j28h29m2br2dk2es2fq2gl2io2np2tu34735d38k39i3an3cs3el3ft3gr3hm3jp3oq45846e49l4aj4bo4dt4fm4gu" +
+      "4hs4in4kq4pr56957f5am5bk5cp5eu5gn5it5jo5lr5qs67a68g6bn6cl6dq6ho6ju6kp6ms6rt78b79h7co7dm7er7ip" +
+      "7lq7nt7su89c8ai8dp8en8fs8jq8mr8ou9ad9bj9eq9fo9gt9kr9nsabeackafragpahualsaotbcfbdlbgsbhqbmtbpu" +
+      "cdgcemchtcircnudehdfndiudjsefiegoektfgjfhpflughkgiqhilhjrijmiksjknjltklokmulmpmnqnoropspqtqru",
+    root8: "01b02a03u04q05h06f07k08t09p0cr0do0ej0gm0is0ln12513914a16i17g18l1cq1du1ep1fk1hn1jr1mo1st23624c" +
+      "27j28h29m2br2dk2es2fq2gl2io2np2tu34735d38k3an3bi3cs3el3ft3gr3hm3jp3oq45846e49l4bo4dt4fm4gu4hj" +
+      "4in4ks4pr56957f5am5bk5cp5eu5gn5it5jo5lr5qs67a68g6bn6cl6dq6ho6ju6kp6ms6rt78b79h7co7dm7er7ip7lq" +
+      "7nt7su89c8ai8dp8en8fs8jq8mr8ou9ad9bj9eq9fo9gt9iu9kr9nsabeacjafragpahuakqalsaotbcfbdlbgsbhqbmt" +
+      "bpucdgcemchtcikcnudehdfndirdjsefiegoektfgjfhpflughkgiqhilhrsijmjknjltklokmulmpmnqnoropspqtqru",
+    root6: "01902a03u04q05h06f07k08t0bp0cr0do0ej0gm0is0ln12513b14a16i17g18l1cq1du1ep1fk1hn1jr1mo1st23624c" +
+      "27j28h29m2br2dk2es2fq2gl2io2np2tu34735d38k39i3an3cs3el3ft3gr3hm3jp3oq45846e49l4bo4dt4fm4gu4hj" +
+      "4in4ks4pr56957f5am5bk5cp5eu5gn5it5jo5lr5qs67a68g6bn6cl6dq6ho6ju6kp6ms6rt78b79h7co7dm7er7ip7lq" +
+      "7nt7su89c8ai8dp8en8fs8jq8mr8ou9ad9bj9eq9fo9gt9kr9ns9puabeacjafragpahuakqalsaotbcfbdlbgsbhqbiu" +
+      "bmtcdgcemchtcikcnudehdfndirdjsefiegoektfgjfhpflughkgiqhilhrsijmjknjltklokmulmpmnqnoropspqtqru",
+    v17: "01b02a03u04n05i06f07k08t09p0cq0do0ej0gm0hl0rs12u13914i15617g18l1aq1cj1dr1ep1fk1hn1mo1st23624c" +
+      "25t27j28h29m2br2dk2es2fq2gl2io2np34735d38k3an3bi3cs3el3ft3gr3hm3jp3oq45846e49l4aj4bo4dt4fm4gu" +
+      "4hs4kq4pr57f59u5am5bk5cp5eh5gn5jo5lr5qs67a68g69i6bn6cl6dq6ho6ju6kp6ms6rt78b79h7co7dm7er7ip7lq" +
+      "7nt7su89c8ai8dp8en8fs8jq8mr8ou9ad9bj9eq9fo9gt9kr9nsabeackafragpahualsaotbcfbdlbgsbhqbmtbpucdg" +
+      "cemchtcircnudeudfndhidjsefiegoektfgjfhpflughkgiqhjrijmiksilnitujknjltklokmulmpmnqnoropspqtqru",
+    two_step_v4: "01b02a03904n05h06f07k08t0cq0do0ej0gm0ip0lu0rs12513714m16i18l19o1aq1cj1dr1ep1fk1gu1hn1st23624c" +
+      "27j28h29m2br2dk2es2fq2gl2io2np2tu34u35d38k3an3bi3cs3el3ft3gr3hm3jp3oq45846e47g49i4aj4bo4dt4fl" +
+      "4hs4kq4pr56957f5am5bk5cp5eu5gn5it5jo5lr5qs67a68g6bn6cl6dq6ho6ju6kp6ms6rt78b79p7co7dm7er7hi7lq" +
+      "7nt7su89c8ai8dp8en8fs8jq8mr8ou9ad9bj9eq9fu9gt9hl9kr9nsabeackafragpahualsaotbcfbdlbgsbhqbmtbpu" +
+      "cdgcemchtcircnudehdfndiudjsefiegoektfgjfhpfmoghkgiqhjrijmiksilnjknjltklokmulmpmnqnoropspqtqru",
+    two_step_v10: "01b02a03u04n05i06f07k08t09p0cq0do0ej0gm0hl0rs12u13914i15617g18l1aq1cj1dr1ep1fk1hn1mo1st23624c" +
+      "25t27j28h29m2br2dk2es2fq2gl2io2np34735d38k3an3bi3cs3el3ft3gr3hm3jp3oq45846e49l4aj4bo4dt4fm4gu" +
+      "4hs4kq4pr57f59u5am5bk5cp5eh5gn5jo5lr5qs67a68g69i6bn6cl6dq6ho6ju6kp6ms6rt78b79h7co7dm7er7ip7lq" +
+      "7nt7su89c8af8dp8en8is8jq8mr8ou9ad9bj9eq9fo9gt9kr9nsabeackagpahuairalsaotbcgbdlbfsbhqbmtbpucdi" +
+      "cemcfrchtcnudeudfndghdjsefiegoektfgjfhpflugiqgkshikhjrijmilnitujknjltklokmulmpmnqnoropspqtqru",
+    p0_0: "01902a03u04q05h06f07k08t0bp0cr0do0ej0gm0is0ln12513b14a16i17g18l1cq1du1ep1fk1hn1jr1mo1st23624c" +
+      "27j28h29m2br2dk2es2fq2gl2io2np2tu34735d38k39i3an3ct3el3fs3gr3hm3jp3oq45846e49l4bo4dt4fm4gu4hj" +
+      "4in4ks4pr56957c5am5bk5eu5fp5gn5it5jo5lr5qs67a68g6bn6cl6dq6ho6ju6kp6ms6rt78b79h7dm7er7fo7ip7lq" +
+      "7nt7su89f8ai8cs8dp8en8jq8mr8ou9ad9bj9co9eq9gt9kr9ns9puabeacjafragpahuakqalsaotbcfbdlbgsbhqbiu" +
+      "bmtcdgcemchpcikcnudehdfndirdjsefiegoektfgjfhtflughkgiqhilhrsijmjknjltklokmulmpmnqnoropspqtqru"
+  };
+  const META = [
+    { id: "cyclic", name: "cyclic STS(31)", label: "cyclic core", pasch: 0, mitres: 279 },
+    { id: "root8", name: "root eight, volume-18 witness", label: "root eight", pasch: 1, mitres: 199 },
+    { id: "root6", name: "root six, volume-18 witness", label: "root six", pasch: 1, mitres: 200 },
+    { id: "v17", name: "volume-17 witness", label: "volume 17", pasch: 1, mitres: 197 },
+    { id: "two_step_v4", name: "two-step one-Pasch design (second trade of volume 4)", label: "two-step v4", pasch: 1, mitres: 191 },
+    { id: "two_step_v10", name: "two-step one-Pasch design (second trade of volume 10)", label: "two-step v10", pasch: 1, mitres: 165 },
+    { id: "p0_0", name: "noncyclic Pasch-free system", label: "noncyclic Pasch-free", pasch: 0, mitres: 182 }
+  ];
+  // REVIEWED VALUES (not recomputed here): exact q7 differences reported by today's reviewers, rounded.
+  const REVIEWED = {
+    root6_below_cyclic: 2.86187e-25,      // rev35325 run111a: root6 MINUS cyclic
+    root8_below_root6: 6.84e-30,          // rev35325 run111a: root6 MINUS v18 (v18 = root eight)
+    root6_above_v17: 2.05046e-29,         // rev35325 run111a: root6 MINUS v17
+    v17_below_root8: 1.37e-29,            // reviewed difference of the two lines above
+    noncyclic_below_cyclic: 6.63e-28,     // rev35330 run122v: p0_18 MINUS cyclic (p0_18 and p0_10 are isomorphic)
+    noncyclic_above_root6: 2.85524e-25,   // rev35330 run122v: p0_18 MINUS root6
+    v4_below_v17: 4.09571e-29,            // rev35325 run116v
+    v4_below_root8: 5.46180e-29,          // rev35325 run116v
+    v10_below_v17: 2.18668e-28,           // rev35325 run116v
+    v10_below_root8: 2.32328e-28          // rev35325 run116v
+  };
+  const MOVES = [["cyclic", "root8", 18, "18-block swap"], ["root8", "root6", 6, "6-block switch"],
+    ["root6", "p0_0", 10, "10-block switch"]];
+  const ROOT6_PASCH = [[3, 8, 20], [3, 9, 18], [8, 9, 12], [12, 18, 20]];   // reviewer's quartet (run111a)
+  const fail = [];
+  const key = t => t[0] * 1024 + t[1] * 32 + t[2];
+  function decode(id, s) {
+    const T = [];
+    if (s.length !== 155 * 3) fail.push(id + ": " + s.length / 3 + " triples, not 155");
+    for (let i = 0; i + 2 < s.length; i += 3) {
+      const t = [ALPHA.indexOf(s[i]), ALPHA.indexOf(s[i + 1]), ALPHA.indexOf(s[i + 2])].sort((a, b) => a - b);
+      if (t[0] < 0) fail.push(id + ": bad symbol"); T.push(t);
+    }
+    return T;
+  }
+  function isSTS(id, T) {
+    const cnt = new Int32Array(v * v);
+    for (const t of T) {
+      if (t[0] === t[1] || t[1] === t[2]) { fail.push(id + ": triple with a repeated point"); return false; }
+      cnt[t[0] * v + t[1]]++; cnt[t[0] * v + t[2]]++; cnt[t[1] * v + t[2]]++;
+    }
+    for (let a = 0; a < v; a++) for (let b = a + 1; b < v; b++)
+      if (cnt[a * v + b] !== 1) { fail.push(id + ": pair {" + a + "," + b + "} lies in " + cnt[a * v + b] + " triples"); return false; }
+    return true;
+  }
+  function thirdMap(T) {
+    const th = new Int32Array(v * v).fill(-1), blk = new Int32Array(v * v).fill(-1);
+    T.forEach((t, i) => { for (let j = 0; j < 3; j++) { const x = t[j], y = t[(j + 1) % 3], z = t[(j + 2) % 3];
+      th[x * v + y] = z; th[y * v + x] = z; blk[x * v + y] = i; blk[y * v + x] = i; } });
+    return { th, blk };
+  }
+  // Pasch: four triples on six points, every two meeting; found from each pair of meeting triples
+  function pasches(T) {
+    const { th, blk } = thirdMap(T), out = new Map();
+    for (let i = 0; i < T.length; i++) for (let j = i + 1; j < T.length; j++) {
+      const p = T[i].filter(x => T[j].includes(x));
+      if (p.length !== 1) continue;
+      const [a1, a2] = T[i].filter(x => x !== p[0]), [c1, c2] = T[j].filter(x => x !== p[0]);
+      for (const [x, y, z, w] of [[a1, c1, a2, c2], [a1, c2, a2, c1]]) {
+        const s = th[x * v + y];
+        if (s >= 0 && th[z * v + w] === s) {
+          const q = [i, j, blk[x * v + y], blk[z * v + w]].sort((a, b) => a - b);
+          out.set(q.join(","), q);
+        }
+      }
+    }
+    return [...out.values()];
+  }
+  // mitre: {a,b,c},{a,d,e},{a,f,g},{b,d,f},{c,e,g} (centre a lies on three of the five triples)
+  function mitres(T) {
+    const { th } = thirdMap(T); let n = 0;
+    for (let a = 0; a < v; a++) {
+      const thr = T.filter(t => t.includes(a)).map(t => t.filter(x => x !== a));
+      for (let i = 0; i < thr.length; i++) for (let j = i + 1; j < thr.length; j++) for (let k = j + 1; k < thr.length; k++) {
+        const [b, c] = thr[i], P2 = thr[j], P3 = thr[k];
+        for (const [d, e] of [P2, [P2[1], P2[0]]]) {
+          const f = th[b * v + d];
+          if (f !== P3[0] && f !== P3[1]) continue;
+          const g = f === P3[0] ? P3[1] : P3[0];
+          if (th[c * v + e] === g) n++;
+        }
+      }
+    }
+    return n;
+  }
+  const systems = {};
+  for (const m of META) {
+    const T = decode(m.id, DATA[m.id] || "");
+    const sys = { id: m.id, name: m.name, label: m.label, triples: T, sts: false, pasch: [], paschCount: -1, mitres: -1 };
+    systems[m.id] = sys;
+    if (!isSTS(m.id, T)) continue;
+    sys.sts = true;
+    sys.pasch = pasches(T); sys.paschCount = sys.pasch.length; sys.mitres = mitres(T);
+    if (sys.paschCount !== m.pasch) fail.push(m.id + ": Pasch count " + sys.paschCount + ", expected " + m.pasch);
+    if (sys.mitres !== m.mitres) fail.push(m.id + ": mitre count " + sys.mitres + ", expected " + m.mitres);
+  }
+  // the core is cyclic: i -> i+1 maps the triple set to itself
+  const C = systems.cyclic.triples, Cset = new Set(C.map(key));
+  if (!C.every(t => Cset.has(key([(t[0] + 1) % v, (t[1] + 1) % v, (t[2] + 1) % v].sort((a, b) => a - b)))))
+    fail.push("core is not invariant under i -> i+1");
+  // the root-six Pasch configuration is the one the reviewer printed
+  const r6 = systems.root6;
+  if (r6.pasch.length === 1) {
+    const got = r6.pasch[0].map(i => r6.triples[i].join(",")).sort().join(" ");
+    if (got !== ROOT6_PASCH.map(t => t.join(",")).sort().join(" ")) fail.push("root six Pasch quartet differs from the reviewed one");
+  }
+  // the moves change exactly the stated number of triples
+  for (const [a, b, n] of MOVES) {
+    const A = new Set(systems[a].triples.map(key));
+    const d = systems[b].triples.filter(t => !A.has(key(t))).length;
+    if (d !== n) fail.push("move " + a + " -> " + b + " changes " + d + " triples, expected " + n);
+  }
+  // reviewed q7 gaps: consistent with the stated order cyclic > noncyclic > root6 > root8 > v17 > v4 > v10
+  const R = REVIEWED, close = (x, y) => Math.abs(x - y) <= 0.01 * Math.max(Math.abs(x), Math.abs(y));
+  for (const k in R) if (!(R[k] > 0)) fail.push("reviewed value " + k + " is not positive");
+  if (!close(R.root6_above_v17, R.root8_below_root6 + R.v17_below_root8)) fail.push("root6 - v17 != (root6 - root8) + (root8 - v17)");
+  if (!close(R.root6_below_cyclic - R.noncyclic_below_cyclic, R.noncyclic_above_root6)) fail.push("noncyclic gaps disagree");
+  if (!close(R.v4_below_root8 - R.v4_below_v17, R.v17_below_root8)) fail.push("two-step v4 gaps disagree with root8 - v17");
+  if (!close(R.v10_below_root8 - R.v10_below_v17, R.v17_below_root8)) fail.push("two-step v10 gaps disagree with root8 - v17");
+  const gap = {
+    cyclic: 0,
+    p0_0: R.noncyclic_below_cyclic,
+    root6: R.root6_below_cyclic,
+    root8: R.root6_below_cyclic + R.root8_below_root6,
+    v17: R.root6_below_cyclic + R.root8_below_root6 + R.v17_below_root8,
+    two_step_v4: R.root6_below_cyclic + R.root8_below_root6 + R.v17_below_root8 + R.v4_below_v17,
+    two_step_v10: R.root6_below_cyclic + R.root8_below_root6 + R.v17_below_root8 + R.v10_below_v17
+  };
+  const order = ["cyclic", "p0_0", "root6", "root8", "v17", "two_step_v4", "two_step_v10"];
+  for (let i = 1; i < order.length; i++)
+    if (!(gap[order[i]] > gap[order[i - 1]])) fail.push("gap order broken at " + order[i]);
+  return { v, META, systems, gap, order, MOVES, REVIEWED, fail };
+})();
+if (typeof module !== "undefined") module.exports = STS31;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const S = STS31, err = document.getElementById("err");
+  if (S.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + S.fail.join("; "); return; }
+  let canvas = document.getElementById("c");
+  let gl = canvas.getContext("webgl", { antialias: true, premultipliedAlpha: false });
+  let ctx = null;   // set below: the 2D fallback when WebGL is missing or its shaders fail
+
+  const GOLD = [1.0, 0.80, 0.38], ROSE = [1.0, 0.45, 0.62], CORE = [1.0, 0.93, 0.70], BLUE = [0.62, 0.86, 1.0];
+  const colOf = id => S.systems[id].paschCount === 0 ? GOLD : ROSE;
+  const radiusOf = g => 0.6 + 0.62 * (Math.log10(g) + 28.5);     // log scale: one ring per power of ten
+  const ANG = { root8: 0.35, root6: 1.25, v17: -0.6, two_step_v4: -1.5, two_step_v10: -2.4, p0_0: 2.55 };
+  const BODY = {};
+  for (const m of S.META) {
+    const r = m.id === "cyclic" ? 0 : radiusOf(S.gap[m.id]), a = ANG[m.id] || 0;
+    BODY[m.id] = [r * Math.cos(a), r * Math.sin(a), 0];
+  }
+  // arcs: quadratic curves lifted out of the orbital plane
+  const ARCS = S.MOVES.map(([a, b, n, txt]) => {
+    const P = BODY[a], Q = BODY[b], L = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+    const M = [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2, 0.35 + 0.3 * L];
+    return { P, Q, M, txt };
+  });
+  const bez = (A, t) => { const u = 1 - t; return [0, 1, 2].map(k => u * u * A.P[k] + 2 * u * t * A.M[k] + t * t * A.Q[k]); };
+  // 31 points on a sphere for the inset cloud
+  const SPH = [];
+  for (let i = 0; i < S.v; i++) { const y = 1 - 2 * (i + 0.5) / S.v, r = Math.sqrt(1 - y * y), ph = i * 2.39996323;
+    SPH.push([r * Math.cos(ph), y, r * Math.sin(ph)]); }
+
+  // labels (textContent only)
+  const labBox = document.getElementById("labels");
+  function mkLab(cls, text) { const d = document.createElement("div"); d.className = "lab " + cls; d.textContent = text; labBox.appendChild(d); return d; }
+  const bodyLab = {};
+  for (const m of S.META) bodyLab[m.id] = mkLab(S.systems[m.id].paschCount === 0 ? "p0" : "p1", m.label);
+  const moveLab = ARCS.map(A => mkLab("move", A.txt));
+  const RINGS = [-28, -27, -26, -25];
+  const ringLab = RINGS.map(e => mkLab("ring", "gap 1e" + e));
+  const insetLab = mkLab("inset", "");
+
+  // ---- immediate-mode batch: triangles in pixel space, premultiplied additive colour ----
+  let buf = [];
+  function tri(a, b, c, rgb, al) { buf.push(a[0], a[1], b[0], b[1], c[0], c[1], rgb[0] * al, rgb[1] * al, rgb[2] * al); }
+  function line(a, b, wpx, rgb, al) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L * wpx / 2, ny = dx / L * wpx / 2;
+    const p1 = [a[0] + nx, a[1] + ny], p2 = [a[0] - nx, a[1] - ny], p3 = [b[0] + nx, b[1] + ny], p4 = [b[0] - nx, b[1] - ny];
+    tri(p1, p2, p3, rgb, al); tri(p2, p4, p3, rgb, al);
+  }
+  function disc(c, r, rgb, al) {
+    const n = 18;
+    for (let i = 0; i < n; i++) { const a0 = 2 * Math.PI * i / n, a1 = 2 * Math.PI * (i + 1) / n;
+      tri(c, [c[0] + r * Math.cos(a0), c[1] + r * Math.sin(a0)], [c[0] + r * Math.cos(a1), c[1] + r * Math.sin(a1)], rgb, al); }
+  }
+  function glow(c, r, rgb, al) { disc(c, r * 3.2, rgb, al * 0.10); disc(c, r * 1.9, rgb, al * 0.22); disc(c, r, rgb, al * 0.75); disc(c, r * 0.45, [1, 1, 1], al * 0.5); }
+
+  let prog, vb, aPos, aCol, uRes;
+  if (gl) try {
+    const vs = "attribute vec2 aPos; attribute vec3 aCol; uniform vec2 uRes; varying vec3 vCol;" +
+      "void main() { vec2 p = aPos / uRes * 2.0 - 1.0; gl_Position = vec4(p.x, -p.y, 0.0, 1.0); vCol = aCol; }";
+    const fs = "precision mediump float; varying vec3 vCol; void main() { gl_FragColor = vec4(vCol, 1.0); }";
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog); gl.useProgram(prog);
+    vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+    aPos = gl.getAttribLocation(prog, "aPos"); aCol = gl.getAttribLocation(prog, "aCol"); uRes = gl.getUniformLocation(prog, "uRes");
+    gl.enableVertexAttribArray(aPos); gl.enableVertexAttribArray(aCol);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    gl.clearColor(0.043, 0.051, 0.110, 1);
+  } catch (e) {
+    // a canvas holding a WebGL context cannot give a 2D one, so swap in a fresh canvas
+    gl = null; const c2 = canvas.cloneNode(false); canvas.parentNode.replaceChild(c2, canvas); canvas = c2;
+  }
+  if (!gl) ctx = canvas.getContext("2d");   // fallback: same geometry, drawn with the 2D canvas
+  if (!gl && !ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+  function flush(w, h) {
+    const n = buf.length / 9;
+    if (gl) {
+      // expand to per-vertex records: x, y, r, g, b
+      const out = new Float32Array(n * 15);
+      for (let i = 0; i < n; i++) { const o = i * 9;
+        for (let k = 0; k < 3; k++) { const q = (i * 3 + k) * 5;
+          out[q] = buf[o + 2 * k]; out[q + 1] = buf[o + 2 * k + 1]; out[q + 2] = buf[o + 6]; out[q + 3] = buf[o + 7]; out[q + 4] = buf[o + 8]; } }
+      gl.viewport(0, 0, w, h); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, out, gl.DYNAMIC_DRAW);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 20, 0); gl.vertexAttribPointer(aCol, 3, gl.FLOAT, false, 20, 8);
+      gl.uniform2f(uRes, w, h); gl.drawArrays(gl.TRIANGLES, 0, n * 3);
+    } else {
+      ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#0b0d1c"; ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < n; i++) { const o = i * 9;
+        ctx.fillStyle = "rgb(" + Math.round(Math.min(1, buf[o + 6]) * 255) + "," + Math.round(Math.min(1, buf[o + 7]) * 255) + "," + Math.round(Math.min(1, buf[o + 8]) * 255) + ")";
+        ctx.beginPath(); ctx.moveTo(buf[o], buf[o + 1]); ctx.lineTo(buf[o + 2], buf[o + 3]); ctx.lineTo(buf[o + 4], buf[o + 5]); ctx.closePath(); ctx.fill(); }
+    }
+    buf = [];
+  }
+
+  // ---- state and controls ----
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let yaw = 0.4, pitch = 1.0, zoom = 1, spin = !reduced, moves = true, spot = false, spotT = 0, lightT = 0, cloudT = 0.6;
+  let sel = "root6";
+  const stateEl = document.getElementById("state");
+  const toggle = (id, on) => document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false");
+  const ids = S.META.map(m => m.id);
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  document.getElementById("bMoves").onclick = () => { moves = !moves; toggle("bMoves", moves); };
+  document.getElementById("bSpot").onclick = () => { spot = !spot; spotT = 0; toggle("bSpot", spot); };
+  document.getElementById("bNext").onclick = () => { sel = ids[(ids.indexOf(sel) + 1) % ids.length]; spotT = 0; };
+  toggle("bSpin", spin);
+
+  let drag = null, moved = 0, screenPos = {};
+  canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; moved = 0; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!drag) return;
+    const dx = e.clientX - drag[0], dy = e.clientY - drag[1]; moved += Math.abs(dx) + Math.abs(dy);
+    yaw += dx * 0.008; pitch = Math.max(0.15, Math.min(1.45, pitch - dy * 0.006)); drag = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", e => {
+    if (drag && moved < 6) {   // a click: pick the nearest body
+      const dpr = Math.min(2, window.devicePixelRatio || 1), x = e.clientX * dpr, y = e.clientY * dpr;
+      let best = null, bd = 30 * dpr;
+      for (const id in screenPos) { const p = screenPos[id], d = Math.hypot(p[0] - x, p[1] - y); if (d < bd) { bd = d; best = id; } }
+      if (best) { sel = best; spot = false; toggle("bSpot", false); }
+    }
+    drag = null; });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); zoom = Math.max(0.5, Math.min(2.2, zoom * Math.exp(-e.deltaY * 0.001))); }, { passive: false });
+
+  // labels are queued per frame, then a collision pass places them (CSS px)
+  let LQ = [];
+  function queueLab(el, p, dpr, show, kind) { LQ.push({ el, x: p[0] / dpr, y: p[1] / dpr, show, kind }); }
+  const rectGap = (a, b) => Math.max(0, Math.max(a.l, b.l) - Math.min(a.r, b.r), Math.max(a.t, b.t) - Math.min(a.b, b.b));
+  function layoutLabels(dpr) {
+    const items = LQ.filter(o => o.show && o.kind !== "ring"), rings = LQ.filter(o => o.kind === "ring");
+    const bodies = Object.values(screenPos).map(p => [p[0] / dpr, p[1] / dpr]);
+    for (const o of items) { o.w = o.el.offsetWidth || 70; o.h = o.el.offsetHeight || 14; o.cy = o.y - o.h; }
+    for (let it = 0; it < 8; it++) for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+      const a = items[i], b = items[j];
+      const ox = (a.w + b.w) / 2 + 12 - Math.abs(a.x - b.x), oy = (a.h + b.h) / 2 + 10 - Math.abs(a.cy - b.cy);
+      if (ox > 0 && oy > 0) { const s = a.cy <= b.cy ? 1 : -1; a.cy -= s * oy / 2; b.cy += s * oy / 2; }
+    }
+    const boxes = items.map(o => ({ l: o.x - o.w / 2, r: o.x + o.w / 2, t: o.cy - o.h / 2, b: o.cy + o.h / 2 }));
+    for (const o of LQ) if (!o.show) o.el.style.display = "none";
+    for (const o of items) { o.el.style.display = "block"; o.el.style.left = o.x + "px"; o.el.style.top = (o.cy + o.h) + "px"; }
+    for (const o of rings) {
+      const w = o.el.offsetWidth || 50, h = o.el.offsetHeight || 12;
+      const R = { l: o.x + 4, r: o.x + 4 + w, t: o.y - h / 2, b: o.y + h / 2 };
+      const near = bodies.some(p => rectGap(R, { l: p[0], r: p[0], t: p[1], b: p[1] }) < 40) || boxes.some(B => rectGap(R, B) < 40);
+      o.el.style.display = near ? "none" : "block"; o.el.style.left = o.x + "px"; o.el.style.top = o.y + "px";
+    }
+    LQ = [];
+  }
+  function placeLab(el, p, dpr, show) {
+    if (!show) { el.style.display = "none"; return; }
+    el.style.display = "block"; el.style.left = (p[0] / dpr) + "px"; el.style.top = (p[1] / dpr) + "px";
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (spin && !drag) yaw += dt * 0.12;
+    if (!reduced) { cloudT += dt * 0.45; if (moves) lightT += dt; }
+    if (spot) { spotT += dt; if (spotT > 4.5) { spotT = 0; sel = ids[(ids.indexOf(sel) + 1) % ids.length]; } }
+
+    // layout: scene on the left or top, inset cloud bottom right
+    const land = w > h * 1.15;
+    const cx = land ? w * 0.40 : w * 0.5, cy = land ? h * 0.52 : h * 0.42;
+    const F = zoom * 3.4 / 3.1 * (land ? Math.min(w * 0.34, h * 0.48) : Math.min(w * 0.44, h * 0.36));
+    const IR = land ? Math.min(w, h) * 0.17 : Math.min(w * 0.24, h * 0.13);
+    const icx = w - IR - 22 * dpr, icy = land ? h - IR - 70 * dpr : h - IR - 150 * dpr;
+    const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch), DIST = 12;
+    // camera: yaw about the vertical, pitch tilts the orbital plane; depth along the line of sight
+    const P3 = q => { const x = q[0] * cyw - q[1] * syw, y0 = q[0] * syw + q[1] * cyw;
+      const up = y0 * cp + q[2] * sp, depth = y0 * sp - q[2] * cp;   // depth > 0 is away from the viewer
+      const k = F / 3.4 * DIST / (DIST + depth);
+      return [cx + x * k, cy - up * k, depth]; };
+
+    // rings at powers of ten (log scale)
+    RINGS.forEach((e, i) => {
+      const r = radiusOf(Math.pow(10, e)); let prev = null;
+      for (let j = 0; j <= 96; j++) { const a = 2 * Math.PI * j / 96, p = P3([r * Math.cos(a), r * Math.sin(a), 0]);
+        if (prev && j % 2 === 0) line(prev, p, 1.0 * dpr, [0.42, 0.42, 0.66], 0.55); prev = p; }
+      queueLab(ringLab[i], P3([r * Math.cos(-yaw + 0.0), r * Math.sin(-yaw), 0]), dpr, true, "ring");
+    });
+    // the orbit shared by the bodies (thin solid), drawn for each body's radius
+    const seenR = new Set();
+    for (const m of S.META) { if (m.id === "cyclic") continue; const r = Math.hypot(BODY[m.id][0], BODY[m.id][1]), rk = r.toFixed(2);
+      if (seenR.has(rk)) continue; seenR.add(rk); let prev = null;
+      for (let j = 0; j <= 128; j++) { const a = 2 * Math.PI * j / 128, p = P3([r * Math.cos(a), r * Math.sin(a), 0]);
+        if (prev) line(prev, p, 1.2 * dpr, colOf(m.id), 0.16); prev = p; } }
+
+    // move arcs and the travelling light
+    const LEG = 3.0, total = LEG * ARCS.length, lt = reduced ? -1 : (lightT % (total + 1.5));
+    ARCS.forEach((A, i) => {
+      let prev = null;
+      for (let j = 0; j <= 48; j++) { const p = P3(bez(A, j / 48));
+        if (prev) line(prev, p, 1.6 * dpr, BLUE, moves ? (reduced ? 0.6 : 0.28) : 0.12); prev = p; }
+      queueLab(moveLab[i], P3(bez(A, 0.5)), dpr, moves, "move");
+      if (moves && lt >= i * LEG && lt < (i + 1) * LEG) {
+        const t = (lt - i * LEG) / LEG;
+        for (let j = 14; j >= 0; j--) { const tt = t - j * 0.018; if (tt < 0) continue;
+          disc(P3(bez(A, tt)), (3.2 - j * 0.15) * dpr, BLUE, 0.5 * (1 - j / 15)); }
+        glow(P3(bez(A, t)), 3.5 * dpr, [0.85, 0.95, 1.0], 1);
+      }
+    });
+
+    // bodies and the core
+    screenPos = {};
+    for (const m of S.META) {
+      const p = P3(BODY[m.id]); screenPos[m.id] = p;
+      const core = m.id === "cyclic", isSel = m.id === sel;
+      const pulse = reduced ? 1 : 0.85 + 0.15 * Math.sin(now / 400);
+      glow(p, (core ? 11 : 6) * dpr * (isSel ? 1.35 : 1), core ? CORE : colOf(m.id), core ? pulse : (isSel ? 1 : 0.75));
+      if (isSel) { let prev = null; const rr = (core ? 26 : 17) * dpr;
+        for (let j = 0; j <= 40; j++) { const a = 2 * Math.PI * j / 40, q = [p[0] + rr * Math.cos(a), p[1] + rr * Math.sin(a)];
+          if (prev) line(prev, q, 1.4 * dpr, [1, 1, 1], 0.5); prev = q; } }
+      queueLab(bodyLab[m.id], [p[0], p[1] - (core ? 14 : 6) * dpr], dpr, true, "body");
+    }
+
+    // inset: the selected system's 155 triples as triangles on 31 sphere points
+    const sys = S.systems[sel], ca = Math.cos(cloudT), sa = Math.sin(cloudT), ct = Math.cos(0.42), st = Math.sin(0.42);
+    const Q = SPH.map(q => { const x = q[0] * ca + q[2] * sa, z0 = -q[0] * sa + q[2] * ca, y = q[1] * ct - z0 * st, z = q[1] * st + z0 * ct;
+      const k = IR * 0.86 * 3 / (3 - z); return [icx + x * k, icy - y * k, z]; });
+    { let prev = null; for (let j = 0; j <= 64; j++) { const a = 2 * Math.PI * j / 64, q = [icx + IR * Math.cos(a), icy + IR * Math.sin(a)];
+        if (prev) line(prev, q, 1 * dpr, [0.4, 0.4, 0.62], 0.5); prev = q; } }
+    const lit = new Set(), litPts = new Set();
+    for (const qd of sys.pasch) for (const i of qd) { lit.add(i); for (const x of sys.triples[i]) litPts.add(x); }
+    const base = sel === "cyclic" ? CORE : colOf(sel), dim = lit.size ? 0.55 : 1;
+    sys.triples.forEach((t, i) => { if (lit.has(i)) return;
+      tri(Q[t[0]], Q[t[1]], Q[t[2]], base, 0.020 * dim);
+      line(Q[t[0]], Q[t[1]], 0.8 * dpr, base, 0.07 * dim); line(Q[t[1]], Q[t[2]], 0.8 * dpr, base, 0.07 * dim); line(Q[t[2]], Q[t[0]], 0.8 * dpr, base, 0.07 * dim); });
+    for (const i of lit) { const t = sys.triples[i];
+      tri(Q[t[0]], Q[t[1]], Q[t[2]], ROSE, 0.22);
+      line(Q[t[0]], Q[t[1]], 2 * dpr, ROSE, 0.9); line(Q[t[1]], Q[t[2]], 2 * dpr, ROSE, 0.9); line(Q[t[2]], Q[t[0]], 2 * dpr, ROSE, 0.9); }
+    Q.forEach((q, i) => disc(q, (litPts.has(i) ? 3.4 : 2.0) * dpr * (0.8 + 0.2 * (q[2] + 1)), litPts.has(i) ? [1, 0.8, 0.88] : [0.85, 0.85, 1], litPts.has(i) ? 0.95 : 0.55));
+    placeLab(insetLab, [icx, icy + IR + 6 * dpr], dpr, true);
+    insetLab.textContent = sys.label + ": 155 triples on 31 points" + (sys.paschCount ? ", its one Pasch lit" : ", no Pasch");
+
+    flush(w, h);
+    layoutLabels(dpr);
+    const g = S.gap[sel];
+    stateEl.textContent = sys.name + ": every pair in exactly one triple; Pasch " + sys.paschCount + ", mitres " + sys.mitres +
+      (sel === "cyclic" ? "; the reference q7 (largest known)." : "; reviewed q7 gap below the cyclic core " + g.toExponential(5) + ".");
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -87,6 +87,8 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 - `two_scalar_sky.html`: the two-scalar sky as a rotating 3D relief (height log(1 + N(p))), with the nine pageless primes as pits and a mode that grows p from 5 to 3000; it recomputes every N(p) and checks the empty set before drawing.
 - `page_on_41.html`: the page (26, 14) on Z_41 with a light tracing its single 40-cycle, and an option to lift A and B onto two planes so the cycle zigzags between them; it checks the starters, sums and cycle before drawing.
 - `shift_pair_dial.html`: one short cycle, every prime. Pick a prime p and watch K_(p, p+1) split into p+1 single edges, (p-1)/2 Hamilton cycles and one gold cycle of length p-1, by the shift-pair trade colour by colour (card 181); it rebuilds and checks the partition for the chosen prime before drawing.
+- `sts31_neighbourhood.html`: around the best Steiner system on 31 points. The cyclic system at the core and six rivals orbiting at their reviewed probability gaps, with a travelling light along the moves root eight -> root six -> the non-cyclic Pasch-free system (card 188); it recomputes every system's pair cover, Pasch count and mitre count from the real block lists before drawing.
+- `borsuk_lines.html`: Borsuk's nine. The lines of R^4 as a rotating ball, coloured by 11 caps whose sampled covering radius is below 45 degrees, against 10 caps that leave gaps (card 156); a numerical lead, not a proof, and the page says so.
 
 The scripts that produced the pictures are in the agents' working branches of a fork of the
 collection and are not published yet; every number on the page was printed by one of them and
