@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="330" viewBox="0 0 880 330" font-family="Helvetica, Arial, sans-serif">
+<rect width="880" height="330" fill="#ffffff"/>
+<text x="440" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Every number of cycles from 3 to 7 splits K7 exactly: 121,215 decompositions in all</text>
+<text x="88.0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">3 Hamilton cycles</text>
+<text x="88.0" y="67" text-anchor="middle" font-size="12" fill="#444">(Walecki)</text>
+<polygon points="39.5,101.3 88.0,78.0 136.5,101.3 27.6,153.8 148.4,153.8 61.1,195.9 114.9,195.9" fill="none" stroke="#d62728" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="39.5,101.3 136.5,101.3 148.4,153.8 88.0,78.0 114.9,195.9 27.6,153.8 61.1,195.9" fill="none" stroke="#1f77b4" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="39.5,101.3 148.4,153.8 114.9,195.9 136.5,101.3 61.1,195.9 88.0,78.0 27.6,153.8" fill="none" stroke="#2ca02c" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<circle cx="88.0" cy="78.0" r="4" fill="#222"/>
+<circle cx="136.5" cy="101.3" r="4" fill="#222"/>
+<circle cx="148.4" cy="153.8" r="4" fill="#222"/>
+<circle cx="114.9" cy="195.9" r="4" fill="#222"/>
+<circle cx="61.1" cy="195.9" r="4" fill="#222"/>
+<circle cx="27.6" cy="153.8" r="4" fill="#222"/>
+<circle cx="39.5" cy="101.3" r="4" fill="#222"/>
+<text x="88.0" y="232" text-anchor="middle" font-size="11.5" fill="#444">7+7+7</text>
+<text x="88.0" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">960</text>
+<text x="88.0" y="272" text-anchor="middle" font-size="11" fill="#555">labelled decompositions</text>
+<text x="264.0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">4 cycles</text>
+<polygon points="264.0,78.0 324.4,153.8 237.1,195.9 312.5,101.3 203.6,153.8 215.5,101.3" fill="none" stroke="#d62728" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="264.0,78.0 237.1,195.9 290.9,195.9 215.5,101.3 324.4,153.8 203.6,153.8" fill="none" stroke="#1f77b4" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="312.5,101.3 290.9,195.9 203.6,153.8 237.1,195.9 215.5,101.3" fill="none" stroke="#2ca02c" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="264.0,78.0 312.5,101.3 324.4,153.8 290.9,195.9" fill="none" stroke="#9467bd" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<circle cx="264.0" cy="78.0" r="4" fill="#222"/>
+<circle cx="312.5" cy="101.3" r="4" fill="#222"/>
+<circle cx="324.4" cy="153.8" r="4" fill="#222"/>
+<circle cx="290.9" cy="195.9" r="4" fill="#222"/>
+<circle cx="237.1" cy="195.9" r="4" fill="#222"/>
+<circle cx="203.6" cy="153.8" r="4" fill="#222"/>
+<circle cx="215.5" cy="101.3" r="4" fill="#222"/>
+<text x="264.0" y="232" text-anchor="middle" font-size="11.5" fill="#444">6+6+5+4</text>
+<text x="264.0" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">39,900</text>
+<text x="264.0" y="272" text-anchor="middle" font-size="11" fill="#555">labelled decompositions</text>
+<text x="440.0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">5 cycles</text>
+<polygon points="440.0,78.0 379.6,153.8 500.4,153.8 466.9,195.9 413.1,195.9 391.5,101.3" fill="none" stroke="#d62728" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="488.5,101.3 379.6,153.8 413.1,195.9 500.4,153.8 391.5,101.3" fill="none" stroke="#1f77b4" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="440.0,78.0 466.9,195.9 488.5,101.3 413.1,195.9" fill="none" stroke="#2ca02c" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="440.0,78.0 488.5,101.3 500.4,153.8" fill="none" stroke="#9467bd" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="466.9,195.9 379.6,153.8 391.5,101.3" fill="none" stroke="#ff7f0e" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<circle cx="440.0" cy="78.0" r="4" fill="#222"/>
+<circle cx="488.5" cy="101.3" r="4" fill="#222"/>
+<circle cx="500.4" cy="153.8" r="4" fill="#222"/>
+<circle cx="466.9" cy="195.9" r="4" fill="#222"/>
+<circle cx="413.1" cy="195.9" r="4" fill="#222"/>
+<circle cx="379.6" cy="153.8" r="4" fill="#222"/>
+<circle cx="391.5" cy="101.3" r="4" fill="#222"/>
+<text x="440.0" y="232" text-anchor="middle" font-size="11.5" fill="#444">6+5+4+3+3</text>
+<text x="440.0" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">69,300</text>
+<text x="440.0" y="272" text-anchor="middle" font-size="11" fill="#555">labelled decompositions</text>
+<text x="616.0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">6 cycles</text>
+<polygon points="616.0,78.0 642.9,195.9 664.5,101.3 589.1,195.9" fill="none" stroke="#d62728" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="616.0,78.0 555.6,153.8 664.5,101.3 567.5,101.3" fill="none" stroke="#1f77b4" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="676.4,153.8 555.6,153.8 642.9,195.9 567.5,101.3" fill="none" stroke="#2ca02c" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="616.0,78.0 664.5,101.3 676.4,153.8" fill="none" stroke="#9467bd" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="676.4,153.8 642.9,195.9 589.1,195.9" fill="none" stroke="#ff7f0e" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="589.1,195.9 555.6,153.8 567.5,101.3" fill="none" stroke="#17becf" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<circle cx="616.0" cy="78.0" r="4" fill="#222"/>
+<circle cx="664.5" cy="101.3" r="4" fill="#222"/>
+<circle cx="676.4" cy="153.8" r="4" fill="#222"/>
+<circle cx="642.9" cy="195.9" r="4" fill="#222"/>
+<circle cx="589.1" cy="195.9" r="4" fill="#222"/>
+<circle cx="555.6" cy="153.8" r="4" fill="#222"/>
+<circle cx="567.5" cy="101.3" r="4" fill="#222"/>
+<text x="616.0" y="232" text-anchor="middle" font-size="11.5" fill="#444">4+4+4+3+3+3</text>
+<text x="616.0" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">11,025</text>
+<text x="616.0" y="272" text-anchor="middle" font-size="11" fill="#555">labelled decompositions</text>
+<text x="792.0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">7 triangles</text>
+<text x="792.0" y="67" text-anchor="middle" font-size="12" fill="#444">(Fano plane)</text>
+<polygon points="792.0,78.0 840.5,101.3 818.9,195.9" fill="none" stroke="#d62728" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="792.0,78.0 852.4,153.8 743.5,101.3" fill="none" stroke="#1f77b4" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="792.0,78.0 765.1,195.9 731.6,153.8" fill="none" stroke="#2ca02c" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="840.5,101.3 852.4,153.8 765.1,195.9" fill="none" stroke="#9467bd" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="840.5,101.3 731.6,153.8 743.5,101.3" fill="none" stroke="#ff7f0e" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="852.4,153.8 818.9,195.9 731.6,153.8" fill="none" stroke="#17becf" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<polygon points="818.9,195.9 765.1,195.9 743.5,101.3" fill="none" stroke="#8c564b" stroke-width="2.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+<circle cx="792.0" cy="78.0" r="4" fill="#222"/>
+<circle cx="840.5" cy="101.3" r="4" fill="#222"/>
+<circle cx="852.4" cy="153.8" r="4" fill="#222"/>
+<circle cx="818.9" cy="195.9" r="4" fill="#222"/>
+<circle cx="765.1" cy="195.9" r="4" fill="#222"/>
+<circle cx="731.6" cy="153.8" r="4" fill="#222"/>
+<circle cx="743.5" cy="101.3" r="4" fill="#222"/>
+<text x="792.0" y="232" text-anchor="middle" font-size="11.5" fill="#444">3+3+3+3+3+3+3</text>
+<text x="792.0" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">30</text>
+<text x="792.0" y="272" text-anchor="middle" font-size="11" fill="#555">labelled decompositions</text>
+<text x="440" y="302" text-anchor="middle" font-size="11.5" fill="#333">Card 181 asks for the fewest pieces (3), card 188 reaches for the most (7); everything between exists for every odd n by the</text>
+<text x="440" y="318" text-anchor="middle" font-size="11.5" fill="#333">Bryant, Horsley and Pettersson theorem (Alspach's conjecture), Proc. London Math. Soc. 108 (2014) 1153-1192 [verified].</text>
+</svg>
