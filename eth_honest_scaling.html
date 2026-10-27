@@ -128,8 +128,8 @@ as n grows. The small enumerations below are illustrations of the problem, not a
 
 <section id="s3" aria-labelledby="h3s">
   <h2 id="h3s">3. The exponent's long journey</h2>
-  <p>The claimed bound is C (L+1)^d 2^(A n f(n)). Switch between the ratio f(n), the ratio A f(n) (which decides whether the
-  exponent term alone, 2^(A n f(n)), is below 2^n) and the exponent A n f(n) itself, which grows without bound even when the
+  <p>The claimed bound is C (L+1)^d 2^(A n f(n)). Switch between the ratio f(n), the ratio A f(n) (which, for n &gt; 0, decides whether the
+  exponent term alone, 2^(A n f(n)), is below 2^n; at n = 0 both are 1) and the exponent A n f(n) itself, which grows without bound even when the
   ratio shrinks. The horizontal axis is doubly logarithmic, from n = 0 to about n = 10^3000; huge values are computed in
   logarithms, never formed. These are illustrative comparisons of upper bounds with unknown theorem constants, not running
   times. For each fixed k the theorem gives one machine and constants C, A, S, d, e (existential, no values); the A, C, d and L here are
@@ -334,7 +334,25 @@ const NUM = (function () {
     if (Ls < 36) { first = Math.max(0, Math.floor(Math.exp(Ls) - 16)); while (A * fN(first) <= 1) first++; while (first > 0 && A * fN(first - 1) > 1) first--; }
     return { empty: false, openT: Math.log10(Math.max(1, Math.exp(Ls) - 15)), first, closeLog10: Ll / LN10 };
   }
-  return { LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
+  // a graph family grown to v = 10^lv from a small graph (vS vertices, eS edges), in logs; v is never formed.
+  // dense: e = p v (v - 1) / 2 with p = eS / (vS (vS - 1) / 2), so log10 e = log10 p + log10 v + log10(v - 1) - log10 2,
+  //   with log10 v = lv and log10(v - 1) = lv + log1p(-10^-lv) / ln 10 (two lv terms: e grows like v^2)
+  // sparse: e = (eS / vS) v (one lv term: e grows like v). Perfect-matching variables n_PM = c (v + e).
+  function family(fam, vS, eS, lv, c) {
+    let le = null;
+    if (eS > 0 && fam === "dense") { const p = eS / (vS * (vS - 1) / 2); le = Math.log10(p) + lv + (lv + Math.log1p(-Math.pow(10, -lv)) / LN10) - Math.log10(2); }
+    else if (eS > 0) le = Math.log10(eS / vS) + lv;
+    return { le, lPM: Math.log10(c) + lse10([lv, le]) };
+  }
+  // the exponent term 2^(A n f(n)) against 2^n, decided from n: at n = 0 both are 2^0 = 1 for every A;
+  // for n > 0 the ratio test A f(n) against 1 is equivalent; A f(n) = 1 at n > 0 is equality (a tangency)
+  function expVsN(p, A) {
+    const l = log10n(p);
+    if (l === null) return "equal";
+    const r = A * fP(p);
+    return Math.abs(r - 1) <= 1e-12 ? "tangent" : r < 1 ? "below" : "above";
+  }
+  return { family, expVsN, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
 })();
 
 /* ================= the checks and the deliberately broken controls ================= */
@@ -353,6 +371,24 @@ const DECIDE = {
   pmOK: (g, enc, drawn) => { const e = g.edges.length, r = CHECK.models(enc.nvars, enc.clauses, (1 << e) - 1);
     return r.count === g.refPM && r.projections === r.count && CHECK.directPM(g.v, g.edges) === g.refPM && drawn === g.refPM &&
       enc.decision === e && enc.nvars <= 3 * (g.v + e) && enc.clauses.length <= 8 * e + g.v && CHECK.width(enc.clauses) <= 3; },
+  // family sizes against exact BigInt arithmetic at v = 10^s (s integer), for every small graph, both families, several c
+  familyExact: familyFn => {
+    const blog = b => { const t = b.toString(); return t.length - 1 + Math.log10(Number(t.slice(0, 17)) / Math.pow(10, Math.min(17, t.length) - 1)); };
+    for (const key of ALL_GRAPH_KEYS) { const g = graphByKey(key), vS = BigInt(g.v), eS = BigInt(g.edges.length);
+      for (const s of [1, 2, 3, 6, 12, 50, 100, 200]) for (const c of [1, 3, 1000]) for (const fam of ["dense", "sparse"]) {
+        const v = 10n ** BigInt(s), num = fam === "dense" ? eS * v * (v - 1n) : eS * v, den = fam === "dense" ? vS * (vS - 1n) : vS;
+        const r = familyFn(fam, g.v, g.edges.length, s, c);
+        if (eS === 0n) { if (r.le !== null) return false; }
+        else if (r.le === null || Math.abs(r.le - (blog(num) - blog(den))) > 1e-9) return false;
+        const nNum = BigInt(c) * (v * den + num);   // n_PM = c (v + e) = c (v den + num) / den
+        if (Math.abs(r.lPM - (blog(nNum) - blog(den))) > 1e-9) return false; } }
+    // Marlow's control: C4, dense, s = 6, c = 3 gives e = 333,333,000,000 and n_PM = 1,000,002,000,000
+    const m = familyFn("dense", 4, 4, 6, 3);
+    return Math.round(Math.pow(10, m.le)) === 333333000000 && Math.round(Math.pow(10, m.lPM)) === 1000002000000;
+  },
+  zeroIsEquality: cls => [0.1, NUM.ASTAR, 0.5, 1, 1.5].every(A => cls(NUM.point(0), A) === "equal") &&
+    cls(NUM.point(Math.log10(50)), 1) === "below" && cls(NUM.point(Math.log10(51)), 1) === "above" &&
+    cls(NUM.point(1), 0.25) === "below" && cls(NUM.point(NUM.LPK / NUM.LN10), NUM.ASTAR) === "tangent",
   firstCrossing: fn => fn(49) < 1 && fn(50) > 1 && fn(49).toFixed(4) === PRINTED.f49 && fn(50).toFixed(4) === PRINTED.f50,
   close1: printed => { const b = NUM.band(1); return b.first === 50 && Math.abs(b.closeLog10 - printed) < 0.005; }
 };
@@ -382,7 +418,9 @@ function runChecks() {
   const b2 = NUM.band(0.5);
   add("A = 1/2: f > 2 from n = 327,741,238 to about 10^" + PRINTED.close2, b2.first === PRINTED.open2 && NUM.fN(327741237) < 2 && NUM.fN(327741238) > 2 && Math.abs(b2.closeLog10 - PRINTED.close2) < 0.005,
     "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
-  add("no band at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
+  add("family scaling: dense e = p v (v-1)/2 and sparse e = (e/v of the small graph) v, and n = c (v+e), match exact BigInt arithmetic at v = 10^s for s = 1, 2, 3, 6, 12, 50, 100, 200, every small graph (zero-edge included), c = 1, 3, 1000; C4 dense at s = 6, c = 3 gives e = 333,333,000,000 and n = 1,000,002,000,000", DECIDE.familyExact(NUM.family));
+  add("n = 0: 2^(A n f(n)) = 2^n = 1 for every A, classified as equality, not from the ratio; for n > 0 the ratio decides (n = 49 below and n = 50 above at A = 1; A = e^2/16 at the real peak point is a tangency)", DECIDE.zeroIsEquality(NUM.expVsN));
+  add("no strict band (A f(n) > 1 nowhere) at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
   let idOK = true; for (let t = 0; t <= 300; t += 0.25) { const d = Math.log(Math.pow(10, t) + 15); if (Math.abs(NUM.lnN16t(t) - d) > 1e-12 * d) idOK = false; }
   add("log-space ln(n+16) = t ln 10 + log1p(15 * 10^-t) with t = log10(n+1), checked against direct evaluation for t <= 300", idOK);
   const p0 = NUM.point(0);
@@ -408,6 +446,9 @@ function runControls() {
     add("wrong reduction: " + g.label + "'s matching encoding without its at-most-one clauses must fail", DECIDE.pmOK(g, Object.assign({}, enc, { clauses: enc.clauses.filter(c => !(c.length === 2 && c[0] < 0 && c[1] < 0)) }), g.refPM)); }
   add("wrong scale: f with ln(n) in place of ln(n+16) must miss the 49/50 crossing", DECIDE.firstCrossing(n => NUM.g(Math.log(n))));
   add("wrong landmark: a recrossing printed as 10^2390.31 must fail", DECIDE.close1(2390.31));
+  add("wrong family scaling: dense e with one lv term (linear in v) must fail", DECIDE.familyExact((fam, vS, eS, lv, c) => { const r = NUM.family(fam, vS, eS, lv, c);
+    if (fam !== "dense" || r.le === null) return r; const le = r.le - lv; return { le, lPM: Math.log10(c) + NUM.lse10([lv, le]) }; }));
+  add("wrong n = 0 rule: a ratio-only comparison (A f(n) < 1 means below) must fail", DECIDE.zeroIsEquality((p, A) => { const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "tangent" : r < 1 ? "below" : "above"; }));
   return out;
 }
 const RESULT = (function () { try { return { checks: runChecks(), controls: runControls() }; } catch (e) { return { checks: [{ name: "checks threw: " + e.message, ok: false }], controls: [] }; } })();
@@ -572,11 +613,7 @@ if (typeof document !== "undefined") (function () {
   const edgeName = ([a, b]) => "e" + a + b;
   function scaling() {   // n for the family at v = 10^s, in logs; never forms v
     const g = graphByKey(S.g), v = g.v, e = g.edges.length, lv = S.s;
-    let le;   // log10 of e for the big family
-    if (e === 0) le = null;
-    else if (S.fam === "dense") { const p = e / (v * (v - 1) / 2); le = Math.log10(p) + lv + Math.log10(1 - Math.pow(10, -lv)) - Math.log10(2); }
-    else le = Math.log10(e / v) + lv;
-    const lPM = Math.log10(S.c) + NUM.lse10([lv, le]), tIS = NUM.lg1p(lv), tPM = NUM.lg1p(lPM);
+    const { le, lPM } = NUM.family(S.fam, v, e, lv, S.c), tIS = NUM.lg1p(lv), tPM = NUM.lg1p(lPM);
     const pIS = NUM.point(tIS), pPM = NUM.point(tPM);
     return { g, lv, le, lPM, tIS, tPM, expIS: NUM.expLog10(pIS, S.A), expPM: NUM.expLog10(pPM, S.A) };
   }
@@ -659,15 +696,16 @@ if (typeof document !== "undefined") (function () {
     document.querySelectorAll("[data-m3]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m3 === S.m3)));
     $("vA").textContent = S.A.toFixed(4);
     const p = curPoint(), f = NUM.fP(p), ex = NUM.expLog10(p, S.A), full = NUM.fullLog10(p, S.A, S.log2C, S.d, S.lam), ln = NUM.log10n(p), b = NUM.band(S.A);
-    $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + (S.A * f < 1 ? " (exponent term below 2^n)" : " (exponent term not below 2^n)") +
+    $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + " (" + ({ equal: "n = 0: the exponent term equals 2^n, both are 1, for every A", tangent: "the exponent term equals 2^n here: a tangency", below: "exponent term strictly below 2^n", above: "exponent term strictly above 2^n" })[NUM.expVsN(p, S.A)] + ")" +
       "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
       " bits; below 2^n here: " + (NUM.below(p, S.A, S.log2C, S.d, S.lam) ? "yes" : "no") + ", for these illustrative constants only. " +
-      (b.empty ? "A = " + S.A.toFixed(4) + " is at or below e^2/16 = 0.46182: A f(n) <= 1 at every real n >= 0." : "A f(n) > 1 from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openT.toFixed(2)) + " to about 10^" + b.closeLog10.toFixed(2) + ".");
+      (b.empty ? (Math.abs(S.A - NUM.ASTAR) <= 1e-12 ? "A = e^2/16 exactly: no strict band (A f(n) > 1 nowhere); the exponent term only touches 2^n at the real peak point n*, not an integer (a tangency)."
+      : "A = " + S.A.toFixed(4) + " is below e^2/16 = 0.46182: the exponent term is strictly below 2^n at every real n > 0 (at n = 0 both are 1).") : "A f(n) > 1 from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openT.toFixed(2)) + " to about 10^" + b.closeLog10.toFixed(2) + ".");
     const rows = [["first crossing of f = 1", "between n = 49 and 50: f(49) = " + NUM.fN(49).toFixed(4) + ", f(50) = " + NUM.fN(50).toFixed(4)],
       ["real peak of f (not of n f, which grows without bound)", "16/e^2 = " + NUM.FMAX.toFixed(5) + " at ln(n+16) = e^4, n about 10^" + (NUM.LPK / NUM.LN10).toFixed(2)],
       ["f > 2", "from n = 327,741,238 to about 10^" + NUM.band(0.5).closeLog10.toFixed(2)],
       ["recrossing of f = 1 (the band at A = 1 closes)", "near 10^" + NUM.band(1).closeLog10.toFixed(2)],
-      ["sharp threshold (Confluence)", "A f(n) < 1 at every real n >= 0 exactly when A < e^2/16 = " + NUM.ASTAR.toFixed(10)],
+      ["sharp threshold (Confluence)", "the exponent term is strictly below 2^n at every real n > 0 exactly when A < e^2/16 = " + NUM.ASTAR.toFixed(10) + "; at A = e^2/16 no strict band, a tangency at the real peak point (not an integer); n = 0 is excluded because both sides are 1"],
       ["integer maximum of f", "recorded on card 378 (514,843,556,263,457,213,182,250, 16/e^2 minus about 2.0 * 10^-54); beyond double precision, not rechecked here"],
       ["cursor", $("r3").textContent]];
     $("t3").innerHTML = "<tr><th>landmark</th><th>value (recomputed on this page unless stated)</th></tr>" + rows.map(r => "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td></tr>").join("");
@@ -700,7 +738,7 @@ if (typeof document !== "undefined") (function () {
       if (S.m3 === "f") { dot(Math.log10(50.5), NUM.fN(50), narrow ? "49/50" : "first crossing 49/50", "left", 14); dot(NUM.LPK / NUM.LN10, NUM.FMAX, "real peak at ln(n+16) = e^4", "right");
         dot(NUM.band(1).closeLog10, 1, narrow ? "10^2390.21" : "below 1 again near 10^2390.21", "right", 14); dot(Math.log10(327741239), 2, "f = 2", "right", 12); }
       else { const b = NUM.band(S.A); if (!b.empty) { dot(b.first !== null ? Math.log10(b.first + 1) : b.openT, 1, narrow ? "opens" : "band opens", "left", 14); dot(b.closeLog10, 1, (narrow ? "closes 10^" : "band closes near 10^") + b.closeLog10.toFixed(2), "right", 14); }
-        texts.push({ x: x0 + 8, y: y0 - 12, s: b.empty ? (narrow ? "A <= e^2/16: no band" : "A at or below e^2/16 = 0.46182: no band (Confluence's threshold)") : (narrow ? "amber: A f(n) > 1" : "amber: A f(n) > 1, the exponent term alone exceeds 2^n"), c: "#ffcf7a", sz: 12, al: "left" }); }
+        texts.push({ x: x0 + 8, y: y0 - 12, s: b.empty ? (narrow ? "A <= e^2/16: no strict band" : "A at or below e^2/16 = 0.46182: no strict band; at e^2/16 a tangency (Confluence)") : (narrow ? "amber: A f(n) > 1" : "amber: A f(n) > 1, the exponent term alone exceeds 2^n"), c: "#ffcf7a", sz: 12, al: "left" }); }
       texts.push({ x: x0 + 8, y: y0 - 28, s: S.m3 === "f" ? (narrow ? "f(n); amber where f > 1/A" : "f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)); amber where f > 1/A") : (narrow ? "the ratio A f(n)" : "the ratio A f(n); the exponent is n times this"), c: "#a9b7b4", sz: 12, al: "left" });
     } else {
       for (const [l, s] of [[1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"]]) texts.push({ x: x0 - 6, y: Yp(NUM.Y(l)), s, c: "#a9b7b4", sz: 10.5, al: "right" });
