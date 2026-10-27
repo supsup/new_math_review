@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runtime Zoom Tunnel</title>
+<style>
+  :root { --bg: #0f1317; --panel: #161c22; --ink: #e9eee9; --dim: #a9b5b2; --accent: #ffcf7a; --cool: #8fd8e8; --warm: #f0a35a; --line: #31414a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 14px 16px 40px; }
+  h1 { margin: 0; font-size: clamp(20px, 4.6vw, 28px); font-weight: normal; }
+  .label { display: inline-block; margin: 6px 0 2px; font: 12.5px/1.3 ui-monospace, Menlo, monospace; letter-spacing: .04em; color: #ff9c8a; }
+  p { margin: 6px 0; line-height: 1.45; font-size: 14.5px; color: var(--dim); }
+  p.caveat { color: var(--accent); }
+  #stage { position: relative; width: 100%; height: min(62vh, 560px); min-height: 340px; background: #0b0f12; border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; }
+  #c, #ov { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #c:focus { outline: 2px solid var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0; font-size: 14px; }
+  .row label { display: flex; gap: 6px; align-items: center; }
+  input[type=range] { width: min(560px, 100%); }
+  select { width: auto; }
+  input[type=number], select { min-width: 92px; background: #1b2730; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 3px 5px; font: 14px Georgia, serif; }
+  button { background: #1b2730; color: var(--ink); border: 1px solid #3d5560; border-radius: 6px; padding: 6px 11px; font: 13.5px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #3d5560; border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } #stage { height: 640px; } }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; line-height: 1.5; color: var(--dim); }
+  .box b { color: var(--ink); font-weight: normal; }
+  .yes { color: #9be39b; } .no { color: var(--warm); }
+  #tourText { color: var(--ink); min-height: 4.5em; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border-top: 1px solid var(--line); padding: 4px 6px; text-align: right; } th { color: var(--accent); font-weight: normal; } td:first-child, th:first-child { text-align: left; }
+  .tablewrap { overflow-x: auto; }
+  #err { display: none; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; font: 14px monospace; margin: 10px 0; }
+  #checks { font-size: 12.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Runtime Zoom Tunnel (card 378)</h1>
+  <div class="label">STATEMENT READ; CHECKER NOT RUN. The formalized (log log n)^2 / sqrt(log n) route only.</div>
+  <p>The Lean statement bounds the running time by B(n, L) = C (L+1)^d 2^(A n f(n)), with
+  f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)), natural logarithms and the +16 exactly as in the Lean's runtimeScale(n) = n f(n).
+  One zoom control moves n from 0 to astronomically large sizes. The left instrument shows the coefficient A f(n) against 1;
+  the right instrument shows the number of bits in the whole illustrative bound, log2 B, against n, the number of bits in
+  2^n. The coefficient rises, peaks and falls; the bound keeps growing the whole time. A falling coefficient is not a falling
+  runtime.</p>
+  <p class="caveat">Illustrative throughout: the theorem gives C, A and d only existentially, so every value below is an
+  example, not a witness extracted from the theorem, and L(n) is a hypothetical input-length model. A point below the 2^n
+  reference means only that this illustrative upper bound is below 2^n there, not an observed speedup.</p>
+  <div id="err" role="alert"></div>
+  <div id="stage"><canvas id="c" tabindex="0" aria-label="Two synchronized instruments: the coefficient A f(n) against 1, and the bits of the full illustrative bound against n"></canvas><canvas id="ov" aria-hidden="true"></canvas></div>
+  <div class="row">
+    <label for="zoom">zoom</label><input id="zoom" type="range" min="0" max="2000" step="1" value="700" aria-describedby="nread">
+    <span id="nread"></span>
+  </div>
+  <div class="row">
+    <button id="play" aria-pressed="false">play the zoom</button>
+    <button id="reduce" aria-pressed="false">reduce motion</button>
+    <button id="n0">n = 0</button>
+    <span style="font-size:12.5px">keys (canvas focused): left/right zoom, shift for big steps, + and - step n by one while n is an exact integer, P plays</span>
+  </div>
+  <div class="grid">
+    <div class="box">
+      <b>illustrative constants</b> (examples, not witnesses)<br>
+      <div class="row">A <button data-a="1">1</button><button data-a="0.5">1/2</button><button data-a="0.25">1/4</button><button data-a="estar">e^2/16</button>
+        <input id="iA" type="number" step="0.01" min="0.01" value="1" aria-label="A"></div>
+      <div class="row"><label>log2 C <input id="iC" type="number" step="1" value="20"></label><label>d <input id="iD" type="number" step="1" min="0" value="2"></label></div>
+      <div class="row"><label>L(n) model <select id="iM"><option value="lin">L = lambda (n+1) + 1</option><option value="quad">L = lambda (n+1)^2 + 1</option></select></label>
+        <label>lambda <input id="iL" type="number" step="1" min="1" value="4"></label></div>
+      <span style="font-size:12.5px">The encoding writes n in unary, so any real input has L &gt;= n + 2. Both models are monotone in n and respect that; a real formula's L depends on the formula, which this hypothetical model does not see.</span>
+    </div>
+    <div class="box" id="crit" aria-live="polite"></div>
+  </div>
+  <div class="box" style="margin-top:12px">
+    <b>guided tour</b> <button id="prev">previous</button> <button id="next">next</button> <span id="tourStep"></span>
+    <p id="tourText"></p>
+  </div>
+  <div class="box" style="margin-top:12px">
+    <b>numbers</b> (the readable fallback; always shown)
+    <div class="tablewrap"><table id="tbl"></table></div>
+  </div>
+  <div class="box" style="margin-top:12px" id="checks"></div>
+</main>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const TUN = (function () {
+  const LN10 = Math.log(10), LOG2_10 = Math.log2(10);
+  // A point n is {x, int}: x = log10 n (n >= 1), int = the exact integer when n < 2^53, else null; n = 0 is {zero: true}.
+  // Huge n is never formed as a float: ln(n+16) = x ln 10 + log1p(16 * 10^-x), an identity; for x >= 17 the +16 is below
+  // double-precision resolution, and past x = 323 the correction underflows to 0.
+  const fromInt = k => k === 0 ? { zero: true, x: -Infinity, int: 0 } : { zero: false, x: Math.log10(k), int: k };
+  const fromLog = x => (x < 15 ? fromInt(Math.round(Math.pow(10, x))) : { zero: false, x, int: null });
+  // the formula, with deliberately wrong variants for the control checks
+  const VARIANTS = {
+    correct: p => { const L = p.int !== null ? Math.log(p.int + 16) : p.x * LN10 + Math.log1p(16 * Math.pow(10, -p.x)); const l = Math.log(L); return l * l / Math.sqrt(L); },
+    "no +16": p => { const L = p.int !== null ? Math.log(p.int) : p.x * LN10; const l = Math.log(L); return l * l / Math.sqrt(L); },
+    "log10": p => { const L = p.int !== null ? Math.log10(p.int + 16) : p.x + Math.log10(1 + 16 * Math.pow(10, -p.x)); const l = Math.log10(L); return l * l / Math.sqrt(L); },
+  };
+  const f = VARIANTS.correct;
+  const g = L => { const l = Math.log(L); return l * l / Math.sqrt(L); };   // f as a function of L = ln(n+16), real n >= 0
+  const ESTAR = Math.exp(2) / 16, FMAX = 16 / Math.exp(2), PEAK_LOG10 = Math.exp(4) / LN10;
+  const lse10 = (a, b) => { if (a === -Infinity) return b; if (b === -Infinity) return a; const m = Math.max(a, b); return m + Math.log10(1 + Math.pow(10, Math.min(a, b) - m)); };
+  // log2(L+1) for the hypothetical, monotone input-length models (L >= n + 2 always)
+  function log2L1(p, model, lambda) {
+    if (p.int !== null && p.int < 1e15) { const n = p.int; const L = model === "quad" ? lambda * (n + 1) * (n + 1) + 1 : lambda * (n + 1) + 1; return Math.log2(L + 1); }
+    const log2n1 = p.x * LOG2_10;   // n + 1 = n to double precision here
+    return Math.log2(lambda) + (model === "quad" ? 2 * log2n1 : log2n1);
+  }
+  // the full illustrative bound, in logs: log2 B = log2 C + d log2(L+1) + A n f(n). Returns log10(log2 B), the gap
+  // log10(log2 B) - log10(n), and the full-bound criterion log2 C + d log2(L+1) <= n (1 - A f(n)), all without forming n.
+  function bound(p, A, log2C, d, model, lambda, ff) {
+    const fv = (ff || f)(p), coef = A * fv, small = log2C + d * log2L1(p, model, lambda);
+    const logSmall = small > 0 ? Math.log10(small) : -Infinity;
+    if (p.zero) return { coef, fv, small, logBits: logSmall, gap: null, criterion: small <= 0, critLhs: small, critRhsLog10: null, slack: 1 - coef };
+    const logExp = p.x + Math.log10(coef);                     // log10(A n f(n))
+    const logBits = lse10(logExp, logSmall);                    // log10(log2 B), assuming small >= 0
+    const slack = 1 - coef;
+    let criterion;
+    if (slack <= 0) criterion = small <= 0 ? (slack === 0) : false;
+    else criterion = small <= 0 ? true : Math.log10(small) <= p.x + Math.log10(slack);
+    return { coef, fv, small, logBits, gap: logBits - p.x, criterion, critLhs: small, critRhsLog10: slack > 0 ? p.x + Math.log10(slack) : null, slack };
+  }
+  // the zoom: position k in 0..2000; k = 0 is n = 0; otherwise log10 n = 10^(4.3 (k-1)/1999) - 1, so n runs from 1 to
+  // about 10^19950 (past the 10^2390.21 crossing); below 10^15 n is snapped to an exact integer
+  const KMAX = 2000;
+  const xOfK = k => Math.pow(10, 4.3 * (k - 1) / (KMAX - 1)) - 1;
+  const pointOfK = k => k === 0 ? fromInt(0) : fromLog(xOfK(k));
+  const kOfX = x => 1 + Math.round(Math.log10(x + 1) / 4.3 * (KMAX - 1));
+  // landmarks, recomputed here (bisection on L = ln(n+16) over real n >= 0)
+  function bisect(fun, lo, hi) { const s = Math.sign(fun(lo)); for (let i = 0; i < 300; i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === s) lo = m; else hi = m; } return (lo + hi) / 2; }
+  function landmarks(ff) {
+    const F = ff || f, out = {};
+    out.f49 = F(fromInt(49)); out.f50 = F(fromInt(50));
+    out.f2a = F(fromInt(327741237)); out.f2b = F(fromInt(327741238));
+    let best = -Infinity, bx = 0;                               // the peak, scanned over log10 n in [1, 100]
+    for (let i = 0; i <= 200000; i++) { const x = 1 + 99 * i / 200000, v = F(fromLog(x)); if (v > best) { best = v; bx = x; } }
+    out.peak = best; out.peakX = bx;
+    const G = c => x => F({ zero: false, x, int: null }) - c;   // descending roots, as log10 n
+    out.root1 = bisect(G(1), 30, 1e5); out.root2 = bisect(G(2), 30, 1e5);
+    return out;
+  }
+  const PRINTED = { f49lt: 1, f50gt: 1, peak: 2.1654, peakX: 23.71, peakN: "5.1484e23", estar: 0.46181600618316563920, root1: 2390.21, root2: 81.59 };
+  function verdicts(ff) {
+    const m = landmarks(ff), r = [];
+    const ok = (name, cond, detail) => r.push({ name, ok: !!cond, detail });
+    ok("first crossing of 1 between n = 49 and 50", m.f49 < 1 && m.f50 > 1, "f(49) = " + m.f49.toFixed(4) + ", f(50) = " + m.f50.toFixed(4));
+    ok("f crosses 2 between n = 327,741,237 and 327,741,238", m.f2a < 2 && m.f2b > 2, "f = " + m.f2a.toFixed(12) + ", " + m.f2b.toFixed(12));
+    ok("peak of f is 16/e^2 = 2.1654 (real n >= 0)", Math.abs(m.peak - FMAX) < 1e-9 && Math.abs(m.peak - PRINTED.peak) < 5e-5, "scanned max " + m.peak.toFixed(6));
+    ok("peak at log10 n about 23.71 (n about 5.1484e23)", Math.abs(m.peakX - PRINTED.peakX) < 0.01 && Math.abs(Math.pow(10, PEAK_LOG10 - 23) - 5.1484) < 1e-3, "scanned at 10^" + m.peakX.toFixed(3));
+    ok("sharp threshold e^2/16 = 0.4618160061831656 (Confluence)", Math.abs(ESTAR - PRINTED.estar) < 1e-15 && Math.abs(1 / m.peak - ESTAR) < 1e-9, "1/peak = " + (1 / m.peak).toFixed(12));
+    ok("f falls below 1 again near 10^2390.21", Math.abs(m.root1 - PRINTED.root1) < 0.005, "root at 10^" + m.root1.toFixed(4));
+    ok("f falls below 2 again near 10^81.59", Math.abs(m.root2 - PRINTED.root2) < 0.005, "root at 10^" + m.root2.toFixed(4));
+    return r;
+  }
+  const healthy = verdicts();
+  const controls = ["no +16", "log10"].map(name => ({ name, results: verdicts(VARIANTS[name]) }));
+  const fail = healthy.filter(v => !v.ok).map(v => v.name + " (" + v.detail + ")");
+  controls.forEach(c => { if (c.results.every(v => v.ok)) fail.push("the wrong formula '" + c.name + "' passed every check, so the checks are blind"); });
+  // no NaN or overflow anywhere on the zoom, for the presets and both models, including n = 0 and the largest zoom
+  let finiteChecked = 0;
+  for (const A of [1, 0.5, 0.25, ESTAR]) for (const model of ["lin", "quad"]) for (let k = 0; k <= KMAX; k += 7) {
+    const p = pointOfK(k), b = bound(p, A, 20, 2, model, 4);
+    const vals = [b.coef, b.small, b.logBits].concat(p.zero ? [] : [b.gap]);
+    if (!vals.every(Number.isFinite)) { fail.push("non-finite value at zoom " + k + " (A = " + A + ", " + model + ")"); break; }
+    finiteChecked++;
+  }
+  { const p = pointOfK(KMAX), b = bound(p, 1, 20, 2, "quad", 4);
+    if (!(Number.isFinite(p.x) && p.x > 2390.21 && b.coef < 1)) fail.push("largest zoom should sit past the 10^2390.21 crossing with finite values"); }
+  // the full bound grows past the coefficient peak (fixed positive constants, monotone L(n))
+  for (const model of ["lin", "quad"]) { let prev = -Infinity, grows = true;
+    for (let k = kOfX(PEAK_LOG10); k <= KMAX; k += 3) { const v = bound(pointOfK(k), 1, 20, 2, model, 4).logBits; if (!(v > prev)) grows = false; prev = v; }
+    if (!grows) fail.push("the full bound should keep growing past the coefficient peak (" + model + ")"); }
+  return { f, g, fromInt, fromLog, bound, pointOfK, kOfX, xOfK, KMAX, ESTAR, FMAX, PEAK_LOG10, healthy, controls, finiteChecked, fail, VARIANTS };
+})();
+if (typeof module !== "undefined") module.exports = TUN;   // lets node test the block above
+
+/* ---------- the page ---------- */
+if (typeof document !== "undefined") (function () {
+  const T = TUN, $ = id => document.getElementById(id), err = $("err");
+  const checksEl = $("checks");
+  checksEl.innerHTML = "<b>checks run in this page before drawing</b> (finite arithmetic, not a proof or a checker run)<br>" +
+    T.healthy.map(v => (v.ok ? "<span class='yes'>pass</span> " : "<span class='no'>FAIL</span> ") + v.name + ": " + v.detail).join("<br>") + "<br>" +
+    T.controls.map(c => "control, wrong formula '" + c.name + "': " + (c.results.some(v => !v.ok) ? "<span class='yes'>caught</span> (" + c.results.filter(v => !v.ok).length + " checks fail)" : "<span class='no'>NOT caught</span>")).join("<br>") +
+    "<br>no NaN or overflow at " + T.finiteChecked + " zoom positions (four A presets, both L models, n = 0 to the largest zoom); the full bound keeps growing past the coefficient peak";
+  if (T.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + T.fail.join("; "); return; }
+
+  let A = 1, log2C = 20, d = 2, model = "lin", lambda = 4, k = 700, playing = false, reduced = false, tourI = -1;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) reduced = true;
+  $("reduce").setAttribute("aria-pressed", reduced ? "true" : "false");
+  let P = T.pointOfK(k);
+  const fmtInt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  function fmtN(p) {
+    if (p.zero) return "0";
+    if (p.int !== null && p.int < 1e15) return fmtInt(p.int);
+    const e = Math.floor(p.x), m = Math.pow(10, p.x - e);
+    return m.toFixed(4) + " x 10^" + e + "  (log10 n = " + p.x.toFixed(4) + ")";
+  }
+  const fmtBits = lg => lg === -Infinity ? "0" : lg < 15 ? fmtInt(Math.round(Math.pow(10, lg))) : "10^" + lg.toFixed(4);
+  const readNum = (id, dflt, lo) => { const v = Number($(id).value); return Number.isFinite(v) ? Math.max(lo, v) : dflt; };
+  function setA(v) { A = v; $("iA").value = String(+v.toFixed(12)); update(); }
+  document.querySelectorAll("button[data-a]").forEach(b => b.onclick = () => setA(b.dataset.a === "estar" ? T.ESTAR : Number(b.dataset.a)));
+  $("iA").addEventListener("input", () => { A = readNum("iA", 1, 0.01); update(); });
+  $("iC").addEventListener("input", () => { log2C = readNum("iC", 20, 0); update(); });
+  $("iD").addEventListener("input", () => { d = readNum("iD", 2, 0); update(); });
+  $("iM").addEventListener("change", () => { model = $("iM").value; update(); });
+  $("iL").addEventListener("input", () => { lambda = readNum("iL", 4, 1); update(); });
+  $("zoom").addEventListener("input", () => { k = +$("zoom").value; P = T.pointOfK(k); update(); });
+  $("n0").onclick = () => { k = 0; P = T.fromInt(0); update(); };
+  $("reduce").onclick = () => { reduced = !reduced; $("reduce").setAttribute("aria-pressed", reduced ? "true" : "false"); };
+  $("play").onclick = () => { playing = !playing; $("play").setAttribute("aria-pressed", playing ? "true" : "false"); if (playing && k >= T.KMAX) { k = 1; P = T.pointOfK(k); } };
+  const canvas0 = $("c");
+  canvas0.addEventListener("keydown", e => {
+    const big = e.shiftKey ? 50 : 1;
+    if (e.key === "ArrowRight") { k = Math.min(T.KMAX, k + big); P = T.pointOfK(k); }
+    else if (e.key === "ArrowLeft") { k = Math.max(0, k - big); P = T.pointOfK(k); }
+    else if ((e.key === "+" || e.key === "=") && P.int !== null && P.int < 1e15 - 1) { P = T.fromInt(P.int + 1); k = P.zero ? 0 : T.kOfX(P.x); }
+    else if (e.key === "-" && P.int !== null && P.int > 0) { P = T.fromInt(P.int - 1); k = P.zero ? 0 : T.kOfX(P.x); }
+    else if (e.key === "p" || e.key === "P") { $("play").click(); }
+    else return;
+    e.preventDefault(); update();
+  });
+  const TOUR = [
+    { n: 49, A: 1, text: "n = 49: the coefficient A f(n) at illustrative A = 1 is f(49) = 0.9994, just under 1. Press + once: at n = 50 it is f(50) = 1.0027, the first crossing of 1. This is a statement about the coefficient, not about measured solver time; the right instrument shows the whole bound is still dominated by its C and L terms here." },
+    { n: 327741238, A: 0.5, text: "At illustrative A = 1/2 the coefficient first exceeds 1 at n = 327,741,238 (f crosses 2 between 327,741,237 and 327,741,238). Again a coefficient statement: it says where 2^(A n f(n)) passes 2^n, nothing about measured time." },
+    { x: T.PEAK_LOG10, A: 1, text: "The coefficient peaks here: f has its maximum 16/e^2 = 2.1654 over real n >= 0 at ln(n+16) = e^4, n about 5.1484e23. This is the peak of f, not of n f(n): runtimeScale = n f(n) keeps growing, and so does the full bound on the right. Zoom further and watch the coefficient fall while the bound still grows." },
+    { x: T.PEAK_LOG10, A: T.ESTAR, text: "A = e^2/16 = 0.46181600618... is Confluence's sharp threshold: for A below it the coefficient A f(n) is below 1 at every real n >= 0 (at exactly e^2/16 it only touches 1 at the real peak point, which is not an integer). Even then the full bound is not automatically below 2^n: log2 C + d log2(L+1) must also fit under n (1 - A f(n)), which fails at small n." },
+    { x: 2390.212, A: 1, text: "Near n = 10^2390.21, at illustrative A = 1, the coefficient falls back below 1 for good. Past this point the full-bound criterion holds for these illustrative C, d and L, so this example bound is below 2^n there. That is a bound statement for chosen constants, not an observed speedup, and the theorem does not supply the constants." },
+  ];
+  function tour(i) {
+    tourI = (i + TOUR.length) % TOUR.length; const s = TOUR[tourI];
+    setA(s.A); P = s.n !== undefined ? T.fromInt(s.n) : T.fromLog(s.x); k = P.zero ? 0 : T.kOfX(P.x);
+    $("tourStep").textContent = "step " + (tourI + 1) + " of " + TOUR.length; $("tourText").textContent = s.text; update();
+  }
+  $("next").onclick = () => tour(tourI + 1); $("prev").onclick = () => tour(tourI - 1);
+
+  function update() {
+    $("zoom").value = String(k);
+    const b = T.bound(P, A, log2C, d, model, lambda);
+    $("nread").textContent = "n = " + fmtN(P);
+    $("crit").innerHTML = "<b>full-bound criterion</b> at this n:<br>log2 C + d log2(L+1) &lt;= n (1 - A f(n))<br>" +
+      "left side: " + b.critLhs.toFixed(1) + "<br>right side: " + (P.zero ? "0" : b.critRhsLog10 === null ? "n (1 - A f(n)) &lt;= 0, since A f(n) = " + b.coef.toFixed(4) + " &gt;= 1" : "10^" + b.critRhsLog10.toFixed(4)) +
+      "<br>this illustrative upper bound is below 2^n here: " + (b.criterion ? "<span class='yes'>yes</span>" : "<span class='no'>no</span>") +
+      "<br><span style='font-size:12.5px'>Yes means only that this chosen upper bound is below 2^n at this n; it is not an observed speedup, and A f(n) &lt; 1 alone does not establish it.</span>";
+    const rows = [["n", fmtN(P)], ["A f(n), the coefficient", b.coef.toFixed(6)], ["f(n)", b.fv.toFixed(6)],
+      ["log2 C + d log2(L+1)", b.small.toFixed(2)], ["bits in the bound, log2 B", fmtBits(b.logBits)],
+      ["bits in 2^n, n", P.zero ? "0" : fmtBits(P.x)], ["bound below 2^n here (illustrative)", b.criterion ? "yes" : "no"]];
+    const marks = [[49, null], [50, null], [327741238, null], [null, T.PEAK_LOG10], [null, 2390.2], [null, 2390.22]];
+    let html = "<tr><th>quantity</th><th>value now</th></tr>" + rows.map(r => "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td></tr>").join("");
+    html += "<tr><th>landmark n</th><th>A f(n) / bound bits / 2^n bits / below?</th></tr>";
+    for (const [ni, xi] of marks) { const p = ni !== null ? T.fromInt(ni) : T.fromLog(xi), q = T.bound(p, A, log2C, d, model, lambda);
+      html += "<tr><td>" + fmtN(p).split("  ")[0] + "</td><td>" + q.coef.toFixed(4) + " / " + fmtBits(q.logBits) + " / " + fmtBits(p.x) + " / " + (q.criterion ? "yes" : "no") + "</td></tr>"; }
+    $("tbl").innerHTML = html;
+  }
+  update();
+
+  // ---- drawing: two instruments on one canvas; WebGL lines as quads, 2D canvas when WebGL is unavailable
+  let canvas = canvas0;
+  const ov = $("ov"), octx = ov.getContext("2d");
+  let gl = null, G = null;
+  try { gl = canvas.getContext("webgl", { antialias: true, alpha: false }); } catch (e) { gl = null; }
+  if (gl) {
+    try {
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+      const p = gl.createProgram();
+      gl.attachShader(p, sh(gl.VERTEX_SHADER, "attribute vec2 aS; attribute vec4 aC; varying vec4 vC; void main() { gl_Position = vec4(aS, 0.0, 1.0); vC = aC; }"));
+      gl.attachShader(p, sh(gl.FRAGMENT_SHADER, "precision mediump float; varying vec4 vC; void main() { gl_FragColor = vec4(vC.rgb * vC.a, vC.a); }"));
+      gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+      G = { p, buf: gl.createBuffer() };
+      if (gl.getError() !== gl.NO_ERROR) throw new Error("WebGL error");
+    } catch (e) { gl = null; G = null; }
+  }
+  let ctx = null;
+  if (!gl) { const c2 = canvas.cloneNode(false); canvas.parentNode.replaceChild(c2, canvas); canvas = c2; ctx = canvas.getContext("2d");
+    c2.addEventListener("keydown", e => canvas0.dispatchEvent(new KeyboardEvent("keydown", e)));
+    if (!ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available; the table below has every number."; } }
+
+  // horizontal axis of both instruments: s = log10(1 + log10 n), n >= 1 (n = 0 sits off the log axis, shown in the table)
+  const SMAX = Math.log10(1 + T.xOfK(T.KMAX));
+  const sOfP = p => p.zero ? 0 : Math.log10(1 + p.x);
+  const NS = 600, curveS = [], curveP = [];
+  for (let i = 0; i <= NS; i++) { const s = SMAX * i / NS, x = Math.pow(10, s) - 1; curveS.push(s); curveP.push(T.fromLog(x)); }
+  function frame(now) {
+    if (!ctx && !gl) return;
+    if (playing) { k = Math.min(T.KMAX, k + (reduced ? 40 : 3)); P = T.pointOfK(k); update(); if (k >= T.KMAX) { playing = false; $("play").setAttribute("aria-pressed", "false"); } }
+    const dpr = Math.min(2, window.devicePixelRatio || 1), w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    if (ov.width !== w || ov.height !== h) { ov.width = w; ov.height = h; }
+    const stacked = w / dpr < 700, pad = 46 * dpr;
+    const panels = stacked
+      ? [{ x0: pad, x1: w - 14 * dpr, y0: 26 * dpr, y1: h / 2 - 26 * dpr }, { x0: pad, x1: w - 14 * dpr, y0: h / 2 + 24 * dpr, y1: h - 30 * dpr }]
+      : [{ x0: pad, x1: w / 2 - 20 * dpr, y0: 30 * dpr, y1: h - 40 * dpr }, { x0: w / 2 + pad, x1: w - 16 * dpr, y0: 30 * dpr, y1: h - 40 * dpr }];
+    const segs = [], X = (pn, s) => pn.x0 + (pn.x1 - pn.x0) * s / SMAX;
+    // left: A f(n) on [0, max(2.4, A * 2.2)]
+    const L0 = panels[0], ymaxL = Math.max(2.4, A * T.FMAX * 1.1), YL = v => L0.y1 - (L0.y1 - L0.y0) * v / ymaxL;
+    segs.push([L0.x0, YL(1), L0.x1, YL(1), 0.56, 0.85, 0.91, 0.9, 1.5 * dpr]);
+    for (let i = 0; i < NS; i++) { const a = A * T.f(curveP[i]), b = A * T.f(curveP[i + 1]); segs.push([X(L0, curveS[i]), YL(a), X(L0, curveS[i + 1]), YL(b), 1, 0.81, 0.48, 1, 2.4 * dpr]); }
+    // right: two lanes. Top: digits of the bit counts, log10(log2 B) and log10 n, both rising (global axis, no rescaling).
+    // Bottom: their difference, log10(log2 B) - log10 n; above 0 means this illustrative bound exceeds 2^n.
+    const R = panels[1], mid = R.y0 + (R.y1 - R.y0) * 0.58;
+    const top = { y0: R.y0, y1: mid - 14 * dpr }, bot = { y0: mid + 14 * dpr, y1: R.y1 };
+    const lbMax = Math.log10(T.xOfK(T.KMAX)) + 0.5, YT = v => top.y1 - (top.y1 - top.y0) * Math.max(0, v) / lbMax;   // v = log10(bits)
+    const yt = v => YT(Math.log10(Math.max(1e-9, v)));   // plot log10 of log10(bits) so the whole zoom fits; labelled
+    const GMIN = -1.5, GMAX = 3, YB = v => bot.y1 - (bot.y1 - bot.y0) * (Math.max(GMIN, Math.min(GMAX, v)) - GMIN) / (GMAX - GMIN);
+    segs.push([R.x0, YB(0), R.x1, YB(0), 0.56, 0.85, 0.91, 0.9, 1.5 * dpr]);
+    let prevB = null, prevN = null, prevG = null;
+    for (let i = 0; i <= NS; i++) {
+      const p = curveP[i], b = T.bound(p, A, log2C, d, model, lambda), xs = X(R, curveS[i]);
+      const yB = yt(1 + b.logBits), yN = yt(1 + p.x), yG = YB(b.gap);
+      if (prevB) { segs.push([prevB[0], prevB[1], xs, yB, 1, 0.81, 0.48, 1, 2.4 * dpr]); segs.push([prevN[0], prevN[1], xs, yN, 0.56, 0.85, 0.91, 0.95, 1.6 * dpr]);
+        segs.push([prevG[0], prevG[1], xs, yG, 1, 0.81, 0.48, 1, 2.2 * dpr]); }
+      prevB = [xs, yB]; prevN = [xs, yN]; prevG = [xs, yG];
+    }
+    // the synchronized marker: one vertical line through both instruments
+    const sNow = sOfP(P);
+    for (const pn of panels) segs.push([X(pn, sNow), pn.y0, X(pn, sNow), pn.y1, 1, 1, 1, 0.85, 1.5 * dpr]);
+    if (gl) {
+      gl.viewport(0, 0, w, h); gl.clearColor(0.043, 0.059, 0.071, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const cl = (x, y) => [x / w * 2 - 1, 1 - y / h * 2], tri = [];
+      for (const s of segs) { const dx = s[2] - s[0], dy = s[3] - s[1], len = Math.hypot(dx, dy) || 1, nx = -dy / len * s[8] / 2, ny = dx / len * s[8] / 2;
+        for (const q of [[s[0] + nx, s[1] + ny], [s[0] - nx, s[1] - ny], [s[2] + nx, s[3] + ny], [s[0] - nx, s[1] - ny], [s[2] - nx, s[3] - ny], [s[2] + nx, s[3] + ny]]) tri.push(...cl(q[0], q[1]), s[4], s[5], s[6], s[7]); }
+      gl.useProgram(G.p); gl.bindBuffer(gl.ARRAY_BUFFER, G.buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tri), gl.STREAM_DRAW);
+      const aS = gl.getAttribLocation(G.p, "aS"), aC = gl.getAttribLocation(G.p, "aC");
+      gl.enableVertexAttribArray(aS); gl.vertexAttribPointer(aS, 2, gl.FLOAT, false, 24, 0);
+      gl.enableVertexAttribArray(aC); gl.vertexAttribPointer(aC, 4, gl.FLOAT, false, 24, 8);
+      gl.drawArrays(gl.TRIANGLES, 0, tri.length / 6);
+    } else {
+      ctx.fillStyle = "#0b0f12"; ctx.fillRect(0, 0, w, h); ctx.lineCap = "round";
+      for (const s of segs) { ctx.strokeStyle = "rgba(" + Math.round(s[4] * 255) + "," + Math.round(s[5] * 255) + "," + Math.round(s[6] * 255) + "," + s[7] + ")"; ctx.lineWidth = s[8]; ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); ctx.stroke(); }
+    }
+    // labels
+    octx.clearRect(0, 0, w, h); octx.font = (11.5 * dpr) + "px Georgia, serif"; octx.textBaseline = "middle";
+    const lab = (x, y, s, col, al) => { octx.textAlign = al || "left"; octx.fillStyle = col || "#a9b5b2"; octx.fillText(s, x, y); };
+    const ticks = [[0, "1"], [Math.log10(2), "10"], [Math.log10(11), "10^10"], [Math.log10(101), "10^100"], [Math.log10(1001), "10^1000"], [Math.log10(10001), "10^10000"]];
+    for (const pn of panels) for (const [s, t] of ticks) lab(X(pn, s), pn.y1 + 14 * dpr, t, null, "center");
+    lab(L0.x0, L0.y0 - 14 * dpr, "left: the coefficient A f(n) (amber) and the line 1", "#e9eee9");
+    for (const v of [0, 1, 2]) lab(L0.x0 - 6 * dpr, YL(v), String(v), null, "right");
+    const bNow = T.bound(P, A, log2C, d, model, lambda);
+    lab(X(L0, sNow) + 6 * dpr, YL(Math.min(ymaxL, bNow.coef)) - 10 * dpr, "A f(n) = " + bNow.coef.toFixed(4), "#ffcf7a");
+    lab(R.x0, top.y0 - 14 * dpr, "right, top: bits of bound and of 2^n (log10 of log10 scale)", "#e9eee9");
+    lab(R.x1, top.y0 + 8 * dpr, "amber: bits of the full bound   blue: n, bits of 2^n", null, "right");
+    lab(R.x0, bot.y0 - 4 * dpr, "right, bottom: log10(bound bits / n); above 0, this bound exceeds 2^n", "#e9eee9");
+    for (const v of [-1, 0, 1, 2]) lab(R.x0 - 6 * dpr, YB(v), String(v), null, "right");
+    if (P.zero) lab(L0.x0 + 4 * dpr, L0.y0 + 12 * dpr, "n = 0 is off the log axis: see the table (A f(0) = " + bNow.coef.toFixed(4) + ", runtimeScale(0) = 0)", "#ffcf7a");
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
