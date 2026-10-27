@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ETH Honest Scaling</title>
+<style>
+  :root { --bg: #0e1418; --panel: #121c21; --ink: #e9efe9; --dim: #a9b7b4; --accent: #ffcf7a; --cool: #7fd0e6;
+    --line: #3c5a62; --yes: #9be39b; --no: #ffb38a; }
+  html { background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; line-height: 1.45; }
+  main { max-width: 1100px; margin: 0 auto; padding: 14px 16px 40px; box-sizing: border-box; }
+  h1 { margin: 6px 0 4px; font-size: clamp(21px, 5vw, 30px); font-weight: normal; }
+  h2 { margin: 0 0 6px; font-size: clamp(18px, 4.2vw, 23px); font-weight: normal; }
+  h3 { margin: 10px 0 4px; font-size: 16px; font-weight: normal; color: var(--accent); }
+  p { margin: 6px 0; font-size: 14.5px; max-width: 860px; }
+  .dim { color: var(--dim); }
+  .stamp { display: inline-block; border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 4px;
+    font-size: 13px; letter-spacing: 0.04em; margin: 2px 6px 2px 0; }
+  .label { color: var(--accent); font-size: 14px; }
+  section { background: var(--panel); border: 1px solid #24363c; border-radius: 8px; padding: 12px 14px; margin: 16px 0; }
+  .viz { position: relative; width: 100%; height: clamp(300px, 60vw, 500px); border: 1px solid #24363c; border-radius: 6px;
+    overflow: hidden; touch-action: none; outline: none; background: var(--bg); }
+  .viz:focus-visible { border-color: var(--accent); }
+  .viz canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+  .viz canvas.t { pointer-events: none; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  button { background: #1b2a30; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px;
+    font: 13.5px Georgia, serif; cursor: pointer; min-height: 34px; }
+  button[aria-pressed="true"] { background: #3c5a62; border-color: var(--accent); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  label { font-size: 14px; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  input[type=range] { width: min(240px, 60vw); }
+  input[type=number] { width: 76px; background: #1b2a30; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 3px 4px; font: 13.5px Georgia, serif; }
+  .readout { font-size: 14.5px; color: var(--accent); margin: 8px 0; min-height: 2.8em; }
+  .tw { overflow-x: auto; max-width: 100%; }
+  table { border-collapse: collapse; font-size: 13.5px; margin: 6px 0; }
+  th, td { border: 1px solid #2a3f45; padding: 3px 7px; text-align: left; vertical-align: top; }
+  th { color: var(--dim); font-weight: normal; }
+  td.ok { color: var(--yes); } td.bad { color: var(--no); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 8px 0; }
+  .node { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13.5px; }
+  .node b { font-weight: normal; color: var(--ink); display: block; margin-bottom: 3px; }
+  .node.claim { border-color: var(--accent); }
+  .node.weak { border-style: dashed; border-color: var(--cool); }
+  .node.not { border-color: #8a5a4a; }
+  .node .tag { font-size: 12px; color: var(--dim); }
+  .belt { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; margin: 8px 0; }
+  .belt button { flex: 1 1 150px; text-align: left; }
+  .belt button .ev { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+  #beltDetail { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+  ul.checks { list-style: none; padding: 0; margin: 6px 0; font-size: 13.5px; }
+  ul.checks li { margin: 3px 0; }
+  .pass { color: var(--yes); } .fail { color: var(--no); }
+  #err { display: none; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; font: 14px monospace; margin: 10px 0; white-space: pre-wrap; }
+  footer { font-size: 13px; color: var(--dim); }
+  @media (max-width: 600px) { p { font-size: 14px; } .belt button { flex-basis: 100%; } }
+</style>
+</head>
+<body>
+<main>
+<h1>From eight assignments to honest scaling (family 378)</h1>
+<p><span class="stamp">CLAIMED RESULT</span><span class="stamp">STATEMENT READ; CHECKER NOT RUN</span></p>
+<p class="label">Interactive page: author-reported consistency checks; not independently reviewed by the crew.</p>
+<p>The collection claims an algorithm that, for each fixed clause width k &gt;= 2, writes out the exact number of satisfying
+assignments of a k-CNF formula on n variables, and a SAT bit, within C (L+1)^d 2^(A n f(n)) steps, where
+f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)) (natural logarithms, the +16 exactly as the Lean's runtimeScale n = n f(n) defines it)
+and C, A, d exist but are not given. This page shows what is counted, how a reduction changes n, and what the bound says
+as n grows. The small enumerations below are illustrations of the problem, not an implementation of the claimed algorithm.</p>
+<p id="gfx" class="dim"></p>
+<div id="err" role="alert"></div>
+
+<section id="s1" aria-labelledby="h1s">
+  <h2 id="h1s">1. Eight assignments</h2>
+  <p>Three variables x, y, z give 2^3 = 8 assignments, one per corner of the cube (corner xyz = 101 means x true, y false,
+  z true). Each clause you switch on removes the corners that falsify it. SAT asks one bit: does any corner survive?
+  Counting asks how many.</p>
+  <div class="row" role="group" aria-label="Known-answer presets">
+    <span class="dim">Presets:</span>
+    <button data-pre="F">F = (x or y) and (not x or z)</button>
+    <button data-pre="none">empty CNF</button>
+    <button data-pre="bot">one empty clause</button>
+    <button data-pre="contra">x and not x</button>
+  </div>
+  <div class="row" role="group" aria-label="Clauses" id="clauseBtns"><span class="dim">Clauses:</span></div>
+  <div class="viz" id="v1" tabindex="0" role="img" aria-label="Rotatable cube of the eight assignments; the table below carries the same information">
+    <canvas class="g"></canvas><canvas class="t" aria-hidden="true"></canvas></div>
+  <div class="row"><button id="spin" aria-pressed="true">Spin</button>
+    <span class="dim">Drag, or focus the picture and use the arrow keys, to rotate. Check and cross marks carry the same
+    information as the colours.</span></div>
+  <div class="readout" id="r1" role="status" aria-live="polite"></div>
+  <div class="tw"><table id="t1"></table></div>
+</section>
+
+<section id="s2" aria-labelledby="h2s">
+  <h2 id="h2s">2. A reduction budget</h2>
+  <p>A graph problem becomes a CNF formula, and the formula's variable count n is what the claimed bound is in.
+  <b>Independent sets</b>: one decision bit per vertex and one clause (not x_u or not x_w) per edge, so n = v.
+  <b>Perfect matchings</b>: one decision bit per edge, <i>then</i> auxiliary variables for a circuit checking that exactly one
+  chosen edge meets each vertex. The manuscript's corollary gives O(v+e) variables and clauses in total, with the auxiliary
+  values uniquely determined by the edge bits (so the count is preserved), and states no constants. It is never just e
+  variables.</p>
+  <div class="row" role="group" aria-label="Problem">
+    <button data-gm="IS">independent sets</button><button data-gm="PM">perfect matchings</button>
+    <button id="aux" aria-pressed="false">then add the auxiliary variables</button>
+  </div>
+  <div class="row" role="group" aria-label="Graph">
+    <span class="dim">Graph:</span><button data-g="triangle">triangle</button><button data-g="d4">C4</button><button data-g="d6">K4</button>
+    <label for="dens">density on v = 4: e = <span id="de"></span> <input id="dens" type="range" min="0" max="6" step="1" value="4"></label>
+  </div>
+  <div class="viz" id="v2" tabindex="0" role="img" aria-label="The graph and its Boolean variables; the table below carries the same information">
+    <canvas class="g"></canvas><canvas class="t" aria-hidden="true"></canvas></div>
+  <div class="row"><button id="prev">previous solution</button><button id="next">next solution</button>
+    <span class="dim">Focus the picture and use the left and right arrow keys to step through the solutions.</span></div>
+  <div class="readout" id="r2" role="status" aria-live="polite"></div>
+  <div class="tw"><table id="t2"></table></div>
+  <h3>Scaling the family: why v alone does not control the matching guarantee</h3>
+  <p>Grow the graph to v = 10^s vertices. <b>Dense family</b>: keep the small graph's edge density p = e / (v choose 2), so e grows like
+  p v^2 / 2. <b>Sparse family</b>: keep its average degree 2e/v, so e grows like v. Matching variables are taken as
+  c (v + e) with an <i>illustrative</i> constant c (the manuscript gives none; this page's own example encoding uses 3e).</p>
+  <div class="row">
+    <button data-fam="dense">dense family</button><button data-fam="sparse">sparse family</button>
+    <label for="sS">s = <span id="vS"></span> <input id="sS" type="range" min="1" max="200" step="0.5" value="6"></label>
+    <label for="cC">illustrative c = <input id="cC" type="number" value="3" min="1" max="1000" step="1"></label>
+  </div>
+  <div class="readout" id="r2b" role="status" aria-live="polite"></div>
+</section>
+
+<section id="s3" aria-labelledby="h3s">
+  <h2 id="h3s">3. The exponent's long journey</h2>
+  <p>The claimed bound is C (L+1)^d 2^(A n f(n)). Switch between the ratio f(n), the ratio A f(n) (which decides whether the
+  exponent term alone, 2^(A n f(n)), is below 2^n) and the exponent A n f(n) itself, which grows without bound even when the
+  ratio shrinks. The horizontal axis is doubly logarithmic, from n = 0 to about n = 10^3000; huge values are computed in
+  logarithms, never formed. These are illustrative comparisons of upper bounds with unknown theorem constants, not running
+  times. For each fixed k the theorem gives one machine and constants C, A, S, d, e (existential, no values); the A, C, d and L here are
+  choices for illustration.</p>
+  <div class="row" role="group" aria-label="What to plot">
+    <button data-m3="f">f(n)</button><button data-m3="Af">A f(n)</button><button data-m3="nf">n f(n) and the full bound</button>
+  </div>
+  <div class="row">
+    <label for="sA">A = <span id="vA"></span> <input id="sA" type="range" min="0.1" max="1.5" step="0.005" value="1"></label>
+    <button data-a="1">A = 1</button><button data-a="0.5">A = 1/2</button><button data-a="star">A = e^2/16</button><button data-a="0.25">A = 1/4</button>
+  </div>
+  <div class="row">
+    <label for="sN">cursor n: <input id="sN" type="range" min="0" max="1000" step="1" value="160"></label>
+    <label for="iC">log2 C <input id="iC" type="number" value="20" min="0" max="100000" step="1"></label>
+    <label for="iD">d <input id="iD" type="number" value="2" min="0.5" max="50" step="0.5"></label>
+    <label for="iL">L = &lambda; (n+1), &lambda; <input id="iL" type="number" value="4" min="1" max="1000000" step="1"></label>
+  </div>
+  <div class="viz" id="v3" tabindex="0" role="img" aria-label="Plot of the chosen quantity against n on a doubly logarithmic axis; the table below carries the same information">
+    <canvas class="g"></canvas><canvas class="t" aria-hidden="true"></canvas></div>
+  <p class="dim">Drag on the plot, or focus it and use the arrow keys (shift for bigger steps), to move the cursor n.</p>
+  <div class="readout" id="r3" role="status" aria-live="polite"></div>
+  <div class="tw"><table id="t3"></table></div>
+</section>
+
+<section id="s4" aria-labelledby="h4s">
+  <h2 id="h4s">Assumption map, conditional on the claim</h2>
+  <p class="label">Everything below the first box holds only IF the claimed theorem is correct. Nobody on the crew has checked
+  the proof: STATEMENT READ; CHECKER NOT RUN.</p>
+  <div class="grid">
+    <div class="node claim"><b>The claim (unverified)</b>For each fixed k &gt;= 2: exact count of k-CNF models and the SAT bit in
+      C (L+1)^d 2^(A n f(n)); the exponent A n f(n) is o(n). Lean: the (ln ln)^2 / sqrt(ln) route only; the paper's
+      sharper Theorem 1.1 and every corollary are outside the formalization.</div>
+    <div class="node"><b>From the exact count: #ETH</b>#3-SAT in 2^(o(n)) would refute #ETH, the counting version of the
+      hypothesis. <span class="tag">needs the count, not just the bit</span></div>
+    <div class="node"><b>From the SAT bit: ETH</b>Deciding 3-SAT in 2^(o(n)) would refute ETH (Impagliazzo and Paturi, 2001),
+      and SETH with it, since SETH implies ETH. <span class="tag">the decision consequence</span></div>
+    <div class="node"><b>Lower bounds proved assuming ETH or #ETH</b>Lose the force of that proof; they are not shown
+      false, and another proof or a weaker hypothesis may still establish them. Example: Curticapean's #ETH-conditional bound
+      for counting perfect matchings in sparse bipartite graphs, which the paper's corollary addresses directly.</div>
+    <div class="node weak"><b>Weaker or different hypotheses, not touched</b>The Orthogonal Vectors Conjecture; the hypothesis
+      that CNF-SAT of unrestricted width has no 2^((1-&delta;)n) algorithm. The fixed-width theorem does not touch them, and the
+      paper notes some SETH-based bounds also follow from them.</div>
+    <div class="node not"><b>Not implied: all of NP</b>"Runtime bounds of the form 2^(o(n)) do not transfer under general
+      polynomial-time reductions", and the result "does not imply that general NP problems admit subexponential time
+      algorithms" (the paper). Corollaries: independent sets and fixed-q colourings in 2^(o(v)), perfect matchings only in
+      2^(o(v+e)); manuscript only, not in the Lean.</div>
+    <div class="node not"><b>Not drawn here: practical or cryptographic conclusions</b>C, A and d are existential and
+      unstated; the card records no demonstrated practical speedup from the theorem alone and nothing direct about
+      cryptographic parameters (Marlow's wording).</div>
+  </div>
+</section>
+
+<section id="s5" aria-labelledby="h5s">
+  <h2 id="h5s">Proof boundary: where the evidence stops</h2>
+  <p><span class="stamp">STATEMENT READ; CHECKER NOT RUN</span> Select a stage to see what the crew actually did there.
+  A source read, a lexical scan or a numeric review is not a Lean build or a comparator certificate.</p>
+  <div class="belt" role="group" aria-label="Proof boundary stages" id="belt"></div>
+  <div id="beltDetail" role="status" aria-live="polite"></div>
+</section>
+
+<section id="s6" aria-labelledby="h6s">
+  <h2 id="h6s">This page's checks</h2>
+  <p class="label">Author-reported consistency checks; not independently reviewed by the crew. They run in your browser
+  before anything is drawn; the page refuses to draw if any fails, or if any deliberately broken control fails to trip its
+  deciding check. They check this page's illustrations, not the theorem.</p>
+  <ul class="checks" id="checks"></ul>
+</section>
+
+<footer>
+<p>Grounding: openai/math statement revision 7ef5c0cc5ca4b0e072b7a050fca09ab24bc6fa3a; lean/ComparatorChallenges/SubexponentialSAT.lean
+and its JSON (theorem exact_count_and_sat); scope lean/docs/378.md; the manuscript's graph-counting corollary
+(cor:graph-counting in main_full_version.tex). Card 378 of the showcase holds the reviewed numbers this page re-derives.
+The perfect-matching encoding drawn here is this page's own example (a prefix-OR circuit in 3-CNF), not the manuscript's
+construction. Nothing is loaded from elsewhere.</p>
+</footer>
+</main>
+<script>
+"use strict";
+/* ================= DATA: the one source both the drawing and the checker read ================= */
+const DATA = (function () {
+  const deep = o => { Object.values(o).forEach(v => { if (v && typeof v === "object") deep(v); }); return Object.freeze(o); };
+  const k4 = [[0, 1], [1, 2], [2, 3], [3, 0], [0, 2], [1, 3]];   // the first four edges are C4, all six K4
+  return deep({
+    varNames: ["x", "y", "z"],
+    clauseMenu: [
+      { id: "c1", lits: [1, 2] }, { id: "c2", lits: [-1, 3] }, { id: "c3", lits: [1] },
+      { id: "c4", lits: [-1] }, { id: "c5", lits: [] }, { id: "c6", lits: [-2, -3] }],
+    presets: [
+      { id: "F", label: "F = (x or y) and (not x or z)", on: ["c1", "c2"], ref: 4 },
+      { id: "none", label: "empty CNF", on: [], ref: 8 },
+      { id: "bot", label: "one empty clause", on: ["c5"], ref: 0 },
+      { id: "contra", label: "x and not x", on: ["c3", "c4"], ref: 0 }],
+    k4order: k4,
+    // hand-derived references for v = 4 with the first e edges of k4order (e = 4 is C4, e = 6 is K4)
+    densityRef: [{ IS: 16, PM: 0 }, { IS: 12, PM: 0 }, { IS: 10, PM: 0 }, { IS: 8, PM: 1 }, { IS: 7, PM: 2 }, { IS: 6, PM: 2 }, { IS: 5, PM: 3 }],
+    named: [
+      { key: "triangle", label: "triangle", v: 3, edges: [[0, 1], [1, 2], [2, 0]], refIS: 4, refPM: 0 },
+      { key: "C4", label: "C4", v: 4, edges: k4.slice(0, 4), refIS: 7, refPM: 2 },
+      { key: "K4", label: "K4", v: 4, edges: k4, refIS: 5, refPM: 3 }]
+  });
+})();
+function graphByKey(key) {   // every graph the drawing can show
+  if (key === "triangle") return DATA.named[0];
+  const e = Number(key.slice(1));
+  return { key, label: e === 4 ? "C4" : e === 6 ? "K4" : "v = 4, e = " + e, v: 4, edges: DATA.k4order.slice(0, e), refIS: DATA.densityRef[e].IS, refPM: DATA.densityRef[e].PM };
+}
+const ALL_GRAPH_KEYS = ["triangle", "d0", "d1", "d2", "d3", "d4", "d5", "d6"];
+
+/* ================= MODEL: what the drawing shows (boolean arrays, decision-bit enumeration) ================= */
+const MODEL = (function () {
+  const litTrue = (l, a) => l > 0 ? a[l - 1] : !a[-l - 1];
+  const clauseTrue = (c, a) => { for (const l of c) if (litTrue(l, a)) return true; return false; };
+  const cube = []; for (let i = 0; i < 8; i++) cube.push([(i >> 2 & 1) === 1, (i >> 1 & 1) === 1, (i & 1) === 1]);
+  function evaluate(clauses) {
+    const rows = cube.map(a => { const per = clauses.map(c => clauseTrue(c, a)); return { a, per, ok: per.every(Boolean) }; });
+    const count = rows.filter(r => r.ok).length;
+    return { rows, count, sat: count > 0 };
+  }
+  function encodeIS(g) { return { nvars: g.v, decision: g.v, aux: 0, clauses: g.edges.map(([u, w]) => [-(u + 1), -(w + 1)]) }; }
+  // perfect matchings: edge bits 1..e; per vertex, prefix-OR gates s_j = s_(j-1) or x_j (unique once edge bits are fixed),
+  // at most one (not s_(j-1) or not x_j), at least one (s_last); an isolated vertex gives the empty clause
+  function encodePM(g) {
+    const e = g.edges.length, inc = Array.from({ length: g.v }, () => []), auxOf = [], clauses = [];
+    g.edges.forEach(([u, w], i) => { inc[u].push(i + 1); inc[w].push(i + 1); });
+    let next = e + 1;
+    for (let u = 0; u < g.v; u++) {
+      const xs = inc[u];
+      if (!xs.length) { clauses.push([]); auxOf.push([]); continue; }
+      const s = xs.map(() => next++); auxOf.push(s);
+      clauses.push([-s[0], xs[0]], [s[0], -xs[0]]);
+      for (let j = 1; j < xs.length; j++) clauses.push([-s[j], s[j - 1], xs[j]], [s[j], -s[j - 1]], [s[j], -xs[j]], [-s[j - 1], -xs[j]]);
+      clauses.push([s[xs.length - 1]]);
+    }
+    return { nvars: next - 1, decision: e, aux: next - 1 - e, clauses, inc, auxOf };
+  }
+  // solutions as decision-bit masks; for PM the auxiliary values are set by propagation, then every clause is evaluated
+  function solutions(g, mode) {
+    const enc = mode === "IS" ? encodeIS(g) : encodePM(g), D = enc.decision, out = [];
+    for (let m = 0; m < (1 << D); m++) {
+      const a = new Array(enc.nvars).fill(false);
+      for (let i = 0; i < D; i++) a[i] = (m >> i & 1) === 1;
+      if (mode === "PM") enc.auxOf.forEach((s, u) => { let acc = false; s.forEach((sv, j) => { acc = acc || a[enc.inc[u][j] - 1]; a[sv - 1] = acc; }); });
+      if (enc.clauses.every(c => clauseTrue(c, a))) out.push({ mask: m, a });
+    }
+    return { enc, list: out };
+  }
+  return { evaluate, encodeIS, encodePM, solutions };
+})();
+
+/* ================= CHECK: an independent checker (bitmask brute force over ALL variables, direct combinatorics) ================= */
+const CHECK = (function () {
+  function toMasks(clauses) { return clauses.map(c => { let p = 0, q = 0; for (const l of c) { if (l > 0) p |= 1 << (l - 1); else q |= 1 << (-l - 1); } return [p, q]; }); }
+  function models(nvars, clauses, projBits) {
+    if (nvars > 24) throw new Error("checker limit: " + nvars + " variables");
+    const M = toMasks(clauses), sat = [], proj = new Set();
+    for (let a = 0; a < (1 << nvars); a++) {
+      let ok = true;
+      for (const [p, q] of M) if (((a & p) | (~a & q)) === 0) { ok = false; break; }
+      if (ok) { sat.push(a); proj.add(a & (projBits || 0)); }
+    }
+    return { count: sat.length, sat, projections: proj.size };
+  }
+  function directIS(v, edges) { let c = 0; for (let s = 0; s < (1 << v); s++) if (edges.every(([a, b]) => !((s >> a & 1) && (s >> b & 1)))) c++; return c; }
+  function directPM(v, edges) {
+    const full = (1 << v) - 1;
+    const rec = used => { if (used === full) return 1; let u = 0; while (used >> u & 1) u++; let t = 0;
+      for (const [a, b] of edges) { const w = a === u ? b : b === u ? a : -1; if (w >= 0 && !(used >> w & 1)) t += rec(used | 1 << u | 1 << w); } return t; };
+    return rec(0);
+  }
+  const width = clauses => clauses.reduce((m, c) => Math.max(m, c.length), 0);
+  return { models, directIS, directPM, width };
+})();
+
+/* ================= NUM: f(n) and the bound, in logarithms ================= */
+const NUM = (function () {
+  const LN10 = Math.log(10), LN2 = Math.log(2);
+  const g = L => { const l = Math.log(L); return l * l / Math.sqrt(L); };      // f as a function of L = ln(n + 16)
+  // position t = log10(n + 1); ln(n + 16) = ln(10^t + 15) = t ln 10 + log1p(15 * 10^-t), an identity (n is never formed)
+  const lnN16t = t => t * LN10 + Math.log1p(15 * Math.pow(10, -t));
+  const fN = n => g(Math.log(n + 16));                                           // integer n < 2^53
+  const ASTAR = Math.exp(2) / 16, FMAX = 16 / Math.exp(2), LPK = Math.exp(4);
+  const TMAX = 3000, UMAX = Math.log10(1 + TMAX);
+  const uOfT = t => Math.log10(1 + t), tOfU = u => Math.pow(10, u) - 1;
+  // a point on the axis: below t = 15 snapped to an integer n (n = 0 included), above it kept as t
+  function point(t) { if (t < 15) { const n = Math.round(Math.expm1(t * LN10)); return { n, t: Math.log10(n + 1), small: true }; } return { n: null, t, small: false }; }
+  const log10n = p => p.small ? (p.n > 0 ? Math.log10(p.n) : null) : p.t + Math.log1p(-Math.pow(10, -p.t)) / LN10;
+  const fP = p => p.small ? fN(p.n) : g(lnN16t(p.t));
+  const lse10 = xs => { xs = xs.filter(x => x !== null); if (!xs.length) return null; const m = Math.max(...xs); let s = 0; for (const x of xs) s += Math.pow(10, x - m); return m + Math.log10(s); };
+  const expLog10 = (p, A) => { const l = log10n(p); return l === null ? null : Math.log10(A) + l + Math.log10(fP(p)); };   // log10 of A n f(n)
+  const log2Lp1 = (p, lam) => (Math.log(lam) + p.t * LN10 + Math.log1p(Math.pow(10, -p.t) / lam)) / LN2;        // L = lam (n + 1)
+  // log10 of the full illustrative log2-bound  log2 C + d log2(L+1) + A n f(n)
+  const fullLog10 = (p, A, log2C, d, lam) => lse10([log2C > 0 ? Math.log10(log2C) : null, d > 0 ? Math.log10(d) + Math.log10(log2Lp1(p, lam)) : null, expLog10(p, A)]);
+  function below(p, A, log2C, d, lam) { const l = log10n(p), b = fullLog10(p, A, log2C, d, lam); if (l === null) return false; return b === null ? true : b < l; }
+  const lg1p = l => l > 0 ? l + Math.log1p(Math.pow(10, -l)) / LN10 : Math.log1p(Math.pow(10, l)) / LN10;   // log10(1 + 10^l)
+  const Y = l => l === null ? 0 : Math.log10(1 + lg1p(l));                     // the plot's doubly logarithmic height
+  function bisect(fun, lo, hi) { const s = Math.sign(fun(lo)); for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === s) lo = m; else hi = m; } return (lo + hi) / 2; }
+  // the band where A f(n) > 1: empty when A <= e^2/16 (real n >= 0); else between the two roots of g(L) = 1/A
+  function band(A) {
+    if (A <= ASTAR) return { empty: true };
+    const c = 1 / A, Ls = bisect(L => g(L) - c, 1.0001, LPK), Ll = bisect(L => g(L) - c, LPK, 1e15);
+    let first = null;
+    if (Ls < 36) { first = Math.max(0, Math.floor(Math.exp(Ls) - 16)); while (A * fN(first) <= 1) first++; while (first > 0 && A * fN(first - 1) > 1) first--; }
+    return { empty: false, openT: Math.log10(Math.max(1, Math.exp(Ls) - 15)), first, closeLog10: Ll / LN10 };
+  }
+  return { LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
+})();
+
+/* ================= the checks and the deliberately broken controls ================= */
+const CLAUSES = ids => ids.map(id => DATA.clauseMenu.find(c => c.id === id).lits);
+const PRINTED = { astar: "0.46181600618316563920", f49: "0.9994", f50: "1.0027", peakT: 23.71, close1: 2390.21, open2: 327741238, close2: 81.59, f0: 0.6246 };
+// deciding predicates: the checks and the controls call the same functions
+const DECIDE = {
+  cnfCount: (nvars, clauses, ref) => CHECK.models(nvars, clauses).count === ref,
+  cubeAgrees: (clauses, evalFn) => {      // the drawing's per-corner verdicts against the checker's satisfying set
+    const r = evalFn(clauses), cs = new Set(CHECK.models(3, clauses).sat);
+    const toMask = a => (a[0] ? 1 : 0) | (a[1] ? 2 : 0) | (a[2] ? 4 : 0);
+    return r.count === cs.size && r.sat === (cs.size > 0) && r.rows.every(row => row.ok === cs.has(toMask(row.a)));
+  },
+  isOK: (g, enc, drawn) => { const c = CHECK.models(enc.nvars, enc.clauses).count;
+    return c === g.refIS && CHECK.directIS(g.v, g.edges) === g.refIS && drawn === g.refIS && enc.nvars === g.v && enc.clauses.length === g.edges.length && CHECK.width(enc.clauses) <= 2; },
+  pmOK: (g, enc, drawn) => { const e = g.edges.length, r = CHECK.models(enc.nvars, enc.clauses, (1 << e) - 1);
+    return r.count === g.refPM && r.projections === r.count && CHECK.directPM(g.v, g.edges) === g.refPM && drawn === g.refPM &&
+      enc.decision === e && enc.nvars <= 3 * (g.v + e) && enc.clauses.length <= 8 * e + g.v && CHECK.width(enc.clauses) <= 3; },
+  firstCrossing: fn => fn(49) < 1 && fn(50) > 1 && fn(49).toFixed(4) === PRINTED.f49 && fn(50).toFixed(4) === PRINTED.f50,
+  close1: printed => { const b = NUM.band(1); return b.first === 50 && Math.abs(b.closeLog10 - printed) < 0.005; }
+};
+function runChecks() {
+  const out = [], add = (name, ok, detail) => out.push({ name, ok: !!ok, detail: detail || "" });
+  for (const p of DATA.presets) { const c = CHECK.models(3, CLAUSES(p.on)).count;
+    add("tiny count: " + p.label + " has " + p.ref + " models", DECIDE.cnfCount(3, CLAUSES(p.on), p.ref), "checker counted " + c); }
+  let agree = 0;
+  for (let s = 0; s < 64; s++) { const cl = DATA.clauseMenu.filter((c, i) => s >> i & 1).map(c => c.lits); if (DECIDE.cubeAgrees(cl, MODEL.evaluate)) agree++; }
+  add("scene 1: cube and table agree with the checker on all 64 clause subsets", agree === 64, agree + " of 64");
+  for (const key of ALL_GRAPH_KEYS.concat(["C4", "K4"])) {
+    const g0 = key === "C4" ? DATA.named[1] : key === "K4" ? DATA.named[2] : graphByKey(key);
+    const g = Object.assign({}, g0, { label: key[0] === "d" ? "v = 4, e = " + key.slice(1) : g0.label + " (known answer)" });
+    const si = MODEL.solutions(g, "IS"), sp = MODEL.solutions(g, "PM");
+    add("independent sets of " + g.label + " = " + g.refIS + " (CNF brute force, direct count, drawing; n = v, e clauses, width 2)", DECIDE.isOK(g, si.enc, si.list.length),
+      "CNF " + CHECK.models(si.enc.nvars, si.enc.clauses).count + ", direct " + CHECK.directIS(g.v, g.edges) + ", drawing " + si.list.length);
+    const r = CHECK.models(sp.enc.nvars, sp.enc.clauses, (1 << g.edges.length) - 1);
+    add("perfect matchings of " + g.label + " = " + g.refPM + " (brute force over all " + sp.enc.nvars + " variables, unique auxiliary values, direct count, drawing)", DECIDE.pmOK(g, sp.enc, sp.list.length),
+      "CNF " + r.count + " (" + r.projections + " distinct edge patterns), direct " + CHECK.directPM(g.v, g.edges) + ", drawing " + sp.list.length + "; " + sp.enc.decision + " edge bits + " + sp.enc.aux + " auxiliary");
+  }
+  add("e^2/16 = " + PRINTED.astar + " (Confluence's threshold)", Math.abs(NUM.ASTAR - Number(PRINTED.astar)) < 1e-15, String(NUM.ASTAR));
+  let best = 0, bestL = 0; for (let i = 0; i <= 200000; i++) { const L = Math.log(16) + 400 * i / 200000, v = NUM.g(L); if (v > best) { best = v; bestL = L; } }
+  add("real peak of f is 16/e^2 at ln(n+16) = e^4, n about 10^" + PRINTED.peakT, Math.abs(best - NUM.FMAX) < 1e-9 && Math.abs(bestL - NUM.LPK) < 0.01 && Math.abs(NUM.LPK / NUM.LN10 - PRINTED.peakT) < 0.005,
+    "scan max " + best.toFixed(12) + " at L = " + bestL.toFixed(4));
+  add("first crossing of 1 between n = 49 and 50 (f(49) = " + PRINTED.f49 + ", f(50) = " + PRINTED.f50 + ")", DECIDE.firstCrossing(NUM.fN), NUM.fN(49) + ", " + NUM.fN(50));
+  add("A = 1: the band opens at n = 50 and closes near 10^" + PRINTED.close1, DECIDE.close1(PRINTED.close1), "closes at 10^" + NUM.band(1).closeLog10.toFixed(4));
+  const b2 = NUM.band(0.5);
+  add("A = 1/2: f > 2 from n = 327,741,238 to about 10^" + PRINTED.close2, b2.first === PRINTED.open2 && NUM.fN(327741237) < 2 && NUM.fN(327741238) > 2 && Math.abs(b2.closeLog10 - PRINTED.close2) < 0.005,
+    "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
+  add("no band at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
+  let idOK = true; for (let t = 0; t <= 300; t += 0.25) { const d = Math.log(Math.pow(10, t) + 15); if (Math.abs(NUM.lnN16t(t) - d) > 1e-12 * d) idOK = false; }
+  add("log-space ln(n+16) = t ln 10 + log1p(15 * 10^-t) with t = log10(n+1), checked against direct evaluation for t <= 300", idOK);
+  const p0 = NUM.point(0);
+  add("n = 0 handled: f(0) = (ln ln 16)^2 / sqrt(ln 16) = " + PRINTED.f0 + ", exponent 0, no logarithm of 0", p0.n === 0 && Math.abs(NUM.fP(p0) - PRINTED.f0) < 5e-5 && NUM.expLog10(p0, 1) === null && NUM.Y(NUM.expLog10(p0, 1)) === 0 && NUM.below(p0, 1, 0, 1, 1) === false);
+  let finite = true, cnt = 0;
+  for (let i = 0; i <= 400; i++) { const p = NUM.point(NUM.tOfU(NUM.UMAX * i / 400));
+    for (const A of [0.1, NUM.ASTAR, 1, 1.5]) for (const [c, d, lam] of [[0, 0.5, 1], [20, 2, 4], [100000, 50, 1e6]]) {
+      const vals = [NUM.fP(p), NUM.Y(NUM.log10n(p)), NUM.Y(NUM.expLog10(p, A)), NUM.Y(NUM.fullLog10(p, A, c, d, lam))];
+      cnt++; if (!vals.every(Number.isFinite)) finite = false; } }
+  add("no Infinity or NaN anywhere on the plotted range, at extreme slider values", finite, cnt + " points");
+  return out;
+}
+function runControls() {
+  const out = [], add = (name, decidingOK) => out.push({ name, tripped: !decidingOK });
+  add("wrong formula: (x or y) and (x or z) in place of F must not count 4", DECIDE.cnfCount(3, [[1, 2], [1, 3]], 4));
+  add("wrong clause: dropping the empty clause must not still count 0", DECIDE.cnfCount(3, [], 0));
+  add("wrong clause path: a drawing that drops the negations must disagree with the checker on F", DECIDE.cubeAgrees(CLAUSES(["c1", "c2"]), cl => MODEL.evaluate(cl.map(c => c.map(Math.abs)))));
+  add("wrong count path: a drawing that reports one survivor too many must disagree with the checker",
+    DECIDE.cubeAgrees(CLAUSES(["c1", "c2"]), cl => { const r = MODEL.evaluate(cl); return { rows: r.rows, count: r.count + 1, sat: r.sat }; }));
+  const tri = DATA.named[0], isEnc = MODEL.encodeIS(tri);
+  add("wrong reduction: the triangle's IS encoding with one edge clause dropped must fail", DECIDE.isOK(tri, { nvars: isEnc.nvars, clauses: isEnc.clauses.slice(1) }, 4));
+  for (const g of [DATA.named[1], DATA.named[2]]) { const enc = MODEL.encodePM(g);
+    add("wrong reduction: " + g.label + "'s matching encoding without its at-most-one clauses must fail", DECIDE.pmOK(g, Object.assign({}, enc, { clauses: enc.clauses.filter(c => !(c.length === 2 && c[0] < 0 && c[1] < 0)) }), g.refPM)); }
+  add("wrong scale: f with ln(n) in place of ln(n+16) must miss the 49/50 crossing", DECIDE.firstCrossing(n => NUM.g(Math.log(n))));
+  add("wrong landmark: a recrossing printed as 10^2390.31 must fail", DECIDE.close1(2390.31));
+  return out;
+}
+const RESULT = (function () { try { return { checks: runChecks(), controls: runControls() }; } catch (e) { return { checks: [{ name: "checks threw: " + e.message, ok: false }], controls: [] }; } })();
+RESULT.ok = RESULT.checks.every(c => c.ok) && RESULT.controls.length > 0 && RESULT.controls.every(c => c.tripped);
+if (typeof module !== "undefined") module.exports = { DATA, MODEL, CHECK, NUM, DECIDE, RESULT, graphByKey };
+
+/* ================= drawing ================= */
+if (typeof document !== "undefined") (function () {
+  const $ = id => document.getElementById(id), err = $("err");
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // the check list is shown either way
+  $("checks").innerHTML = RESULT.checks.map(c => "<li class='" + (c.ok ? "pass" : "fail") + "'>" + (c.ok ? "&#10003; " : "&#10007; ") + esc(c.name) + (c.detail ? " <span class='dim'>(" + esc(c.detail) + ")</span>" : "") + "</li>").join("") +
+    RESULT.controls.map(c => "<li class='" + (c.tripped ? "pass" : "fail") + "'>" + (c.tripped ? "&#10003; control tripped as required: " : "&#10007; control did NOT trip: ") + esc(c.name) + "</li>").join("");
+  if (!RESULT.ok) {
+    err.style.display = "block";
+    err.textContent = "Refusing to draw. Failed: " + RESULT.checks.filter(c => !c.ok).map(c => c.name).concat(RESULT.controls.filter(c => !c.tripped).map(c => "control " + c.name)).join("; ");
+    for (const id of ["s1", "s2", "s3"]) $(id).style.display = "none";
+    return;
+  }
+  const params = new URLSearchParams(location.search), allowGL = !params.has("nowebgl");
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const BG = [0.055, 0.078, 0.094];
+
+  /* ---- one small renderer: WebGL triangles, or the 2D canvas, from the same primitive list; text on an overlay ---- */
+  function makeView(wrap) {
+    let c = wrap.querySelector("canvas.g"); const ov = wrap.querySelector("canvas.t"), octx = ov.getContext("2d");
+    let gl = null, P = null, ctx = null;
+    if (allowGL) { try { gl = c.getContext("webgl", { antialias: true, alpha: false }); } catch (e) { gl = null; } }
+    if (gl) {
+      try {
+        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+          if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+        const p = gl.createProgram();
+        gl.attachShader(p, sh(gl.VERTEX_SHADER, "attribute vec2 aS; attribute vec4 aC; varying vec4 vC; void main() { gl_Position = vec4(aS, 0.0, 1.0); vC = aC; }"));
+        gl.attachShader(p, sh(gl.FRAGMENT_SHADER, "precision mediump float; varying vec4 vC; void main() { gl_FragColor = vec4(vC.rgb * vC.a, vC.a); }"));
+        gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+        P = { p, buf: gl.createBuffer(), aS: gl.getAttribLocation(p, "aS"), aC: gl.getAttribLocation(p, "aC") };
+        if (gl.getError() !== gl.NO_ERROR) throw new Error("WebGL error");
+      } catch (e) { gl = null; P = null; }
+    }
+    if (!gl) { const c2 = c.cloneNode(false); c.parentNode.replaceChild(c2, c); c = c2; ctx = c.getContext("2d"); }
+    const V = { kind: gl ? "webgl" : ctx ? "2d" : "none", w: 0, h: 0, dpr: 1 };
+    V.size = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight;
+      if (w === V.w && h === V.h && dpr === V.dpr) return false;
+      V.w = w; V.h = h; V.dpr = dpr;
+      for (const k of [c, ov]) { k.width = Math.max(1, Math.round(w * dpr)); k.height = Math.max(1, Math.round(h * dpr)); }
+      return true;
+    };
+    const rgba = col => "rgba(" + Math.round(col[0] * 255) + "," + Math.round(col[1] * 255) + "," + Math.round(col[2] * 255) + "," + col[3] + ")";
+    V.draw = (prims, texts) => {
+      const W = V.w, H = V.h, dpr = V.dpr;
+      if (gl) {
+        const T = [], cl = (x, y) => [x / W * 2 - 1, 1 - y / H * 2], push = (x, y, col) => T.push(...cl(x, y), col[0], col[1], col[2], col[3]);
+        const quad = (a, b, cc, d, col) => { push(a[0], a[1], col); push(b[0], b[1], col); push(cc[0], cc[1], col); push(b[0], b[1], col); push(d[0], d[1], col); push(cc[0], cc[1], col); };
+        for (const q of prims) {
+          if (q.k === "l") { const dx = q.x2 - q.x1, dy = q.y2 - q.y1, len = Math.hypot(dx, dy) || 1, nx = -dy / len * q.w / 2, ny = dx / len * q.w / 2;
+            quad([q.x1 + nx, q.y1 + ny], [q.x1 - nx, q.y1 - ny], [q.x2 + nx, q.y2 + ny], [q.x2 - nx, q.y2 - ny], q.c); }
+          else if (q.k === "r") quad([q.x, q.y], [q.x + q.w, q.y], [q.x, q.y + q.h], [q.x + q.w, q.y + q.h], q.c);
+          else if (q.k === "d") { const N = 28, r0 = q.ring ? q.r - q.ring : 0;
+            for (let i = 0; i < N; i++) { const a0 = 2 * Math.PI * i / N, a1 = 2 * Math.PI * (i + 1) / N, c0 = Math.cos(a0), s0 = Math.sin(a0), c1 = Math.cos(a1), s1 = Math.sin(a1);
+              quad([q.x + r0 * c0, q.y + r0 * s0], [q.x + q.r * c0, q.y + q.r * s0], [q.x + r0 * c1, q.y + r0 * s1], [q.x + q.r * c1, q.y + q.r * s1], q.c); } }
+        }
+        gl.viewport(0, 0, c.width, c.height); gl.clearColor(BG[0], BG[1], BG[2], 1); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, P.buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(T), gl.STREAM_DRAW);
+        gl.enableVertexAttribArray(P.aS); gl.vertexAttribPointer(P.aS, 2, gl.FLOAT, false, 24, 0);
+        gl.enableVertexAttribArray(P.aC); gl.vertexAttribPointer(P.aC, 4, gl.FLOAT, false, 24, 8);
+        gl.drawArrays(gl.TRIANGLES, 0, T.length / 6);
+      } else if (ctx) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#0e1418"; ctx.fillRect(0, 0, W, H); ctx.lineCap = "round";
+        for (const q of prims) {
+          if (q.k === "l") { ctx.strokeStyle = rgba(q.c); ctx.lineWidth = q.w; ctx.beginPath(); ctx.moveTo(q.x1, q.y1); ctx.lineTo(q.x2, q.y2); ctx.stroke(); }
+          else if (q.k === "r") { ctx.fillStyle = rgba(q.c); ctx.fillRect(q.x, q.y, q.w, q.h); }
+          else if (q.k === "d") { ctx.beginPath(); if (q.ring) { ctx.strokeStyle = rgba(q.c); ctx.lineWidth = q.ring; ctx.arc(q.x, q.y, q.r - q.ring / 2, 0, 2 * Math.PI); ctx.stroke(); }
+            else { ctx.fillStyle = rgba(q.c); ctx.arc(q.x, q.y, q.r, 0, 2 * Math.PI); ctx.fill(); } }
+        }
+      }
+      octx.setTransform(dpr, 0, 0, dpr, 0, 0); octx.clearRect(0, 0, W, H); octx.textBaseline = "middle";
+      for (const t of texts) { octx.font = (t.sz || 12) + "px Georgia, 'Times New Roman', serif"; octx.textAlign = t.al || "center"; octx.fillStyle = t.c || "#e9efe9"; octx.fillText(t.s, t.x, t.y); }
+    };
+    return V;
+  }
+  const views = [makeView($("v1")), makeView($("v2")), makeView($("v3"))];
+  $("gfx").textContent = views[0].kind === "webgl" ? "Drawing with WebGL (a 2D-canvas fallback is built in; the tables carry the same information)."
+    : views[0].kind === "2d" ? "WebGL is unavailable here: drawing with the 2D canvas. The tables below each picture carry the same information."
+    : "No canvas is available: the tables below each picture carry the same information.";
+
+  const L = (x1, y1, x2, y2, c, w) => ({ k: "l", x1, y1, x2, y2, c, w: w || 1.5 });
+  const TEAL = [0.50, 0.82, 0.90, 1], AMBER = [1, 0.81, 0.48, 1], GREY = [0.55, 0.62, 0.62, 0.8], RED = [1, 0.62, 0.48, 1], GREEN = [0.61, 0.89, 0.61, 1];
+  const S = { on: new Set(["c1", "c2"]), yaw: 0.65, pitch: 0.42, spin: !reduced, gm: "IS", g: "d4", aux: false, sol: 0, fam: "dense", s: 6, c: 3,
+    m3: "Af", A: 1, cur: 160, log2C: 20, d: 2, lam: 4 };
+  const dirty = [true, true, true];
+  const mark = () => { dirty[0] = dirty[1] = dirty[2] = true; };
+  const litName = l => (l > 0 ? "" : "not ") + DATA.varNames[Math.abs(l) - 1];
+  const clauseName = c => c.length ? "(" + c.map(litName).join(" or ") + ")" : "(empty clause, false)";
+  const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  /* ---------- scene 1 ---------- */
+  const cb = $("clauseBtns");
+  for (const c of DATA.clauseMenu) { const b = document.createElement("button"); b.dataset.cl = c.id; b.textContent = clauseName(c.lits); cb.appendChild(b);
+    b.addEventListener("click", () => { S.on.has(c.id) ? S.on.delete(c.id) : S.on.add(c.id); sync1(); }); }
+  document.querySelectorAll("[data-pre]").forEach(b => b.addEventListener("click", () => { S.on = new Set(DATA.presets.find(p => p.id === b.dataset.pre).on); sync1(); }));
+  function activeIds() { return DATA.clauseMenu.filter(c => S.on.has(c.id)).map(c => c.id); }
+  function sync1() {
+    const ids = activeIds(), cl = CLAUSES(ids), r = MODEL.evaluate(cl);
+    cb.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", S.on.has(b.dataset.cl) ? "true" : "false"));
+    const pre = DATA.presets.find(p => p.on.length === ids.length && p.on.every(id => S.on.has(id)));
+    document.querySelectorAll("[data-pre]").forEach(b => b.setAttribute("aria-pressed", pre && pre.id === b.dataset.pre ? "true" : "false"));
+    $("r1").textContent = (ids.length ? "Formula: " + cl.map(clauseName).join(" and ") : "Formula: the empty CNF (no clauses, true everywhere)") +
+      ". SAT bit: " + (r.sat ? "1 (satisfiable)" : "0 (unsatisfiable)") + ". Exact count: " + r.count + " of 8." + (pre ? " Known answer for this preset: " + pre.ref + "." : "");
+    let h = "<caption class='dim' style='text-align:left'>The eight assignments (check: satisfies; cross: falsifies)</caption><tr><th>x y z</th>" + ids.map((id, i) => "<th>" + esc(clauseName(cl[i])) + "</th>").join("") + "<th>survives</th></tr>";
+    for (const row of r.rows) h += "<tr><td>" + row.a.map(v => v ? 1 : 0).join(" ") + "</td>" + row.per.map(v => "<td class='" + (v ? "ok" : "bad") + "'>" + (v ? "&#10003;" : "&#10007;") + "</td>").join("") +
+      "<td class='" + (row.ok ? "ok" : "bad") + "'>" + (row.ok ? "&#10003; yes" : "&#10007; no") + "</td></tr>";
+    h += "<tr><td colspan='" + (ids.length + 2) + "'>count " + r.count + "; SAT bit " + (r.sat ? 1 : 0) + "</td></tr>";
+    $("t1").innerHTML = h; dirty[0] = true;
+  }
+  function render1(V) {
+    const r = MODEL.evaluate(CLAUSES(activeIds())), W = V.w, H = V.h, cx = W / 2, cy = H / 2 + 6, sc = Math.min(W, H) * 0.27;
+    const cy_ = Math.cos(S.yaw), sy = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch);
+    const proj = (x, y, z) => { const x1 = cy_ * x + sy * z, z1 = -sy * x + cy_ * z, y1 = cp * y - sp * z1, z2 = sp * y + cp * z1, k = 4.2 / (4.2 + z2);
+      return { x: cx + x1 * sc * k, y: cy - y1 * sc * k, z: z2, k }; };
+    const pos = a => [a[0] ? 1 : -1, a[1] ? 1 : -1, a[2] ? 1 : -1], P = r.rows.map(row => proj(...pos(row.a)));
+    const prims = [], texts = [];
+    for (let i = 0; i < 8; i++) for (const b of [1, 2, 4]) { const j = i ^ b; if (j > i) prims.push(L(P[i].x, P[i].y, P[j].x, P[j].y, GREY, 1.5)); }
+    const o = proj(-1, -1, -1);
+    [["x", [1.7, -1, -1]], ["y", [-1, 1.7, -1]], ["z", [-1, -1, 1.7]]].forEach(([n, q]) => { const e = proj(...q); prims.push(L(o.x, o.y, e.x, e.y, [0.75, 0.75, 0.6, 0.7], 1));
+      texts.push({ x: e.x, y: e.y, s: n + " = 1 this way", c: "#a9b7b4", sz: 11.5 }); });
+    const order = [...Array(8).keys()].sort((a, b) => P[b].z - P[a].z);
+    for (const i of order) { const p = P[i], row = r.rows[i], rad = 15 * p.k;
+      prims.push({ k: "d", x: p.x, y: p.y, r: rad + 2, c: [BG[0], BG[1], BG[2], 1] });
+      prims.push(row.ok ? { k: "d", x: p.x, y: p.y, r: rad, c: TEAL } : { k: "d", x: p.x, y: p.y, r: rad, c: RED, ring: 2.5 });
+      texts.push({ x: p.x, y: p.y + 1, s: row.ok ? "✓" : "✗", c: row.ok ? "#0e1418" : "#ffb38a", sz: 15 * p.k });
+      texts.push({ x: p.x + rad + 5, y: p.y - rad, s: row.a.map(v => v ? 1 : 0).join(""), c: "#e9efe9", sz: 12, al: "left" }); }
+    texts.push({ x: 12, y: 16, s: "count " + r.count + " of 8   SAT bit " + (r.sat ? 1 : 0), c: "#ffcf7a", sz: 15, al: "left" });
+    texts.push({ x: 12, y: 36, s: "filled with a check: survives; ring with a cross: removed", c: "#a9b7b4", sz: 11.5, al: "left" });
+    V.draw(prims, texts);
+  }
+  const v1 = $("v1"); let drag = null;
+  v1.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; v1.setPointerCapture(e.pointerId); S.spin = false; $("spin").setAttribute("aria-pressed", "false"); });
+  v1.addEventListener("pointermove", e => { if (!drag) return; S.yaw += (e.clientX - drag[0]) * 0.01; S.pitch = Math.max(-1.4, Math.min(1.4, S.pitch + (e.clientY - drag[1]) * 0.01)); drag = [e.clientX, e.clientY]; dirty[0] = true; });
+  v1.addEventListener("pointerup", () => { drag = null; });
+  v1.addEventListener("keydown", e => { const k = e.key; if (k === "ArrowLeft") S.yaw -= 0.15; else if (k === "ArrowRight") S.yaw += 0.15;
+    else if (k === "ArrowUp") S.pitch = Math.max(-1.4, S.pitch - 0.15); else if (k === "ArrowDown") S.pitch = Math.min(1.4, S.pitch + 0.15);
+    else if (k === " ") { S.spin = !S.spin; $("spin").setAttribute("aria-pressed", String(S.spin)); } else return; e.preventDefault(); dirty[0] = true; });
+  $("spin").setAttribute("aria-pressed", String(S.spin));
+  $("spin").addEventListener("click", () => { S.spin = !S.spin; $("spin").setAttribute("aria-pressed", String(S.spin)); });
+
+  /* ---------- scene 2 ---------- */
+  const cache = {};
+  const sol = (key, mode) => cache[key + mode] || (cache[key + mode] = MODEL.solutions(graphByKey(key), mode));
+  document.querySelectorAll("[data-gm]").forEach(b => b.addEventListener("click", () => { S.gm = b.dataset.gm; S.sol = 0; sync2(); }));
+  document.querySelectorAll("[data-g]").forEach(b => b.addEventListener("click", () => { S.g = b.dataset.g; S.sol = 0; if (S.g !== "triangle") $("dens").value = S.g.slice(1); sync2(); }));
+  $("dens").addEventListener("input", e => { S.g = "d" + e.target.value; S.sol = 0; sync2(); });
+  $("aux").addEventListener("click", () => { S.aux = !S.aux; sync2(); });
+  const step = d => { const n = sol(S.g, S.gm).list.length; if (n) S.sol = (S.sol + d + n) % n; sync2(); };
+  $("prev").addEventListener("click", () => step(-1)); $("next").addEventListener("click", () => step(1));
+  $("v2").addEventListener("keydown", e => { if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1); else return; e.preventDefault(); });
+  document.querySelectorAll("[data-fam]").forEach(b => b.addEventListener("click", () => { S.fam = b.dataset.fam; sync2(); }));
+  $("sS").addEventListener("input", e => { S.s = Number(e.target.value); sync2(); });
+  $("cC").addEventListener("input", e => { const v = Number(e.target.value); S.c = Number.isFinite(v) ? Math.min(1000, Math.max(1, v)) : 3; sync2(); });
+  const edgeName = ([a, b]) => "e" + a + b;
+  function scaling() {   // n for the family at v = 10^s, in logs; never forms v
+    const g = graphByKey(S.g), v = g.v, e = g.edges.length, lv = S.s;
+    let le;   // log10 of e for the big family
+    if (e === 0) le = null;
+    else if (S.fam === "dense") { const p = e / (v * (v - 1) / 2); le = Math.log10(p) + lv + Math.log10(1 - Math.pow(10, -lv)) - Math.log10(2); }
+    else le = Math.log10(e / v) + lv;
+    const lPM = Math.log10(S.c) + NUM.lse10([lv, le]), tIS = NUM.lg1p(lv), tPM = NUM.lg1p(lPM);
+    const pIS = NUM.point(tIS), pPM = NUM.point(tPM);
+    return { g, lv, le, lPM, tIS, tPM, expIS: NUM.expLog10(pIS, S.A), expPM: NUM.expLog10(pPM, S.A) };
+  }
+  function sync2() {
+    const g = graphByKey(S.g), si = sol(S.g, "IS"), sp = sol(S.g, "PM"), cur = S.gm === "IS" ? si : sp;
+    document.querySelectorAll("[data-gm]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.gm === S.gm)));
+    document.querySelectorAll("[data-g]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.g === S.g)));
+    document.querySelectorAll("[data-fam]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.fam === S.fam)));
+    $("aux").setAttribute("aria-pressed", String(S.aux)); $("aux").disabled = S.gm !== "PM";
+    $("de").textContent = S.g === "triangle" ? "(triangle selected)" : S.g.slice(1);
+    const n = cur.list.length, k = n ? Math.min(S.sol, n - 1) : -1, which = k >= 0 ? cur.list[k] : null;
+    const show = !which ? "none" : which.mask === 0 ? "{} (the empty set)" : (S.gm === "IS" ? "{" + [...Array(g.v).keys()].filter(u => which.mask >> u & 1).join(", ") + "}" : "{" + g.edges.filter((ed, i) => which.mask >> i & 1).map(edgeName).join(", ") + "}");
+    const enc = cur.enc;
+    $("r2").textContent = g.label + " (v = " + g.v + ", e = " + g.edges.length + "). " + (S.gm === "IS"
+      ? "Independent sets: " + n + ". Variables n = v = " + enc.nvars + " decision bits, " + enc.clauses.length + " clauses (one per edge)."
+      : "Perfect matchings: " + n + ". Decision bits: e = " + enc.decision + (S.aux ? "; then " + enc.aux + " auxiliary gate variables in this page's example encoding, " + enc.nvars + " in total, " + enc.clauses.length + " clauses. The manuscript: O(v+e) in total, constants unspecified."
+        : "; the auxiliary variables are not shown yet (press the button): e alone is not the formula's size.")) +
+      (n ? " Showing solution " + (k + 1) + " of " + n + ": " + show + "." : "") + " Checked against an independent brute-force counter.";
+    const rows = [["graph", g.label, g.label], ["v, e", g.v + ", " + g.edges.length, g.v + ", " + g.edges.length], ["decision bits", si.enc.decision + " (one per vertex)", sp.enc.decision + " (one per edge)"],
+      ["auxiliary variables", "0", sp.enc.aux + " (this page's prefix-OR encoding; manuscript: part of O(v+e))"], ["total variables n", si.enc.nvars + " = v", sp.enc.nvars + " (not e)"],
+      ["clauses", si.enc.clauses.length + " = e", String(sp.enc.clauses.length)], ["max clause width", String(CHECK.width(si.enc.clauses)), String(CHECK.width(sp.enc.clauses))],
+      ["count (drawing path)", String(si.list.length), String(sp.list.length)], ["count (independent checker)", String(CHECK.models(si.enc.nvars, si.enc.clauses).count), String(CHECK.models(sp.enc.nvars, sp.enc.clauses).count)],
+      ["hand-derived reference", String(g.refIS), String(g.refPM)], ["claimed bound (corollary, manuscript only)", "2^(o(v))", "2^(o(v+e))"]];
+    $("t2").innerHTML = "<tr><th></th><th>independent sets</th><th>perfect matchings</th></tr>" + rows.map(r => "<tr>" + r.map((c, i) => (i ? "<td>" : "<th>") + esc(c) + (i ? "</td>" : "</th>")).join("") + "</tr>").join("");
+    const sc = scaling(), f2 = x => x.toFixed(2), fam = S.fam === "dense" ? "dense family (density p of " + g.label + ")" : "sparse family (average degree of " + g.label + ")";
+    $("vS").textContent = S.s.toFixed(1);
+    const ratioPM = sc.expPM - sc.lv;
+    $("r2b").textContent = fam + ", v = 10^" + f2(sc.lv) + ", e " + (sc.le === null ? "= 0" : "about 10^" + f2(sc.le)) + ". Independent sets: n = v, exponent A n f(n) about 10^" + f2(sc.expIS) +
+      " bits, " + f2(Math.pow(10, sc.expIS - sc.lv)) + " times v (the ratio A f(v)). Perfect matchings: n = c (v+e) about 10^" + f2(sc.lPM) + ", exponent about 10^" + f2(sc.expPM) + " bits, " +
+      (ratioPM < 6 ? f2(Math.pow(10, ratioPM)) : "about 10^" + f2(ratioPM)) + " times v. " +
+      (S.fam === "dense" && sc.le !== null ? "With fixed density, v + e grows like v^2, so a bound 2^(o(v+e)) does not give 2^(o(v)). " : "With bounded average degree, v + e = O(v), and the matching bound is 2^(o(v)) too. ") +
+      "Upper-bound exponents with A = " + S.A.toFixed(3) + " and c = " + S.c + ", both illustrative; marked in scene 3.";
+    dirty[1] = true; dirty[2] = true;
+  }
+  function render2(V) {
+    const g = graphByKey(S.g), cur = sol(S.g, S.gm), W = V.w, H = V.h, narrow = W < 560;
+    const n = cur.list.length, which = n ? cur.list[Math.min(S.sol, n - 1)] : null, prims = [], texts = [];
+    const gw = narrow ? W : W * 0.42, gh = narrow ? H * 0.46 : H, R = Math.min(gw, gh) * 0.3, gcx = gw / 2, gcy = narrow ? gh / 2 + 14 : gh / 2;
+    const vp = g.v === 3 ? [0, 1, 2].map(i => [gcx + R * Math.cos(-Math.PI / 2 + 2 * Math.PI * i / 3), gcy + R * Math.sin(-Math.PI / 2 + 2 * Math.PI * i / 3)])
+      : [[gcx - R, gcy - R], [gcx + R, gcy - R], [gcx + R, gcy + R], [gcx - R, gcy + R]];
+    g.edges.forEach((ed, i) => { const on = which && S.gm === "PM" && (which.mask >> i & 1); const [a, b] = ed;
+      prims.push(L(vp[a][0], vp[a][1], vp[b][0], vp[b][1], on ? AMBER : GREY, on ? 6 : 2));
+      const fr = g.v === 4 && (a + b) % 2 === 0 ? 0.27 : 0.5;   // diagonals of the square: label off-centre so they do not collide
+      if (S.gm === "PM") texts.push({ x: vp[a][0] + (vp[b][0] - vp[a][0]) * fr + (a + b === 3 && g.v === 4 ? 14 : 0), y: vp[a][1] + (vp[b][1] - vp[a][1]) * fr - 10, s: edgeName(ed), c: on ? "#ffcf7a" : "#a9b7b4", sz: 11.5 }); });
+    vp.forEach(([x, y], u) => { const on = which && S.gm === "IS" && (which.mask >> u & 1);
+      prims.push({ k: "d", x, y, r: 14, c: [BG[0], BG[1], BG[2], 1] }); prims.push(on ? { k: "d", x, y, r: 13, c: TEAL } : { k: "d", x, y, r: 13, c: GREY, ring: 2 });
+      texts.push({ x, y, s: String(u), c: on ? "#0e1418" : "#e9efe9", sz: 13 }); });
+    texts.push({ x: 10, y: 14, s: g.label + ": v = " + g.v + ", e = " + g.edges.length, c: "#ffcf7a", sz: 13.5, al: "left" });
+    // variables
+    const enc = cur.enc, x0 = narrow ? 10 : W * 0.46, y0 = narrow ? gh + 8 : 30, bw = 30, gap = 6, perRow = Math.max(4, Math.floor((W - x0 - 10) / (bw + gap)));
+    const a = which ? which.a : null; let y = y0;
+    const boxes = (lab, ids, col, names) => { texts.push({ x: x0, y: y + 6, s: lab, c: "#a9b7b4", sz: 12, al: "left" }); y += 16;
+      ids.forEach((vid, i) => { const bx = x0 + (i % perRow) * (bw + gap), by = y + Math.floor(i / perRow) * (bw + gap), v = a && a[vid - 1];
+        prims.push({ k: "r", x: bx, y: by, w: bw, h: bw, c: v ? col : [col[0] * 0.3, col[1] * 0.3, col[2] * 0.3, 1] });
+        texts.push({ x: bx + bw / 2, y: by + bw / 2, s: names ? names[i] : (v ? "1" : "0"), c: v ? "#0e1418" : "#e9efe9", sz: 10.5 }); });
+      y += Math.ceil(Math.max(1, ids.length) / perRow) * (bw + gap) + 6; };
+    const range = (lo, hi) => { const r = []; for (let i = lo; i <= hi; i++) r.push(i); return r; };
+    if (S.gm === "IS") { boxes("decision bits: one per vertex (n = v = " + enc.nvars + ")", range(1, enc.decision), TEAL, range(0, g.v - 1).map(u => "x" + u));
+      texts.push({ x: x0, y: y + 6, s: enc.clauses.length + " clauses (not x_u or not x_w), one per edge; width 2", c: "#a9b7b4", sz: 12, al: "left" }); }
+    else { boxes("decision bits: one per edge (e = " + enc.decision + ")", range(1, enc.decision), AMBER, g.edges.map(edgeName));
+      if (S.aux) { boxes("then auxiliary gate variables (" + enc.aux + " here; values forced by the edge bits)", range(enc.decision + 1, enc.nvars), [0.72, 0.78, 0.78, 1], null);
+        texts.push({ x: x0, y: y + 6, s: "total n = " + enc.nvars + " here; manuscript: O(v+e), constants unspecified", c: "#ffcf7a", sz: 12, al: "left" }); }
+      else texts.push({ x: x0, y: y + 6, s: "not yet the whole formula: auxiliary variables come next", c: "#ffb38a", sz: 12, al: "left" }); }
+    texts.push({ x: narrow ? 10 : x0, y: H - 14, s: (S.gm === "IS" ? "independent sets: " : "perfect matchings: ") + n + (n ? "   showing " + (Math.min(S.sol, n - 1) + 1) + " of " + n : ""), c: "#ffcf7a", sz: 13, al: "left" });
+    V.draw(prims, texts);
+  }
+
+  /* ---------- scene 3 ---------- */
+  document.querySelectorAll("[data-m3]").forEach(b => b.addEventListener("click", () => { S.m3 = b.dataset.m3; sync3(); }));
+  const setA = a => { S.A = a; $("sA").value = String(a); sync3(); sync2(); };
+  $("sA").addEventListener("input", e => { S.A = Number(e.target.value); sync3(); sync2(); });
+  document.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => setA(b.dataset.a === "star" ? NUM.ASTAR : Number(b.dataset.a))));
+  $("sN").addEventListener("input", e => { S.cur = Number(e.target.value); sync3(); });
+  const num = (id, dflt, lo, hi) => { const v = Number($(id).value); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt; };
+  for (const id of ["iC", "iD", "iL"]) $(id).addEventListener("input", () => { S.log2C = num("iC", 20, 0, 100000); S.d = num("iD", 2, 0.5, 50); S.lam = num("iL", 4, 1, 1e6); sync3(); });
+  const curPoint = () => NUM.point(NUM.tOfU(NUM.UMAX * S.cur / 1000));
+  const nText = p => p.small ? fmt(p.n) : "about 10^" + NUM.log10n(p).toFixed(2);
+  const bitsText = l => l === null ? "0" : l < 6 ? Math.pow(10, l).toFixed(l < 2 ? 2 : 0) : "about 10^" + l.toFixed(2);
+  function sync3() {
+    document.querySelectorAll("[data-m3]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m3 === S.m3)));
+    $("vA").textContent = S.A.toFixed(4);
+    const p = curPoint(), f = NUM.fP(p), ex = NUM.expLog10(p, S.A), full = NUM.fullLog10(p, S.A, S.log2C, S.d, S.lam), ln = NUM.log10n(p), b = NUM.band(S.A);
+    $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + (S.A * f < 1 ? " (exponent term below 2^n)" : " (exponent term not below 2^n)") +
+      "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
+      " bits; below 2^n here: " + (NUM.below(p, S.A, S.log2C, S.d, S.lam) ? "yes" : "no") + ", for these illustrative constants only. " +
+      (b.empty ? "A = " + S.A.toFixed(4) + " is at or below e^2/16 = 0.46182: A f(n) <= 1 at every real n >= 0." : "A f(n) > 1 from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openT.toFixed(2)) + " to about 10^" + b.closeLog10.toFixed(2) + ".");
+    const rows = [["first crossing of f = 1", "between n = 49 and 50: f(49) = " + NUM.fN(49).toFixed(4) + ", f(50) = " + NUM.fN(50).toFixed(4)],
+      ["real peak of f (not of n f, which grows without bound)", "16/e^2 = " + NUM.FMAX.toFixed(5) + " at ln(n+16) = e^4, n about 10^" + (NUM.LPK / NUM.LN10).toFixed(2)],
+      ["f > 2", "from n = 327,741,238 to about 10^" + NUM.band(0.5).closeLog10.toFixed(2)],
+      ["recrossing of f = 1 (the band at A = 1 closes)", "near 10^" + NUM.band(1).closeLog10.toFixed(2)],
+      ["sharp threshold (Confluence)", "A f(n) < 1 at every real n >= 0 exactly when A < e^2/16 = " + NUM.ASTAR.toFixed(10)],
+      ["integer maximum of f", "recorded on card 378 (514,843,556,263,457,213,182,250, 16/e^2 minus about 2.0 * 10^-54); beyond double precision, not rechecked here"],
+      ["cursor", $("r3").textContent]];
+    $("t3").innerHTML = "<tr><th>landmark</th><th>value (recomputed on this page unless stated)</th></tr>" + rows.map(r => "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td></tr>").join("");
+    dirty[2] = true;
+  }
+  let box = null;
+  function render3(V) {
+    const W = V.w, H = V.h, narrow = W < 560, x0 = narrow ? 44 : 64, x1 = W - (narrow ? 12 : 24), y0 = 42, y1 = H - 46, prims = [], texts = [];
+    const X = u => x0 + (x1 - x0) * u / NUM.UMAX; box = { x0, x1 };
+    let ymax = S.m3 === "f" ? 2.5 : S.m3 === "Af" ? Math.max(2.5, 2.25 * S.A + 0.2) : NUM.UMAX * 1.02;
+    const Yp = y => y1 - (y1 - y0) * y / ymax, NS = narrow ? 260 : 520;
+    const pts = []; for (let i = 0; i <= NS; i++) { const u = NUM.UMAX * i / NS, p = NUM.point(NUM.tOfU(u)); pts.push({ u, p, f: NUM.fP(p) }); }
+    // shading: where the chosen comparison goes the wrong way (amber) or where the full bound is below 2^n (green strip)
+    for (let i = 0; i < NS; i++) { const q = pts[i], xa = X(q.u), xb = X(pts[i + 1].u);
+      if (S.m3 !== "nf" && S.A * q.f > 1) prims.push({ k: "r", x: xa, y: y0, w: xb - xa + 0.5, h: y1 - y0, c: [0.35, 0.22, 0.08, 1] });
+      if (S.m3 === "nf" && NUM.below(q.p, S.A, S.log2C, S.d, S.lam)) prims.push({ k: "r", x: xa, y: y1 - 7, w: xb - xa + 0.5, h: 7, c: [0.3, 0.6, 0.35, 1] }); }
+    prims.push(L(x0, y1, x1, y1, GREY, 1)); prims.push(L(x0, y0, x0, y1, GREY, 1));
+    for (const [t, s] of [[0, "0"], [1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"], [3000, "10^3000"]]) { const x = X(NUM.uOfT(t));
+      prims.push(L(x, y1, x, y1 + 5, GREY, 1)); if (!(narrow && t === 1000)) texts.push({ x, y: y1 + 14, s, c: "#a9b7b4", sz: 11, al: t === 3000 ? "right" : "center" }); }
+    texts.push({ x: (x0 + x1) / 2, y: y1 + 32, s: "n (doubly logarithmic axis; the tick is n + 1)", c: "#a9b7b4", sz: 11.5 });
+    const curve = (yf, col, w) => { for (let i = 0; i < NS; i++) { const ya = yf(pts[i]), yb = yf(pts[i + 1]); if (ya <= ymax || yb <= ymax) prims.push(L(X(pts[i].u), Yp(Math.min(ya, ymax)), X(pts[i + 1].u), Yp(Math.min(yb, ymax)), col, w)); } };
+    const hline = (y, col, lab) => { prims.push(L(x0, Yp(y), x1, Yp(y), col, 1.2)); texts.push({ x: x1 - 4, y: Yp(y) - 9, s: lab, c: "rgb(" + col.slice(0, 3).map(v => Math.round(v * 255)).join(",") + ")", sz: 11.5, al: "right" }); };
+    const dot = (t, y, lab, al, dy) => { const x = X(NUM.uOfT(t)); prims.push({ k: "d", x, y: Yp(y), r: 4.5, c: [1, 1, 1, 1] }); texts.push({ x: x + (al === "right" ? -7 : 7), y: Yp(y) + (dy || -12), s: lab, c: "#e9efe9", sz: 11, al: al || "left" }); };
+    if (S.m3 === "f" || S.m3 === "Af") {
+      const k = S.m3 === "f" ? 1 : S.A;
+      for (const y of [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5]) if (y <= ymax) texts.push({ x: x0 - 6, y: Yp(y), s: String(y), c: "#a9b7b4", sz: 11, al: "right" });
+      if (S.m3 === "f") { hline(1, [0.75, 1, 1, 0.9], "f = 1"); hline(1 / S.A <= ymax ? 1 / S.A : ymax, AMBER, 1 / S.A <= ymax ? "f = 1/A, A = " + S.A.toFixed(3) : "1/A above the plot"); hline(NUM.FMAX, [0.7, 0.7, 0.7, 0.7], "16/e^2 = 2.1654"); }
+      else { hline(1, AMBER, "A f(n) = 1"); }
+      curve(q => k * q.f, TEAL, 2.5);
+      if (S.m3 === "f") { dot(Math.log10(50.5), NUM.fN(50), narrow ? "49/50" : "first crossing 49/50", "left", 14); dot(NUM.LPK / NUM.LN10, NUM.FMAX, "real peak at ln(n+16) = e^4", "right");
+        dot(NUM.band(1).closeLog10, 1, narrow ? "10^2390.21" : "below 1 again near 10^2390.21", "right", 14); dot(Math.log10(327741239), 2, "f = 2", "right", 12); }
+      else { const b = NUM.band(S.A); if (!b.empty) { dot(b.first !== null ? Math.log10(b.first + 1) : b.openT, 1, narrow ? "opens" : "band opens", "left", 14); dot(b.closeLog10, 1, (narrow ? "closes 10^" : "band closes near 10^") + b.closeLog10.toFixed(2), "right", 14); }
+        texts.push({ x: x0 + 8, y: y0 - 12, s: b.empty ? (narrow ? "A <= e^2/16: no band" : "A at or below e^2/16 = 0.46182: no band (Confluence's threshold)") : (narrow ? "amber: A f(n) > 1" : "amber: A f(n) > 1, the exponent term alone exceeds 2^n"), c: "#ffcf7a", sz: 12, al: "left" }); }
+      texts.push({ x: x0 + 8, y: y0 - 28, s: S.m3 === "f" ? (narrow ? "f(n); amber where f > 1/A" : "f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)); amber where f > 1/A") : (narrow ? "the ratio A f(n)" : "the ratio A f(n); the exponent is n times this"), c: "#a9b7b4", sz: 12, al: "left" });
+    } else {
+      for (const [l, s] of [[1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"]]) texts.push({ x: x0 - 6, y: Yp(NUM.Y(l)), s, c: "#a9b7b4", sz: 10.5, al: "right" });
+      curve(q => NUM.Y(NUM.log10n(q.p)), [0.75, 0.75, 0.75, 0.9], 2);
+      curve(q => NUM.Y(NUM.expLog10(q.p, S.A)), TEAL, 2);
+      curve(q => NUM.Y(NUM.fullLog10(q.p, S.A, S.log2C, S.d, S.lam)), AMBER, 2);
+      const sc = scaling();
+      for (const [t, lab, col] of [[sc.tIS, "IS: n = v", TEAL], [sc.tPM, "PM: n = c (v+e)", AMBER]]) if (t <= NUM.TMAX) { const x = X(NUM.uOfT(t)); prims.push(L(x, y0 + 30, x, y1, [col[0], col[1], col[2], 0.55], 1.5)); texts.push({ x: x + 4, y: y0 + 36 + (lab[0] === "P" ? 14 : 0), s: lab, c: "#e9efe9", sz: 11, al: "left" }); }
+      texts.push({ x: x0 + 8, y: y0 - 28, s: narrow ? "grey: n; teal: A n f(n); amber: full bound" : "grey: n (the 2^n line); teal: A n f(n); amber: log2 C + d log2(L+1) + A n f(n)", c: "#a9b7b4", sz: narrow ? 10.5 : 12, al: "left" });
+      texts.push({ x: x0 + 8, y: y0 - 12, s: narrow ? "green strip: full bound below 2^n" : "green strip: full illustrative bound below 2^n; heights doubly logarithmic, in bits", c: "#a9b7b4", sz: narrow ? 10.5 : 12, al: "left" });
+    }
+    const pc = curPoint(), xc = X(NUM.uOfT(pc.t)); prims.push(L(xc, y0, xc, y1, [1, 1, 1, 0.85], 1.5));
+    texts.push({ x: Math.min(xc + 5, x1 - 70), y: y1 - 16, s: "n = " + nText(pc), c: "#ffffff", sz: 11.5, al: "left" });
+    V.draw(prims, texts);
+  }
+  const v3 = $("v3"); let drag3 = false;
+  const setCur = clientX => { if (!box) return; const r = v3.getBoundingClientRect(), u = (clientX - r.left - box.x0) / (box.x1 - box.x0); S.cur = Math.round(Math.max(0, Math.min(1, u)) * 1000); $("sN").value = String(S.cur); sync3(); };
+  v3.addEventListener("pointerdown", e => { drag3 = true; v3.setPointerCapture(e.pointerId); setCur(e.clientX); });
+  v3.addEventListener("pointermove", e => { if (drag3) setCur(e.clientX); });
+  v3.addEventListener("pointerup", () => { drag3 = false; });
+  v3.addEventListener("keydown", e => { const st = e.shiftKey ? 50 : 5; if (e.key === "ArrowLeft") S.cur = Math.max(0, S.cur - st); else if (e.key === "ArrowRight") S.cur = Math.min(1000, S.cur + st); else return;
+    e.preventDefault(); $("sN").value = String(S.cur); sync3(); });
+
+  /* ---------- proof-boundary conveyor ---------- */
+  const STAGES = [
+    { t: "1. Real input file", ev: "nothing certified", d: "A real file, for example a DIMACS .cnf. Outside the theorem: it certifies nothing about reading a file. Crew evidence: Marlow READ the input boundary and recorded that this stage is not covered." },
+    { t: "2. Parsing and normalization", ev: "nothing certified", d: "Reading variables into Fin n, deduplicating clauses, rejecting malformed input. Outside the theorem. Crew evidence: none beyond Marlow's reading that it is not covered." },
+    { t: "3. Canonical Finset, unary input", ev: "READ", d: "The theorem's input: a Finset of clauses over Fin n of width at most k, canonically sorted into a unary encoding (L = its bit length) and placed on the input tape at no cost. Crew evidence: encoding READ (Fixpoint); input boundary READ (Marlow); formal statement READ at revision 7ef5c0cc5 (Fixpoint, Marlow, Lattice)." },
+    { t: "4. The theorem's machine and outputs", ev: "READ; scan MEASURED; checker NOT RUN", d: "A unit-cost multi-tape machine; the exact count in binary and the SAT bit; time at most C (L+1)^d 2^(A n f(n)), space at most S (L+1)^e, one machine and existential constants per k. Crew evidence: machine model, outputs and quantifier order READ (Fixpoint); checker configuration READ (Fixpoint); lexical scan of the 3,977 solution files MEASURED (Fixpoint: no sorry, admit, axiom or native_decide outside comments); f's peak and thresholds recomputed (Fixpoint) and confirmed independently (Lattice). No Lean build, no comparator run: STATEMENT READ; CHECKER NOT RUN. A scan and a numeric review are not a certificate." },
+    { t: "5. Implementation and performance", ev: "nothing certified", d: "Any program you could run, its constants and its behaviour on real inputs. Outside the theorem: C, A, d are existential and unstated. Crew evidence: none. This page's tiny enumerations are illustrations, not an implementation of the claimed algorithm, and its checks are author-reported consistency checks, not independently reviewed by the crew." }];
+  const belt = $("belt"); let stage = 3;
+  STAGES.forEach((s, i) => { const b = document.createElement("button"); b.innerHTML = esc(s.t) + "<span class='ev'>" + esc(s.ev) + "</span>"; belt.appendChild(b);
+    b.addEventListener("click", () => { stage = i; syncBelt(); }); });
+  function syncBelt() { belt.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === stage))); $("beltDetail").textContent = STAGES[stage].d; }
+
+  /* ---------- loop ---------- */
+  sync1(); sync2(); sync3(); syncBelt();
+  const renders = [render1, render2, render3];
+  function loop() {
+    if (S.spin) { S.yaw += 0.005; dirty[0] = true; }
+    views.forEach((V, i) => { if (V.kind === "none") return; const resized = V.size(); if ((resized || dirty[i]) && V.w > 0) { renders[i](V); dirty[i] = false; } });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  window.addEventListener("resize", mark);
+})();
+</script>
+</body>
+</html>
