@@ -36,8 +36,9 @@
   <h1>The A threshold: where the exponent term alone exceeds 2^n (family 378)</h1>
   <p class="long">With f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)) exactly as runtimeScale n = n f(n) defines it, the exponent
   term 2^(A n f(n)) exceeds 2^n exactly where A &gt; 1/f(n). The curve A = 1/f(n) is lowest at the peak of f, so the
-  exponent term is below 2^n at every real n &gt;= 0 exactly when A &lt; e^2/16 = 0.46181600618... (Confluence's threshold; at
-  A = e^2/16 it only touches 2^n, at the real peak point, which is not an integer). Above it, one band opens and closes;
+  exponent term is strictly below 2^n at every real n &gt; 0 exactly when A &lt; e^2/16 = 0.46181600618... (Confluence's threshold;
+  n = 0 is excluded, where both are 1). At A = e^2/16 the strict-exceedance band is empty; the exponent term only touches
+  2^n (a tangency) at the real peak point, which is not an integer. Above it, one band opens and closes;
   the slider shows its two edges.</p>
   <p class="caveat">Illustrative; the theorem gives only C, A, d existentially. Exponent component on the map; the panel adds
   C, d and L for the full inequality log2 C + d log2(L+1) &lt;= n (1 - A f(n)).</p>
@@ -127,7 +128,7 @@ if (typeof document !== "undefined") (function () {
     document.getElementById("vA").textContent = A.toFixed(3); document.getElementById("vN").textContent = xN.toFixed(2);
     const b = T.band(A);
     stateEl.textContent = b.empty
-      ? "A = " + A.toFixed(3) + " is at or below e^2/16 = " + T.ASTAR.toFixed(5) + ": no band; A f(n) <= 1 at every real n >= 0. Exponent component only."
+      ? "A = " + A.toFixed(3) + " is at or below e^2/16 = " + T.ASTAR.toFixed(5) + ": no band (A f(n) > 1 nowhere; at exactly e^2/16 a tangency at the real peak point, not an integer). Exponent component only."
       : "A = " + A.toFixed(3) + ": the exponent term exceeds 2^n from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openLog10.toFixed(2)) +
         " to about 10^" + b.closeLog10.toFixed(2) + ". Exponent component only; an illustration.";
     const r = T.full(A, xN, log2C, d, lambda);
