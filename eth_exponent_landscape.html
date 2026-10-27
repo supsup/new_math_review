@@ -47,7 +47,7 @@
 <div id="legend"><b>surface height:</b> A f(n)<br><b>teal:</b> A f(n) &lt; 1 (exponent term below 2^n)<br>
 <b>amber:</b> A f(n) &gt; 1<br><b>sheet:</b> height 1<br><b>bright ribbon:</b> the A on the slider<br>
 <b>left to right:</b> log10 n from 1 to 10^7 on a log axis<br><b>front to back:</b> A from 0.10 to 1.50<br>
-<b>checks:</b> f, its peak and the thresholds printed on the card are recomputed here before drawing</div>
+<b>peak:</b> of f itself, not of runtimeScale = n f, which grows without bound<br><b>checks:</b> f, its peak and the thresholds printed on the card are recomputed here before drawing</div>
 <div id="state"></div>
 <div id="bar">
   <label for="sA">A = <span id="vA">1.00</span> <input id="sA" type="range" min="0.10" max="1.50" step="0.01" value="1.00"></label>
@@ -74,6 +74,7 @@ const ETH = (function () {
     for (let i = 0; i < (iters || 200); i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === slo) lo = m; else hi = m; }
     return (lo + hi) / 2;
   }
+  // peak OF f (not of runtimeScale = n f, which grows without bound). Over real n:
   // peak: d/dL (ln L)^2 L^(-1/2) = L^(-3/2) ln L (2 - ln L / 2) vanishes at ln L = 4, so L = e^4, f = 16 / e^2
   const Lpk = Math.exp(4), fmax = 16 / Math.exp(2), peakLog10n = Lpk / LN10;
   // the n-ranges where A f(n) < 1, for any A > 0: [n small] and [n large], from the two roots of g(L) = 1/A
@@ -93,13 +94,15 @@ const ETH = (function () {
   // the peak, checked numerically as well as in closed form
   let best = 0, bestX = 0;
   for (let i = 0; i <= 200000; i++) { const x = 1 + 99 * i / 200000, v = fX(x); if (v > best) { best = v; bestX = x; } }
-  if (!near(best, fmax, 1e-9)) fail.push("numerical peak " + best + " differs from 16/e^2");
-  if (!near(fmax, PRINTED.fmax, 5e-5)) fail.push("peak " + fmax + ", card says " + PRINTED.fmax);
-  if (!near(bestX, PRINTED.peakLog10n, 0.01) || !near(peakLog10n, PRINTED.peakLog10n, 0.005)) fail.push("peak at log10 n = " + peakLog10n + ", card says " + PRINTED.peakLog10n);
+  if (!near(best, fmax, 1e-9)) fail.push("numerical peak of f (not of runtimeScale) " + best + " differs from 16/e^2");
+  // runtimeScale = n f itself has no peak: it keeps growing past the peak of f
+  if (!(Math.pow(10, 30) * fX(30) > Math.pow(10, 24) * fX(24) && Math.pow(10, 300) * fX(300) > Math.pow(10, 30) * fX(30))) fail.push("runtimeScale = n f should keep growing past the peak of f");
+  if (!near(fmax, PRINTED.fmax, 5e-5)) fail.push("peak of f " + fmax + ", card says " + PRINTED.fmax);
+  if (!near(bestX, PRINTED.peakLog10n, 0.01) || !near(peakLog10n, PRINTED.peakLog10n, 0.005)) fail.push("peak of f at log10 n = " + peakLog10n + ", card says " + PRINTED.peakLog10n);
   const r1 = region(1), r2 = region(0.5), r4 = region(0.25);
-  if (!(fN(49) < 1 && fN(50) > 1) || r1.nSmall !== PRINTED.n1) fail.push("f < 1 should hold up to n = 49 exactly, got " + r1.nSmall);
+  if (!(fN(49) < 1 && fN(50) > 1) || r1.nSmall !== PRINTED.n1) fail.push("first crossing of f = 1 should be between n = 49 and n = 50, got " + r1.nSmall);
   if (!near(r1.log10Large, PRINTED.large1, 0.005)) fail.push("f < 1 again past 10^" + r1.log10Large + ", card says 10^" + PRINTED.large1);
-  if (!(fN(327741237) < 2 && fN(327741238) > 2) || r2.nSmall !== PRINTED.n2) fail.push("f < 2 should hold up to n = 327,741,237 exactly, got " + r2.nSmall);
+  if (!(fN(327741237) < 2 && fN(327741238) > 2) || r2.nSmall !== PRINTED.n2) fail.push("first crossing of f = 2 should be between n = 327,741,237 and the next integer, got " + r2.nSmall);
   if (!near(r2.log10Large, PRINTED.large2, 0.005)) fail.push("f < 2 again past 10^" + r2.log10Large + ", card says 10^" + PRINTED.large2);
   if (!r4.all) fail.push("f should never reach 4");
   // the log-space formula agrees with the direct one wherever 10^x + 16 is an ordinary double
@@ -195,9 +198,9 @@ if (typeof document !== "undefined") (function () {
     const r = E.region(A);
     vA.textContent = A.toFixed(2);
     const head = "A = " + A.toFixed(2) + " (an illustration): ";
-    if (r.all) return head + "A f(n) < 1 for every n, since f never exceeds 16/e^2 = " + E.fmax.toFixed(4) +
+    if (r.all) return head + "A f(n) < 1 for every n, since f itself (not n f) never exceeds 16/e^2 = " + E.fmax.toFixed(4) +
       ". Exponent component only.";
-    const small = r.nSmall !== null ? "n <= " + fmt(r.nSmall) : "n up to about 10^" + r.log10Small.toFixed(2);
+    const small = r.nSmall !== null ? "n <= " + fmt(r.nSmall) + " (first crossing between " + fmt(r.nSmall) + " and " + fmt(r.nSmall + 1) + ")" : "n up to about 10^" + r.log10Small.toFixed(2) + " (first crossing)";
     return head + "A f(n) < 1 for " + small + " and again for n beyond about 10^" + r.log10Large.toFixed(2) +
       "; in between, the exponent term alone exceeds 2^n. Exponent component only.";
   }
@@ -227,7 +230,7 @@ if (typeof document !== "undefined") (function () {
     T(0, yF - 0.13, 0, "log10 n (log axis)", "#a9b7b4");
     for (const a of [0.25, 0.5, 1.0, 1.5]) T(toX(UMAX) + 0.1, toY(a), 0, "A = " + a, "#a9b7b4");
     if (sheetOn) T(toX(0) - 0.16, toY(AMIN), toZ(1), "sheet: height 1", "#d8eef2");
-    T(toX(Math.log10(E.peakLog10n)), toY(A), toZ(A * E.fmax) + 0.07, "peak: A 16/e^2 = " + (A * E.fmax).toFixed(3) + " at n = 10^" + E.peakLog10n.toFixed(2), "#ffcf7a");
+    T(toX(Math.log10(E.peakLog10n)), toY(A), toZ(A * E.fmax) + 0.07, "peak of A f (not of n f): A 16/e^2 = " + (A * E.fmax).toFixed(3) + " at n = 10^" + E.peakLog10n.toFixed(2), "#ffcf7a");
   }
 
   let last = performance.now();
