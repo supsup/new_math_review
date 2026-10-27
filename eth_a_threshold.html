@@ -17,6 +17,7 @@
   #hud p.caveat { color: var(--accent); }
   #panel { position: fixed; right: 16px; top: 132px; width: min(330px, calc(100vw - 32px)); background: rgba(10,16,20,0.88);
     border: 1px solid #3c5a62; border-radius: 6px; padding: 9px 11px; font-size: 13px; line-height: 1.45; color: var(--dim); }
+  #panel { max-height: calc(100vh - 150px); overflow-y: auto; box-sizing: border-box; }
   #panel b { color: var(--ink); font-weight: normal; }
   #panel .yes { color: #9be39b; } #panel .no { color: #ffb38a; }
   #panel label { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin: 3px 0; }
@@ -159,6 +160,9 @@ const TH = (function () {
   }
   // ---- the card's printed values, checked against this page's own computation
   const PRINTED = { astar: "0.46181600618316563920", open1: 50, close1: 2390.21, open2: 327741238, close2: 81.59, peak: 23.71 };
+  // the formal proof's own witnesses (source reading, Confluence; cross-checked by Marlow and Fixpoint): A >= 258.
+  // Fixpoint's 50-digit bisection of (ln L)^2 / sqrt(L) = 1/258: L = 2.12912358064900e10, log10 n = 9.24666622365955e9
+  const PROOF_A = 258, PROOF_CROSS_LOG10N = 9246666223.66;
   const fail = [];
   if (Math.abs(ASTAR - Number(PRINTED.astar)) > 1e-15) fail.push("e^2/16 = " + ASTAR + ", card says " + PRINTED.astar);
   let best = 0, bestX = 0;
@@ -172,6 +176,8 @@ const TH = (function () {
   if (Math.abs(b2.closeLog10 - PRINTED.close2) > 0.005) fail.push("A = 1/2 band closes near 10^" + b2.closeLog10 + ", card says 10^" + PRINTED.close2);
   if (!band(ASTAR * 0.9999).empty || band(ASTAR * 1.0001).empty) fail.push("the band should be empty just below e^2/16 and not just above");
   if (!band(0.25).empty) fail.push("A = 1/4 should have no band");
+  { const b = band(PROOF_A), rel = Math.abs(b.closeLog10 - PROOF_CROSS_LOG10N) / PROOF_CROSS_LOG10N;
+    if (b.empty || !(rel <= 1e-3) || b.first !== 0) fail.push("A = 258: A f(n) < 1 should start near log10 n = " + PROOF_CROSS_LOG10N + " (page: " + b.closeLog10 + ") with A f(n) > 1 from n = 0"); }
   for (let x = 0; x <= 300; x += 0.5) { const d = Math.log(Math.pow(10, x) + 16); if (Math.abs(lnN16(x) - d) > 1e-12 * d) fail.push("log-space ln(n+16) off at x = " + x); }
   // the full inequality: inside the band it never holds; far past the band with modest C, d it does
   // ---- AT-M1 / AT-M2: controls through the same reader and evaluator the panel uses (raw strings in, yes or no out)
@@ -203,7 +209,7 @@ const TH = (function () {
     const lhs = full(1, 6, 10, 2, { kind: "cnf", r: 4.26 }).lhs;
     if (Math.abs(lhs - (10 + 2 * l2)) > 1e-9) fail.push("full-bound left side at n = 10^6 is " + lhs + ", BigInt gives " + (10 + 2 * l2));
   }
-  return { ASTAR, fX, fN, band, full, evaluate, RANGES, LABEL, FIELDS, peakLog10n, log2Lp1, checkL, fail };
+  return { PROOF_A, PROOF_CROSS_LOG10N, ASTAR, fX, fN, band, full, evaluate, RANGES, LABEL, FIELDS, peakLog10n, log2Lp1, checkL, fail };
 })();
 if (typeof module !== "undefined") module.exports = TH;   // lets node test the block above
 
@@ -225,8 +231,16 @@ if (typeof document !== "undefined") (function () {
     "<label>d, in [0, 64] <input id='iD' type='number' value='2' step='1' min='0' max='64'></label>" +
     "<div><button id='mCnf' type='button' aria-pressed='true'>random 3-CNF</button> <button id='mMin' type='button' aria-pressed='false'>lower bound L = n + 2</button></div>" +
     "<label for='iR'>clause ratio r = m/n = <span id='vR'>4.26</span> <input id='iR' type='range' min='0.5' max='10' step='0.01' value='4.26'></label>" +
-    "<span id='lnote' style='font-size:12px'></span><div id='out'></div>";
+    "<span id='lnote' style='font-size:12px'></span><div id='out'></div>" +
+    "<details id='proofA' style='font-size:12px;margin-top:6px'><summary>this proof construction: A &gt;= 258 (a lower bound, not an exact A)</summary>" +
+    "Source reading of openai/math 7ef5c0cc5, not built (Confluence; cross-checks Marlow and Fixpoint): SqrtLogSpace/Final.lean gives A + 1, d + 2, C + 28700; " +
+    "NativeLargeEntry.lean gives A = 256 + At with At &gt;= 1 (NativeLeafContract.lean uniform_contract); 256 = 8 x 32 (Asymptotics.lean inverse_sparsifySchedule_target). " +
+    "Exponent-only necessary condition, separate from the C, d, L comparison above: at A = 258, A f(n) &lt; 1 only for log10 n &gt; <span id='pA'></span>." +
+    "<br>Does not imply: (1) anything about the running time versus 2^n, since time &lt;= U and U &gt; 2^n says nothing about the time; " +
+    "(2) that the theorem needs constants this large: these are the witnesses this proof constructs, not the best possible; " +
+    "(3) any real speed of the program: no actual-runtime curve is drawn here.</details>";
   const out = document.getElementById("out");
+  document.getElementById("pA").textContent = (T.band(T.PROOF_A).closeLog10 / 1e9).toFixed(4) + " x 10^9";
   // the panel reads the raw field strings every time and hands them to T.evaluate; nothing is clamped or defaulted
   const IDS = { log2C: "iC", d: "iD", r: "iR" };
   const readRaw = () => ({ log2C: document.getElementById("iC").value, d: document.getElementById("iD").value, r: document.getElementById("iR").value, model: modelKind });
@@ -263,7 +277,9 @@ if (typeof document !== "undefined") (function () {
   let box = null;
   function layout(w, h, dpr) {
     const narrow = w / dpr < 760;
-    const x0 = 70 * dpr, x1 = w - (narrow ? 20 : 370) * dpr, y0 = (narrow ? 150 : 170) * dpr, y1 = h - (narrow ? 200 : 110) * dpr;
+    // the plot starts below the measured heading block (its caveat wraps differently by width), with room for the off-scale note
+    const hud = document.getElementById("hud"), hb = hud ? hud.getBoundingClientRect().bottom : 0;
+    const x0 = 70 * dpr, x1 = w - (narrow ? 20 : 370) * dpr, y0 = Math.max(narrow ? 150 : 170, hb + 34) * dpr, y1 = h - (narrow ? 200 : 110) * dpr;
     box = { x0, x1, y0, y1, X: u => x0 + (x1 - x0) * u / UMAX, Y: a => y1 - (y1 - y0) * (a - AMIN) / (AMAX - AMIN) };
   }
   const colour = (a, i) => { const v = a * FU[i] - 1;   // inside the band amber, outside teal, stronger away from the boundary
@@ -346,6 +362,11 @@ if (typeof document !== "undefined") (function () {
     lab(B.x1 - 6 * dpr, B.Y(T.ASTAR) + 12 * dpr, "A = e^2/16 = 0.46182: below this line, no band (Confluence)", "#ffcf7a", "right");
     lab(B.X(Math.log10(T.peakLog10n)), B.Y(1.32), "inside: the exponent term exceeds 2^n", "#2a1406");
     lab(B.X(5.2), B.Y(0.38), "outside: the exponent term is below 2^n", "#e9efe9");
+    {   // off scale: the formal proof's own witness floor A = 258, far above this axis
+      const bp = T.band(T.PROOF_A), xs = (bp.closeLog10 / 1e9).toFixed(4);
+      lab(B.x0, B.y0 - 13 * dpr, (B.x1 - B.x0) / dpr < 520 ? "^ off scale: this proof construction, A >= 258 (a lower bound, not an exact A)"
+        : "^ off scale above: this proof construction, A >= 258 (a lower bound, not an exact A); exponent-only: A f(n) < 1 only beyond n about 10^(" + xs + " x 10^9)", "#ffcf7a", "left");
+    }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

@@ -527,8 +527,34 @@ const TUN = (function () {
   for (const model of ["lin", "quad"]) { let prev = -Infinity, grows = true;
     for (let k = kOfX(PEAK_LOG10); k <= KMAX; k += 3) { const v = bound(pointOfK(k), 1, 20, 2, model, 4).logBits; if (!(v > prev)) grows = false; prev = v; }
     if (!grows) fail.push("the full bound should keep growing past the coefficient peak (" + model + ")"); }
+  // cursor labels (BrewShot's GIF: the coefficient label crossed into the right instrument at far zoom): placed right of
+  // the cursor unless that would cross the panel's right edge, then left of it; clamped inside the panel either way
+  function placeLabel(cx, textW, x0, x1, gap) {
+    let left = cx + gap;
+    if (left + textW > x1) left = cx - gap - textW;
+    if (left < x0) left = x0;
+    if (left + textW > x1) left = Math.max(x0, x1 - textW);
+    return { left, right: left + textW };
+  }
+  const placeLabelReviewed = (cx, textW, x0, x1, gap) => ({ left: cx + gap, right: cx + gap + textW });   // control only
+  function labelChecks(place) {
+    const r = [], ok = (name, cond, detail) => r.push({ name, ok: !!cond, detail });
+    const bad = [];
+    for (const [W, stacked] of [[1280, false], [900, false], [700, false], [600, true], [375, true]]) for (const dpr of [1, 2]) {
+      const pad = 46 * dpr, w = W * dpr, x0 = pad, x1 = stacked ? w - 14 * dpr : w / 2 - 20 * dpr;
+      for (const sv of [0, SMAX * 0.25, SMAX * 0.5, SMAX * 0.999, SMAX]) for (const tw of [120, 180, 240]) {
+        const textW = tw * dpr, cx = x0 + (x1 - x0) * sv / SMAX; if (textW > x1 - x0) continue;
+        const b = place(cx, textW, x0, x1, 6 * dpr);
+        const fitsOneSide = textW + 6 * dpr <= x1 - cx || textW + 6 * dpr <= cx - x0;   // then the label must not cover the cursor line
+        if (!(b.left >= x0 - 1e-9 && b.right <= x1 + 1e-9 && Math.abs(b.right - b.left - textW) < 1e-9) || (fitsOneSide && !(b.left >= cx || b.right <= cx)))
+          bad.push(W + "px x" + dpr + " s = " + sv.toFixed(3) + " w = " + tw);
+      } }
+    ok("cursor label box stays inside its panel at both ends of the zoom (and between), five widths, two pixel ratios, three label widths, and does not cover the cursor line when it fits on one side", bad.length === 0, bad.length ? bad.slice(0, 4).join("; ") : "all inside");
+    return r;
+  }
   // the review fixes: each group must pass, and each control (the reviewed behaviour) must be caught
   const groups = [
+    { name: "cursor label placement", results: labelChecks(placeLabel) },
     { name: "inputs (TZ-N1)", results: validationChecks(parseField) },
     { name: "reduced motion (TZ-M1)", results: motionChecks(MOTION.correct) },
     { name: "tour narration (TZ-T1)", results: tourChecks(narrate) },
@@ -536,6 +562,7 @@ const TUN = (function () {
     { name: "exact symbolic setting (TZ-N2)", results: symChecks() },
   ];
   const controls2 = [
+    { name: "the reviewed label placement (always right of the cursor)", results: labelChecks(placeLabelReviewed) },
     { name: "the reviewed input reader (finite-only, clamps to a lower bound, substitutes a default)", results: validationChecks(clampParse) },
     { name: "the reviewed motion handling (40 per frame when reduced; preference and button do not stop play)", results: motionChecks(MOTION.reviewed) },
     { name: "narration frozen to the preset, ignoring the actual parameters", results: tourChecks(staticNarrate) },
@@ -544,7 +571,7 @@ const TUN = (function () {
   ];
   groups.forEach(gr => gr.results.forEach(v => { if (!v.ok) fail.push(gr.name + ": " + v.name + " (" + v.detail + ")"); }));
   controls2.forEach(c => { if (c.results.every(v => v.ok)) fail.push("the control '" + c.name + "' passed every check, so the checks are blind"); });
-  return { f, g, fromInt, fromLog, bound, decide, coefStatus, isCritical, UI0, ui, uiValidate, fmtA, pointOfK, kOfX, xOfK, KMAX, ESTAR, FMAX, PEAK_LOG10, SMAX, NS, CURVE_S, CURVE_P, LANDMARK_POINTS,
+  return { placeLabel, f, g, fromInt, fromLog, bound, decide, coefStatus, isCritical, UI0, ui, uiValidate, fmtA, pointOfK, kOfX, xOfK, KMAX, ESTAR, FMAX, PEAK_LOG10, SMAX, NS, CURVE_S, CURVE_P, LANDMARK_POINTS,
     healthy, controls, groups, controls2, finiteChecked, fail, VARIANTS, RANGES, FIELDS, LABEL, rangeText, parseField, validateState, computeState,
     motion, MOTION, PLAY_STEP, MANUAL_STEP, TOUR, tourPoint, presetRaw, matchesPreset, narrate, dNote, fmtN, fmtBits, fmtVal, fmtRoom, COEF_TEXT, STATUS_TEXT };
 })();
@@ -739,7 +766,9 @@ if (typeof document !== "undefined") (function () {
     lab(L0.x0, L0.y0 - 14 * dpr, "left: the coefficient A f(n) (amber) and the line 1", "#e9eee9");
     for (const v of [0, 1, 2]) lab(L0.x0 - 6 * dpr, YL(v), String(v), null, "right");
     const cst = bNow.coefState;
-    lab(X(L0, sNow) + 6 * dpr, YL(Math.min(ymaxL, bNow.coef)) - 10 * dpr, "A f(n) = " + bNow.coef.toFixed(4) + (cst === "tangent" ? " (analytic tangency)" : cst === "near" ? " (near 1, unresolved)" : ""), "#ffcf7a");
+    { const s = "A f(n) = " + bNow.coef.toFixed(4) + (cst === "tangent" ? " (analytic tangency)" : cst === "near" ? " (near 1, unresolved)" : "");
+      const bx = T.placeLabel(X(L0, sNow), octx.measureText(s).width, L0.x0, L0.x1, 6 * dpr);   // never crosses into the right instrument
+      lab(bx.left, YL(Math.min(ymaxL, bNow.coef)) - 10 * dpr, s, "#ffcf7a", "left"); }
     lab(R.x0, top.y0 - 14 * dpr, "right, top: bits of bound and of 2^n (log10 of log10 scale)", "#e9eee9");
     lab(R.x1, top.y0 + 8 * dpr, "amber: bits of the full bound   blue: n, bits of 2^n", null, "right");
     lab(R.x0, bot.y0 - 4 * dpr, stacked ? "bottom: log10(bound bits / n); above 0: above 2^n" : "right, bottom: log10(bound bits / n); above 0, this bound exceeds 2^n", "#e9eee9");
