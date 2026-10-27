@@ -129,11 +129,20 @@ const TH = (function () {
   }
   // the full inequality at one n (n = 10^x), in logs: log2 C + d log2(L+1) <= n (1 - A f(n)), with L from the model above.
   // Signed and correct for any finite inputs; no early return on the sign of the slack.
+  // This page has no exact tags (no critical preset, no named peak point), so when A f(n) is within TOL of 1 the room
+  // n (1 - A f(n)) is numerically unresolved: holds = null, unless the overhead exceeds the largest room the tolerance band
+  // allows (a certain no; a certain yes for negative overhead). Never a yes or no from a rounded slack.
+  const TOL = 1e-12;
   function full(A, x, log2C, d, model) {
-    const slack = 1 - A * fX(x);
+    const r = A * fX(x), slack = 1 - r;
     const lhs = log2C + d * log2Lp1(x, model);
     const rhsSign = Math.sign(slack), rhsLog10 = slack === 0 ? null : x + Math.log10(Math.abs(slack));
-    return { holds: signedLe(lhs, rhsSign, rhsLog10), slack, lhs, rhsSign, rhsLog10 };
+    if (Math.abs(r - 1) <= TOL) {
+      const maxRoom = x + Math.log10(TOL * 1.001);
+      const holds = lhs > 0 && Math.log10(lhs) > maxRoom ? false : lhs < 0 && Math.log10(-lhs) > maxRoom ? true : null;
+      return { holds, unresolved: holds === null, slack, lhs, rhsSign, rhsLog10 };
+    }
+    return { holds: signedLe(lhs, rhsSign, rhsLog10), unresolved: false, slack, lhs, rhsSign, rhsLog10 };
   }
   // ---- the panel's input reader: declared ranges, parsed from the raw strings, never clamped or replaced by a default
   const FIELDS = ["log2C", "d", "r"], MODELS = ["cnf", "min"];
@@ -199,9 +208,20 @@ const TH = (function () {
     if (!(nOver.ok && nOver.res.holds === false && nOver.res.rhsSign > 0)) fail.push("NO twin outside the band: A = 0.3, n = 1000, log2 C = 10000, d = 64 should not hold"); }
   { let xe = null; for (let i = 0; i < 4000 && xe === null; i++) { const x = 1 + i * 0.01; if (1 - (1 / fX(x)) * fX(x) === 0) xe = x; }
     const e = xe === null ? null : evaluate(RAW({ log2C: "0", d: "0" }), 1 / fX(xe), xe);
-    if (!(e && e.ok && e.res.slack === 0 && e.res.lhs === 0 && e.res.holds === true)) fail.push("equality (0 <= 0) should count as holding");
+    if (!(e && e.ok && e.res.slack === 0 && e.res.lhs === 0 && e.res.holds === null)) fail.push("a rounded slack of exactly 0 (no exact tags on this page) should be unresolved, not a certified yes");
     if (!(signedLe(5, 1, Math.log10(5)) && signedLe(-5, -1, Math.log10(5)) && !signedLe(-5, -1, Math.log10(6)) && !signedLe(0, -1, 0) && signedLe(-1, 1, 3) && !signedLe(1, -1, -3)))
       fail.push("signed comparison cases"); }
+  {   // the tangency A = e^2/16 at the real peak point and its double-precision neighbours: positive overhead, never a certified yes
+    const xp = Lpk / LN10;
+    for (const x of [xp, xp * (1 + 1e-15), xp * (1 - 1e-15)]) for (const [c, dd] of [["20", "2"], ["10000", "64"]]) {
+      const e = evaluate(RAW({ log2C: c, d: dd }), ASTAR, x);
+      if (!(e.ok && e.res.holds === null)) fail.push("A = e^2/16 near the peak (log10 n = " + x + ", log2 C = " + c + ") should be unresolved, got " + (e.ok ? e.res.holds : "invalid")); }
+    // near ratio 1 at n = 50: the largest room the tolerance allows (50 x 1e-12 bits) is below the overhead: a certain no
+    const x50 = Math.log10(50), e50 = evaluate(RAW({}), 1 / fX(x50), x50), e50z = evaluate(RAW({ log2C: "0", d: "0" }), 1 / fX(x50), x50);
+    if (!(e50.ok && e50.res.holds === false)) fail.push("near ratio 1 at n = 50 with positive overhead should be a certain no");
+    if (!(e50z.ok && e50z.res.holds === null)) fail.push("near ratio 1 at n = 50 with zero overhead should be unresolved");
+    if (!(signedLe(0, 0, null) && !signedLe(1e-300, 0, null))) fail.push("equality at a zero room should hold, any positive overhead should not");
+  }
   if (!(dNote(0) && dNote(2.5) && dNote(2) === "" && dNote(1) === "")) fail.push("d = 0 and fractional d should be flagged exploratory");
   checkL(log2Lp1).forEach(b => fail.push("input length L: " + b));
   {   // the panel's left side uses that L: at n = 10^6, m = 4,260,000, log2 C = 10, d = 2, against BigInt
@@ -264,8 +284,8 @@ if (typeof document !== "undefined") (function () {
     if (!ev.ok) { out.innerHTML = "<span class='no'>not evaluated: invalid input</span><br>" + ev.errors.map(q => q.msg.replace(/&/g, "&amp;").replace(/</g, "&lt;")).join("<br>"); return; }
     const r = ev.res;
     out.innerHTML = "at n = 10^" + xN.toFixed(2) + ": 1 - A f(n) = " + r.slack.toFixed(4) + "<br>log2(L+1) = " + ev.l2.toFixed(1) + "<br>log2 C + d log2(L+1) = " + r.lhs.toFixed(1) +
-      (r.rhsSign === 0 ? "<br>n (1 - A f(n)) = 0" : "<br>n (1 - A f(n)) = " + (r.rhsSign < 0 ? "-" : "") + "10^" + r.rhsLog10.toFixed(2)) +
-      "<br>full bound at most 2^n here: " + (r.holds ? "<span class='yes'>yes</span>" : "<span class='no'>no</span>") +
+      (r.unresolved || (r.holds !== null && Math.abs(r.slack) <= 1e-12) ? "<br>n (1 - A f(n)): not resolved in double precision (|room| at most about n x 10^-12)" : r.rhsSign === 0 ? "<br>n (1 - A f(n)) = 0" : "<br>n (1 - A f(n)) = " + (r.rhsSign < 0 ? "-" : "") + "10^" + r.rhsLog10.toFixed(2)) +
+      "<br>full bound at most 2^n here: " + (r.holds === true ? "<span class='yes'>yes</span>" : r.holds === false ? "<span class='no'>no</span>" : "unresolved (A f(n) within 10^-12 of 1: the room n (1 - A f(n)) is below what double precision resolves)") +
       (ev.note ? "<br><span style='font-size:12px'>" + ev.note + "</span>" : "") +
       "<br><span style='font-size:12px'>for these illustrative C, d, L only</span>";
   }

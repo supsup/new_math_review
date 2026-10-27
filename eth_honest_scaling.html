@@ -375,13 +375,30 @@ const NUM = (function () {
   const log2Lp1 = (p, model) => log2Lp1n(log10n(p), model);
   // log10 of the full illustrative log2-bound  log2 C + d log2(L+1) + A n f(n)
   const fullLog10 = (p, A, log2C, d, model) => lse10([log2C > 0 ? Math.log10(log2C) : null, d > 0 ? Math.log10(d) + Math.log10(log2Lp1(p, model)) : null, expLog10(p, A)]);
-  // is the full illustrative log2-bound at most n?  log2 C + d log2(L+1) + A n f(n) <= n, equality counting as holding.
-  // Signed in log2 C (correct for any finite input): with log2 C < 0 it is P <= n + |log2 C|, P = d log2(L+1) + A n f(n) >= 0.
-  function atMost(p, A, log2C, d, model) {
-    const l = log10n(p), P = lse10([d > 0 ? Math.log10(d) + Math.log10(log2Lp1(p, model)) : null, expLog10(p, A)]);
-    if (log2C >= 0) { const b = lse10([log2C > 0 ? Math.log10(log2C) : null, P]); if (l === null) return b === null; return b === null ? true : b <= l; }
-    const rhs = lse10([l, Math.log10(-log2C)]);
-    return P === null ? true : P <= rhs;
+  // signed lhs <= rhs with rhs given by its sign and log10 of its magnitude (rhsLog10 = null when rhs = 0); equality holds
+  function signedLe(lhs, rhsSign, rhsLog10) {
+    if (rhsSign === 0) return lhs <= 0;
+    if (rhsSign > 0) return lhs <= 0 ? true : Math.log10(lhs) <= rhsLog10;
+    if (lhs > 0) return false;
+    return lhs === 0 ? false : rhsLog10 <= Math.log10(-lhs);
+  }
+  // is the full illustrative bound at most 2^n?  The overhead log2 C + d log2(L+1) against the room n (1 - A f(n)), signed,
+  // equality holding (the same criterion as the A-threshold page; summing logs would lose the overhead against huge n).
+  // n = 0: the room is exactly 0. The exact tags (critical preset A = e^2/16 at the named real peak point): the room is exactly
+  // 0 by analysis. A f(n) within TOL of 1 without the tags: the room is numerically unresolved, so the answer is null, unless the
+  // overhead exceeds the largest room the tolerance band allows (then a certain no, or a certain yes for negative overhead).
+  // Returns true, false, or null (unresolved).
+  function atMost(p, A, log2C, d, model, critical) {
+    const O = log2C + d * log2Lp1(p, model), l = log10n(p);
+    if (l === null) return signedLe(O, 0, null);
+    const cls = expVsN(p, A, critical === true);
+    if (cls === "tangent") return signedLe(O, 0, null);
+    if (cls === "unresolved") { const maxRoom = l + Math.log10(TOL * 1.001);
+      if (O > 0 && Math.log10(O) > maxRoom) return false;
+      if (O < 0 && Math.log10(-O) > maxRoom) return true;
+      return null; }
+    const slack = 1 - A * fP(p);
+    return signedLe(O, Math.sign(slack), l + Math.log10(Math.abs(slack)));
   }
   const lg1p = l => l > 0 ? l + Math.log1p(Math.pow(10, -l)) / LN10 : Math.log1p(Math.pow(10, l)) / LN10;   // log10(1 + 10^l)
   const Y = l => l === null ? 0 : Math.log10(1 + lg1p(l));                     // the plot's doubly logarithmic height
@@ -421,7 +438,7 @@ const NUM = (function () {
     if (critical === true && A === ASTAR) return "critical";
     return Math.abs(A - ASTAR) <= TOL ? "unresolved" : A < ASTAR ? "below" : "above";
   }
-  return { atMost, log2Lp1, log2Lp1n, checkL, family, expVsN, aClass, peakPoint, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, lg1p, Y, band };
+  return { signedLe, atMost, log2Lp1, log2Lp1n, checkL, family, expVsN, aClass, peakPoint, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, lg1p, Y, band };
 })();
 
 /* ================= READ: the full-bound and scaling inputs, parsed from raw strings, never clamped or defaulted ================= */
@@ -436,7 +453,7 @@ const READ = (function () {
   }
   const dNote = d => (Number.isInteger(d) && d >= 1) ? "" : "d = " + d + " is an exploratory setting: the theorem's degree d is a positive natural number.";
   // the whole full-bound state: fields, model, and the computed values at the current point and at the ends of the axis, all finite
-  function validate3(raw, A, p, parse) {
+  function validate3(raw, A, p, parse, critical) {
     const P = parse || parseField, errors = [], v = {};
     for (const key of ["log2C", "d", "r"]) { const q = P(key, raw[key]); if (q.ok) v[key] = q.value; else errors.push(q); }
     if (["cnf", "min"].indexOf(raw.model) < 0) errors.push({ ok: false, field: "model", msg: "the L model '" + raw.model + "' is not one of cnf, min" });
@@ -447,7 +464,7 @@ const READ = (function () {
       if (!vals.every(x => x === null || Number.isFinite(x)) || !Number.isFinite(v.log2C + v.d * NUM.log2Lp1(q, model)))
         return { ok: false, errors: [{ ok: false, field: null, msg: "a computed value is not finite (overflow): the inputs are outside what this page can evaluate" }] };
     }
-    return { ok: true, v, model, atMost: NUM.atMost(p, A, v.log2C, v.d, model), note: dNote(v.d) };
+    return { ok: true, v, model, atMost: NUM.atMost(p, A, v.log2C, v.d, model, critical === true), note: dNote(v.d) };
   }
   return { RANGES, LABEL, parseField, dNote, validate3 };
 })();
@@ -486,21 +503,29 @@ const DECIDE = {
   // the full-bound reader and evaluator, through the same validate3 the page uses (raw strings in)
   fullEval: (atMostFn, parse) => {
     const RAW = o => Object.assign({ log2C: "20", d: "2", r: "4.26", model: "cnf" }, o);
-    const V = (o, A, p, prs) => { const st = READ.validate3(RAW(o), A, p, prs === undefined ? parse : prs); return st.ok ? Object.assign(st, { atMost: atMostFn(p, A, st.v.log2C, st.v.d, st.model) }) : st; };
+    // atMostFn null: the reader's own answer, exactly what the page shows; a function: a control evaluator on the same parsed state
+    const V = (o, A, p, prs, crit) => { const st = READ.validate3(RAW(o), A, p, prs === undefined ? parse : prs, crit);
+      return st.ok && atMostFn ? Object.assign(st, { atMost: atMostFn(p, A, st.v.log2C, st.v.d, st.model, crit === true) }) : st; };
     const anyFinite = (key, raw) => { const v = Number(raw); return Number.isFinite(v) ? { ok: true, value: v } : { ok: false, field: key, msg: "not finite" }; };
     const named = (st, key) => !st.ok && st.errors.some(q => q.field === key && q.msg.indexOf(READ.LABEL[key]) === 0);
     const p50 = NUM.point(Math.log10(51)), p398 = NUM.point(Math.log10(399)), p1000 = NUM.point(Math.log10(1001)), pBig = NUM.point(NUM.TMAX), p0 = NUM.point(0);
     const neg = V({ log2C: "-100", d: "1" }, 1, p50, anyFinite), y = V({ log2C: "10", d: "2" }, 1, pBig), nIn = V({}, 1, p398), nOver = V({ log2C: "10000", d: "64" }, 0.3, p1000);
     const eq = V({ log2C: "0", d: "0" }, 1, p0), eq1 = V({ log2C: "0", d: "1" }, 1, p0);
-    // equality at n > 0: an integer n where A = 1/f(n) makes log10(A n f(n)) equal log10 n exactly in double precision
-    let eqPos = null; for (let n = 2; n < 5000 && eqPos === null; n++) { const q = NUM.point(Math.log10(n + 1)), A = 1 / NUM.fN(n);
-      if (q.n === n && NUM.expLog10(q, A) === NUM.log10n(q)) eqPos = V({ log2C: "0", d: "0" }, A, q); }
+    // the exact tangency (both tags: critical preset A = e^2/16 at the named real peak point): the room is exactly 0
+    const pk = NUM.peakPoint, tan = V({}, NUM.ASTAR, pk, undefined, true), tan0 = V({ log2C: "0", d: "0" }, NUM.ASTAR, pk, undefined, true);
+    // the same numbers without the tags: numerically unresolved (the room n* x 1e-12 is far above the overhead)
+    const nearPk = V({}, NUM.ASTAR, pk, undefined, false), nearPk2 = V({}, NUM.ASTAR, NUM.point(pk.t), undefined, true);
+    // near ratio 1 at small n: the largest room the tolerance allows (50 x 1e-12 bits) is below the overhead, so a certain no
+    const A50 = 1 / NUM.fN(50), near50 = V({}, A50, p50), near50z = V({ log2C: "0", d: "0" }, A50, p50);
+    const sl = NUM.signedLe, signedOK = sl(5, 1, Math.log10(5)) && sl(-5, -1, Math.log10(5)) && !sl(-5, -1, Math.log10(6)) && !sl(0, -1, 0) && sl(-1, 1, 3) && !sl(1, -1, -3) && sl(0, 0, null) && !sl(1e-300, 0, null);
     return p50.n === 50 && named(V({ log2C: "-100", d: "1" }, 1, p50), "log2C") && neg.ok && neg.atMost === true &&
       named(V({ d: "1e308" }, 1, pBig), "d") && !V({ d: "1e308" }, 1, pBig, anyFinite).ok &&
       ["", "abc", "Infinity", "NaN"].every(b => named(V({ log2C: b }, 1, p50), "log2C")) && named(V({ r: "11" }, 1, p50), "r") && !V({ model: "lin" }, 1, p50).ok &&
       !READ.parseField("c", "0").ok && !READ.parseField("c", "1001").ok && READ.parseField("c", "3").ok &&
       y.ok && y.atMost === true && nIn.ok && nIn.atMost === false && nOver.ok && nOver.atMost === false &&
-      eq.ok && eq.atMost === true && eq1.ok && eq1.atMost === false && eqPos !== null && eqPos.ok && eqPos.atMost === true &&
+      eq.ok && eq.atMost === true && eq1.ok && eq1.atMost === false &&
+      tan.ok && tan.atMost === false && tan0.ok && tan0.atMost === true && nearPk.ok && nearPk.atMost === null && nearPk2.ok && nearPk2.atMost === null &&
+      near50.ok && near50.atMost === false && near50z.ok && near50z.atMost === null && signedOK &&
       !!READ.dNote(0) && !!READ.dNote(2.5) && READ.dNote(2) === "" && READ.dNote(1) === "";
   },
   classifier: (cls, acls) => {
@@ -550,7 +575,7 @@ function runChecks() {
     "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
   add("family scaling: dense e = p v (v-1)/2 and sparse e = (e/v of the small graph) v, and n = c (v+e), match exact BigInt arithmetic at v = 10^s for s = 1, 2, 3, 6, 12, 50, 100, 200, every small graph (zero-edge included), c = 1, 3, 1000; C4 dense at s = 6, c = 3 gives e = 333,333,000,000 and n = 1,000,002,000,000", DECIDE.familyExact(NUM.family));
   add("exponent-term classifier: n = 0 is exact equality for every A; for n > 0 the ratio decides (n = 49 below, n = 50 above at A = 1; ratio 1 +- 1e-9 above/below; ratio 1 +- 5e-13 and the nonstationary crossing n = 50, A = 1/f(50) unresolved, never equal or tangent); tangency only for the critical preset A = e^2/16 at the named peak point (with the preset flag but A = e^2/16 +- 1e-9 or +- 5e-13 at that point: above/below; +- 4e-13: unresolved); A near e^2/16 classified by sign, unresolved within 1e-12, exactly e^2/16 only for the preset", DECIDE.classifier(NUM.expVsN, NUM.aClass));
-  add("full-bound reader and evaluator (the same path as the page): log2 C = -100, d = 1e308, c = 0, empty, non-numeric and out-of-range r are refused with named messages; with the range check bypassed, A = 1, n = 50, log2 C = -100, d = 1 is at most 2^n (signed), and d = 1e308 is refused as overflow; YES at n = 10^3000 (log2 C = 10, d = 2) and NO twins at n = 398 inside the band and at n = 1000 with log2 C = 10000, d = 64; equality (n = 0, log2 C = 0, d = 0, and an n > 0 where A n f(n) = n exactly in double precision) counts as holding; d = 0 and fractional d flagged exploratory", DECIDE.fullEval(NUM.atMost));
+  add("full-bound reader and evaluator (the same path as the page): log2 C = -100, d = 1e308, c = 0, empty, non-numeric and out-of-range r are refused with named messages; with the range check bypassed, A = 1, n = 50, log2 C = -100, d = 1 is at most 2^n (signed), and d = 1e308 is refused as overflow; YES at n = 10^3000 (log2 C = 10, d = 2) and NO twins at n = 398 inside the band and at n = 1000 with log2 C = 10000, d = 64; equality (n = 0 with zero overhead; the exact tangency with zero overhead) counts as holding; the exact tangency (critical preset at the named peak point) with positive overhead is NO; the same numbers without the tags are unresolved; near ratio 1 at n = 50 the overhead exceeds the largest room the tolerance allows, a certain NO (unresolved with zero overhead); d = 0 and fractional d flagged exploratory", DECIDE.fullEval(null));
   const Lbad = NUM.checkL(NUM.log2Lp1n);
   {   // the plotted full bound uses that L: at n = 10^6, m = 4,260,000, log2 C = 10, d = 2, A = 1, against BigInt
     const ex = (4260000n * (12n * 1000000n + 22n) + 1000000n + 3n).toString(), l2 = (ex.length - 1 + Math.log10(Number(ex.slice(0, 17)) / Math.pow(10, Math.min(17, ex.length) - 1))) * Math.log2(10);
@@ -584,9 +609,13 @@ function runControls() {
     add("wrong reduction: " + g.label + "'s matching encoding without its at-most-one clauses must fail", DECIDE.pmOK(g, Object.assign({}, enc, { clauses: enc.clauses.filter(c => !(c.length === 2 && c[0] < 0 && c[1] < 0)) }), g.refPM)); }
   add("wrong scale: f with ln(n) in place of ln(n+16) must miss the 49/50 crossing", DECIDE.firstCrossing(n => NUM.g(Math.log(n))));
   add("wrong landmark: a recrossing printed as 10^2390.31 must fail", DECIDE.close1(2390.31));
+  add("wrong full-bound evaluator: the summed-log atMost of 8783c35 (overhead lost against n at the tangency) must fail", DECIDE.fullEval((p, A, log2C, d, model) => {
+    const l = NUM.log10n(p), P = NUM.lse10([d > 0 ? Math.log10(d) + Math.log10(NUM.log2Lp1(p, model)) : null, NUM.expLog10(p, A)]);
+    if (log2C >= 0) { const b = NUM.lse10([log2C > 0 ? Math.log10(log2C) : null, P]); if (l === null) return b === null; return b === null ? true : b <= l; }
+    const rhs = NUM.lse10([l, Math.log10(-log2C)]); return P === null ? true : P <= rhs; }));
   add("wrong full-bound evaluator: the unsigned sum that drops a negative log2 C must fail", DECIDE.fullEval((p, A, c, d, m) => { const l = NUM.log10n(p), b = NUM.fullLog10(p, A, c, d, m); if (l === null) return b === null; return b === null ? true : b <= l; }));
   add("wrong full-bound evaluator: a strict comparison (equality not holding) must fail", DECIDE.fullEval((p, A, c, d, m) => { const l = NUM.log10n(p), b = NUM.fullLog10(p, A, Math.max(0, c), d, m); if (l === null) return false; return b === null ? true : b < l; }));
-  add("wrong reader: one without the range check must fail", DECIDE.fullEval(NUM.atMost, (key, raw) => { const v = Number(raw); return Number.isFinite(v) ? { ok: true, value: v } : { ok: false, field: key, msg: READ.LABEL[key] + " is not finite" }; }));
+  add("wrong reader: one without the range check must fail", DECIDE.fullEval(null, (key, raw) => { const v = Number(raw); return Number.isFinite(v) ? { ok: true, value: v } : { ok: false, field: key, msg: READ.LABEL[key] + " is not finite" }; }));
   add("wrong input length: a linear L = r (n + 1) in place of m (12 n + 22) + n + 2 must fail the L check", NUM.checkL((l, m) => m.kind === "min" ? NUM.log2Lp1n(l, m) : Math.log2(m.r * (l === null ? 1 : Math.pow(10, l) + 1) + 1)).length === 0);
   add("wrong family scaling: dense e with one lv term (linear in v) must fail", DECIDE.familyExact((fam, vS, eS, lv, c) => { const r = NUM.family(fam, vS, eS, lv, c);
     if (fam !== "dense" || r.le === null) return r; const le = r.le - lv; return { le, lPM: Math.log10(c) + NUM.lse10([lv, le]) }; }));
@@ -598,7 +627,7 @@ function runControls() {
 }
 const RESULT = (function () { try { return { checks: runChecks(), controls: runControls() }; } catch (e) { return { checks: [{ name: "checks threw: " + e.message, ok: false }], controls: [] }; } })();
 RESULT.ok = RESULT.checks.every(c => c.ok) && RESULT.controls.length > 0 && RESULT.controls.every(c => c.tripped);
-if (typeof module !== "undefined") module.exports = { DATA, MODEL, CHECK, NUM, DECIDE, RESULT, graphByKey };
+if (typeof module !== "undefined") module.exports = { DATA, MODEL, CHECK, NUM, READ, DECIDE, RESULT, graphByKey };
 
 /* ================= drawing ================= */
 if (typeof document !== "undefined") (function () {
@@ -840,7 +869,7 @@ if (typeof document !== "undefined") (function () {
   // the full-bound fields are read as raw strings and validated as a whole (READ.validate3) on every change; nothing is clamped
   for (const id of ["iC", "iD", "sR"]) $(id).addEventListener("input", () => sync3());
   document.querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { S.LmKind = b.dataset.lm; sync3(); }));
-  const read3 = p => READ.validate3({ log2C: $("iC").value, d: $("iD").value, r: $("sR").value, model: S.LmKind }, S.A, p);
+  const read3 = p => READ.validate3({ log2C: $("iC").value, d: $("iD").value, r: $("sR").value, model: S.LmKind }, S.A, p, undefined, S.crit === true);
   const curPoint = () => S.atPeak ? NUM.peakPoint : NUM.point(NUM.tOfU(NUM.UMAX * S.cur / 1000));
   const nText = p => p.peak ? "n* = e^(e^4) - 16, about 10^" + NUM.log10n(p).toFixed(2) + " (the real peak point, not an integer)" : p.small ? fmt(p.n) : "about 10^" + NUM.log10n(p).toFixed(2);
   const bitsText = l => l === null ? "0" : l < 6 ? Math.pow(10, l).toFixed(l < 2 ? 2 : 0) : "about 10^" + l.toFixed(2);
@@ -857,7 +886,7 @@ if (typeof document !== "undefined") (function () {
     const full = st.ok ? NUM.fullLog10(p, S.A, st.v.log2C, st.v.d, st.model) : null;
     $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + " (" + ({ equal: "n = 0: the exponent term equals 2^n, both are 1, for every A", tangent: "critical preset A = e^2/16 at the real peak point: A f(n*) = 1, the exponent term touches 2^n (a tangency, analytic, not a numerical finding)", unresolved: "near equality, numerical comparison unresolved", below: "exponent term strictly below 2^n", above: "exponent term strictly above 2^n" })[NUM.expVsN(p, S.A, S.crit)] + ")" +
       "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + (st.ok ? "; log2(L+1) = " + NUM.log2Lp1(p, st.model).toFixed(1) + (st.model.kind === "cnf" ? " (random 3-CNF, r = " + st.v.r.toFixed(2) + ")" : " (the universal minimum L = n + 2)") + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
-      " bits; full bound at most 2^n here: " + (st.atMost ? "yes" : "no") + ", for these illustrative constants only. " + (st.note ? st.note + " " : "")
+      " bits; full bound at most 2^n here: " + (st.atMost === true ? "yes" : st.atMost === false ? "no" : "unresolved (A f(n) is within 10^-12 of 1 without the exact tags, so the room n (1 - A f(n)) is below what double precision resolves)") + ", for these illustrative constants only. " + (st.note ? st.note + " " : "")
       : "; full bound not evaluated: invalid input: " + st.errors.map(q => q.msg).join("; ") + ". ") +
       ({ critical: "A = e^2/16 (the critical preset): no strict band (A f(n) > 1 nowhere); the exponent term only touches 2^n at the real peak point n*, which is not an integer (a tangency).",
         unresolved: "A is within 10^-12 of e^2/16 but not the critical preset: whether a strict band exists is numerically unresolved here.",
@@ -884,7 +913,7 @@ if (typeof document !== "undefined") (function () {
     // shading: where the chosen comparison goes the wrong way (amber) or where the full bound is below 2^n (green strip)
     for (let i = 0; i < NS; i++) { const q = pts[i], xa = X(q.u), xb = X(pts[i + 1].u);
       if (S.m3 !== "nf" && S.A * q.f > 1) prims.push({ k: "r", x: xa, y: y0, w: xb - xa + 0.5, h: y1 - y0, c: [0.35, 0.22, 0.08, 1] });
-      if (S.m3 === "nf" && S.st3 && S.st3.ok && NUM.atMost(q.p, S.A, S.st3.v.log2C, S.st3.v.d, S.st3.model)) prims.push({ k: "r", x: xa, y: y1 - 7, w: xb - xa + 0.5, h: 7, c: [0.3, 0.6, 0.35, 1] }); }
+      if (S.m3 === "nf" && S.st3 && S.st3.ok && NUM.atMost(q.p, S.A, S.st3.v.log2C, S.st3.v.d, S.st3.model, false) === true) prims.push({ k: "r", x: xa, y: y1 - 7, w: xb - xa + 0.5, h: 7, c: [0.3, 0.6, 0.35, 1] }); }
     prims.push(L(x0, y1, x1, y1, GREY, 1)); prims.push(L(x0, y0, x0, y1, GREY, 1));
     for (const [t, s] of [[0, "0"], [1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"], [3000, "10^3000"]]) { const x = X(NUM.uOfT(t));
       prims.push(L(x, y1, x, y1 + 5, GREY, 1)); if (!(narrow && t === 1000)) texts.push({ x, y: y1 + 14, s, c: "#a9b7b4", sz: 11, al: t === 3000 ? "right" : "center" }); }
