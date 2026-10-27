@@ -139,10 +139,11 @@ as n grows. The small enumerations below are illustrations of the problem, not a
   </div>
   <div class="row">
     <label for="sA">A = <span id="vA"></span> <input id="sA" type="range" min="0.1" max="1.5" step="0.005" value="1"></label>
-    <button data-a="1">A = 1</button><button data-a="0.5">A = 1/2</button><button data-a="star">A = e^2/16</button><button data-a="0.25">A = 1/4</button>
+    <button data-a="1">A = 1</button><button data-a="0.5">A = 1/2</button><button data-a="star">A = e^2/16 (critical preset)</button><button data-a="0.25">A = 1/4</button>
   </div>
   <div class="row">
     <label for="sN">cursor n: <input id="sN" type="range" min="0" max="1000" step="1" value="160"></label>
+    <button id="toPeak" aria-pressed="false">cursor to the real peak point n*</button>
     <label for="iC">log2 C <input id="iC" type="number" value="20" min="0" max="100000" step="1"></label>
     <label for="iD">d <input id="iD" type="number" value="2" min="0.5" max="50" step="0.5"></label>
     <label for="iL">L = &lambda; (n+1), &lambda; <input id="iL" type="number" value="4" min="1" max="1000000" step="1"></label>
@@ -344,15 +345,24 @@ const NUM = (function () {
     else if (eS > 0) le = Math.log10(eS / vS) + lv;
     return { le, lPM: Math.log10(c) + lse10([lv, le]) };
   }
-  // the exponent term 2^(A n f(n)) against 2^n, decided from n: at n = 0 both are 2^0 = 1 for every A;
-  // for n > 0 the ratio test A f(n) against 1 is equivalent; A f(n) = 1 at n > 0 is equality (a tangency)
-  function expVsN(p, A) {
-    const l = log10n(p);
-    if (l === null) return "equal";
+  // the real peak point n* = e^(e^4) - 16 as a named point (t = log10(n* + 1)); only this point, with the critical preset, is a tangency
+  const peakPoint = Object.freeze({ n: null, t: (LPK + Math.log1p(-15 * Math.exp(-LPK))) / LN10, small: false, peak: true });
+  const TOL = 1e-12;
+  // the exponent term 2^(A n f(n)) against 2^n, decided from n: at n = 0 both are 2^0 = 1 for every A (exact).
+  // For n > 0 the ratio A f(n) against 1 decides; within TOL of 1 a double cannot settle it ("unresolved", never equal or tangent).
+  // The analytic tangency is reserved for the explicit critical preset (A = e^2/16 chosen by its button) at the named peak point.
+  function expVsN(p, A, critical) {
+    if (log10n(p) === null) return "equal";
+    if (critical === true && A === ASTAR && p.peak === true) return "tangent";
     const r = A * fP(p);
-    return Math.abs(r - 1) <= 1e-12 ? "tangent" : r < 1 ? "below" : "above";
+    return Math.abs(r - 1) <= TOL ? "unresolved" : r < 1 ? "below" : "above";
   }
-  return { family, expVsN, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
+  // A against the threshold e^2/16: "critical" only for the explicit preset; a nearby A is classified by sign, unresolved within TOL
+  function aClass(A, critical) {
+    if (critical === true && A === ASTAR) return "critical";
+    return Math.abs(A - ASTAR) <= TOL ? "unresolved" : A < ASTAR ? "below" : "above";
+  }
+  return { family, expVsN, aClass, peakPoint, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
 })();
 
 /* ================= the checks and the deliberately broken controls ================= */
@@ -386,9 +396,18 @@ const DECIDE = {
     const m = familyFn("dense", 4, 4, 6, 3);
     return Math.round(Math.pow(10, m.le)) === 333333000000 && Math.round(Math.pow(10, m.lPM)) === 1000002000000;
   },
-  zeroIsEquality: cls => [0.1, NUM.ASTAR, 0.5, 1, 1.5].every(A => cls(NUM.point(0), A) === "equal") &&
-    cls(NUM.point(Math.log10(50)), 1) === "below" && cls(NUM.point(Math.log10(51)), 1) === "above" &&
-    cls(NUM.point(1), 0.25) === "below" && cls(NUM.point(NUM.LPK / NUM.LN10), NUM.ASTAR) === "tangent",
+  classifier: (cls, acls) => {
+    const p50 = NUM.point(Math.log10(51)), f50 = NUM.fN(50), pk = NUM.peakPoint, nearPk = NUM.point(pk.t);
+    return p50.n === 50 && [0.1, NUM.ASTAR, 0.5, 1, 1.5].every(A => cls(NUM.point(0), A, false) === "equal") && cls(NUM.point(0), NUM.ASTAR, true) === "equal" &&
+      cls(NUM.point(Math.log10(50)), 1, false) === "below" && cls(p50, 1, false) === "above" && cls(NUM.point(1), 0.25, false) === "below" &&
+      cls(p50, (1 + 1e-9) / f50, false) === "above" && cls(p50, (1 - 1e-9) / f50, false) === "below" &&          // just off ratio 1, outside the tolerance
+      cls(p50, (1 + 5e-13) / f50, false) === "unresolved" && cls(p50, (1 - 5e-13) / f50, false) === "unresolved" &&   // inside it
+      cls(p50, 1 / f50, false) === "unresolved" && cls(p50, 1 / f50, true) === "unresolved" &&                // a nonstationary crossing is never a tangency
+      cls(pk, NUM.ASTAR, true) === "tangent" && cls(pk, NUM.ASTAR, false) === "unresolved" && cls(nearPk, NUM.ASTAR, true) === "unresolved" &&
+      cls(p50, NUM.ASTAR, true) === "below" &&
+      acls(NUM.ASTAR, true) === "critical" && acls(NUM.ASTAR, false) === "unresolved" && acls(NUM.ASTAR - 5e-13, false) === "unresolved" &&
+      acls(NUM.ASTAR - 5e-13, true) === "unresolved" && acls(NUM.ASTAR - 1e-9, false) === "below" && acls(NUM.ASTAR + 1e-9, false) === "above" && acls(0.25, false) === "below" && acls(1, false) === "above";
+  },
   firstCrossing: fn => fn(49) < 1 && fn(50) > 1 && fn(49).toFixed(4) === PRINTED.f49 && fn(50).toFixed(4) === PRINTED.f50,
   close1: printed => { const b = NUM.band(1); return b.first === 50 && Math.abs(b.closeLog10 - printed) < 0.005; }
 };
@@ -419,7 +438,7 @@ function runChecks() {
   add("A = 1/2: f > 2 from n = 327,741,238 to about 10^" + PRINTED.close2, b2.first === PRINTED.open2 && NUM.fN(327741237) < 2 && NUM.fN(327741238) > 2 && Math.abs(b2.closeLog10 - PRINTED.close2) < 0.005,
     "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
   add("family scaling: dense e = p v (v-1)/2 and sparse e = (e/v of the small graph) v, and n = c (v+e), match exact BigInt arithmetic at v = 10^s for s = 1, 2, 3, 6, 12, 50, 100, 200, every small graph (zero-edge included), c = 1, 3, 1000; C4 dense at s = 6, c = 3 gives e = 333,333,000,000 and n = 1,000,002,000,000", DECIDE.familyExact(NUM.family));
-  add("n = 0: 2^(A n f(n)) = 2^n = 1 for every A, classified as equality, not from the ratio; for n > 0 the ratio decides (n = 49 below and n = 50 above at A = 1; A = e^2/16 at the real peak point is a tangency)", DECIDE.zeroIsEquality(NUM.expVsN));
+  add("exponent-term classifier: n = 0 is exact equality for every A; for n > 0 the ratio decides (n = 49 below, n = 50 above at A = 1; ratio 1 +- 1e-9 above/below; ratio 1 +- 5e-13 and the nonstationary crossing n = 50, A = 1/f(50) unresolved, never equal or tangent); tangency only for the critical preset A = e^2/16 at the named peak point; A near e^2/16 classified by sign, unresolved within 1e-12, exactly e^2/16 only for the preset", DECIDE.classifier(NUM.expVsN, NUM.aClass));
   add("no strict band (A f(n) > 1 nowhere) at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
   let idOK = true; for (let t = 0; t <= 300; t += 0.25) { const d = Math.log(Math.pow(10, t) + 15); if (Math.abs(NUM.lnN16t(t) - d) > 1e-12 * d) idOK = false; }
   add("log-space ln(n+16) = t ln 10 + log1p(15 * 10^-t) with t = log10(n+1), checked against direct evaluation for t <= 300", idOK);
@@ -448,7 +467,10 @@ function runControls() {
   add("wrong landmark: a recrossing printed as 10^2390.31 must fail", DECIDE.close1(2390.31));
   add("wrong family scaling: dense e with one lv term (linear in v) must fail", DECIDE.familyExact((fam, vS, eS, lv, c) => { const r = NUM.family(fam, vS, eS, lv, c);
     if (fam !== "dense" || r.le === null) return r; const le = r.le - lv; return { le, lPM: Math.log10(c) + NUM.lse10([lv, le]) }; }));
-  add("wrong n = 0 rule: a ratio-only comparison (A f(n) < 1 means below) must fail", DECIDE.zeroIsEquality((p, A) => { const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "tangent" : r < 1 ? "below" : "above"; }));
+  add("wrong n = 0 rule: a ratio-only comparison (A f(n) < 1 means below) must fail", DECIDE.classifier((p, A, cr) => { if (cr === true && A === NUM.ASTAR && p.peak === true) return "tangent"; const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "unresolved" : r < 1 ? "below" : "above"; }, NUM.aClass));
+  add("wrong tolerance rule: a classifier that calls ratio 1 within 1e-12 a tangency must fail", DECIDE.classifier((p, A) => { if (NUM.log10n(p) === null) return "equal"; const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "tangent" : r < 1 ? "below" : "above"; }, NUM.aClass));
+  add("wrong tolerance rule: a classifier that calls ratio 1 within 1e-12 an equality must fail", DECIDE.classifier((p, A) => { if (NUM.log10n(p) === null) return "equal"; const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "equal" : r < 1 ? "below" : "above"; }, NUM.aClass));
+  add("wrong threshold rule: calling any A within 1e-12 of e^2/16 exactly critical must fail", DECIDE.classifier(NUM.expVsN, A => Math.abs(A - NUM.ASTAR) <= 1e-12 ? "critical" : A < NUM.ASTAR ? "below" : "above"));
   return out;
 }
 const RESULT = (function () { try { return { checks: runChecks(), controls: runControls() }; } catch (e) { return { checks: [{ name: "checks threw: " + e.message, ok: false }], controls: [] }; } })();
@@ -540,7 +562,7 @@ if (typeof document !== "undefined") (function () {
   const L = (x1, y1, x2, y2, c, w) => ({ k: "l", x1, y1, x2, y2, c, w: w || 1.5 });
   const TEAL = [0.50, 0.82, 0.90, 1], AMBER = [1, 0.81, 0.48, 1], GREY = [0.55, 0.62, 0.62, 0.8], RED = [1, 0.62, 0.48, 1], GREEN = [0.61, 0.89, 0.61, 1];
   const S = { on: new Set(["c1", "c2"]), yaw: 0.65, pitch: 0.42, spin: !reduced, gm: "IS", g: "d4", aux: false, sol: 0, fam: "dense", s: 6, c: 3,
-    m3: "Af", A: 1, cur: 160, log2C: 20, d: 2, lam: 4 };
+    m3: "Af", A: 1, crit: false, atPeak: false, cur: 160, log2C: 20, d: 2, lam: 4 };
   const dirty = [true, true, true];
   const mark = () => { dirty[0] = dirty[1] = dirty[2] = true; };
   const litName = l => (l > 0 ? "" : "not ") + DATA.varNames[Math.abs(l) - 1];
@@ -683,24 +705,31 @@ if (typeof document !== "undefined") (function () {
 
   /* ---------- scene 3 ---------- */
   document.querySelectorAll("[data-m3]").forEach(b => b.addEventListener("click", () => { S.m3 = b.dataset.m3; sync3(); }));
-  const setA = a => { S.A = a; $("sA").value = String(a); sync3(); sync2(); };
-  $("sA").addEventListener("input", e => { S.A = Number(e.target.value); sync3(); sync2(); });
-  document.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => setA(b.dataset.a === "star" ? NUM.ASTAR : Number(b.dataset.a))));
-  $("sN").addEventListener("input", e => { S.cur = Number(e.target.value); sync3(); });
+  // S.crit is set only by the explicit critical preset button; any other way of choosing A clears it
+  const setA = (a, crit) => { S.A = a; S.crit = crit === true; $("sA").value = String(a); sync3(); sync2(); };
+  $("sA").addEventListener("input", e => { S.A = Number(e.target.value); S.crit = false; sync3(); sync2(); });
+  document.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => b.dataset.a === "star" ? setA(NUM.ASTAR, true) : setA(Number(b.dataset.a), false)));
+  $("sN").addEventListener("input", e => { S.cur = Number(e.target.value); S.atPeak = false; sync3(); });
+  $("toPeak").addEventListener("click", () => { S.atPeak = true; S.cur = Math.round(1000 * NUM.uOfT(NUM.peakPoint.t) / NUM.UMAX); $("sN").value = String(S.cur); sync3(); });
   const num = (id, dflt, lo, hi) => { const v = Number($(id).value); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt; };
   for (const id of ["iC", "iD", "iL"]) $(id).addEventListener("input", () => { S.log2C = num("iC", 20, 0, 100000); S.d = num("iD", 2, 0.5, 50); S.lam = num("iL", 4, 1, 1e6); sync3(); });
-  const curPoint = () => NUM.point(NUM.tOfU(NUM.UMAX * S.cur / 1000));
-  const nText = p => p.small ? fmt(p.n) : "about 10^" + NUM.log10n(p).toFixed(2);
+  const curPoint = () => S.atPeak ? NUM.peakPoint : NUM.point(NUM.tOfU(NUM.UMAX * S.cur / 1000));
+  const nText = p => p.peak ? "n* = e^(e^4) - 16, about 10^" + NUM.log10n(p).toFixed(2) + " (the real peak point, not an integer)" : p.small ? fmt(p.n) : "about 10^" + NUM.log10n(p).toFixed(2);
   const bitsText = l => l === null ? "0" : l < 6 ? Math.pow(10, l).toFixed(l < 2 ? 2 : 0) : "about 10^" + l.toFixed(2);
   function sync3() {
     document.querySelectorAll("[data-m3]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m3 === S.m3)));
-    $("vA").textContent = S.A.toFixed(4);
+    $("vA").textContent = S.A.toFixed(4) + (S.crit ? " (e^2/16, critical preset)" : "");
+    document.querySelectorAll("[data-a]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a === "star" ? S.crit : !S.crit && Number(b.dataset.a) === S.A)));
+    $("toPeak").setAttribute("aria-pressed", String(S.atPeak === true));
     const p = curPoint(), f = NUM.fP(p), ex = NUM.expLog10(p, S.A), full = NUM.fullLog10(p, S.A, S.log2C, S.d, S.lam), ln = NUM.log10n(p), b = NUM.band(S.A);
-    $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + " (" + ({ equal: "n = 0: the exponent term equals 2^n, both are 1, for every A", tangent: "the exponent term equals 2^n here: a tangency", below: "exponent term strictly below 2^n", above: "exponent term strictly above 2^n" })[NUM.expVsN(p, S.A)] + ")" +
+    $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + " (" + ({ equal: "n = 0: the exponent term equals 2^n, both are 1, for every A", tangent: "critical preset A = e^2/16 at the real peak point: A f(n*) = 1, the exponent term touches 2^n (a tangency, analytic, not a numerical finding)", unresolved: "near equality, numerical comparison unresolved", below: "exponent term strictly below 2^n", above: "exponent term strictly above 2^n" })[NUM.expVsN(p, S.A, S.crit)] + ")" +
       "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
       " bits; below 2^n here: " + (NUM.below(p, S.A, S.log2C, S.d, S.lam) ? "yes" : "no") + ", for these illustrative constants only. " +
-      (b.empty ? (Math.abs(S.A - NUM.ASTAR) <= 1e-12 ? "A = e^2/16 exactly: no strict band (A f(n) > 1 nowhere); the exponent term only touches 2^n at the real peak point n*, not an integer (a tangency)."
-      : "A = " + S.A.toFixed(4) + " is below e^2/16 = 0.46182: the exponent term is strictly below 2^n at every real n > 0 (at n = 0 both are 1).") : "A f(n) > 1 from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openT.toFixed(2)) + " to about 10^" + b.closeLog10.toFixed(2) + ".");
+      ({ critical: "A = e^2/16 (the critical preset): no strict band (A f(n) > 1 nowhere); the exponent term only touches 2^n at the real peak point n*, which is not an integer (a tangency).",
+        unresolved: "A is within 10^-12 of e^2/16 but not the critical preset: whether a strict band exists is numerically unresolved here.",
+        below: "A = " + S.A.toFixed(4) + " is below e^2/16 = 0.46182: the exponent term is strictly below 2^n at every real n > 0 (at n = 0 both are 1).",
+        above: b.empty ? "A is above e^2/16, but its band is too narrow to locate in double precision." : "A f(n) > 1 from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openT.toFixed(2)) + " to about 10^" + b.closeLog10.toFixed(2) + "." +
+          (b.first > 0 && NUM.expVsN(NUM.point(Math.log10(b.first)), S.A, false) === "unresolved" ? " At n = " + fmt(b.first - 1) + " the ratio is within 10^-12 of 1: near equality, numerical comparison unresolved." : "") })[NUM.aClass(S.A, S.crit)];
     const rows = [["first crossing of f = 1", "between n = 49 and 50: f(49) = " + NUM.fN(49).toFixed(4) + ", f(50) = " + NUM.fN(50).toFixed(4)],
       ["real peak of f (not of n f, which grows without bound)", "16/e^2 = " + NUM.FMAX.toFixed(5) + " at ln(n+16) = e^4, n about 10^" + (NUM.LPK / NUM.LN10).toFixed(2)],
       ["f > 2", "from n = 327,741,238 to about 10^" + NUM.band(0.5).closeLog10.toFixed(2)],
@@ -738,7 +767,7 @@ if (typeof document !== "undefined") (function () {
       if (S.m3 === "f") { dot(Math.log10(50.5), NUM.fN(50), narrow ? "49/50" : "first crossing 49/50", "left", 14); dot(NUM.LPK / NUM.LN10, NUM.FMAX, "real peak at ln(n+16) = e^4", "right");
         dot(NUM.band(1).closeLog10, 1, narrow ? "10^2390.21" : "below 1 again near 10^2390.21", "right", 14); dot(Math.log10(327741239), 2, "f = 2", "right", 12); }
       else { const b = NUM.band(S.A); if (!b.empty) { dot(b.first !== null ? Math.log10(b.first + 1) : b.openT, 1, narrow ? "opens" : "band opens", "left", 14); dot(b.closeLog10, 1, (narrow ? "closes 10^" : "band closes near 10^") + b.closeLog10.toFixed(2), "right", 14); }
-        texts.push({ x: x0 + 8, y: y0 - 12, s: b.empty ? (narrow ? "A <= e^2/16: no strict band" : "A at or below e^2/16 = 0.46182: no strict band; at e^2/16 a tangency (Confluence)") : (narrow ? "amber: A f(n) > 1" : "amber: A f(n) > 1, the exponent term alone exceeds 2^n"), c: "#ffcf7a", sz: 12, al: "left" }); }
+        texts.push({ x: x0 + 8, y: y0 - 12, s: b.empty ? ({ critical: narrow ? "A = e^2/16: tangency at n*" : "critical preset A = e^2/16: no strict band; a tangency at the real peak point (Confluence)", unresolved: narrow ? "A near e^2/16: unresolved" : "A within 10^-12 of e^2/16: numerically unresolved", below: narrow ? "A < e^2/16: no band" : "A below e^2/16 = 0.46182: no band (Confluence's threshold)", above: "band too narrow to draw" })[NUM.aClass(S.A, S.crit)] : (narrow ? "amber: A f(n) > 1" : "amber: A f(n) > 1, the exponent term alone exceeds 2^n"), c: "#ffcf7a", sz: 12, al: "left" }); }
       texts.push({ x: x0 + 8, y: y0 - 28, s: S.m3 === "f" ? (narrow ? "f(n); amber where f > 1/A" : "f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)); amber where f > 1/A") : (narrow ? "the ratio A f(n)" : "the ratio A f(n); the exponent is n times this"), c: "#a9b7b4", sz: 12, al: "left" });
     } else {
       for (const [l, s] of [[1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"]]) texts.push({ x: x0 - 6, y: Yp(NUM.Y(l)), s, c: "#a9b7b4", sz: 10.5, al: "right" });
@@ -755,11 +784,11 @@ if (typeof document !== "undefined") (function () {
     V.draw(prims, texts);
   }
   const v3 = $("v3"); let drag3 = false;
-  const setCur = clientX => { if (!box) return; const r = v3.getBoundingClientRect(), u = (clientX - r.left - box.x0) / (box.x1 - box.x0); S.cur = Math.round(Math.max(0, Math.min(1, u)) * 1000); $("sN").value = String(S.cur); sync3(); };
+  const setCur = clientX => { if (!box) return; const r = v3.getBoundingClientRect(), u = (clientX - r.left - box.x0) / (box.x1 - box.x0); S.cur = Math.round(Math.max(0, Math.min(1, u)) * 1000); S.atPeak = false; $("sN").value = String(S.cur); sync3(); };
   v3.addEventListener("pointerdown", e => { drag3 = true; v3.setPointerCapture(e.pointerId); setCur(e.clientX); });
   v3.addEventListener("pointermove", e => { if (drag3) setCur(e.clientX); });
   v3.addEventListener("pointerup", () => { drag3 = false; });
-  v3.addEventListener("keydown", e => { const st = e.shiftKey ? 50 : 5; if (e.key === "ArrowLeft") S.cur = Math.max(0, S.cur - st); else if (e.key === "ArrowRight") S.cur = Math.min(1000, S.cur + st); else return;
+  v3.addEventListener("keydown", e => { const st = e.shiftKey ? 50 : 5; if (e.key === "ArrowLeft") S.cur = Math.max(0, S.cur - st); else if (e.key === "ArrowRight") S.cur = Math.min(1000, S.cur + st); else return; S.atPeak = false;
     e.preventDefault(); $("sN").value = String(S.cur); sync3(); });
 
   /* ---------- proof-boundary conveyor ---------- */
