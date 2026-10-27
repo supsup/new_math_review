@@ -404,6 +404,10 @@ const DECIDE = {
       cls(p50, (1 + 5e-13) / f50, false) === "unresolved" && cls(p50, (1 - 5e-13) / f50, false) === "unresolved" &&   // inside it
       cls(p50, 1 / f50, false) === "unresolved" && cls(p50, 1 / f50, true) === "unresolved" &&                // a nonstationary crossing is never a tangency
       cls(pk, NUM.ASTAR, true) === "tangent" && cls(pk, NUM.ASTAR, false) === "unresolved" && cls(nearPk, NUM.ASTAR, true) === "unresolved" &&
+      // the preset flag alone is not enough: at the named peak point, a different A is classified by its sign (or unresolved within tolerance)
+      cls(pk, NUM.ASTAR + 1e-9, true) === "above" && cls(pk, NUM.ASTAR - 1e-9, true) === "below" &&
+      cls(pk, NUM.ASTAR + 4e-13, true) === "unresolved" && cls(pk, NUM.ASTAR - 4e-13, true) === "unresolved" &&   // ratio 1 +- 8.7e-13, inside the tolerance
+      cls(pk, NUM.ASTAR + 5e-13, true) === "above" && cls(pk, NUM.ASTAR - 5e-13, true) === "below" &&               // ratio 1 +- 1.08e-12, just outside it
       cls(p50, NUM.ASTAR, true) === "below" &&
       acls(NUM.ASTAR, true) === "critical" && acls(NUM.ASTAR, false) === "unresolved" && acls(NUM.ASTAR - 5e-13, false) === "unresolved" &&
       acls(NUM.ASTAR - 5e-13, true) === "unresolved" && acls(NUM.ASTAR - 1e-9, false) === "below" && acls(NUM.ASTAR + 1e-9, false) === "above" && acls(0.25, false) === "below" && acls(1, false) === "above";
@@ -438,7 +442,7 @@ function runChecks() {
   add("A = 1/2: f > 2 from n = 327,741,238 to about 10^" + PRINTED.close2, b2.first === PRINTED.open2 && NUM.fN(327741237) < 2 && NUM.fN(327741238) > 2 && Math.abs(b2.closeLog10 - PRINTED.close2) < 0.005,
     "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
   add("family scaling: dense e = p v (v-1)/2 and sparse e = (e/v of the small graph) v, and n = c (v+e), match exact BigInt arithmetic at v = 10^s for s = 1, 2, 3, 6, 12, 50, 100, 200, every small graph (zero-edge included), c = 1, 3, 1000; C4 dense at s = 6, c = 3 gives e = 333,333,000,000 and n = 1,000,002,000,000", DECIDE.familyExact(NUM.family));
-  add("exponent-term classifier: n = 0 is exact equality for every A; for n > 0 the ratio decides (n = 49 below, n = 50 above at A = 1; ratio 1 +- 1e-9 above/below; ratio 1 +- 5e-13 and the nonstationary crossing n = 50, A = 1/f(50) unresolved, never equal or tangent); tangency only for the critical preset A = e^2/16 at the named peak point; A near e^2/16 classified by sign, unresolved within 1e-12, exactly e^2/16 only for the preset", DECIDE.classifier(NUM.expVsN, NUM.aClass));
+  add("exponent-term classifier: n = 0 is exact equality for every A; for n > 0 the ratio decides (n = 49 below, n = 50 above at A = 1; ratio 1 +- 1e-9 above/below; ratio 1 +- 5e-13 and the nonstationary crossing n = 50, A = 1/f(50) unresolved, never equal or tangent); tangency only for the critical preset A = e^2/16 at the named peak point (with the preset flag but A = e^2/16 +- 1e-9 or +- 5e-13 at that point: above/below; +- 4e-13: unresolved); A near e^2/16 classified by sign, unresolved within 1e-12, exactly e^2/16 only for the preset", DECIDE.classifier(NUM.expVsN, NUM.aClass));
   add("no strict band (A f(n) > 1 nowhere) at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
   let idOK = true; for (let t = 0; t <= 300; t += 0.25) { const d = Math.log(Math.pow(10, t) + 15); if (Math.abs(NUM.lnN16t(t) - d) > 1e-12 * d) idOK = false; }
   add("log-space ln(n+16) = t ln 10 + log1p(15 * 10^-t) with t = log10(n+1), checked against direct evaluation for t <= 300", idOK);
