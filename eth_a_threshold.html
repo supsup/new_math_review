@@ -20,12 +20,15 @@
   #panel b { color: var(--ink); font-weight: normal; }
   #panel .yes { color: #9be39b; } #panel .no { color: #ffb38a; }
   #panel label { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin: 3px 0; }
+  #panel button { background: #1b2a30; color: var(--ink); border: 1px solid #3c5a62; border-radius: 5px; padding: 4px 7px; font: 12.5px Georgia, serif; cursor: pointer; }
+  #panel button[aria-pressed="true"] { background: #3c5a62; border-color: var(--accent); }
+  #panel input[type=range] { width: 110px; }
   #panel input[type=number] { width: 84px; background: #1b2a30; color: var(--ink); border: 1px solid #3c5a62; border-radius: 4px; padding: 2px 4px; font: 13px Georgia, serif; }
   #bar { position: fixed; left: 16px; bottom: 14px; right: 16px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 14px; }
   #bar label { display: flex; align-items: center; gap: 8px; }
   input[type=range] { width: min(240px, 42vw); }
   #state { position: fixed; left: 16px; right: 360px; bottom: 52px; font-size: 14px; color: var(--accent); pointer-events: none; line-height: 1.4; z-index: 2; }
-  @media (max-width: 760px) { #hud p.long { display: none; } #panel { top: auto; bottom: 120px; } #state { right: 16px; bottom: 60px; } }
+  @media (max-width: 760px) { #hud p.long { display: none; } #panel { top: auto; bottom: 120px; } #lnote { display: none; } #state { right: 16px; bottom: 60px; } }
   #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; display: none; font: 14px monospace; }
 </style>
 </head>
@@ -41,7 +44,7 @@
   2^n (a tangency) at the real peak point, which is not an integer. Above it, one band opens and closes;
   the slider shows its two edges.</p>
   <p class="caveat">Illustrative; the theorem gives only C, A, d existentially. Exponent component on the map; the panel adds
-  C, d and L for the full inequality log2 C + d log2(L+1) &lt;= n (1 - A f(n)).</p>
+  C, d and L (the challenge's unary input length, about 51 n^2 for a random 3-CNF) for log2 C + d log2(L+1) &lt;= n (1 - A f(n)).</p>
 </div>
 <div id="panel"></div>
 <div id="state" role="status"></div>
@@ -63,6 +66,48 @@ const TH = (function () {
   const fN = n => g(Math.log(n + 16));                                       // f at an integer n < 2^53
   const ASTAR = Math.exp(2) / 16;                                            // 1 / max f over real n >= 0
   const Lpk = Math.exp(4), peakLog10n = Lpk / LN10;
+  /* ---- the input length L, from the challenge's own encoding (SubexponentialSAT.lean, namespace Encoding) ----
+     encodeNat c = c ones and a zero (c + 1 bits); frame doubles a list and adds a closing bit (2b + 1);
+     encodeList adds, per item, a 1 and the framed item, then a closing 0; literal code c = 2v + (1 if positive).
+     So a clause with k literals whose codes sum to S takes 2 S + 4 k + 1 bits, and 4 S + 8 k + 4 bits once framed
+     in the formula's list; L = (n + 1) + 1 + sum over clauses of (4 S + 8 k + 4). For k = 3 with distinct variables
+     and uniform signs the mean code is n - 1/2, so the mean framed clause is 12 n + 22 bits, and a random 3-CNF with
+     m clauses has expected L = m (12 n + 22) + n + 2 (about 51 n^2 at m = 4.26 n). The empty formula gives L = n + 2,
+     the minimum over all formulas on n variables. */
+  const ENC = (function () {   // a direct transcription, as bit lists, used only by the checks
+    const encodeNat = c => new Array(c).fill(true).concat([false]);
+    const frame = bits => bits.reduceRight((rest, b) => [true, b].concat(rest), [false]);
+    const encodeList = (enc, xs) => xs.length === 0 ? [false] : [true].concat(frame(enc(xs[0])), encodeList(enc, xs.slice(1)));
+    const encodeCNF = (n, F) => encodeNat(n).concat(encodeList(cl => encodeList(encodeNat, cl), F.map(C => C.map(([v, pos]) => 2 * v + (pos ? 1 : 0)).sort((a, b) => a - b))));
+    return { encodeCNF };
+  })();
+  const LOG2_10 = Math.log2(10);
+  const lse10 = xs => { xs = xs.filter(x => x !== null); const m = Math.max(...xs); let s = 0; for (const x of xs) s += Math.pow(10, x - m); return m + Math.log10(s); };
+  // log2(L + 1) with ln10n = log10 n (null for n = 0), never forming n.
+  // model "cnf": L = m (12 n + 22) + n + 2 with m = r n, so L + 1 = 12 r n^2 + (22 r + 1) n + 3; model "min": L + 1 = n + 3
+  function log2Lp1(ln10n, model) {
+    if (model.kind === "min") return lse10([ln10n, Math.log10(3)]) * LOG2_10;
+    const r = model.r;
+    return lse10([ln10n === null ? null : Math.log10(12 * r) + 2 * ln10n, ln10n === null ? null : Math.log10(22 * r + 1) + ln10n, Math.log10(3)]) * LOG2_10;
+  }
+  // the deciding check for L: the formula against the transcription, the mean over all clauses, and log2Lp1 against BigInt
+  function checkL(l2fn) {
+    const bad = [];
+    const formulaL = (n, F) => n + 2 + F.reduce((s, C) => s + 4 * C.reduce((t, [v, pos]) => t + 2 * v + (pos ? 1 : 0), 0) + 8 * C.length + 4, 0);
+    const samples = [[3, []], [3, [[[0, true], [1, true]], [[0, false], [2, true]]]], [5, [[[0, true], [3, false], [4, true]], [[1, false], [2, false], [4, false]], [[2, true]]]], [8, [[[7, true], [6, true], [5, false]]]]];
+    for (const [n, F] of samples) if (ENC.encodeCNF(n, F).length !== formulaL(n, F)) bad.push("encoding length of a sample formula on n = " + n);
+    for (const n of [5, 7]) { let sum = 0, cnt = 0;
+      for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) for (let c = b + 1; c < n; c++) for (let s = 0; s < 8; s++) {
+        const C = [[a, !!(s & 1)], [b, !!(s & 2)], [c, !!(s & 4)]]; sum += ENC.encodeCNF(n, [C]).length - (n + 2); cnt++; }
+      if (sum !== cnt * (12 * n + 22)) bad.push("mean framed 3-clause on n = " + n + " is " + sum / cnt + ", not 12 n + 22"); }
+    const blog2 = b => { const t = b.toString(); return (t.length - 1 + Math.log10(Number(t.slice(0, 17)) / Math.pow(10, Math.min(17, t.length) - 1))) * LOG2_10; };
+    for (const [n, m] of [[1, 4], [3, 13], [10, 43], [100, 426], [1000, 4260], [1000000, 4260000]]) {
+      const exact = BigInt(m) * (12n * BigInt(n) + 22n) + BigInt(n) + 3n;   // L + 1
+      if (Math.abs(l2fn(Math.log10(n), { kind: "cnf", r: m / n }) - blog2(exact)) > 1e-9) bad.push("log2(L+1) at n = " + n + ", m = " + m);
+      if (Math.abs(l2fn(Math.log10(n), { kind: "min" }) - blog2(BigInt(n) + 3n)) > 1e-9) bad.push("log2(n+3) at n = " + n); }
+    if (Math.abs(l2fn(null, { kind: "cnf", r: 4.26 }) - Math.log2(3)) > 1e-12 || Math.abs(l2fn(null, { kind: "min" }) - Math.log2(3)) > 1e-12) bad.push("n = 0: L = 2");
+    return bad;
+  }
   function bisect(fun, lo, hi) { const s = Math.sign(fun(lo)); for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === s) lo = m; else hi = m; } return (lo + hi) / 2; }
   // the band where A f(n) > 1: empty when A <= e^2/16 (real n); else between the two roots of g(L) = 1/A
   function band(A) {
@@ -72,10 +117,10 @@ const TH = (function () {
     if (Ls < 36) { first = Math.max(0, Math.floor(Math.exp(Ls) - 16)); while (A * fN(first) <= 1) first++; while (first > 0 && A * fN(first - 1) > 1) first--; }
     return { empty: false, openLog10: Math.log10(Math.max(1, Math.exp(Ls) - 16)), first, closeLog10: Ll / LN10 };
   }
-  // the full inequality at one n (n = 10^x), in logs: log2 C + d log2(L+1) <= n (1 - A f(n)), with L = lambda n
-  function full(A, x, log2C, d, lambda) {
+  // the full inequality at one n (n = 10^x), in logs: log2 C + d log2(L+1) <= n (1 - A f(n)), with L from the model above
+  function full(A, x, log2C, d, model) {
     const slack = 1 - A * fX(x);
-    const lhs = log2C + d * (Math.log2(lambda) + x * Math.log2(10) + Math.log2(1 + Math.pow(10, -x) / lambda));
+    const lhs = log2C + d * log2Lp1(x, model);
     if (slack <= 0) return { holds: false, slack, lhs, rhsLog10: null };
     const rhsLog10 = x + Math.log10(slack);
     const holds = lhs <= 0 ? true : Math.log10(lhs) <= rhsLog10;
@@ -98,9 +143,15 @@ const TH = (function () {
   if (!band(0.25).empty) fail.push("A = 1/4 should have no band");
   for (let x = 0; x <= 300; x += 0.5) { const d = Math.log(Math.pow(10, x) + 16); if (Math.abs(lnN16(x) - d) > 1e-12 * d) fail.push("log-space ln(n+16) off at x = " + x); }
   // the full inequality: inside the band it never holds; far past the band with modest C, d it does
-  if (full(1, 10, 0, 1, 1).holds) fail.push("full inequality cannot hold inside the band");
-  if (!full(1, 3000, 10, 2, 4).holds) fail.push("full inequality should hold at n = 10^3000 for A = 1, log2 C = 10, d = 2, L = 4n");
-  return { ASTAR, fX, fN, band, full, peakLog10n, fail };
+  if (full(1, 10, 0, 1, { kind: "min" }).holds) fail.push("full inequality cannot hold inside the band");
+  if (!full(1, 3000, 10, 2, { kind: "cnf", r: 4.26 }).holds) fail.push("full inequality should hold at n = 10^3000 for A = 1, log2 C = 10, d = 2, L = m (12 n + 22) + n + 2 with m = 4.26 n");
+  checkL(log2Lp1).forEach(b => fail.push("input length L: " + b));
+  {   // the panel's left side uses that L: at n = 10^6, m = 4,260,000, log2 C = 10, d = 2, against BigInt
+    const ex = (4260000n * (12n * 1000000n + 22n) + 1000000n + 3n).toString(), l2 = (ex.length - 1 + Math.log10(Number(ex.slice(0, 17)) / Math.pow(10, Math.min(17, ex.length) - 1))) * LOG2_10;
+    const lhs = full(1, 6, 10, 2, { kind: "cnf", r: 4.26 }).lhs;
+    if (Math.abs(lhs - (10 + 2 * l2)) > 1e-9) fail.push("full-bound left side at n = 10^6 is " + lhs + ", BigInt gives " + (10 + 2 * l2));
+  }
+  return { ASTAR, fX, fN, band, full, peakLog10n, log2Lp1, checkL, fail };
 })();
 if (typeof module !== "undefined") module.exports = TH;   // lets node test the block above
 
@@ -114,16 +165,20 @@ if (typeof document !== "undefined") (function () {
   const NU = 280, NA = 120;
   const FU = []; for (let i = 0; i <= NU; i++) FU.push(T.fX(Math.pow(10, UMAX * i / NU)));
   const sliderA = v => AMIN + (AMAX - AMIN) * v / 1200;
-  let A = sliderA(700), xN = 3.5, log2C = 20, d = 2, lambda = 4;
+  let A = sliderA(700), xN = 3.5, log2C = 20, d = 2, model = { kind: "cnf", r: 4.26 };
   const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   panel.innerHTML = "<b>full-bound panel</b> (illustrative; the theorem gives only C, A, d existentially)<br>" +
     "<label>log2 C <input id='iC' type='number' value='20' step='1'></label>" +
     "<label>d <input id='iD' type='number' value='2' step='1' min='0'></label>" +
-    "<label>L = &lambda; n, &lambda; <input id='iL' type='number' value='4' step='1' min='1'></label>" +
-    "<span style='font-size:12px'>this encoding writes n in unary, so L &gt;= n + 1</span><div id='out'></div>";
+    "<div><button id='mCnf' type='button' aria-pressed='true'>random 3-CNF</button> <button id='mMin' type='button' aria-pressed='false'>lower bound L = n + 2</button></div>" +
+    "<label for='iR'>clause ratio r = m/n = <span id='vR'>4.26</span> <input id='iR' type='range' min='0.5' max='10' step='0.01' value='4.26'></label>" +
+    "<span id='lnote' style='font-size:12px'></span><div id='out'></div>";
   const out = document.getElementById("out");
   const readNum = (id, dflt, lo) => { const v = Number(document.getElementById(id).value); return isFinite(v) ? Math.max(lo, v) : dflt; };
-  ["iC", "iD", "iL"].forEach(id => document.getElementById(id).addEventListener("input", () => { log2C = readNum("iC", 20, -1e9); d = readNum("iD", 2, 0); lambda = readNum("iL", 4, 1); describe(); }));
+  ["iC", "iD"].forEach(id => document.getElementById(id).addEventListener("input", () => { log2C = readNum("iC", 20, -1e9); d = readNum("iD", 2, 0); describe(); }));
+  document.getElementById("iR").addEventListener("input", e => { const v = Number(e.target.value); model = { kind: model.kind, r: isFinite(v) ? Math.min(10, Math.max(0.5, v)) : 4.26 }; describe(); });
+  document.getElementById("mCnf").addEventListener("click", () => { model = { kind: "cnf", r: model.r }; describe(); });
+  document.getElementById("mMin").addEventListener("click", () => { model = { kind: "min", r: model.r }; describe(); });
   function describe() {
     document.getElementById("vA").textContent = A.toFixed(3); document.getElementById("vN").textContent = xN.toFixed(2);
     const b = T.band(A);
@@ -131,8 +186,13 @@ if (typeof document !== "undefined") (function () {
       ? "A = " + A.toFixed(3) + " is at or below e^2/16 = " + T.ASTAR.toFixed(5) + ": no band (A f(n) > 1 nowhere; at exactly e^2/16 a tangency at the real peak point, not an integer). Exponent component only."
       : "A = " + A.toFixed(3) + ": the exponent term exceeds 2^n from n = " + (b.first !== null ? fmt(b.first) : "about 10^" + b.openLog10.toFixed(2)) +
         " to about 10^" + b.closeLog10.toFixed(2) + ". Exponent component only; an illustration.";
-    const r = T.full(A, xN, log2C, d, lambda);
-    out.innerHTML = "at n = 10^" + xN.toFixed(2) + ": 1 - A f(n) = " + r.slack.toFixed(4) + "<br>log2 C + d log2(L+1) = " + r.lhs.toFixed(1) +
+    document.getElementById("mCnf").setAttribute("aria-pressed", String(model.kind === "cnf")); document.getElementById("mMin").setAttribute("aria-pressed", String(model.kind === "min"));
+    document.getElementById("vR").textContent = model.r.toFixed(2); document.getElementById("iR").disabled = model.kind !== "cnf";
+    document.getElementById("lnote").textContent = model.kind === "cnf"
+      ? "L = m (12 n + 22) + n + 2, m = r n: the expected length of the challenge's unary encoding of a random 3-CNF near the hard ratio (about 51 n^2 at r = 4.26)"
+      : "L = n + 2: the empty formula, the shortest input on n variables; a lower bound that understates log2(L+1) for real formulas";
+    const r = T.full(A, xN, log2C, d, model);
+    out.innerHTML = "at n = 10^" + xN.toFixed(2) + ": 1 - A f(n) = " + r.slack.toFixed(4) + "<br>log2(L+1) = " + T.log2Lp1(xN, model).toFixed(1) + "<br>log2 C + d log2(L+1) = " + r.lhs.toFixed(1) +
       (r.rhsLog10 === null ? "<br>n (1 - A f(n)) &lt;= 0" : "<br>n (1 - A f(n)) = 10^" + r.rhsLog10.toFixed(2)) +
       "<br>full bound below 2^n here: " + (r.holds ? "<span class='yes'>yes</span>" : "<span class='no'>no</span>") +
       "<br><span style='font-size:12px'>for these illustrative C, d, L only</span>";

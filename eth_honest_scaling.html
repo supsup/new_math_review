@@ -146,8 +146,16 @@ as n grows. The small enumerations below are illustrations of the problem, not a
     <button id="toPeak" aria-pressed="false">cursor to the real peak point n*</button>
     <label for="iC">log2 C <input id="iC" type="number" value="20" min="0" max="100000" step="1"></label>
     <label for="iD">d <input id="iD" type="number" value="2" min="0.5" max="50" step="0.5"></label>
-    <label for="iL">L = &lambda; (n+1), &lambda; <input id="iL" type="number" value="4" min="1" max="1000000" step="1"></label>
   </div>
+  <div class="row" role="group" aria-label="Input length model">
+    <span class="dim">input length L:</span><button data-lm="cnf">random 3-CNF, L = m (12 n + 22) + n + 2</button><button data-lm="min">lower bound L = n + 2</button>
+    <label for="sR">clause ratio r = m/n = <span id="vR"></span> <input id="sR" type="range" min="0.5" max="10" step="0.01" value="4.26"></label>
+  </div>
+  <p class="dim" id="lnote">L is the bit length of the challenge's unary encoding (SubexponentialSAT.lean, Encoding): n + 1 bits for n, then
+  4 S + 8 k + 4 bits per clause of k literals whose codes 2v or 2v + 1 sum to S, and a closing bit. A random 3-CNF with distinct
+  variables and uniform signs averages 12 n + 22 bits per clause, so with m = r n clauses L is about m (12 n + 22) + n + 2, about
+  51 n^2 at r = 4.26 near the hard ratio (Confluence's final check counted about m (12 n + 28) + n + 1, same leading term).
+  The empty formula's L = n + 2 is a lower bound for every formula and understates d log2(L+1) for real ones.</p>
   <div class="viz" id="v3" tabindex="0" role="img" aria-label="Plot of the chosen quantity against n on a doubly logarithmic axis; the table below carries the same information">
     <canvas class="g"></canvas><canvas class="t" aria-hidden="true"></canvas></div>
   <p class="dim">Drag on the plot, or focus it and use the arrow keys (shift for bigger steps), to move the cursor n.</p>
@@ -320,10 +328,51 @@ const NUM = (function () {
   const fP = p => p.small ? fN(p.n) : g(lnN16t(p.t));
   const lse10 = xs => { xs = xs.filter(x => x !== null); if (!xs.length) return null; const m = Math.max(...xs); let s = 0; for (const x of xs) s += Math.pow(10, x - m); return m + Math.log10(s); };
   const expLog10 = (p, A) => { const l = log10n(p); return l === null ? null : Math.log10(A) + l + Math.log10(fP(p)); };   // log10 of A n f(n)
-  const log2Lp1 = (p, lam) => (Math.log(lam) + p.t * LN10 + Math.log1p(Math.pow(10, -p.t) / lam)) / LN2;        // L = lam (n + 1)
+  /* ---- the input length L, from the challenge's own encoding (SubexponentialSAT.lean, namespace Encoding) ----
+     encodeNat c = c ones and a zero (c + 1 bits); frame doubles a list and adds a closing bit (2b + 1);
+     encodeList adds, per item, a 1 and the framed item, then a closing 0; literal code c = 2v + (1 if positive).
+     So a clause with k literals whose codes sum to S takes 2 S + 4 k + 1 bits, and 4 S + 8 k + 4 bits once framed
+     in the formula's list; L = (n + 1) + 1 + sum over clauses of (4 S + 8 k + 4). For k = 3 with distinct variables
+     and uniform signs the mean code is n - 1/2, so the mean framed clause is 12 n + 22 bits, and a random 3-CNF with
+     m clauses has expected L = m (12 n + 22) + n + 2 (about 51 n^2 at m = 4.26 n). The empty formula gives L = n + 2,
+     the minimum over all formulas on n variables. */
+  const ENC = (function () {   // a direct transcription, as bit lists, used only by the checks
+    const encodeNat = c => new Array(c).fill(true).concat([false]);
+    const frame = bits => bits.reduceRight((rest, b) => [true, b].concat(rest), [false]);
+    const encodeList = (enc, xs) => xs.length === 0 ? [false] : [true].concat(frame(enc(xs[0])), encodeList(enc, xs.slice(1)));
+    const encodeCNF = (n, F) => encodeNat(n).concat(encodeList(cl => encodeList(encodeNat, cl), F.map(C => C.map(([v, pos]) => 2 * v + (pos ? 1 : 0)).sort((a, b) => a - b))));
+    return { encodeCNF };
+  })();
+  const LOG2_10 = Math.log2(10);
+  // log2(L + 1) with ln10n = log10 n (null for n = 0), never forming n.
+  // model "cnf": L = m (12 n + 22) + n + 2 with m = r n, so L + 1 = 12 r n^2 + (22 r + 1) n + 3; model "min": L + 1 = n + 3
+  function log2Lp1n(ln10n, model) {
+    if (model.kind === "min") return lse10([ln10n, Math.log10(3)]) * LOG2_10;
+    const r = model.r;
+    return lse10([ln10n === null ? null : Math.log10(12 * r) + 2 * ln10n, ln10n === null ? null : Math.log10(22 * r + 1) + ln10n, Math.log10(3)]) * LOG2_10;
+  }
+  // the deciding check for L: the formula against the transcription, the mean over all clauses, and log2Lp1 against BigInt
+  function checkL(l2fn) {
+    const bad = [];
+    const formulaL = (n, F) => n + 2 + F.reduce((s, C) => s + 4 * C.reduce((t, [v, pos]) => t + 2 * v + (pos ? 1 : 0), 0) + 8 * C.length + 4, 0);
+    const samples = [[3, []], [3, [[[0, true], [1, true]], [[0, false], [2, true]]]], [5, [[[0, true], [3, false], [4, true]], [[1, false], [2, false], [4, false]], [[2, true]]]], [8, [[[7, true], [6, true], [5, false]]]]];
+    for (const [n, F] of samples) if (ENC.encodeCNF(n, F).length !== formulaL(n, F)) bad.push("encoding length of a sample formula on n = " + n);
+    for (const n of [5, 7]) { let sum = 0, cnt = 0;
+      for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) for (let c = b + 1; c < n; c++) for (let s = 0; s < 8; s++) {
+        const C = [[a, !!(s & 1)], [b, !!(s & 2)], [c, !!(s & 4)]]; sum += ENC.encodeCNF(n, [C]).length - (n + 2); cnt++; }
+      if (sum !== cnt * (12 * n + 22)) bad.push("mean framed 3-clause on n = " + n + " is " + sum / cnt + ", not 12 n + 22"); }
+    const blog2 = b => { const t = b.toString(); return (t.length - 1 + Math.log10(Number(t.slice(0, 17)) / Math.pow(10, Math.min(17, t.length) - 1))) * LOG2_10; };
+    for (const [n, m] of [[1, 4], [3, 13], [10, 43], [100, 426], [1000, 4260], [1000000, 4260000]]) {
+      const exact = BigInt(m) * (12n * BigInt(n) + 22n) + BigInt(n) + 3n;   // L + 1
+      if (Math.abs(l2fn(Math.log10(n), { kind: "cnf", r: m / n }) - blog2(exact)) > 1e-9) bad.push("log2(L+1) at n = " + n + ", m = " + m);
+      if (Math.abs(l2fn(Math.log10(n), { kind: "min" }) - blog2(BigInt(n) + 3n)) > 1e-9) bad.push("log2(n+3) at n = " + n); }
+    if (Math.abs(l2fn(null, { kind: "cnf", r: 4.26 }) - Math.log2(3)) > 1e-12 || Math.abs(l2fn(null, { kind: "min" }) - Math.log2(3)) > 1e-12) bad.push("n = 0: L = 2");
+    return bad;
+  }
+  const log2Lp1 = (p, model) => log2Lp1n(log10n(p), model);
   // log10 of the full illustrative log2-bound  log2 C + d log2(L+1) + A n f(n)
-  const fullLog10 = (p, A, log2C, d, lam) => lse10([log2C > 0 ? Math.log10(log2C) : null, d > 0 ? Math.log10(d) + Math.log10(log2Lp1(p, lam)) : null, expLog10(p, A)]);
-  function below(p, A, log2C, d, lam) { const l = log10n(p), b = fullLog10(p, A, log2C, d, lam); if (l === null) return false; return b === null ? true : b < l; }
+  const fullLog10 = (p, A, log2C, d, model) => lse10([log2C > 0 ? Math.log10(log2C) : null, d > 0 ? Math.log10(d) + Math.log10(log2Lp1(p, model)) : null, expLog10(p, A)]);
+  function below(p, A, log2C, d, model) { const l = log10n(p), b = fullLog10(p, A, log2C, d, model); if (l === null) return false; return b === null ? true : b < l; }
   const lg1p = l => l > 0 ? l + Math.log1p(Math.pow(10, -l)) / LN10 : Math.log1p(Math.pow(10, l)) / LN10;   // log10(1 + 10^l)
   const Y = l => l === null ? 0 : Math.log10(1 + lg1p(l));                     // the plot's doubly logarithmic height
   function bisect(fun, lo, hi) { const s = Math.sign(fun(lo)); for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === s) lo = m; else hi = m; } return (lo + hi) / 2; }
@@ -362,7 +411,7 @@ const NUM = (function () {
     if (critical === true && A === ASTAR) return "critical";
     return Math.abs(A - ASTAR) <= TOL ? "unresolved" : A < ASTAR ? "below" : "above";
   }
-  return { family, expVsN, aClass, peakPoint, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
+  return { log2Lp1, log2Lp1n, checkL, family, expVsN, aClass, peakPoint, LN10, g, lnN16t, fN, ASTAR, FMAX, LPK, TMAX, UMAX, uOfT, tOfU, point, log10n, fP, lse10, expLog10, fullLog10, below, lg1p, Y, band };
 })();
 
 /* ================= the checks and the deliberately broken controls ================= */
@@ -443,6 +492,13 @@ function runChecks() {
     "opens " + b2.first + ", closes 10^" + b2.closeLog10.toFixed(4));
   add("family scaling: dense e = p v (v-1)/2 and sparse e = (e/v of the small graph) v, and n = c (v+e), match exact BigInt arithmetic at v = 10^s for s = 1, 2, 3, 6, 12, 50, 100, 200, every small graph (zero-edge included), c = 1, 3, 1000; C4 dense at s = 6, c = 3 gives e = 333,333,000,000 and n = 1,000,002,000,000", DECIDE.familyExact(NUM.family));
   add("exponent-term classifier: n = 0 is exact equality for every A; for n > 0 the ratio decides (n = 49 below, n = 50 above at A = 1; ratio 1 +- 1e-9 above/below; ratio 1 +- 5e-13 and the nonstationary crossing n = 50, A = 1/f(50) unresolved, never equal or tangent); tangency only for the critical preset A = e^2/16 at the named peak point (with the preset flag but A = e^2/16 +- 1e-9 or +- 5e-13 at that point: above/below; +- 4e-13: unresolved); A near e^2/16 classified by sign, unresolved within 1e-12, exactly e^2/16 only for the preset", DECIDE.classifier(NUM.expVsN, NUM.aClass));
+  const Lbad = NUM.checkL(NUM.log2Lp1n);
+  {   // the plotted full bound uses that L: at n = 10^6, m = 4,260,000, log2 C = 10, d = 2, A = 1, against BigInt
+    const ex = (4260000n * (12n * 1000000n + 22n) + 1000000n + 3n).toString(), l2 = (ex.length - 1 + Math.log10(Number(ex.slice(0, 17)) / Math.pow(10, Math.min(17, ex.length) - 1))) * Math.log2(10);
+    const p6 = NUM.point(Math.log10(1000001)), want = NUM.lse10([Math.log10(10 + 2 * l2), NUM.expLog10(p6, 1)]), got = NUM.fullLog10(p6, 1, 10, 2, { kind: "cnf", r: 4.26 });
+    if (p6.n !== 1000000 || Math.abs(got - want) > 1e-12) Lbad.push("full bound at n = 10^6: " + got + " against " + want);
+  }
+  add("input length L from the challenge's own encoding: the per-clause count 4 S + 8 k + 4 and L = n + 2 + sum agree with a bit-list transcription of encodeNat, frame and encodeList on sample formulas; the mean framed 3-clause over all clauses on n = 5 and 7 is exactly 12 n + 22; log2(L+1) for L = m (12 n + 22) + n + 2 and for L = n + 2 matches exact BigInt arithmetic at n = 0, 1, 3, 10, 100, 1000 and 10^6 (m about 4.26 n); the plotted full bound at n = 10^6 uses it", Lbad.length === 0, Lbad.join("; "));
   add("no strict band (A f(n) > 1 nowhere) at or below A = e^2/16 (A = 1/4 included); a band just above", NUM.band(NUM.ASTAR).empty && NUM.band(0.25).empty && !NUM.band(NUM.ASTAR * 1.0001).empty);
   let idOK = true; for (let t = 0; t <= 300; t += 0.25) { const d = Math.log(Math.pow(10, t) + 15); if (Math.abs(NUM.lnN16t(t) - d) > 1e-12 * d) idOK = false; }
   add("log-space ln(n+16) = t ln 10 + log1p(15 * 10^-t) with t = log10(n+1), checked against direct evaluation for t <= 300", idOK);
@@ -450,8 +506,8 @@ function runChecks() {
   add("n = 0 handled: f(0) = (ln ln 16)^2 / sqrt(ln 16) = " + PRINTED.f0 + ", exponent 0, no logarithm of 0", p0.n === 0 && Math.abs(NUM.fP(p0) - PRINTED.f0) < 5e-5 && NUM.expLog10(p0, 1) === null && NUM.Y(NUM.expLog10(p0, 1)) === 0 && NUM.below(p0, 1, 0, 1, 1) === false);
   let finite = true, cnt = 0;
   for (let i = 0; i <= 400; i++) { const p = NUM.point(NUM.tOfU(NUM.UMAX * i / 400));
-    for (const A of [0.1, NUM.ASTAR, 1, 1.5]) for (const [c, d, lam] of [[0, 0.5, 1], [20, 2, 4], [100000, 50, 1e6]]) {
-      const vals = [NUM.fP(p), NUM.Y(NUM.log10n(p)), NUM.Y(NUM.expLog10(p, A)), NUM.Y(NUM.fullLog10(p, A, c, d, lam))];
+    for (const A of [0.1, NUM.ASTAR, 1, 1.5]) for (const [c, d, lm] of [[0, 0.5, { kind: "min" }], [20, 2, { kind: "cnf", r: 4.26 }], [100000, 50, { kind: "cnf", r: 10 }], [0, 0.5, { kind: "cnf", r: 0.5 }]]) {
+      const vals = [NUM.fP(p), NUM.Y(NUM.log10n(p)), NUM.Y(NUM.expLog10(p, A)), NUM.Y(NUM.fullLog10(p, A, c, d, lm)), NUM.log2Lp1(p, lm)];
       cnt++; if (!vals.every(Number.isFinite)) finite = false; } }
   add("no Infinity or NaN anywhere on the plotted range, at extreme slider values", finite, cnt + " points");
   return out;
@@ -469,6 +525,7 @@ function runControls() {
     add("wrong reduction: " + g.label + "'s matching encoding without its at-most-one clauses must fail", DECIDE.pmOK(g, Object.assign({}, enc, { clauses: enc.clauses.filter(c => !(c.length === 2 && c[0] < 0 && c[1] < 0)) }), g.refPM)); }
   add("wrong scale: f with ln(n) in place of ln(n+16) must miss the 49/50 crossing", DECIDE.firstCrossing(n => NUM.g(Math.log(n))));
   add("wrong landmark: a recrossing printed as 10^2390.31 must fail", DECIDE.close1(2390.31));
+  add("wrong input length: a linear L = r (n + 1) in place of m (12 n + 22) + n + 2 must fail the L check", NUM.checkL((l, m) => m.kind === "min" ? NUM.log2Lp1n(l, m) : Math.log2(m.r * (l === null ? 1 : Math.pow(10, l) + 1) + 1)).length === 0);
   add("wrong family scaling: dense e with one lv term (linear in v) must fail", DECIDE.familyExact((fam, vS, eS, lv, c) => { const r = NUM.family(fam, vS, eS, lv, c);
     if (fam !== "dense" || r.le === null) return r; const le = r.le - lv; return { le, lPM: Math.log10(c) + NUM.lse10([lv, le]) }; }));
   add("wrong n = 0 rule: a ratio-only comparison (A f(n) < 1 means below) must fail", DECIDE.classifier((p, A, cr) => { if (cr === true && A === NUM.ASTAR && p.peak === true) return "tangent"; const r = A * NUM.fP(p); return Math.abs(r - 1) <= 1e-12 ? "unresolved" : r < 1 ? "below" : "above"; }, NUM.aClass));
@@ -566,7 +623,7 @@ if (typeof document !== "undefined") (function () {
   const L = (x1, y1, x2, y2, c, w) => ({ k: "l", x1, y1, x2, y2, c, w: w || 1.5 });
   const TEAL = [0.50, 0.82, 0.90, 1], AMBER = [1, 0.81, 0.48, 1], GREY = [0.55, 0.62, 0.62, 0.8], RED = [1, 0.62, 0.48, 1], GREEN = [0.61, 0.89, 0.61, 1];
   const S = { on: new Set(["c1", "c2"]), yaw: 0.65, pitch: 0.42, spin: !reduced, gm: "IS", g: "d4", aux: false, sol: 0, fam: "dense", s: 6, c: 3,
-    m3: "Af", A: 1, crit: false, atPeak: false, cur: 160, log2C: 20, d: 2, lam: 4 };
+    m3: "Af", A: 1, crit: false, atPeak: false, cur: 160, log2C: 20, d: 2, Lm: { kind: "cnf", r: 4.26 } };
   const dirty = [true, true, true];
   const mark = () => { dirty[0] = dirty[1] = dirty[2] = true; };
   const litName = l => (l > 0 ? "" : "not ") + DATA.varNames[Math.abs(l) - 1];
@@ -716,7 +773,9 @@ if (typeof document !== "undefined") (function () {
   $("sN").addEventListener("input", e => { S.cur = Number(e.target.value); S.atPeak = false; sync3(); });
   $("toPeak").addEventListener("click", () => { S.atPeak = true; S.cur = Math.round(1000 * NUM.uOfT(NUM.peakPoint.t) / NUM.UMAX); $("sN").value = String(S.cur); sync3(); });
   const num = (id, dflt, lo, hi) => { const v = Number($(id).value); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt; };
-  for (const id of ["iC", "iD", "iL"]) $(id).addEventListener("input", () => { S.log2C = num("iC", 20, 0, 100000); S.d = num("iD", 2, 0.5, 50); S.lam = num("iL", 4, 1, 1e6); sync3(); });
+  for (const id of ["iC", "iD"]) $(id).addEventListener("input", () => { S.log2C = num("iC", 20, 0, 100000); S.d = num("iD", 2, 0.5, 50); sync3(); });
+  $("sR").addEventListener("input", () => { S.Lm = { kind: S.Lm.kind, r: num("sR", 4.26, 0.5, 10) }; sync3(); });
+  document.querySelectorAll("[data-lm]").forEach(b => b.addEventListener("click", () => { S.Lm = { kind: b.dataset.lm, r: S.Lm.r }; sync3(); }));
   const curPoint = () => S.atPeak ? NUM.peakPoint : NUM.point(NUM.tOfU(NUM.UMAX * S.cur / 1000));
   const nText = p => p.peak ? "n* = e^(e^4) - 16, about 10^" + NUM.log10n(p).toFixed(2) + " (the real peak point, not an integer)" : p.small ? fmt(p.n) : "about 10^" + NUM.log10n(p).toFixed(2);
   const bitsText = l => l === null ? "0" : l < 6 ? Math.pow(10, l).toFixed(l < 2 ? 2 : 0) : "about 10^" + l.toFixed(2);
@@ -725,10 +784,12 @@ if (typeof document !== "undefined") (function () {
     $("vA").textContent = S.A.toFixed(4) + (S.crit ? " (e^2/16, critical preset)" : "");
     document.querySelectorAll("[data-a]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a === "star" ? S.crit : !S.crit && Number(b.dataset.a) === S.A)));
     $("toPeak").setAttribute("aria-pressed", String(S.atPeak === true));
-    const p = curPoint(), f = NUM.fP(p), ex = NUM.expLog10(p, S.A), full = NUM.fullLog10(p, S.A, S.log2C, S.d, S.lam), ln = NUM.log10n(p), b = NUM.band(S.A);
+    document.querySelectorAll("[data-lm]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lm === S.Lm.kind)));
+    $("vR").textContent = S.Lm.r.toFixed(2); $("sR").disabled = S.Lm.kind !== "cnf";
+    const p = curPoint(), f = NUM.fP(p), ex = NUM.expLog10(p, S.A), full = NUM.fullLog10(p, S.A, S.log2C, S.d, S.Lm), ln = NUM.log10n(p), b = NUM.band(S.A);
     $("r3").textContent = "At n = " + nText(p) + ": f(n) = " + f.toFixed(5) + "; ratio A f(n) = " + (S.A * f).toFixed(5) + " (" + ({ equal: "n = 0: the exponent term equals 2^n, both are 1, for every A", tangent: "critical preset A = e^2/16 at the real peak point: A f(n*) = 1, the exponent term touches 2^n (a tangency, analytic, not a numerical finding)", unresolved: "near equality, numerical comparison unresolved", below: "exponent term strictly below 2^n", above: "exponent term strictly above 2^n" })[NUM.expVsN(p, S.A, S.crit)] + ")" +
-      "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
-      " bits; below 2^n here: " + (NUM.below(p, S.A, S.log2C, S.d, S.lam) ? "yes" : "no") + ", for these illustrative constants only. " +
+      "; exponent A n f(n) = " + bitsText(ex) + " bits against n = " + (ln === null ? "0" : bitsText(ln)) + "; log2(L+1) = " + NUM.log2Lp1(p, S.Lm).toFixed(1) + (S.Lm.kind === "cnf" ? " (random 3-CNF, r = " + S.Lm.r.toFixed(2) + ")" : " (lower bound L = n + 2)") + "; full illustrative log2-bound log2 C + d log2(L+1) + A n f(n) = " + bitsText(full) +
+      " bits; below 2^n here: " + (NUM.below(p, S.A, S.log2C, S.d, S.Lm) ? "yes" : "no") + ", for these illustrative constants only. " +
       ({ critical: "A = e^2/16 (the critical preset): no strict band (A f(n) > 1 nowhere); the exponent term only touches 2^n at the real peak point n*, which is not an integer (a tangency).",
         unresolved: "A is within 10^-12 of e^2/16 but not the critical preset: whether a strict band exists is numerically unresolved here.",
         below: "A = " + S.A.toFixed(4) + " is below e^2/16 = 0.46182: the exponent term is strictly below 2^n at every real n > 0 (at n = 0 both are 1).",
@@ -754,7 +815,7 @@ if (typeof document !== "undefined") (function () {
     // shading: where the chosen comparison goes the wrong way (amber) or where the full bound is below 2^n (green strip)
     for (let i = 0; i < NS; i++) { const q = pts[i], xa = X(q.u), xb = X(pts[i + 1].u);
       if (S.m3 !== "nf" && S.A * q.f > 1) prims.push({ k: "r", x: xa, y: y0, w: xb - xa + 0.5, h: y1 - y0, c: [0.35, 0.22, 0.08, 1] });
-      if (S.m3 === "nf" && NUM.below(q.p, S.A, S.log2C, S.d, S.lam)) prims.push({ k: "r", x: xa, y: y1 - 7, w: xb - xa + 0.5, h: 7, c: [0.3, 0.6, 0.35, 1] }); }
+      if (S.m3 === "nf" && NUM.below(q.p, S.A, S.log2C, S.d, S.Lm)) prims.push({ k: "r", x: xa, y: y1 - 7, w: xb - xa + 0.5, h: 7, c: [0.3, 0.6, 0.35, 1] }); }
     prims.push(L(x0, y1, x1, y1, GREY, 1)); prims.push(L(x0, y0, x0, y1, GREY, 1));
     for (const [t, s] of [[0, "0"], [1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"], [3000, "10^3000"]]) { const x = X(NUM.uOfT(t));
       prims.push(L(x, y1, x, y1 + 5, GREY, 1)); if (!(narrow && t === 1000)) texts.push({ x, y: y1 + 14, s, c: "#a9b7b4", sz: 11, al: t === 3000 ? "right" : "center" }); }
@@ -777,7 +838,7 @@ if (typeof document !== "undefined") (function () {
       for (const [l, s] of [[1, "10"], [10, "10^10"], [100, "10^100"], [1000, "10^1000"]]) texts.push({ x: x0 - 6, y: Yp(NUM.Y(l)), s, c: "#a9b7b4", sz: 10.5, al: "right" });
       curve(q => NUM.Y(NUM.log10n(q.p)), [0.75, 0.75, 0.75, 0.9], 2);
       curve(q => NUM.Y(NUM.expLog10(q.p, S.A)), TEAL, 2);
-      curve(q => NUM.Y(NUM.fullLog10(q.p, S.A, S.log2C, S.d, S.lam)), AMBER, 2);
+      curve(q => NUM.Y(NUM.fullLog10(q.p, S.A, S.log2C, S.d, S.Lm)), AMBER, 2);
       const sc = scaling();
       for (const [t, lab, col] of [[sc.tIS, "IS: n = v", TEAL], [sc.tPM, "PM: n = c (v+e)", AMBER]]) if (t <= NUM.TMAX) { const x = X(NUM.uOfT(t)); prims.push(L(x, y0 + 30, x, y1, [col[0], col[1], col[2], 0.55], 1.5)); texts.push({ x: x + 4, y: y0 + 36 + (lab[0] === "P" ? 14 : 0), s: lab, c: "#e9efe9", sz: 11, al: "left" }); }
       texts.push({ x: x0 + 8, y: y0 - 28, s: narrow ? "grey: n; teal: A n f(n); amber: full bound" : "grey: n (the 2^n line); teal: A n f(n); amber: log2 C + d log2(L+1) + A n f(n)", c: "#a9b7b4", sz: narrow ? 10.5 : 12, al: "left" });
