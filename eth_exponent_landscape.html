@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ETH Exponent Landscape</title>
+<style>
+  :root { --bg: #0e1418; --ink: #e9efe9; --dim: #a9b7b4; --accent: #ffcf7a; --cool: #7fd0e6; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  canvas:active { cursor: grabbing; }
+  #ov { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 1; }
+  #hud, #state, #bar, #legend, #err { z-index: 2; }
+  #hud { position: fixed; left: 16px; top: 14px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: clamp(18px, 4.6vw, 26px); font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 800px; line-height: 1.4; }
+  #hud p.caveat { color: var(--accent); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 64px; font-size: 14.5px; color: var(--accent); pointer-events: none; line-height: 1.4; }
+  #bar { position: fixed; left: 16px; bottom: 16px; right: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button { background: #1b2a30; color: var(--ink); border: 1px solid #3c5a62; border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: #3c5a62; border-color: var(--accent); }
+  label { font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  input[type=range] { width: min(260px, 50vw); }
+  #legend { position: fixed; right: 16px; top: 160px; max-width: 290px; background: rgba(10,16,20,0.8);
+    border: 1px solid #3c5a62; border-radius: 6px; padding: 8px 11px; font-size: 12.5px; line-height: 1.45;
+    color: var(--dim); pointer-events: none; }
+  #legend b { color: var(--ink); font-weight: normal; }
+  @media (max-width: 760px) { #legend { display: none; } #hud p.long { display: none; } }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="3D surface of A times f(n) over log10 n and A, with a translucent sheet at height 1"></canvas>
+<canvas id="ov" aria-hidden="true"></canvas>
+<div id="hud">
+  <h1>The exponent landscape of a claimed ETH refutation (family 378)</h1>
+  <p class="long">The Lean statement bounds the running time by C (L+1)^d 2^(A n f(n)), with
+  f(n) = (ln ln(n+16))^2 / sqrt(ln(n+16)) exactly as runtimeScale n = n f(n) defines it. The surface is A f(n) over
+  log10 n (a log axis, out to n = 10^(10^7)) and A; the sheet is height 1. Where the bright ribbon (your A) is below the
+  sheet, only the exponent term 2^(A n f(n)) is below 2^n. Drag to orbit, scroll to zoom.</p>
+  <p class="caveat">Exponent component only: C, d and the encoding length L also decide any finite-instance conclusion,
+  and the statement gives only A &gt; 0 (no value). Every A here is an illustration.</p>
+</div>
+<div id="legend"><b>surface height:</b> A f(n)<br><b>teal:</b> A f(n) &lt; 1 (exponent term below 2^n)<br>
+<b>amber:</b> A f(n) &gt; 1<br><b>sheet:</b> height 1<br><b>bright ribbon:</b> the A on the slider<br>
+<b>left to right:</b> log10 n from 1 to 10^7 on a log axis<br><b>front to back:</b> A from 0.10 to 1.50<br>
+<b>checks:</b> f, its peak and the thresholds printed on the card are recomputed here before drawing</div>
+<div id="state"></div>
+<div id="bar">
+  <label for="sA">A = <span id="vA">1.00</span> <input id="sA" type="range" min="0.10" max="1.50" step="0.01" value="1.00"></label>
+  <button id="bSpin" aria-pressed="true">Spin</button>
+  <button id="bSheet" aria-pressed="true">Sheet</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const ETH = (function () {
+  const LN10 = Math.log(10);
+  // ln(n + 16) for n = 10^x without forming n: ln(10^x + 16) = x ln 10 + log1p(16 * 10^-x), an identity.
+  // Once x is large enough that +16 is negligible in double precision (x >= 17: 16 * 10^-x is below the
+  // last bit of x ln 10) this is x ln 10 exactly as a double; past x = 323, 10^-x underflows to 0 and the
+  // correction is log1p(0) = 0. So n up to 10^(10^7) is safe, and the +16 is kept wherever it matters.
+  const lnN16 = x => x * LN10 + Math.log1p(16 * Math.pow(10, -x));
+  const g = L => { const l = Math.log(L); return l * l / Math.sqrt(L); };        // f as a function of L = ln(n + 16)
+  const fX = x => g(lnN16(x));                                                    // f at n = 10^x
+  const fN = n => g(Math.log(n + 16));                                            // f at an integer n (n < 2^53)
+  const runtimeScale = n => n * fN(n);                                            // as SubexponentialSAT.lean defines it
+  function bisect(fun, lo, hi, iters) {   // fun(lo) and fun(hi) have opposite signs
+    const slo = Math.sign(fun(lo));
+    for (let i = 0; i < (iters || 200); i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === slo) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+  // peak: d/dL (ln L)^2 L^(-1/2) = L^(-3/2) ln L (2 - ln L / 2) vanishes at ln L = 4, so L = e^4, f = 16 / e^2
+  const Lpk = Math.exp(4), fmax = 16 / Math.exp(2), peakLog10n = Lpk / LN10;
+  // the n-ranges where A f(n) < 1, for any A > 0: [n small] and [n large], from the two roots of g(L) = 1/A
+  function region(A) {
+    const c = 1 / A;
+    if (c > fmax) return { all: true };
+    const Lsmall = bisect(L => g(L) - c, 1.0001, Lpk), Llarge = bisect(L => g(L) - c, Lpk, 1e12);
+    // small side as an integer when it fits a double exactly; large side as log10 n (+16 negligible there)
+    let nSmall = null;
+    if (Lsmall < 36) { nSmall = Math.floor(Math.exp(Lsmall) - 16); while (nSmall >= 0 && A * fN(nSmall) >= 1) nSmall--; while (A * fN(nSmall + 1) < 1) nSmall++; }
+    return { all: false, Lsmall, Llarge, log10Small: Lsmall / LN10, nSmall, log10Large: Llarge / LN10 };
+  }
+  // the facts printed on the card, checked against this page's own computation
+  const PRINTED = { fmax: 2.1654, peakLog10n: 23.71, n1: 49, large1: 2390.21, n2: 327741237, large2: 81.59 };
+  const fail = [];
+  const near = (a, b, tol) => Math.abs(a - b) <= tol;
+  // the peak, checked numerically as well as in closed form
+  let best = 0, bestX = 0;
+  for (let i = 0; i <= 200000; i++) { const x = 1 + 99 * i / 200000, v = fX(x); if (v > best) { best = v; bestX = x; } }
+  if (!near(best, fmax, 1e-9)) fail.push("numerical peak " + best + " differs from 16/e^2");
+  if (!near(fmax, PRINTED.fmax, 5e-5)) fail.push("peak " + fmax + ", card says " + PRINTED.fmax);
+  if (!near(bestX, PRINTED.peakLog10n, 0.01) || !near(peakLog10n, PRINTED.peakLog10n, 0.005)) fail.push("peak at log10 n = " + peakLog10n + ", card says " + PRINTED.peakLog10n);
+  const r1 = region(1), r2 = region(0.5), r4 = region(0.25);
+  if (!(fN(49) < 1 && fN(50) > 1) || r1.nSmall !== PRINTED.n1) fail.push("f < 1 should hold up to n = 49 exactly, got " + r1.nSmall);
+  if (!near(r1.log10Large, PRINTED.large1, 0.005)) fail.push("f < 1 again past 10^" + r1.log10Large + ", card says 10^" + PRINTED.large1);
+  if (!(fN(327741237) < 2 && fN(327741238) > 2) || r2.nSmall !== PRINTED.n2) fail.push("f < 2 should hold up to n = 327,741,237 exactly, got " + r2.nSmall);
+  if (!near(r2.log10Large, PRINTED.large2, 0.005)) fail.push("f < 2 again past 10^" + r2.log10Large + ", card says 10^" + PRINTED.large2);
+  if (!r4.all) fail.push("f should never reach 4");
+  // the log-space formula agrees with the direct one wherever 10^x + 16 is an ordinary double
+  for (let x = 0; x <= 300; x += 0.5) { const d = Math.log(Math.pow(10, x) + 16); if (Math.abs(lnN16(x) - d) > 1e-12 * d) fail.push("log-space ln(n+16) off at x = " + x); }
+  // runtimeScale is n f(n): a spot value, f(1000) by hand: ln(1016) = 6.92362, ln of that = 1.93496
+  if (!near(runtimeScale(1000) / 1000, fN(1000), 1e-15) || !near(fN(1000), 1.93496 * 1.93496 / Math.sqrt(6.92362), 1e-4)) fail.push("runtimeScale spot check failed");
+  return { fX, fN, lnN16, region, fmax, peakLog10n, PRINTED, r1, r2, fail };
+})();
+if (typeof module !== "undefined") module.exports = ETH;   // lets node test the block above
+
+/* ---------- drawing ---------- */
+if (typeof document !== "undefined") (function () {
+  const E = ETH, err = document.getElementById("err");
+  if (E.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + E.fail.join("; "); return; }
+  const canvas = document.getElementById("c"), ov = document.getElementById("ov"), octx = ov.getContext("2d");
+  const UMAX = 7, AMIN = 0.10, AMAX = 1.50, HZ = 0.32;            // u = log10(log10 n) in [0, 7]
+  const NU = 280, NA = 56;
+  const toX = u => -1 + 2 * u / UMAX, toY = A => -0.62 + 1.24 * (A - AMIN) / (AMAX - AMIN), toZ = h => HZ * h;
+  const FU = []; for (let i = 0; i <= NU; i++) FU.push(E.fX(Math.pow(10, UMAX * i / NU)));   // f along the u axis
+  const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // surface mesh: position (x, y, z), raw height h = A f, and A (for the ribbon)
+  const SV = [], SI = [];
+  for (let j = 0; j <= NA; j++) for (let i = 0; i <= NU; i++) {
+    const A = AMIN + (AMAX - AMIN) * j / NA, h = A * FU[i];
+    SV.push(toX(UMAX * i / NU), toY(A), toZ(h), h, A);
+  }
+  for (let j = 0; j < NA; j++) for (let i = 0; i < NU; i++) {
+    const v = j * (NU + 1) + i; SI.push(v, v + 1, v + NU + 2, v, v + NU + 2, v + NU + 1);
+  }
+
+  let gl = null;
+  try { gl = canvas.getContext("webgl", { antialias: true, alpha: false }); } catch (e) { gl = null; }
+  let GLS = null;
+  if (gl) {
+    try {   // any shader or buffer failure falls back to the 2D canvas
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+      const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs));
+        gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; };
+      const surf = prog(`attribute vec3 aP; attribute float aH, aA; uniform mat4 uM; varying float vH, vA; varying vec3 vP;
+          void main() { gl_Position = uM * vec4(aP, 1.0); vH = aH; vA = aA; vP = aP; }`,
+        `precision mediump float; varying float vH, vA; varying vec3 vP; uniform float uSel, uBand;
+          void main() {
+            vec3 below = vec3(0.17, 0.62, 0.66), above = vec3(0.93, 0.62, 0.22);
+            vec3 c = vH < 1.0 ? mix(below * 0.55, below, clamp(vH, 0.0, 1.0)) : mix(above * 0.8, above, clamp(vH - 1.0, 0.0, 1.0));
+            float grid = step(0.985, fract(vP.x * 10.0 + 0.5)) + step(0.975, fract((vA - 0.10) / 0.10));
+            c = mix(c, c * 0.62, clamp(grid, 0.0, 1.0));
+            float rib = 1.0 - smoothstep(uBand * 0.5, uBand, abs(vA - uSel));
+            c = mix(c, vH < 1.0 ? vec3(0.75, 1.0, 1.0) : vec3(1.0, 0.93, 0.62), rib);
+            gl_FragColor = vec4(c, 1.0); }`);
+      const flat = prog(`attribute vec3 aP; uniform mat4 uM; void main() { gl_Position = uM * vec4(aP, 1.0); }`,
+        `precision mediump float; uniform vec4 uC; void main() { gl_FragColor = uC; }`);
+      const sb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(SV), gl.STATIC_DRAW);
+      const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(SI), gl.STATIC_DRAW);
+      if (SV.length / 5 > 65535) throw new Error("mesh too large for 16-bit indices");
+      const z1 = toZ(1), x0 = toX(0), x1 = toX(UMAX), y0 = toY(AMIN), y1 = toY(AMAX);
+      const sheet = [x0, y0, z1, x1, y0, z1, x0, y1, z1, x1, y1, z1];
+      const floor = [x0, y0, 0, x1, y0, 0, x1, y0, 0, x1, y1, 0, x1, y1, 0, x0, y1, 0, x0, y1, 0, x0, y0, 0,
+                     x0, y0, z1, x1, y0, z1, x1, y0, z1, x1, y1, z1, x1, y1, z1, x0, y1, z1, x0, y1, z1, x0, y0, z1];
+      const shb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, shb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sheet), gl.STATIC_DRAW);
+      const flb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, flb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(floor), gl.STATIC_DRAW);
+      const rb = gl.createBuffer();   // the selected-A curve, drawn as a line just above the surface
+      GLS = { surf, flat, sb, ib, shb, flb, rb, nIdx: SI.length };
+      const e = gl.getError(); if (e !== gl.NO_ERROR) throw new Error("WebGL error " + e);
+    } catch (e) { GLS = null; gl = null; }
+  }
+  let ctx = null;
+  if (!gl) {   // fallback: the same projection, drawn with the 2D canvas (a fresh canvas: a context type cannot change)
+    const c2 = canvas.cloneNode(false); canvas.parentNode.replaceChild(c2, canvas); ctx = c2.getContext("2d");
+    if (!ctx) { err.style.display = "block"; err.textContent = "Neither WebGL nor a 2D canvas is available."; return; }
+  }
+  const view = gl ? canvas : document.getElementById("c");
+
+  // tiny matrix helpers (column-major)
+  const mul = (a, b) => { const o = new Array(16).fill(0);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) o[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return o; };
+  const persp = (fov, asp, nr, fr) => { const t = 1 / Math.tan(fov / 2);
+    return [t / asp,0,0,0, 0,t,0,0, 0,0,(fr + nr) / (nr - fr),-1, 0,0,2 * fr * nr / (nr - fr),0]; };
+  const rotX = t => [1,0,0,0, 0,Math.cos(t),Math.sin(t),0, 0,-Math.sin(t),Math.cos(t),0, 0,0,0,1];
+  const rotZ = t => [Math.cos(t),Math.sin(t),0,0, -Math.sin(t),Math.cos(t),0,0, 0,0,1,0, 0,0,0,1];
+  const trans = (x, y, z) => [1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1];
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let yaw = -0.35, pitch = -1.08, dist = 3.5, spin = !reduced, sheetOn = true, A = 1.0, t0 = 0;
+  const sA = document.getElementById("sA"), vA = document.getElementById("vA"), stateEl = document.getElementById("state");
+  function toggle(id, on) { document.getElementById(id).setAttribute("aria-pressed", on ? "true" : "false"); }
+  document.getElementById("bSpin").onclick = () => { spin = !spin; toggle("bSpin", spin); };
+  document.getElementById("bSheet").onclick = () => { sheetOn = !sheetOn; toggle("bSheet", sheetOn); };
+  toggle("bSpin", spin);
+  function describe() {
+    const r = E.region(A);
+    vA.textContent = A.toFixed(2);
+    const head = "A = " + A.toFixed(2) + " (an illustration): ";
+    if (r.all) return head + "A f(n) < 1 for every n, since f never exceeds 16/e^2 = " + E.fmax.toFixed(4) +
+      ". Exponent component only.";
+    const small = r.nSmall !== null ? "n <= " + fmt(r.nSmall) : "n up to about 10^" + r.log10Small.toFixed(2);
+    return head + "A f(n) < 1 for " + small + " and again for n beyond about 10^" + r.log10Large.toFixed(2) +
+      "; in between, the exponent term alone exceeds 2^n. Exponent component only.";
+  }
+  sA.addEventListener("input", () => { A = +sA.value; stateEl.textContent = describe(); });
+  stateEl.textContent = describe();
+
+  let drag = null;
+  view.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; view.setPointerCapture(e.pointerId); });
+  view.addEventListener("pointermove", e => { if (!drag) return;
+    yaw += (e.clientX - drag[0]) * 0.008; pitch = Math.max(-1.55, Math.min(-0.05, pitch + (e.clientY - drag[1]) * 0.008));
+    drag = [e.clientX, e.clientY]; });
+  view.addEventListener("pointerup", () => { drag = null; });
+  view.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(1.8, Math.min(8, dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+  const ribbon = () => { const out = []; for (let i = 0; i <= NU; i++) out.push(toX(UMAX * i / NU), toY(A), toZ(A * FU[i]) + 0.004); return out; };
+  function labels(proj, dpr, w, h) {
+    if (ov.width !== w || ov.height !== h) { ov.width = w; ov.height = h; ov.style.width = (w / dpr) + "px"; ov.style.height = (h / dpr) + "px"; }
+    octx.clearRect(0, 0, w, h);
+    octx.font = (11 * dpr) + "px Georgia, serif"; octx.textAlign = "center"; octx.textBaseline = "middle";
+    const T = (x, y, z, s, col) => { const q = proj(x, y, z); if (q[2] <= 0) return;
+      octx.fillStyle = "rgba(10,16,20,0.72)"; const tw = octx.measureText(s).width;
+      octx.fillRect(q[0] - tw / 2 - 3 * dpr, q[1] - 8 * dpr, tw + 6 * dpr, 16 * dpr);
+      octx.fillStyle = col; octx.fillText(s, q[0], q[1]); };
+    const yF = toY(AMIN) - 0.08;
+    const lab = ["1", "10", "100", "10^3", "10^4", "10^5", "10^6", "10^7"];
+    for (let k = 0; k <= UMAX; k++) T(toX(k), yF, 0, lab[k], "#a9b7b4");
+    T(0, yF - 0.13, 0, "log10 n (log axis)", "#a9b7b4");
+    for (const a of [0.25, 0.5, 1.0, 1.5]) T(toX(UMAX) + 0.1, toY(a), 0, "A = " + a, "#a9b7b4");
+    if (sheetOn) T(toX(0) - 0.16, toY(AMIN), toZ(1), "sheet: height 1", "#d8eef2");
+    T(toX(Math.log10(E.peakLog10n)), toY(A), toZ(A * E.fmax) + 0.07, "peak: A 16/e^2 = " + (A * E.fmax).toFixed(3) + " at n = 10^" + E.peakLog10n.toFixed(2), "#ffcf7a");
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.floor(view.clientWidth * dpr), h = Math.floor(view.clientHeight * dpr);
+    if (view.width !== w || view.height !== h) { view.width = w; view.height = h; }
+    if (spin && !drag) yaw += dt * 0.12;
+    const fit = Math.max(1, 1.25 * h / w);   // portrait screens: step back so the whole surface stays in view
+    const M = mul(persp(0.75, w / h, 0.1, 50), mul(trans(0, -0.08, -dist * fit), mul(rotX(pitch), mul(rotZ(yaw), trans(0, 0, -0.25)))));
+    const proj = (x, y, z) => { const X = M[0]*x + M[4]*y + M[8]*z + M[12], Y = M[1]*x + M[5]*y + M[9]*z + M[13],
+      Wc = M[3]*x + M[7]*y + M[11]*z + M[15]; return [(X / Wc * 0.5 + 0.5) * w, (0.5 - Y / Wc * 0.5) * h, Wc]; };
+    if (!gl) { draw2d(proj, w, h, dpr); labels(proj, dpr, w, h); requestAnimationFrame(frame); return; }
+    gl.viewport(0, 0, w, h); gl.clearColor(0.055, 0.078, 0.094, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
+    const S = GLS;
+    gl.useProgram(S.surf);
+    gl.uniformMatrix4fv(gl.getUniformLocation(S.surf, "uM"), false, new Float32Array(M));
+    gl.uniform1f(gl.getUniformLocation(S.surf, "uSel"), A); gl.uniform1f(gl.getUniformLocation(S.surf, "uBand"), 0.035);
+    gl.bindBuffer(gl.ARRAY_BUFFER, S.sb); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, S.ib);
+    const aP = gl.getAttribLocation(S.surf, "aP"), aH = gl.getAttribLocation(S.surf, "aH"), aA = gl.getAttribLocation(S.surf, "aA");
+    gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 3, gl.FLOAT, false, 20, 0);
+    gl.enableVertexAttribArray(aH); gl.vertexAttribPointer(aH, 1, gl.FLOAT, false, 20, 12);
+    gl.enableVertexAttribArray(aA); gl.vertexAttribPointer(aA, 1, gl.FLOAT, false, 20, 16);
+    gl.drawElements(gl.TRIANGLES, S.nIdx, gl.UNSIGNED_SHORT, 0);
+    gl.disableVertexAttribArray(aH); gl.disableVertexAttribArray(aA);
+    gl.useProgram(S.flat);
+    gl.uniformMatrix4fv(gl.getUniformLocation(S.flat, "uM"), false, new Float32Array(M));
+    const uC = gl.getUniformLocation(S.flat, "uC"), fP = gl.getAttribLocation(S.flat, "aP");
+    gl.bindBuffer(gl.ARRAY_BUFFER, S.rb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ribbon()), gl.STREAM_DRAW);
+    gl.enableVertexAttribArray(fP); gl.vertexAttribPointer(fP, 3, gl.FLOAT, false, 0, 0);
+    gl.uniform4f(uC, 1, 1, 1, 1); gl.drawArrays(gl.LINE_STRIP, 0, NU + 1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, S.flb); gl.vertexAttribPointer(fP, 3, gl.FLOAT, false, 0, 0);
+    gl.uniform4f(uC, 0.45, 0.58, 0.6, 1); gl.drawArrays(gl.LINES, 0, sheetOn ? 16 : 8);
+    if (sheetOn) {   // the translucent sheet at height 1, drawn last without writing depth
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+      gl.bindBuffer(gl.ARRAY_BUFFER, S.shb); gl.vertexAttribPointer(fP, 3, gl.FLOAT, false, 0, 0);
+      gl.uniform4f(uC, 0.78, 0.9, 0.95, 0.26); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.depthMask(true);
+    }
+    labels(proj, dpr, w, h);
+    requestAnimationFrame(frame);
+  }
+  // 2D fallback: the surface as A-slices drawn back to front, coloured below and above height 1, then the sheet
+  function draw2d(proj, w, h, dpr) {
+    ctx.fillStyle = "#0e1418"; ctx.fillRect(0, 0, w, h);
+    const slices = [];
+    for (let j = 0; j <= 28; j++) slices.push(AMIN + (AMAX - AMIN) * j / 28);
+    slices.push(A);
+    const depth = a => proj(0, toY(a), 0)[2];
+    slices.sort((p, q) => depth(q) - depth(p));
+    ctx.lineJoin = "round";
+    const z1 = toZ(1);
+    const corners = [[toX(0), toY(AMIN)], [toX(UMAX), toY(AMIN)], [toX(UMAX), toY(AMAX)], [toX(0), toY(AMAX)]];
+    ctx.strokeStyle = "rgba(115,148,153,0.9)"; ctx.lineWidth = dpr; ctx.beginPath();
+    corners.forEach((c, i) => { const q = proj(c[0], c[1], 0); if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.stroke();
+    for (const a of slices) {
+      const sel = a === A;
+      for (let i = 0; i < NU; i += 2) {
+        const h0 = a * FU[i], h1 = a * FU[Math.min(NU, i + 2)];
+        const p0 = proj(toX(UMAX * i / NU), toY(a), toZ(h0)), p1 = proj(toX(UMAX * Math.min(NU, i + 2) / NU), toY(a), toZ(h1));
+        const below = (h0 + h1) / 2 < 1;
+        ctx.strokeStyle = sel ? (below ? "#c0ffff" : "#fff0a0") : (below ? "rgba(43,158,168,0.75)" : "rgba(237,158,56,0.75)");
+        ctx.lineWidth = (sel ? 3 : 1.2) * dpr;
+        ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
+      }
+    }
+    if (sheetOn) {
+      ctx.fillStyle = "rgba(200,230,242,0.16)"; ctx.beginPath();
+      corners.forEach((c, i) => { const q = proj(c[0], c[1], z1); if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); });
+      ctx.closePath(); ctx.fill(); ctx.strokeStyle = "rgba(200,230,242,0.5)"; ctx.stroke();
+    }
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

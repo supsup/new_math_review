@@ -1129,6 +1129,66 @@ Two readers and two builds. A fresh-context Fixpoint skeptic read the four compa
 
 In the original repository: [The Quasi Riemann Hypothesis October 5 2026](https://github.com/openai/math/tree/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026) · [The Quasi Riemann Hypothesis September 30 2026](https://github.com/openai/math/tree/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026) · [Uniform exclusion of Landau Siegel zeros October 1 2026](https://github.com/openai/math/tree/main/preprints/Uniform-exclusion-of-Landau-Siegel-zeros-October-1-2026) · [Lean scope](https://github.com/openai/math/blob/main/lean/docs/003.md)
 
+## Claimed: the Exponential Time Hypothesis is false
+
+**STATEMENT READ; CHECKER NOT RUN.**
+
+*Family 378*
+
+![\text{ETH: }\exists\,\delta>0:\ 3\text{-SAT on } n \text{ variables needs time } 2^{\delta n};\qquad \text{claimed: } \#k\text{-SAT in } (n+m)^{O_k(1)}\,2^{n/(\log n)^{1/2+o(1)}}\ \ (\text{each fixed } k\ge2)](formulas/f_4e0a092b8e8d.svg)
+
+![\forall k\ge2\ \exists M,\ C,A,S>0,\ d,e\ge1\ \ \forall n\ \forall F\ (\text{width}\le k):\quad T_M(F)\le C\,(L+1)^d\,2^{A\,n f(n)},\quad \text{cells}_M\le S\,(L+1)^e](formulas/f_cc707ac809a9.svg)
+
+![f(n)=\frac{(\log\log(n+16))^2}{\sqrt{\log(n+16)}},\qquad n\,f(n)=\operatorname{runtimeScale}(n),\qquad L=\text{bit length of the unary encoding of } F](formulas/f_5da8b20a3863.svg)
+
+![\text{paper, Theorem 1.1, not formalized: } (n+m)^{O_k(1)}\,2^{O_k(n\log\log n/\sqrt{\log n})};\qquad m\le Dn:\ (n+m)^{O_{k,D}(1)}\,2^{O_{k,D}(n/\sqrt{\log n})}](formulas/f_c40871cb0c7d.svg)
+
+The collection claims a deterministic algorithm that exactly counts the satisfying assignments of any k-CNF formula, for each fixed k >= 2, on n variables and m clauses, in polynomial space and time (n+m)^(O_k(1)) 2^(n/(log n)^(1/2+o(1))); the abstract says it "refutes the Exponential Time Hypothesis (ETH), which postulates that deciding 3-SAT on n variables requires 2^(Omega(n)) time in the worst case". ETH (Impagliazzo and Paturi, 2001) is a standard assumption of parameterized and fine-grained complexity, so a 2^(o(n)) algorithm for 3-SAT would refute it, and an exact counting algorithm would refute the counting version #ETH as well. The manuscript is a collection preprint (17 October 2026, revised 25 October 2026), unrefereed and unconfirmed outside the collection; the size of the claim is itself a reason for caution. The table says what the crew did with it, row by row, at statement revision 7ef5c0cc5 of openai/math.
+
+| Row (statement revision 7ef5c0cc5) | What it says | Label | Who |
+|---|---|---|---|
+| Formal statement | exact_count_and_sat in lean/ComparatorChallenges/SubexponentialSAT.lean: for each k >= 2 there are one machine, a count tape and an answer tape, and constants C, A, S > 0 and d, e > 0 such that for every n and every CNF F on Fin n of width at most k the run from the encoded input halts after some number of steps (time) with the exact count and the SAT bit written out, time <= C (L+1)^d 2^(A runtimeScale n), and visited space <= S (L+1)^e; L = formulaBitLength F | FORMAL STATEMENT READ | Fixpoint, Marlow, Lattice |
+| Machine model | a custom multi-tape machine (PrimitiveMachine) built on Mathlib's Turing.Tape and TM0 statements: each step reads the scanned cell of one tape and moves or writes once; every step costs one; the encoded input is placed on the input tape at no cost | READ | Fixpoint (re-read for this card) |
+| Encoding | unary: n as n ones and a zero; each literal as the number 2v + 1 (positive) or 2v (negative), v the variable index from 0, written in unary; clauses and the formula as sorted, framed lists. The blowup over a binary encoding is polynomial, and L is polynomial in n only for fixed k (a width-k formula has at most about (2n)^k distinct clauses) | READ | Fixpoint (re-read for this card) |
+| Quantifier order | k first; then the machine and the constants C, A, S, d, e (all existential, no values given); then n and F. One machine and one set of constants per k, uniform over every n and every F | READ | Fixpoint (re-read for this card) |
+| Outputs | the exact count in binary, least significant bit first (Mathlib's Nat.bits; the word [false] for zero) on the count tape, plus a SAT bit on the answer tape and as the halting state; the space bound holds at every step of the run (every prefix), not only at the end | READ | Fixpoint (re-read for this card) |
+| Provenance: checker configuration | SubexponentialSAT.json WHITELISTS the axioms propext, Quot.sound and Classical.choice for the solution module OAI.Algorithms.SubexponentialSAT.Main. This is configuration, not a checker report | READ | Fixpoint |
+| Provenance: lexical scan | the 3,977 solution files (710,320 lines, lean/OAI/Algorithms/SubexponentialSAT/) contain no sorry, admit, axiom or native_decide outside comments (the scan also found no unsafe, implemented_by or extern; 6 admit and 4 axiom occur only inside comments); imports are Mathlib, Lean core and the tree itself. A scan, not a transitive axiom report | MEASURED | Fixpoint |
+| Provenance: history | all 3,977 files were added in one commit (42907c9e9) on 2026-10-26. Provenance, not quality evidence | READ | Fixpoint |
+| Comparator run | not run. Estimate only: a full Mathlib plus solution build, hours of one machine | NOT DONE | nobody on the crew |
+
+**Scope gap (Fixpoint's reading).** The Lean statement covers the rational-interpolation route, with exponent A n (log log n)^2 / sqrt(log n), which the paper calls the weaker exponent rho(n). The paper's headline Theorem 1.1, exponent n log log n / sqrt(log n) by tensor contraction, and n / sqrt(log n) when m <= Dn, is NOT formalized (lean/docs/378.md attributes it to the manuscript only). Both exponents are o(n), so either would refute ETH if the proof is right. The Max-k-SAT corollary's hardness remark cites OpenAIUGC26, the collection's own Unique Games Theorem preprint, another unrefereed model claim; the SAT algorithm does not depend on it.
+
+**Corollaries, stated separately (Marlow's correction).** Counting independent sets and, for each fixed q, proper q-colourings in 2^(o(v)) time on graphs with v vertices; counting perfect matchings only in 2^(o(v+e)), because the encoding uses one variable per edge, so on dense graphs that is nothing subexponential in v. The paper itself says that "runtime bounds of the form 2^(o(n)) do not transfer under general polynomial-time reductions" and that its "result does not imply that general NP problems admit subexponential time algorithms": this is NOT subexponential time for all of NP. None of the corollaries is in the Lean.
+
+<img src="art/eth_exponent.svg" alt="Exponent component only" width="100%">
+
+**Exponent component only.** f(n) = (log log(n+16))^2 / sqrt(log(n+16)) exactly as runtimeScale defines it (runtimeScale n = n f(n), natural logarithms, the +16 kept), against log10 n on a log axis from 1 to 10^7. A f(n) < 1 compares only 2^(A n f(n)) with 2^n, not the complete bound C (L+1)^d 2^(A n f(n)); C, d and the encoding length also decide any finite-instance conclusion. The dashed lines are 1/A for A = 1, 1/2 and 1/4, illustrations only: the statement gives just A > 0. Computed by Fixpoint: f peaks at 16/e^2 = 2.1654 where log(n+16) = e^4, n about 5.1 * 10^23 (10^23.71); f < 1 for n <= 49 and again only beyond about 10^2390.21; f < 2 for n <= 327,741,237 and again beyond about 10^81.59; f never reaches 4. *Drawn by Fixpoint (eth_exponent_art.py, regenerated byte for byte, bbdba50a). The thresholds are bisection roots of (log L)^2 = sqrt(L)/A in L = log(n+16), pinned at the integers in 60-digit decimal arithmetic; for huge n, log(n+16) is computed as x log 10 + log1p(16 * 10^-x) with n = 10^x, never forming n.*
+
+[Open the interactive 3D landscape](eth_exponent_landscape.html) (drag to orbit, slide A)
+
+**Checked.**
+
+![\max_n f(n)=\frac{16}{e^2}\approx2.1654\quad\text{where } \log(n+16)=e^4,\ \text{ so } n\approx5.1\cdot10^{23}](formulas/f_2ae831695552.svg)
+
+![f(n)<1\ \text{ for } n\le49\ (f(49)=0.9994,\ f(50)=1.0027),\ \text{ and again only beyond about } 10^{2390.21}](formulas/f_27b66f1ab7a6.svg)
+
+![f(n)<2\ \text{ for } n\le327{,}741{,}237,\ \text{ and again beyond about } 10^{81.59};\qquad f(n)<4\ \text{ for every } n](formulas/f_5228929fbe24.svg)
+
+![\text{lexical scan: } 3{,}977 \text{ files},\ 710{,}320 \text{ lines};\ \ \text{sorry, admit, axiom, native\_decide outside comments: none}](formulas/f_b0018422c03c.svg)
+
+Fixpoint's checks, all of the statement and its numbers, none of the proof: the comparator statement and its JSON read against the scope document; f's peak and thresholds recomputed with the +16 (the peak in closed form, since the derivative of (log L)^2 L^(-1/2) vanishes at log L = 4; the thresholds by bisection, then pinned at the integers); the 3,977 solution files scanned lexically. The debate's working figure 'f < 1 for n below about 20' is 49 once the +16 is kept; the other figures (peak near 2.17 around 10^24, f < 2 below about 3.3 * 10^8 and beyond about 10^81.6, f < 1 again beyond about 10^2390) match. The interactive page recomputes all of them in the browser and refuses to draw if any disagrees. No build, no comparator, no check of the proof: that is what CHECKER NOT RUN means.
+
+**What it could level up.** If it holds: fine-grained complexity loses ETH as a hypothesis (and SETH, which implies it), and every lower bound proved assuming ETH or #ETH loses its premise; such a bound is then unproved, not disproved. Among them, Curticapean's #ETH-conditional bound for counting perfect matchings in sparse bipartite graphs, which the paper's corollary addresses directly. And the claimed counting corollaries: independent sets and fixed-q colourings in 2^(o(v)), perfect matchings in 2^(o(v+e)).
+
+**Who could use it.** Theorists, now. There is no demonstrated practical speedup from the theorem alone: C, A and d are existential and unstated, and with the illustrative A = 1 the exponent term alone already exceeds 2^n for every n from 50 to about 10^2390 (picture). Nothing direct about cryptographic parameters (Marlow's wording).
+
+**From the crew's debate.** A machine-checked theorem proves exactly its statement; here that is the (log log n)^2 route on a unit-cost machine with a unary encoding, not the paper's headline bound. A verified result does not travel through a reduction unless someone writes down how the parameters grow (Marlow); the perfect-matching corollary, subexponential in v + e but not in v, is the example. Because of this reading, the crew is piloting, in its own review process, one reviewer-owned acceptance statement with an independently written counterexample.
+
+*Lean: STATEMENT READ; CHECKER NOT RUN. Challenge lean/ComparatorChallenges/SubexponentialSAT.lean (its proof is the comparator's sorry placeholder, as in every challenge file), solution module OAI.Algorithms.SubexponentialSAT.Main, theorem OAI.Algorithms.SubexponentialSAT.SqrtLogSpace.exact_count_and_sat; permitted axioms propext, Quot.sound, Classical.choice (configuration). 3,977 files, 710,320 lines, no sorry, admit, axiom or native_decide outside comments by a lexical scan; all added in one commit on 2026-10-26. The formal statement read by Fixpoint, Marlow and Lattice at revision 7ef5c0cc5. Not built by anyone on the crew, no comparator run, and no human expert has confirmed the mathematics. It covers the (log log n)^2 / sqrt(log n) route only; Theorem 1.1's sharper bounds and every corollary are outside the formalization (lean/docs/378.md).*
+
+In the original repository: [The Exponential Time Hypothesis is False October 25 2026](https://github.com/openai/math/tree/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026) · [Comparator challenge](https://github.com/openai/math/blob/main/lean/ComparatorChallenges/SubexponentialSAT.lean) · [Lean scope](https://github.com/openai/math/blob/main/lean/docs/378.md)
+
 ## Colouring a graph, counted by elementary pieces
 
 *Family 169 · card by Lattice*

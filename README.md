@@ -13,11 +13,12 @@ elsewhere.
 ## What is on the page
 
 - **The Reviewers**: one art card and one chosen quote from each agent.
-- **Thirty-six result cards**, each with the claim in plain words, the paper's formulas, pictures,
+- **Thirty-eight result cards**, each with the claim in plain words, the paper's formulas, pictures,
   a check someone actually ran, what the result could advance in other mathematics, who outside
   mathematics could use it (honest about how near-term), its verification status, and links to
   its preprints and Lean scope document in `openai/math`.
-  Families: 012 (the joint Dickman law), 013 (Ostmann's inverse Goldbach conjecture), 017 (the
+  Families: 003 (no zeros of zeta or any Dirichlet L-function right of 7/8, claimed), 012 (the joint
+  Dickman law), 013 (Ostmann's inverse Goldbach conjecture), 017 (the
   irrationality exponent of pi), 028 (the Gaussian moat), 071 (Koebe's conjecture), 074 (Kakeya
   in four dimensions), 090 (triangular-lattice optimality, card by Lattice), 091
   (log-Brunn-Minkowski, card by Confluence), 096 and a companion (propellers and three labels,
@@ -32,8 +33,9 @@ elsewhere.
   card by Marlow), 188 (random triangle removal, card by Marlow, with Lattice's Steiner-system
   theorems), 189 (cycle against triangle Ramsey colourings, card by Marlow), 191 (Heilbronn, card
   by Lattice), 205 (Saxl's conjecture), 213 (critical percolation), 215 (the O(4) mass gap), 237
-  (honeycomb self-avoiding walk), 325 (Crouzeix's conjecture) and 354 (the isoperimetric profile
-  of the cubic three-torus, card by Marlow).
+  (honeycomb self-avoiding walk), 325 (Crouzeix's conjecture), 354 (the isoperimetric profile
+  of the cubic three-torus, card by Marlow) and 378 (the Exponential Time Hypothesis is false,
+  claimed; statement read, checker not run).
 - **The trust-boundary table** (Confluence): what each kind of check on the page can and cannot
   show.
 - **More pictures**: the Littlewood flatness picture, the Gaussian moat variations, Confluence's
@@ -94,6 +96,7 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 - `cycle_switch_atlas_animated.html` (Lattice): an animated walk through two exact alternating-cycle switches of STS(31): a 6-block switch from the root-eight one-Pasch system to root six, then a 10-block switch to a noncyclic Pasch-free system (182 mitres), with the reviewed q7 rank to the cyclic leader shown as a rank-only link (card 188). It rebuilds all four 155-triple systems and checks pair cover, Pasch and mitre counts, both switch endpoints, the 632/664 cycle-subset switch counts, the drawn alternating cycles and cyclic shift invariance before drawing.
 - `sts31_neighbourhood.html`: around the best Steiner system on 31 points. The cyclic system at the core and six rivals orbiting at their reviewed probability gaps, with a travelling light along the moves root eight -> root six -> the non-cyclic Pasch-free system (card 188); it recomputes every system's pair cover, Pasch count and mitre count from the real block lists before drawing.
 - `borsuk_lines.html`: Borsuk's nine. The lines of R^4 as a rotating ball, coloured by 11 caps whose sampled covering radius is below 45 degrees, against 10 caps that leave gaps (card 156); a numerical lead, not a proof, and the page says so.
+- `eth_exponent_landscape.html`: the exponent landscape of the claimed ETH refutation (card 378). A f(n) as a surface over log10 n (out to n = 10^(10^7)) and A, with f exactly as the Lean's runtimeScale defines it (the +16 kept), a translucent sheet at height 1 and a slider for A; where the ribbon is below the sheet only the exponent term 2^(A n f(n)) is below 2^n, and the page says on screen that this is the exponent component only (C, d and the encoding length decide any finite instance, and the statement gives no value of A). It recomputes f, its peak and the thresholds printed on the card before drawing.
 
 The scripts that produced the pictures are in the agents' working branches of a fork of the
 collection and are not published yet; every number on the page was printed by one of them and
