@@ -74,7 +74,8 @@ const ETH = (function () {
     for (let i = 0; i < (iters || 200); i++) { const m = (lo + hi) / 2; if (Math.sign(fun(m)) === slo) lo = m; else hi = m; }
     return (lo + hi) / 2;
   }
-  // peak OF f (not of runtimeScale = n f, which grows without bound). Over real n:
+  // peak OF f (not of runtimeScale = n f, which grows without bound), over real n >= 0 (the theorem's n is natural;
+  // on the wider real domain f diverges as n -> -15 from above). In x = L = ln(n+16), not n + 16:
   // peak: d/dL (ln L)^2 L^(-1/2) = L^(-3/2) ln L (2 - ln L / 2) vanishes at ln L = 4, so L = e^4, f = 16 / e^2
   const Lpk = Math.exp(4), fmax = 16 / Math.exp(2), peakLog10n = Lpk / LN10;
   // the n-ranges where A f(n) < 1, for any A > 0: [n small] and [n large], from the two roots of g(L) = 1/A
@@ -198,7 +199,7 @@ if (typeof document !== "undefined") (function () {
     const r = E.region(A);
     vA.textContent = A.toFixed(2);
     const head = "A = " + A.toFixed(2) + " (an illustration): ";
-    if (r.all) return head + "A f(n) < 1 for every n, since f itself (not n f) never exceeds 16/e^2 = " + E.fmax.toFixed(4) +
+    if (r.all) return head + "A f(n) < 1 for every n, since f itself (not n f) never exceeds 16/e^2 ≈ " + E.fmax.toFixed(4) +
       ". Exponent component only.";
     const small = r.nSmall !== null ? "n <= " + fmt(r.nSmall) + " (first crossing between " + fmt(r.nSmall) + " and " + fmt(r.nSmall + 1) + ")" : "n up to about 10^" + r.log10Small.toFixed(2) + " (first crossing)";
     return head + "A f(n) < 1 for " + small + " and again for n beyond about 10^" + r.log10Large.toFixed(2) +
@@ -230,7 +231,7 @@ if (typeof document !== "undefined") (function () {
     T(0, yF - 0.13, 0, "log10 n (log axis)", "#a9b7b4");
     for (const a of [0.25, 0.5, 1.0, 1.5]) T(toX(UMAX) + 0.1, toY(a), 0, "A = " + a, "#a9b7b4");
     if (sheetOn) T(toX(0) - 0.16, toY(AMIN), toZ(1), "sheet: height 1", "#d8eef2");
-    T(toX(Math.log10(E.peakLog10n)), toY(A), toZ(A * E.fmax) + 0.07, "peak of A f (not of n f): A 16/e^2 = " + (A * E.fmax).toFixed(3) + " at n = 10^" + E.peakLog10n.toFixed(2), "#ffcf7a");
+    T(toX(Math.log10(E.peakLog10n)), toY(A), toZ(A * E.fmax) + 0.07, "peak of A f (not of n f): A 16/e^2 ≈ " + (A * E.fmax).toFixed(3) + " at n = 10^" + E.peakLog10n.toFixed(2), "#ffcf7a");
   }
 
   let last = performance.now();
