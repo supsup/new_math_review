@@ -63,13 +63,15 @@
     <button id="play" aria-pressed="false">play the zoom</button>
     <button id="reduce" aria-pressed="false">reduce motion</button>
     <button id="n0">n = 0</button>
+    <button id="peak" aria-pressed="false">go to the real peak point n*</button>
     <span class="small">keys (canvas focused): left/right zoom, shift for big steps, + and - step n by one while n is an exact integer, P plays (or steps, under reduced motion)</span>
   </div>
   <div class="row"><span id="motionNote" class="small" aria-live="polite"></span></div>
+  <div class="row"><span id="symNote" class="small tol" aria-live="polite"></span></div>
   <div class="grid">
     <div class="box">
       <b>illustrative constants</b> (examples, not witnesses)<br>
-      <div class="row">A <button data-a="1">1</button><button data-a="0.5">1/2</button><button data-a="0.25">1/4</button><button data-a="estar">e^2/16</button>
+      <div class="row">A <button data-a="1">1</button><button data-a="0.5">1/2</button><button data-a="0.25">1/4</button><button id="estarExact" aria-pressed="false">e^2/16 (exact)</button>
         <input id="iA" type="number" step="0.01" value="1" aria-label="A"></div>
       <div class="row"><label>log2 C <input id="iC" type="number" step="1" value="20"></label><label>d <input id="iD" type="number" step="1" value="2"></label></div>
       <div class="row"><label>L(n) model <select id="iM"><option value="lin">L = lambda (n+1) + 1</option><option value="quad">L = lambda (n+1)^2 + 1</option></select></label>
@@ -145,7 +147,7 @@ const TUN = (function () {
   // control only: the rejected classifier that calls a tolerance-band near-equality a tangency
   const coefStatusTolTangent = (coef, tol) => coefStatus(coef, tol) === "near" ? "tangent" : coefStatus(coef, tol);
   const COEF_TEXT = { below: "below 1", above: "above 1", near: "near 1, numerical comparison unresolved",
-    tangent: "exactly 1 at the analytic tangency (the flagged critical preset A = e^2/16 at the real peak point; by analysis, not by rounding)" };
+    tangent: "exactly 1 at the analytic tangency (both exact symbolic tags hold: A = e^2/16 and n = the real peak point n*; by analysis, not by rounding)" };
   const STATUS_TEXT = { yes: "yes, at most 2^n", no: "no, above 2^n", unresolved: "near equality, numerical comparison unresolved: not classified" };
   // the full illustrative bound, in logs: log2 B = log2 C + d log2(L+1) + A n f(n). Returns log10(log2 B), the gap
   // log10(log2 B) - log10(n), and the full-bound status of log2 C + d log2(L+1) <= n (1 - A f(n)), all without forming n.
@@ -244,19 +246,27 @@ const TUN = (function () {
     return fin(b.logBits) && fin(b.gap) && fin(b.logExp) && (b.critRhsLog10 === null || fin(b.critRhsLog10));
   }
   // everything the page will show or draw for one state: the current point, the landmark rows, every curve sample
+  // The analytic tangency is claimed only through explicit symbolic tags carried in the state (v.aSymbol = "estar",
+  // v.pointSymbol = "peak"), set only by the critical tour step or the explicit exact controls; never by numeric equality.
+  // When both are in force, the current point (the real peak point n*) and the peak landmark row (the same point) are
+  // critical; nothing else ever is.
+  const PEAK_ROW = 3;
   function computeState(v, p) {
-    const errors = [], seen = {};
-    const one = (q, where) => { const b = bound(q, v.A, v.log2C, v.d, v.model, v.lambda, { critical: isCritical(v, q) });
+    const errors = [], seen = {}, crit = isCritical(v);
+    const one = (q, where, c) => { const b = bound(q, v.A, v.log2C, v.d, v.model, v.lambda, { critical: c });
       if (!boundOk(b, q) && !seen[where]) { seen[where] = 1; errors.push({ field: null, msg: "a computed value is not finite at " + where + " (overflow)" }); } return b; };
-    const b = one(p, "the current n"), rows = LANDMARK_POINTS.map(q => one(q, "a landmark n")), curveB = CURVE_P.map(q => one(q, "a drawn curve sample"));
+    const b = one(p, "the current n", crit), rows = LANDMARK_POINTS.map((q, i) => one(q, "a landmark n", crit && i === PEAK_ROW)), curveB = CURVE_P.map(q => one(q, "a drawn curve sample", false));
     const ymaxL = Math.max(2.4, v.A * FMAX * 1.1);
     if (!Number.isFinite(ymaxL)) errors.push({ field: null, msg: "the coefficient axis is not finite" });
     return errors.length ? { ok: false, errors } : { ok: true, errors, v, p, b, rows, curveB, ymaxL };
   }
-  function validateState(raw, p, parse) {
+  function validateState(raw, p, parse, sym) {
     const P = parse || parseField, errors = [], v = {};
     for (const key of FIELDS) { const r = P(key, raw[key]); if (r.ok) v[key] = r.value; else errors.push(r); }
     if (MODELS.indexOf(raw.model) < 0) errors.push({ ok: false, field: "model", msg: "the L(n) model '" + raw.model + "' is not one of lin, quad" }); else v.model = raw.model;
+    v.aSymbol = sym && sym.aSymbol === "estar" ? "estar" : null; v.pointSymbol = sym && sym.pointSymbol === "peak" ? "peak" : null;
+    if (v.aSymbol && v.A !== ESTAR) errors.push({ ok: false, field: "A", msg: "the exact symbol A = e^2/16 does not match the A field" });
+    if (v.pointSymbol && !(p && !p.zero && p.int === null && p.x === PEAK_LOG10)) errors.push({ ok: false, field: null, msg: "the exact real-peak tag does not match the current n" });
     return errors.length ? { ok: false, errors } : computeState(v, p);
   }
   function validationChecks(parse) {
@@ -353,16 +363,18 @@ const TUN = (function () {
   ];
   // the critical preset is identified explicitly: a flagged preset whose A is exactly the named constant e^2/16 and whose
   // point is exactly the named real peak point; no tolerance on A or n is involved
-  function isCritical(v, q) { return !q.zero && q.int === null && TOUR.some(s => s.critical === true && v.A === s.A && q.x === s.x); }
+  function isCritical(v) { return v.aSymbol === "estar" && v.pointSymbol === "peak"; }
+  const presetSym = s => ({ aSymbol: s.critical ? "estar" : null, pointSymbol: s.critical ? "peak" : null });
   const tourPoint = s => s.n !== undefined ? fromInt(s.n) : fromLog(s.x);
   const presetRaw = s => ({ A: String(s.A), log2C: String(s.log2C), d: String(s.d), lambda: String(s.lambda), model: s.model });
-  function matchesPreset(raw, p, s) {
-    const R = presetRaw(s);
+  function matchesPreset(raw, p, s, sym) {
+    const R = presetRaw(s), y = sym || {};
+    if (s.critical && !(y.aSymbol === "estar" && y.pointSymbol === "peak")) return false;
     if (!FIELDS.every(key => Number(raw[key]) === Number(R[key])) || raw.model !== R.model) return false;
     return s.n !== undefined ? (p.int === s.n) : (!p.zero && p.int === null && Math.abs(p.x - s.x) < 1e-12);
   }
-  const fmtA = A => A === ESTAR ? "e^2/16" : String(A);
-  const params = v => "A = " + fmtA(v.A) + ", log2 C = " + v.log2C + ", d = " + v.d + ", " + modelText(v.model, v.lambda);
+  const fmtA = v => v.aSymbol === "estar" ? "e^2/16 (exact)" : String(v.A);
+  const params = v => "A = " + fmtA(v) + ", log2 C = " + v.log2C + ", d = " + v.d + ", " + modelText(v.model, v.lambda);
   function fullSentence(b, p) {
     const oh = b.small.toFixed(2) + " bits", total = "log2 B = " + fmtVal(b.logBits) + " bits", cs = b.coefState;
     const zero = b.small === 0 ? "With log2 C = 0 and d = 0 there is no overhead: the full bound is exactly 2^(A n f(n)). " : "";
@@ -377,7 +389,7 @@ const TUN = (function () {
     return zero + "The comparison of the full bound with 2^n is a near equality that double precision leaves numerically unresolved at this n, so the page does not classify it (a float tolerance proves neither equality nor tangency).";
   }
   function narrate(i, v, p) {
-    const s = TOUR[i], b = bound(p, v.A, v.log2C, v.d, v.model, v.lambda, { critical: isCritical(v, p) }), c = b.coef.toFixed(4), cs = COEF_TEXT[b.coefState];
+    const s = TOUR[i], b = bound(p, v.A, v.log2C, v.d, v.model, v.lambda, { critical: isCritical(v) }), c = b.coef.toFixed(4), cs = COEF_TEXT[b.coefState];
     const exp = "The exponent term A n f(n) is " + fmtVal(b.logExp) + " bits against n = " + fmtN(p).split("  ")[0] + " bits. ";
     const head = {
       first: "n = " + fmtN(p) + " with " + params(v) + " (all illustrative). The coefficient A f(n) = " + c + " is " + cs + " (at n = 50, f(50) = " + f(fromInt(50)).toFixed(4) + ", the first crossing of 1; see the landmark table). " + exp,
@@ -397,14 +409,14 @@ const TUN = (function () {
     return head + fullSentence(b, p) + tail + (dn ? " " + dn : "");
   }
   // control: narration frozen to each step's preset, ignoring the actual parameters (the reviewed behaviour)
-  const staticNarrate = i => { const s = TOUR[i]; return narrate(i, s, tourPoint(s)); };
+  const staticNarrate = i => { const s = TOUR[i]; return narrate(i, Object.assign({}, s, presetSym(s)), tourPoint(s)); };
   function tourChecks(narr) {
     const r = [], ok = (name, cond, detail) => r.push({ name, ok: !!cond, detail: detail || "" });
     const incomplete = [], mismatch = [];
     TOUR.forEach((s, i) => {
       if (!FIELDS.concat(["model"]).every(key => s[key] !== undefined) || (s.n === undefined) === (s.x === undefined)) incomplete.push(i + 1);
-      const p = tourPoint(s), st = validateState(presetRaw(s), p);
-      if (!st.ok || !matchesPreset(presetRaw(s), p, s)) { incomplete.push(i + 1); return; }
+      const u = ui(UI0(), { type: "tour", i }), p = u.p, st = uiValidate(u);
+      if (!st.ok || !matchesPreset(u.raw, p, s, u) || u.playing) { incomplete.push(i + 1); return; }
       const t = narr(i, st.v, p), st2 = st.b.status;
       const yes = t.indexOf("is at most 2^n here") >= 0, no = t.indexOf("above 2^n here") >= 0, tol = t.indexOf("numerically unresolved") >= 0;
       const good = st2 === "yes" ? yes && !no : st2 === "no" ? no && !yes : tol && !yes && !no;
@@ -424,21 +436,62 @@ const TUN = (function () {
     return r;
   }
 
+
+  /* ----- TZ-N2: the page's UI state and its handlers; symbolic tags carry provenance, never numeric equality ----- */
+  const UI0 = () => ({ raw: { A: "1", log2C: "20", d: "2", lambda: "4", model: "lin" }, aSymbol: null, pointSymbol: null,
+    k: 700, p: pointOfK(700), playing: false, reduced: false, tourI: -1 });
+  function ui(s, ev) {
+    const o = Object.assign({}, s, { raw: Object.assign({}, s.raw) });
+    const moveTo = (k, p) => { o.k = k; o.p = p; o.pointSymbol = null; };   // any movement of n leaves the real peak point
+    if (ev.type === "input") { o.raw[ev.key] = String(ev.value); if (ev.key === "A") o.aSymbol = null; }   // even the identical decimal
+    else if (ev.type === "model") o.raw.model = ev.value;
+    else if (ev.type === "presetA") { o.raw.A = String(ev.value); o.aSymbol = null; }
+    else if (ev.type === "estarExact") { o.raw.A = String(ESTAR); o.aSymbol = "estar"; }                 // the explicit exact-A control
+    else if (ev.type === "peak") { o.p = fromLog(PEAK_LOG10); o.k = kOfX(PEAK_LOG10); o.pointSymbol = "peak"; }   // the explicit real-peak control
+    else if (ev.type === "zoom") moveTo(ev.k, pointOfK(ev.k));
+    else if (ev.type === "point") moveTo(ev.p.zero ? 0 : kOfX(ev.p.x), ev.p);
+    else if (ev.type === "motion") { const m = motion({ playing: o.playing, reduced: o.reduced, k: o.k }, ev.ev);
+      o.playing = m.playing; o.reduced = m.reduced; if (m.k !== o.k) moveTo(m.k, pointOfK(m.k)); }
+    else if (ev.type === "tour") { const t = TOUR[ev.i]; o.tourI = ev.i; o.raw = presetRaw(t); Object.assign(o, presetSym(t));
+      o.p = tourPoint(t); o.k = o.p.zero ? 0 : kOfX(o.p.x); o.playing = motion(o, { type: "stop" }).playing; }
+    return o;
+  }
+  const uiValidate = s => validateState(s.raw, s.p, undefined, s);
+  function symChecks() {
+    const r = [], ok = (name, cond, detail) => r.push({ name, ok: !!cond, detail: detail || "" });
+    const run = (evs, s0) => evs.reduce((s, e) => ui(s, e), s0 || UI0()), crit = TOUR.findIndex(s => s.critical === true);
+    const zero = [{ type: "input", key: "log2C", value: "0" }, { type: "input", key: "d", value: "0" }], show = v => v.ok ? v.b.coefState + "/" + v.b.status : "refused";
+    const a = run([{ type: "tour", i: crit }]), a0 = run(zero, a), b0 = run([{ type: "estarExact" }, { type: "peak" }].concat(zero));
+    const va = uiValidate(a), va0 = uiValidate(a0), vb0 = uiValidate(b0);
+    ok("(1) symbolic e^2/16 at the real peak point (critical tour step, or the exact-A and real-peak controls), through the UI handlers and validateState: positive overhead FAILS, zero overhead holds as equality",
+      va.ok && va.b.coefState === "tangent" && va.b.status === "no" && va0.ok && va0.b.status === "yes" && vb0.ok && vb0.b.coefState === "tangent" && vb0.b.status === "yes" && vb0.rows[PEAK_ROW].status === "yes",
+      show(va) + ", " + show(va0) + ", " + show(vb0));
+    const c = run([{ type: "input", key: "A", value: String(ESTAR) }].concat(zero)), c1 = ui(c, { type: "peak" }), vc = uiValidate(c), vc1 = uiValidate(c1);
+    ok("(2) e^2/16 typed by hand as String(ESTAR), no preset, zero overhead: the automatic peak landmark row and the real peak point are near/unresolved, no exact equality; A is not labelled e^2/16",
+      vc.ok && vc1.ok && vc.rows[PEAK_ROW].coefState === "near" && vc.rows[PEAK_ROW].status === "unresolved" && vc1.b.coefState === "near" && vc1.b.status === "unresolved" &&
+      vc1.rows[PEAK_ROW].status === "unresolved" && !/e\^2\/16/.test(fmtA(vc1.v)), "row " + vc.rows[PEAK_ROW].coefState + "/" + vc.rows[PEAK_ROW].status + ", point " + show(vc1) + ", label " + (vc1.ok ? fmtA(vc1.v) : ""));
+    const d = ui(a0, { type: "input", key: "A", value: String(ESTAR) }), vd = uiValidate(d);
+    const e = ui(a0, { type: "zoom", k: a0.k }), ve = uiValidate(e), t = run([{ type: "motion", ev: { type: "play" } }, { type: "motion", ev: { type: "tick" } }], a0);
+    ok("(3) after the symbolic preset, an A input event writing the identical decimal clears the exact status (unresolved again); any zoom or play movement clears the real-peak tag",
+      d.aSymbol === null && d.pointSymbol === "peak" && vd.ok && vd.b.coefState === "near" && vd.b.status === "unresolved" && e.pointSymbol === null && ve.ok && ve.b.coefState !== "tangent" && t.pointSymbol === null,
+      "after the A input " + show(vd));
+    const f1 = run([{ type: "input", key: "A", value: String(ESTAR + Math.pow(2, -54)) }, { type: "peak" }].concat(zero)), vf = uiValidate(f1);
+    const g1 = validateState(a0.raw, fromLog(PEAK_LOG10 + 1e-7), undefined, { aSymbol: "estar" }), g2 = validateState(a0.raw, fromLog(PEAK_LOG10 + 1e-7), undefined, { aSymbol: "estar", pointSymbol: "peak" });
+    ok("(4) A one ulp above e^2/16 at the real peak, and symbolic A at a nearby point, stay near/unresolved; a peak tag on a different n is refused",
+      vf.ok && vf.b.coefState === "near" && vf.b.status === "unresolved" && g1.ok && g1.b.coefState === "near" && g1.b.status === "unresolved" && !g2.ok, show(vf) + ", " + show(g1));
+    return r;
+  }
+
   /* ----- numeric hold: a tolerance band is "unresolved", never a rounded boolean, "equal" or "tangent" ----- */
   function holdChecks(cfg) {
     const r = [], ok = (name, cond, detail) => r.push({ name, ok: !!cond, detail: detail || "" });
     const c0 = cfg || {}, pk = fromLog(PEAK_LOG10);
-    const B = (p, A, c, d, crit) => bound(p, A, c, d, "lin", 4, { tol: c0.tol, cls: c0.cls, critical: crit === undefined ? isCritical({ A }, p) : crit });
+    const B = (p, A, c, d) => bound(p, A, c, d, "lin", 4, { tol: c0.tol, cls: c0.cls });
     ok("exact real tangency (room exactly 0) with positive prefactor bits: the full criterion FAILS", decide(181.5, PEAK_LOG10, 0, 0, false) === "no" && decide(1e-9, PEAK_LOG10, 0, 0, false) === "no" && decide(0, PEAK_LOG10, 0, 0, false) === "yes",
       "and with zero overhead, 0 <= 0 holds ('at most')");
     ok("'at most': with exact inputs, an overhead equal to the room (1 bit = 10 x 0.1) is yes, and 1.5 bits is no", decide(1, 1, 0.1, 0, false) === "yes" && decide(1.5, 1, 0.1, 0, false) === "no");
-    ok("the critical preset is identified explicitly (the flagged tour preset and the named constants), not by a tolerance on A or n",
-      isCritical({ A: ESTAR }, pk) && !isCritical({ A: ESTAR * (1 + 1e-15) }, pk) && !isCritical({ A: ESTAR }, fromLog(PEAK_LOG10 + 1e-9)) && !isCritical({ A: 1 }, pk));
-    const t = B(pk, ESTAR, 20, 2), t0 = B(pk, ESTAR, 0, 0);
-    ok("flagged critical preset (A = e^2/16 at the real peak): analytic tangency, so with positive overhead the full criterion FAILS, and with none it holds as equality",
-      t.coefState === "tangent" && t.status === "no" && t0.status === "yes", "computed A f = " + t.coef.toPrecision(17));
-    const u = B(pk, ESTAR, 20, 2, false), u0 = B(pk, ESTAR, 0, 0, false), u1 = B(fromLog(PEAK_LOG10 + 1e-7), ESTAR, 0, 0), u2 = B(pk, ESTAR * (1 + 2.3e-16), 0, 0);
-    ok("the same numbers without the flag (and A = e^2/16 slightly off the peak, or A one ulp above): near 1, numerically unresolved; never tangent, equal, yes or no",
+    const u = B(pk, ESTAR, 20, 2), u0 = B(pk, ESTAR, 0, 0), u1 = B(fromLog(PEAK_LOG10 + 1e-7), ESTAR, 0, 0), u2 = B(pk, ESTAR + Math.pow(2, -54), 0, 0);
+    ok("A = e^2/16 at the computed peak without symbolic tags (also slightly off the peak, or A one ulp above): near 1, numerically unresolved; never tangent, equal, yes or no",
       [u, u0, u1, u2].every(b => b.coefState === "near" && b.status === "unresolved" && b.criterion === null), [u, u0, u1, u2].map(b => b.coefState + "/" + b.status).join(", "));
     const lo = B(pk, ESTAR * (1 - 1e-6), 20, 2), hi = B(pk, ESTAR * (1 + 1e-6), 20, 2), lo9 = B(pk, ESTAR * (1 - 1e-9), 20, 2);
     ok("A = e^2/16 (1 - 1e-6) and (1 - 1e-9) at the peak: coefficient below 1 and the full bound at most 2^n", lo.coefState === "below" && lo.status === "yes" && lo9.coefState === "below" && lo9.status === "yes", "slack " + lo.slack.toExponential(3) + ", " + lo9.slack.toExponential(3));
@@ -480,6 +533,7 @@ const TUN = (function () {
     { name: "reduced motion (TZ-M1)", results: motionChecks(MOTION.correct) },
     { name: "tour narration (TZ-T1)", results: tourChecks(narrate) },
     { name: "numeric hold near ratio 1", results: holdChecks({}) },
+    { name: "exact symbolic setting (TZ-N2)", results: symChecks() },
   ];
   const controls2 = [
     { name: "the reviewed input reader (finite-only, clamps to a lower bound, substitutes a default)", results: validationChecks(clampParse) },
@@ -490,7 +544,7 @@ const TUN = (function () {
   ];
   groups.forEach(gr => gr.results.forEach(v => { if (!v.ok) fail.push(gr.name + ": " + v.name + " (" + v.detail + ")"); }));
   controls2.forEach(c => { if (c.results.every(v => v.ok)) fail.push("the control '" + c.name + "' passed every check, so the checks are blind"); });
-  return { f, g, fromInt, fromLog, bound, decide, coefStatus, isCritical, pointOfK, kOfX, xOfK, KMAX, ESTAR, FMAX, PEAK_LOG10, SMAX, NS, CURVE_S, CURVE_P, LANDMARK_POINTS,
+  return { f, g, fromInt, fromLog, bound, decide, coefStatus, isCritical, UI0, ui, uiValidate, fmtA, pointOfK, kOfX, xOfK, KMAX, ESTAR, FMAX, PEAK_LOG10, SMAX, NS, CURVE_S, CURVE_P, LANDMARK_POINTS,
     healthy, controls, groups, controls2, finiteChecked, fail, VARIANTS, RANGES, FIELDS, LABEL, rangeText, parseField, validateState, computeState,
     motion, MOTION, PLAY_STEP, MANUAL_STEP, TOUR, tourPoint, presetRaw, matchesPreset, narrate, dNote, fmtN, fmtBits, fmtVal, fmtRoom, COEF_TEXT, STATUS_TEXT };
 })();
@@ -508,63 +562,61 @@ if (typeof document !== "undefined") (function () {
     T.controls2.map(c => "control, " + c.name + ": " + (c.results.some(v => !v.ok) ? "<span class='yes'>caught</span> (" + c.results.filter(v => !v.ok).length + " checks fail)" : "<span class='no'>NOT caught</span>")).join("<br>");
   if (T.fail.length) { err.style.display = "block"; err.textContent = "Refusing to draw: " + T.fail.join("; "); return; }
 
-  // the raw field text is the state; it is parsed and validated as a whole on every change, never clamped or replaced
-  let raw = { A: "1", log2C: "20", d: "2", lambda: "4", model: "lin" }, k = 700, playing = false, reduced = false, tourI = -1, ST = null;
-  let P = T.pointOfK(k);
+  // the page state U (raw field text, symbolic tags, n, motion, tour step) changes only through the tested handler T.ui;
+  // it is parsed and validated as a whole on every change, never clamped or replaced
+  let U = T.UI0(), ST = null;
   const IDS = { A: "iA", log2C: "iC", d: "iD", lambda: "iL" };
   for (const key of T.FIELDS) { $(IDS[key]).min = String(T.RANGES[key][0]); $(IDS[key]).max = String(T.RANGES[key][1]); }
   $("ranges").textContent = "Supported ranges: " + T.FIELDS.map(T.rangeText).join(", ") + ". Anything else is refused with a message, not clamped.";
-  function showFields() { for (const key of T.FIELDS) $(IDS[key]).value = raw[key]; $("iM").value = raw.model; }
-  // motion: every change goes through the tested state function T.motion
-  function syncMotion() {
-    $("play").setAttribute("aria-pressed", playing ? "true" : "false");
-    $("play").textContent = reduced ? "step the zoom (+" + T.MANUAL_STEP + ")" : playing ? "pause the zoom" : "play the zoom";
-    $("reduce").setAttribute("aria-pressed", reduced ? "true" : "false");
-    $("motionNote").textContent = reduced ? "Reduced motion: no autoplay. The step button, arrow keys, + and -, n = 0 and the tour still move n one step at a time." : "";
+  function showFields() { for (const key of T.FIELDS) $(IDS[key]).value = U.raw[key]; $("iM").value = U.raw.model; }
+  function syncUi() {
+    $("play").setAttribute("aria-pressed", U.playing ? "true" : "false");
+    $("play").textContent = U.reduced ? "step the zoom (+" + T.MANUAL_STEP + ")" : U.playing ? "pause the zoom" : "play the zoom";
+    $("reduce").setAttribute("aria-pressed", U.reduced ? "true" : "false");
+    $("motionNote").textContent = U.reduced ? "Reduced motion: no autoplay. The step button, arrow keys, + and -, n = 0 and the tour still move n one step at a time." : "";
+    $("estarExact").setAttribute("aria-pressed", U.aSymbol === "estar" ? "true" : "false");
+    $("peak").setAttribute("aria-pressed", U.pointSymbol === "peak" ? "true" : "false");
+    const tags = (U.aSymbol === "estar" ? ["A = e^2/16 exactly (symbolic, not the typed decimal)"] : []).concat(U.pointSymbol === "peak" ? ["n = the real peak point n*, ln(n* + 16) = e^4 (symbolic)"] : []);
+    $("symNote").textContent = tags.length ? "Exact symbolic setting active: " + tags.join("; ") + (tags.length === 2 ? ". Both hold, so the analytic tangency A f(n*) = 1 is used." : ". Only one tag holds, so nothing is claimed exactly.") + " Typing in A clears the A tag; moving n clears the peak tag." : "";
   }
-  function applyMotion(ev) {
-    const o = T.motion({ playing, reduced, k }, ev), moved = o.k !== k;
-    playing = o.playing; reduced = o.reduced; if (moved) { k = o.k; P = T.pointOfK(k); }
-    syncMotion(); return moved;
-  }
+  function dispatch(ev) { U = T.ui(U, ev); syncUi(); }
   const mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  applyMotion({ type: "pref", reduce: !!(mq && mq.matches) });
-  if (mq) { const onPref = e => { applyMotion({ type: "pref", reduce: e.matches }); update(); };
+  dispatch({ type: "motion", ev: { type: "pref", reduce: !!(mq && mq.matches) } });
+  if (mq) { const onPref = e => { dispatch({ type: "motion", ev: { type: "pref", reduce: e.matches } }); update(); };
     if (mq.addEventListener) mq.addEventListener("change", onPref); else if (mq.addListener) mq.addListener(onPref); }
-  function setA(v) { raw.A = String(v); $("iA").value = raw.A; update(); }
-  document.querySelectorAll("button[data-a]").forEach(b => b.onclick = () => setA(b.dataset.a === "estar" ? T.ESTAR : Number(b.dataset.a)));
-  for (const key of T.FIELDS) $(IDS[key]).addEventListener("input", () => { raw[key] = $(IDS[key]).value; update(); });
-  $("iM").addEventListener("change", () => { raw.model = $("iM").value; update(); });
-  $("zoom").addEventListener("input", () => { k = +$("zoom").value; P = T.pointOfK(k); update(); });
-  $("n0").onclick = () => { k = 0; P = T.fromInt(0); update(); };
-  $("reduce").onclick = () => { applyMotion({ type: "toggleReduce" }); update(); };
-  $("play").onclick = () => { applyMotion({ type: "play" }); P = T.pointOfK(k); update(); };
+  document.querySelectorAll("button[data-a]").forEach(b => b.onclick = () => { dispatch({ type: "presetA", value: Number(b.dataset.a) }); showFields(); update(); });
+  $("estarExact").onclick = () => { dispatch({ type: "estarExact" }); showFields(); update(); };
+  $("peak").onclick = () => { dispatch({ type: "peak" }); update(); };
+  for (const key of T.FIELDS) $(IDS[key]).addEventListener("input", () => { dispatch({ type: "input", key, value: $(IDS[key]).value }); update(); });
+  $("iM").addEventListener("change", () => { dispatch({ type: "model", value: $("iM").value }); update(); });
+  $("zoom").addEventListener("input", () => { dispatch({ type: "zoom", k: +$("zoom").value }); update(); });
+  $("n0").onclick = () => { dispatch({ type: "point", p: T.fromInt(0) }); update(); };
+  $("reduce").onclick = () => { dispatch({ type: "motion", ev: { type: "toggleReduce" } }); update(); };
+  $("play").onclick = () => { dispatch({ type: "motion", ev: { type: "play" } }); update(); };
   const canvas0 = $("c");
   canvas0.addEventListener("keydown", e => {
-    const big = e.shiftKey ? 50 : 1;
-    if (e.key === "ArrowRight") { k = Math.min(T.KMAX, k + big); P = T.pointOfK(k); }
-    else if (e.key === "ArrowLeft") { k = Math.max(0, k - big); P = T.pointOfK(k); }
-    else if ((e.key === "+" || e.key === "=") && P.int !== null && P.int < 1e15 - 1) { P = T.fromInt(P.int + 1); k = P.zero ? 0 : T.kOfX(P.x); }
-    else if (e.key === "-" && P.int !== null && P.int > 0) { P = T.fromInt(P.int - 1); k = P.zero ? 0 : T.kOfX(P.x); }
+    const big = e.shiftKey ? 50 : 1, P = U.p;
+    if (e.key === "ArrowRight") dispatch({ type: "zoom", k: Math.min(T.KMAX, U.k + big) });
+    else if (e.key === "ArrowLeft") dispatch({ type: "zoom", k: Math.max(0, U.k - big) });
+    else if ((e.key === "+" || e.key === "=") && P.int !== null && P.int < 1e15 - 1) dispatch({ type: "point", p: T.fromInt(P.int + 1) });
+    else if (e.key === "-" && P.int !== null && P.int > 0) dispatch({ type: "point", p: T.fromInt(P.int - 1) });
     else if (e.key === "p" || e.key === "P") { $("play").click(); }
     else return;
     e.preventDefault(); update();
   });
-  // a tour step loads a complete preset (every field and n) and stops playback at the narrated landmark
+  // a tour step loads a complete preset (every field, n and the symbolic tags) and stops playback at the narrated landmark
   function tour(i) {
-    tourI = (i + T.TOUR.length) % T.TOUR.length; const s = T.TOUR[tourI];
-    applyMotion({ type: "stop" });
-    raw = T.presetRaw(s); showFields();
-    P = T.tourPoint(s); k = P.zero ? 0 : T.kOfX(P.x);
-    $("tourStep").textContent = "step " + (tourI + 1) + " of " + T.TOUR.length; update();
+    dispatch({ type: "tour", i: (i + T.TOUR.length) % T.TOUR.length }); showFields();
+    $("tourStep").textContent = "step " + (U.tourI + 1) + " of " + T.TOUR.length; update();
   }
-  $("next").onclick = () => tour(tourI + 1); $("prev").onclick = () => tour(tourI - 1);
+  $("next").onclick = () => tour(U.tourI + 1); $("prev").onclick = () => tour(U.tourI - 1);
 
   const statusHtml = st => "<span class='" + (st === "yes" ? "yes" : st === "no" ? "no" : "tol") + "'>" + T.STATUS_TEXT[st] + "</span>";
   function update() {
-    $("zoom").value = String(k);
-    $("nread").textContent = "n = " + T.fmtN(P);
-    ST = T.validateState(raw, P);
+    const P = U.p, tourI = U.tourI;
+    $("zoom").value = String(U.k);
+    $("nread").textContent = "n = " + (U.pointSymbol === "peak" ? "n*, the real peak point (exact), about " : "") + T.fmtN(P);
+    ST = T.uiValidate(U);
     for (const key of T.FIELDS) $(IDS[key]).setAttribute("aria-invalid", !ST.ok && ST.errors.some(e => e.field === key) ? "true" : "false");
     if (!ST.ok) {
       bad.style.display = "block";
@@ -581,7 +633,7 @@ if (typeof document !== "undefined") (function () {
       "<br>coefficient A f(n) = " + b.coef.toFixed(6) + ": " + T.COEF_TEXT[b.coefState] +
       "<br>this illustrative upper bound is at most 2^n here: " + statusHtml(b.status) +
       (dn ? "<br><span class='small'>" + dn + "</span>" : "") +
-      "<br><span class='small'>Yes means only that this chosen upper bound is at most 2^n at this n; it is not an observed speedup, and A f(n) &lt; 1 alone does not establish it. Near ratio 1 double precision cannot decide, and the page says so (unresolved) instead of rounding; the analytic tangency is stated only for the flagged critical preset.</span>";
+      "<br><span class='small'>Yes means only that this chosen upper bound is at most 2^n at this n; it is not an observed speedup, and A f(n) &lt; 1 alone does not establish it. Near ratio 1 double precision cannot decide, and the page says so (unresolved) instead of rounding; the analytic tangency is stated only while both exact symbolic tags hold (A = e^2/16 exactly and n = the real peak point).</span>";
     const rows = [["n", T.fmtN(P)], ["A f(n), the coefficient", b.coef.toFixed(6)], ["f(n)", b.fv.toFixed(6)],
       ["log2 C + d log2(L+1), the overhead", b.small.toFixed(2)], ["bits in the bound, log2 B", T.fmtBits(b.logBits)],
       ["bits in 2^n, n", P.zero ? "0" : T.fmtBits(P.x)], ["bound at most 2^n here (illustrative)", T.STATUS_TEXT[b.status]]];
@@ -592,7 +644,7 @@ if (typeof document !== "undefined") (function () {
     $("tbl").innerHTML = html;
     if (tourI >= 0) {
       const s = T.TOUR[tourI];
-      $("tourText").textContent = T.matchesPreset(raw, P, s) ? T.narrate(tourI, v, P)
+      $("tourText").textContent = T.matchesPreset(U.raw, P, s, U) ? T.narrate(tourI, v, P)
         : "You changed n or a parameter since step " + (tourI + 1) + ", so its narration no longer applies. Press previous or next to load a complete preset again.";
     }
   }
@@ -625,7 +677,7 @@ if (typeof document !== "undefined") (function () {
   const sOfP = p => p.zero ? 0 : Math.log10(1 + p.x);
   function frame(now) {
     if (!ctx && !gl) return;
-    if (playing && applyMotion({ type: "tick" })) update();
+    if (U.playing) { const k0 = U.k; dispatch({ type: "motion", ev: { type: "tick" } }); if (U.k !== k0) update(); }
     const dpr = Math.min(2, window.devicePixelRatio || 1), w = Math.floor(canvas.clientWidth * dpr), h = Math.floor(canvas.clientHeight * dpr);
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     if (ov.width !== w || ov.height !== h) { ov.width = w; ov.height = h; }
@@ -664,7 +716,7 @@ if (typeof document !== "undefined") (function () {
       prevB = [xs, yB]; prevN = [xs, yN]; prevG = [xs, yG];
     }
     // the synchronized marker: one vertical line through both instruments
-    const sNow = sOfP(P);
+    const P = U.p, sNow = sOfP(P);
     for (const pn of panels) segs.push([X(pn, sNow), pn.y0, X(pn, sNow), pn.y1, 1, 1, 1, 0.85, 1.5 * dpr]);
     if (gl) {
       gl.viewport(0, 0, w, h); gl.clearColor(0.043, 0.059, 0.071, 1); gl.clear(gl.COLOR_BUFFER_BIT);
