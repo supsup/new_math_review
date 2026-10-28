@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="An exact, finite graph-counting microscope: merge exact twins, cut cycles, and sum disjoint forest branches.">
+  <title>Cycle Untangler — a finite counting microscope</title>
+  <style>
+:root{color-scheme:dark;--ink:#0a1418;--panel:#101f24;--panel-raised:#15262c;--line:#294047;--text:#edf4ec;--quiet:#9bb1b2;--mint:#b4f4cf;--coral:#ff9b87;--purple:#c4b2ff;--serif:Georgia,'Times New Roman',serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--ink);color:var(--text);font:15px/1.65 var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button,select,input{accent-color:var(--mint)}button,select{color:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.4}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--mint);outline-offset:5px}a{color:inherit}.page-width{width:min(1336px,calc(100% - 96px));margin-inline:auto}.masthead{display:flex;align-items:center;justify-content:space-between;padding-block:30px;border-bottom:1px solid var(--line)}.wordmark{font-size:11px;font-weight:700;letter-spacing:.14em;text-decoration:none;display:flex;align-items:center;gap:12px}.brand-mark{font-size:28px;line-height:1;color:var(--mint)}.wordmark-divider{color:var(--quiet);margin:0 3px}.edition{font:10px var(--mono);letter-spacing:.12em;color:var(--quiet)}.intro{display:grid;grid-template-columns:1fr .75fr;gap:80px;align-items:end;padding:73px 0 67px}.eyebrow{margin:0 0 18px;font:10px/1.4 var(--mono);font-weight:600;letter-spacing:.13em;color:var(--mint)}.status-dot{display:inline-block;width:5px;height:5px;background:var(--mint);border-radius:50%;vertical-align:2px;margin-right:8px}h1,h2,h3,p{margin-top:0}h1{font:clamp(72px,8.3vw,116px)/.88 var(--serif);font-weight:400;letter-spacing:-.058em;margin:0}h1 em{font-weight:400;color:var(--mint)}.intro-copy{padding-bottom:3px;max-width:465px}.intro-copy p{margin-bottom:16px}.intro-copy .lead{font:24px/1.3 var(--serif);letter-spacing:-.02em;color:var(--text)}.quiet{color:var(--quiet);font-size:12px;line-height:1.6}.intro-copy .quiet{margin-bottom:0;font-size:12px;max-width:410px}.workbench{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}.workbench-heading{padding:23px 28px 0;display:flex;justify-content:space-between;align-items:center;gap:20px}.workbench-heading h2{font:21px var(--serif);letter-spacing:-.02em;margin:0}.small-tag{font:9px var(--mono);letter-spacing:.08em;color:var(--quiet)}.controls{padding:25px 28px 0;display:grid;grid-template-columns:1.3fr .85fr 1fr;gap:22px;align-items:end}.control-field,fieldset legend{font:10px/1.5 var(--mono);color:var(--quiet);letter-spacing:.04em}.control-field{display:flex;flex-direction:column;gap:7px}select{width:100%;border:1px solid #365059;border-radius:6px;background:#102128;padding:11px 34px 11px 12px;font:12px var(--sans);min-height:42px;cursor:pointer}fieldset{padding:0;margin:0;min-width:0;border:0}fieldset legend{margin-bottom:7px}.weight-options{display:flex;border:1px solid #365059;border-radius:6px;overflow:hidden;min-height:42px}.weight-options label{flex:1;position:relative;cursor:pointer}.weight-options input{position:absolute;opacity:0;width:1px;height:1px}.weight-options span{display:flex;height:100%;align-items:center;justify-content:center;font-size:11px;padding:8px 6px;white-space:nowrap}.weight-options input:checked+span{background:var(--mint);color:#10241d}.weight-options input:focus-visible+span{outline:2px solid white;outline-offset:-3px}.control-help{padding:0 28px;margin:12px 0 24px;font-size:11px;color:var(--quiet)}.stages{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line);background:#0e1b20}.stages button{position:relative;background:none;border:0;color:var(--quiet);text-align:left;padding:19px 12px;font-size:11px;font-weight:500;min-height:64px}.stages button:first-child{padding-left:28px}.stages button+button{border-left:1px solid var(--line)}.stages button span{font:10px var(--mono);display:block;color:#708d92;margin-bottom:4px}.stages button[aria-pressed=true]{color:var(--mint);background:#15292c}.stages button[aria-pressed=true]:after{content:'';position:absolute;bottom:0;height:2px;left:0;right:0;background:var(--mint)}.stages button[aria-pressed=true] span{color:var(--mint)}.visual-grid{display:grid;grid-template-columns:minmax(0,1fr) 294px}.graph-column{min-width:0;border-right:1px solid var(--line)}.graph-shell{position:relative;height:457px;overflow:hidden;background:radial-gradient(ellipse at center,#172b31 0,transparent 70%),radial-gradient(circle,#3c55594d .7px,transparent .9px);background-size:auto,22px 22px}.graph-corner{position:absolute;inset:18px 20px auto;display:flex;align-items:center;justify-content:space-between;gap:12px;pointer-events:none;font:9px var(--mono);color:var(--quiet);letter-spacing:.09em}.graph-corner span:first-child{color:var(--mint)}canvas{display:block;width:100%;height:100%}.graph-labels{position:absolute;inset:0;pointer-events:none}.graph-node-label{position:absolute;transform:translate(-50%,-50%);color:#edf4ec;background:none;border:0;border-radius:50%;width:52px;min-height:48px;padding:0;pointer-events:auto;display:flex;align-items:center;justify-content:center;flex-direction:column;font:11px var(--mono);line-height:1.25;text-shadow:0 1px 5px #0a1418}.graph-node-label small{font:8px var(--mono);opacity:.8}.graph-node-label:focus-visible{outline-offset:3px}.graph-legend{position:absolute;left:20px;right:20px;bottom:19px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;font-size:9px;color:var(--quiet);pointer-events:none}.graph-legend span{white-space:nowrap}.graph-legend i{display:inline-block;width:8px;height:2px;vertical-align:3px;margin-right:6px}.mint{background:var(--mint)}.coral{background:var(--coral)}.purple{background:var(--purple)}.graph-explanation{padding:21px 26px 20px;border-top:1px solid var(--line);min-height:133px}.graph-explanation p{font-size:12px;margin-bottom:8px}.graph-explanation p:last-child{margin-bottom:0;font-size:11px}.gl-fallback{position:absolute;inset:70px 35px 65px;padding:30px;text-align:center;align-content:center;background:#0e1c22e8;border:1px dashed #607b81;border-radius:10px}.gl-fallback[hidden]{display:none}.gl-fallback>span{display:block;font:36px var(--serif);color:var(--mint);margin-bottom:14px}.gl-fallback strong{display:block;font:22px var(--serif)}.gl-fallback p{font-size:12px;color:var(--quiet);max-width:330px;margin:12px auto 0}.answer-panel{padding:31px 25px 20px;background:#101f24}.answer-panel .eyebrow{font-size:9px;margin-bottom:9px}.large-number{font:76px/1.1 var(--serif);letter-spacing:-.055em;overflow-wrap:anywhere;color:var(--mint);margin-left:-3px}.answer-explanation{font-size:11px;color:var(--quiet);margin:10px 0 23px}.math{font-family:var(--serif);font-style:italic;color:var(--text);white-space:normal}.weighted-answer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:17px;font-size:11px}.weighted-answer strong{font:24px var(--mono);color:var(--coral)}.mode-note{font-size:11px;color:var(--quiet);min-height:54px;margin:10px 0 20px}.mode-note.zero-mode{color:var(--coral)}.structural-stats{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;border-block:1px solid var(--line);padding:16px 0}.structural-stats div{display:flex;flex-direction:column;gap:4px}.structural-stats span{font-size:9px;color:var(--quiet)}.structural-stats strong{font:24px var(--serif);font-weight:400}.original-size{font-size:11px;margin:17px 0 3px}.answer-panel>.quiet{font-size:10px;margin-bottom:21px}.oracle-button{border:1px solid #4d7466;background:#1d3a31;color:var(--mint);border-radius:5px;padding:10px 11px;text-align:left;font-size:10px;width:100%;display:flex;justify-content:space-between;gap:10px}.oracle-status{font:9px/1.6 var(--mono);color:var(--quiet);margin:9px 0 0}.oracle-status.verified{color:var(--mint)}.oracle-status.failed{color:var(--coral)}.branch-panel{border-top:1px solid var(--line);padding:27px 28px 28px;background:#112128}.branch-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.branch-heading .eyebrow{font-size:9px;margin-bottom:6px}.branch-heading h3{font:21px var(--serif);margin-bottom:0}.text-button{background:none;border:0;padding:6px 0;color:var(--mint);font-size:11px;white-space:nowrap}.branch-controls{display:flex;align-items:center;gap:17px;margin:25px 0 11px}.step-button{width:36px;height:36px;background:#193038;border:1px solid #3f5c64;border-radius:50%;font-size:16px;flex-shrink:0}.branch-range-label{display:flex;flex:1;align-items:center;gap:22px;min-width:0;font:11px var(--mono)}.branch-range-label>span{min-width:110px}.branch-range-label input{width:100%;min-width:40px;height:24px;cursor:pointer}.branch-occupancy{font:11px/1.6 var(--mono);color:var(--quiet);margin-bottom:7px}.branch-classification{font-size:12px;color:var(--mint);margin-bottom:20px}.branch-classification.zero-mass{color:var(--coral)}.branch-classification.invalid{color:var(--coral)}.branch-equation{display:grid;grid-template-columns:1fr 30px 1fr 30px 1fr;max-width:620px;align-items:center;gap:8px}.branch-equation>div{display:flex;flex-direction:column;gap:5px}.branch-equation span{font-size:10px;color:var(--quiet)}.branch-equation strong{font:28px var(--serif);font-weight:400;color:var(--mint)}.branch-equation>b{color:#627e83;font:24px var(--serif)}.branch-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.branch-chip{border:1px solid #36565f;border-radius:4px;background:#142931;padding:7px 10px;font:10px var(--mono);color:var(--quiet)}.branch-chip[aria-pressed=true]{border-color:var(--mint);color:var(--mint);background:#203b34}.branch-chip.invalid{border-style:dashed}.method-section,.tables-section{display:grid;grid-template-columns:145px 1fr;gap:20px;border-bottom:1px solid var(--line);padding:66px 0}.section-number{font:9px/1.5 var(--mono);letter-spacing:.12em;color:var(--quiet);padding-top:8px}.method-section h2,.tables-section h2{font:34px/1.2 var(--serif);font-weight:400;letter-spacing:-.035em;margin-bottom:34px}.method-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:36px}.method-index{color:var(--mint);font:9px var(--mono);letter-spacing:.1em}.method-columns h3{font:24px/1.2 var(--serif);font-weight:400;margin:15px 0}.method-columns p{font-size:12px;color:#b5c6c6}.method-columns .formula{font:15px/1.8 var(--serif);color:var(--mint);padding-block:12px;border-block:1px solid var(--line);margin:21px 0 13px}.method-columns .quiet{font-size:10px;color:var(--quiet)}.certificate-list{padding-left:17px;color:var(--quiet);font-size:12px;margin:0 0 28px}.certificate-list li{padding-left:5px;margin-block:6px}.table-scroll{width:100%;overflow-x:auto;margin-top:28px;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;text-align:left;font-size:11px;line-height:1.45}caption{text-align:left;font-size:11px;color:#c7d6d5;padding:15px;background:#122228}th,td{padding:13px 15px;border-top:1px solid var(--line)}th{font:9px/1.4 var(--mono);font-weight:400;color:var(--quiet);background:#0f1d22;white-space:nowrap}td{font:11px/1.5 var(--mono);vertical-align:top}td:first-child{color:var(--mint)}.limits{max-width:820px;margin:0 auto;padding:66px 0 55px;text-align:center}.limits h2{font:43px/1.08 var(--serif);letter-spacing:-.04em;font-weight:400;margin:0 0 24px}.limits>p:not(.eyebrow){font-size:12px;color:var(--quiet);max-width:720px;margin-inline:auto}.limits strong{color:var(--coral);font-weight:500}footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:25px 0 33px;font:9px/1.6 var(--mono);color:var(--quiet);letter-spacing:.04em}.app-error{color:var(--coral);padding:20px;margin:0;border-top:1px solid var(--coral)}.no-script{position:fixed;bottom:0;left:0;right:0;background:#442b2b;color:white;padding:15px;font-size:12px;border-top:1px solid var(--coral)}.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.control-field,select,.method-section>div,.tables-section>div{min-width:0}
+@media(min-width:1450px){.graph-shell{height:480px}.large-number{font-size:84px}}
+@media(max-width:1050px){.page-width{width:calc(100% - 56px)}.intro{gap:35px}.visual-grid{grid-template-columns:minmax(0,1fr) 258px}.answer-panel{padding-inline:20px}.controls{gap:12px}.weight-options span{font-size:10px}.method-section,.tables-section{grid-template-columns:105px 1fr}.method-columns{gap:24px}.graph-corner{font-size:8px}.stages button{font-size:10px}}
+@media(max-width:780px){.page-width{width:calc(100% - 36px)}.masthead{padding-block:22px}.edition{display:none}.intro{grid-template-columns:1fr;gap:30px;padding:48px 0 40px}.intro h1{font-size:86px}.intro-copy{max-width:570px}.intro-copy p{font-size:13px}.intro-copy .lead{font-size:23px}.intro-copy .quiet{max-width:520px}.workbench-heading{padding:22px 20px 0}.small-tag{font-size:8px;max-width:95px;text-align:right}.controls{padding:22px 20px 0;grid-template-columns:1fr 1fr;gap:16px}.weight-field{grid-column:1/-1}.weight-options{max-width:380px}.weight-options span{font-size:12px}.control-help{padding-inline:20px;margin-bottom:20px}.stages{grid-template-columns:1fr 1fr}.stages button{font-size:11px;padding:15px 20px}.stages button:first-child{padding-left:20px}.stages button:nth-child(3){border-left:0;border-top:1px solid var(--line)}.stages button:nth-child(4){border-top:1px solid var(--line)}.visual-grid{grid-template-columns:1fr}.graph-column{border-right:0}.graph-shell{height:425px}.graph-explanation{min-height:0;padding:19px 20px}.answer-panel{border-top:1px solid var(--line);padding:24px 20px;display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.answer-panel>.eyebrow{grid-column:1}.large-number{font-size:68px;grid-column:1}.answer-explanation{grid-column:1;margin-bottom:20px}.weighted-answer{grid-column:2;grid-row:1/3;padding:5px 0 0;display:block;border-top:0}.weighted-answer strong{display:block;font-size:35px;margin-top:8px}.weighted-answer>span{font-size:10px}.mode-note{grid-column:2;grid-row:3;margin:0;min-height:0;font-size:10px}.structural-stats{grid-column:1/-1;margin-top:8px}.original-size,.answer-panel>.quiet,.oracle-button,.oracle-status{grid-column:1/-1}.answer-panel>.quiet{margin-bottom:17px}.oracle-button{max-width:100%;font-size:11px}.branch-panel{padding:24px 20px}.branch-heading{align-items:flex-start}.branch-heading h3{font-size:21px}.branch-heading .text-button{font-size:10px;max-width:90px;white-space:normal}.branch-range-label{flex-direction:column;align-items:stretch;gap:5px}.branch-range-label>span{text-align:center;min-width:0}.branch-equation{gap:4px;grid-template-columns:1fr 15px 1fr 15px 1fr}.branch-equation span{font-size:9px}.branch-equation strong{font-size:25px}.method-section,.tables-section{display:block;padding:42px 0}.section-number{margin-bottom:15px;padding-top:0}.method-section h2,.tables-section h2{font-size:31px;margin-bottom:27px}.method-columns{grid-template-columns:1fr;gap:30px}.method-columns h3 br{display:none}.method-columns h3{font-size:25px;margin-block:10px}.method-columns p{font-size:13px;max-width:610px}.method-columns .formula{margin-block:14px 12px;padding-block:12px;font-size:17px}.method-columns .quiet{font-size:11px}.table-scroll{margin-top:20px}th,td{padding:12px 11px}.limits{padding:45px 0 35px}.limits h2{font-size:36px}footer{flex-direction:column;gap:7px;padding-block:21px 28px}.graph-legend{gap:6px 12px;font-size:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body data-ready="false" data-renderer="pending">
+  <header class="masthead page-width">
+    <a class="wordmark" href="#top" aria-label="Cycle Untangler, top"><span class="brand-mark" aria-hidden="true">◌</span> LATTICE <span class="wordmark-divider">/</span> FIELD NOTES</a>
+    <span class="edition">MATH 378 · FINITE MICROSCOPE 01</span>
+  </header>
+
+  <main id="top" class="page-width">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> STRUCTURE BEFORE SEARCH</p>
+        <h1 id="page-title">Cycle<br><em>Untangler.</em></h1>
+      </div>
+      <div class="intro-copy"><p class="lead">Many variables. Fewer decisions.</p>
+        <p>Start with a graph of forbidden pairs. Merge variables with exactly the same neighbors, cut the remaining cycles, then count each forest branch exactly.</p>
+        <p class="quiet">A microscope for one restricted counting problem. No general SAT shortcut, practical speed claim, or extraction of card 378.</p>
+      </div>
+    </section>
+
+    <section class="workbench" aria-labelledby="workbench-title">
+      <div class="workbench-heading"><h2 id="workbench-title">Follow the untangling</h2><span class="small-tag">EXACT COUNTS · ≤18 VARIABLES</span></div>
+      <div class="controls">
+        <label class="control-field">Graph preset<select id="preset" aria-describedby="group-help"></select></label>
+        <label class="control-field group-field">Blow-up size<select id="group"><option value="1">1 × each vertex</option><option value="2">2 × each vertex</option><option value="3">3 × each vertex</option><option value="4">4 × each vertex</option></select></label>
+        <fieldset class="weight-field"><legend>Original variable weights</legend><div class="weight-options"><label><input type="radio" name="weight-mode" value="unit" checked><span>Unit · 1, 1</span></label><label><input type="radio" name="weight-mode" value="zero"><span>Zero · 0, 1</span></label></div></fieldset>
+      </div>
+      <p id="group-help" class="control-help">Every blow-up block is independent; each original edge becomes a complete cross-product. Sizes above 18 original variables are disabled.</p>
+
+      <nav class="stages" aria-label="Construction stage">
+        <button type="button" data-stage="0" aria-pressed="true"><span>01</span> Original variables</button>
+        <button type="button" data-stage="1" aria-pressed="false"><span>02</span> Exact-neighbor classes</button>
+        <button type="button" data-stage="2" aria-pressed="false"><span>03</span> Construct a cutset</button>
+        <button type="button" data-stage="3" aria-pressed="false"><span>04</span> Count a branch</button>
+      </nav>
+
+      <div class="visual-grid">
+        <div class="graph-column">
+          <div id="graph-shell" class="graph-shell">
+            <div class="graph-corner"><span id="stage-kicker">ORIGINAL GRAPH</span><span id="renderer-label">Graphics initializing</span></div>
+            <canvas id="graph-canvas" data-ready="false" data-renderer="pending" role="img" aria-label="Interactive graph. The complete edge and class information is also available in the tables below." aria-describedby="graph-caption"></canvas>
+            <div id="graph-labels" class="graph-labels"></div>
+            <div id="gl-fallback" class="gl-fallback" role="status" hidden><span aria-hidden="true">◇</span><strong>WebGL2 is unavailable.</strong><p>No graph has been rendered. The exact counts, branch controls and accessible tables below remain available.</p></div>
+            <div class="graph-legend"><span><i class="mint"></i> forest / ordinary edge</span><span><i class="coral"></i> non-tree edge</span><span><i class="purple"></i> cutset vertex</span></div>
+          </div>
+          <div class="graph-explanation"><p id="graph-caption">The JavaScript engine has not initialized.</p><p id="inspect-text" class="quiet">Choose a labeled vertex to inspect its original members and neighbors.</p></div>
+        </div>
+
+        <aside class="answer-panel" aria-label="Exact result">
+          <p class="eyebrow">BOOLEAN MODEL COUNT</p><div id="model-count" class="large-number">—</div><p class="answer-explanation">Assignments satisfying every <span class="math">(¬xᵤ ∨ ¬xᵥ)</span>.</p>
+          <div class="weighted-answer"><span>Weighted partition function <span class="math">Z</span></span><strong id="weighted-z">—</strong></div>
+          <p id="mode-note" class="mode-note">Unit weights count each model once.</p>
+          <div class="structural-stats"><div><span>Cycle rank <span class="math">r</span></span><strong id="r-stat">—</strong></div><div><span>Cutset size <span class="math">|S|</span></span><strong id="s-stat">—</strong></div><div><span>Branch patterns</span><strong id="patterns-stat">—</strong></div></div>
+          <p id="original-count" class="original-size">Original universe —</p><p id="original-length" class="quiet">Original encoding length L —</p>
+          <button id="oracle-button" type="button" class="oracle-button">Check every original assignment <span aria-hidden="true">↗</span></button><p id="oracle-status" class="oracle-status" aria-live="polite">Optional bounded oracle · not run yet.</p>
+        </aside>
+      </div>
+
+      <section class="branch-panel" aria-labelledby="branch-heading">
+        <div class="branch-heading"><div><p class="eyebrow">DISJOINT BRANCHES, THEN ADD</p><h3 id="branch-heading">Choose which cutset classes are occupied.</h3></div><button id="show-branch" type="button" class="text-button">Show forest stage →</button></div>
+        <div class="branch-controls"><button id="branch-prev" type="button" class="step-button" aria-label="Previous cutset branch">←</button><label class="branch-range-label" for="branch"><span id="branch-label">Branch —</span><input id="branch" type="range" min="0" max="0" value="0" step="1"></label><button id="branch-next" type="button" class="step-button" aria-label="Next cutset branch">→</button></div>
+        <p id="branch-occupancy" class="branch-occupancy">—</p><p id="branch-classification" class="branch-classification">—</p>
+        <div class="branch-equation"><div><span>Cutset factor</span><strong id="branch-factor">—</strong></div><b aria-hidden="true">×</b><div><span>Forest sum</span><strong id="forest-total">—</strong></div><b aria-hidden="true">=</b><div><span>This contribution</span><strong id="branch-contribution">—</strong></div></div>
+        <div id="branch-list" class="branch-list" aria-label="Every branch and its exact contribution"></div>
+      </section>
+      <p id="app-error" class="app-error" role="alert" hidden></p><p id="live-summary" class="sr-only" aria-live="polite"></p>
+    </section>
+
+    <section class="method-section" aria-labelledby="method-title">
+      <div class="section-number" aria-hidden="true">THE METHOD</div>
+      <div><h2 id="method-title">What makes the count exact?</h2><div class="method-columns">
+        <article><span class="method-index">01 / COMPRESS</span><h3>Equal neighbors,<br>one class.</h3><p>Compare complete sorted open-neighborhood tuples, not degrees. Each class is independent. Cross-class edges are complete or absent; we verify the original edge set is covered exactly.</p><p class="formula">aᵢ = ∏ wᵥ(0)<br>bᵢ = ∏ [wᵥ(0) + wᵥ(1)] − aᵢ</p><p class="quiet">Empty weight aᵢ; nonempty weight bᵢ. With unit weights: aᵢ = 1 and bᵢ = 2<sup>|class|</sup> − 1.</p></article>
+        <article><span class="method-index">02 / CUT</span><h3>Hit every<br>non-tree edge.</h3><p>Build a spanning forest of the quotient H. For each remaining edge choose its lower-numbered endpoint for S. Deleting S leaves only forest edges.</p><p class="formula">r = |E(H)| − |V(H)| + components(H)<br>|S| ≤ r</p><p class="quiet">This constructs a sufficient cutset. It does not solve minimum feedback vertex set.</p></article>
+        <article><span class="method-index">03 / SUM</span><h3>Two states<br>per forest vertex.</h3><p>Reject adjacent occupied cutset classes. An occupied cutset class forces every forest neighbor empty. For each remaining tree, work from leaves to root.</p><p class="formula">Eᵢ = aᵢ ∏ (Eⱼ + Nⱼ)<br>Nᵢ = bᵢ ∏ Eⱼ</p><p class="quiet">Set Nᵢ = 0 when forced empty. Multiply root sums and the branch factor; then add disjoint branch contributions.</p></article>
+      </div></div>
+    </section>
+
+    <section class="tables-section" aria-labelledby="audit-title"><div class="section-number" aria-hidden="true">OPEN THE LEDGER</div><div><h2 id="audit-title">The small, inspectable certificate.</h2><ul id="certificate-list" class="certificate-list"><li>Waiting for the exact engine.</li></ul>
+      <div class="table-scroll"><table id="class-table"><caption>Exact classes and current original-variable weight mode</caption><thead><tr><th scope="col">Class</th><th scope="col">Original variables</th><th scope="col">Quotient neighbors</th><th scope="col">Empty a</th><th scope="col">Nonempty b</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-scroll"><table id="dp-table"><caption>Selected branch · forest states (no row for a removed cutset class)</caption><thead><tr><th scope="col">Class</th><th scope="col">Children</th><th scope="col">Forced empty?</th><th scope="col">E</th><th scope="col">N</th></tr></thead><tbody></tbody></table></div>
+    </div></section>
+
+    <section class="limits" aria-labelledby="limits-title"><p class="eyebrow">THE CLAIM BOUNDARY</p><h2 id="limits-title">Structure is a promise.<br>Not a universal shortcut.</h2><p>The method has structural work bound <span class="math">O(2ʳ poly(L))</span>. It is polynomial for fixed r, or for <span class="math">r ≤ c log₂ L</span> with a fixed constant c. Unrestricted r can still be large. BigInt arithmetic is exact; it is not free.</p><p>Here L is the length of our <em>original</em> labeled graph encoding: unary n and m headers plus fixed-width edge endpoints. The quotient is never substituted for L, free variables are never discarded, and no padding is added to satisfy a threshold. This page is a finite educational implementation of an elementary proof sketch, not a formal proof or a runtime benchmark.</p><p>All-negative binary CNF always has the all-zero Boolean model. In zero-weight mode that model has weight zero: <strong>Z = 0 does not mean UNSAT.</strong> The Boolean model count remains a separate quantity.</p></section>
+    <footer><span>CYCLE UNTANGLER · LATTICE</span><span>Local, dependency-free · no animation loop · draw on change</span></footer>
+  </main>
+  <noscript><div class="no-script">JavaScript is disabled; no graph or engine has run. Hand checks: C₅ has 11 Boolean models; C₄ has 7; an edge plus an isolated variable has 6. These hand examples are not browser validation.</div></noscript>
+  <script>
+/* Cycle Untangler: bounded, deterministic exact arithmetic. No DOM or dependencies.
+ * Source: math378-cycle-rank-extension-7565.txt, an elementary proof sketch.
+ * This is a finite implementation of that sketch, not an extracted Lean program.
+ */
+(function (root, factory) {
+  "use strict";
+  const api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.CycleUntanglerEngine = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+  const MAX_VERTICES = 18;
+  const MAX_BRANCHES = 64;
+  const PRESETS = Object.freeze({
+    path5: { name: "Blown-up path · P₅", n: 5, edges: [[0,1],[1,2],[2,3],[3,4]] },
+    cycle5: { name: "Blown-up cycle · C₅", n: 5, edges: [[0,1],[1,2],[2,3],[3,4],[0,4]] },
+    cycle4: { name: "Four-cycle · exact twins", n: 4, edges: [[0,1],[1,2],[2,3],[0,3]] },
+    irregular: { name: "Irregular · two cycles", n: 6, edges: [[0,1],[0,2],[1,2],[1,3],[2,3],[3,4],[4,5]] },
+    "edge-free": { name: "One edge + a free vertex", n: 3, edges: [[0,1]] },
+    path4: { name: "Small reference path · P₄", n: 4, edges: [[0,1],[1,2],[2,3]] }
+  });
+
+  function need(ok, message) { if (!ok) throw new Error(message); }
+  function edgeKey(a, b) { return a < b ? a + ":" + b : b + ":" + a; }
+  function equalTuple(a, b) { return a.length === b.length && a.every((v, i) => v === b[i]); }
+  function graphOf(input) {
+    need(input && Number.isInteger(input.n) && input.n >= 1 && input.n <= MAX_VERTICES,
+      "The finite visual requires 1–18 original vertices.");
+    need(Array.isArray(input.edges) && input.edges.length <= MAX_VERTICES * (MAX_VERTICES - 1) / 2,
+      "An explicit, bounded edge list is required.");
+    const seen = new Set(), edges = [];
+    for (const edge of input.edges) {
+      need(Array.isArray(edge) && edge.length === 2, "Each edge needs two endpoints.");
+      const [a,b] = edge;
+      need(Number.isInteger(a) && Number.isInteger(b) && a >= 0 && b >= 0 && a < input.n && b < input.n && a !== b,
+        "Only distinct, in-universe endpoints are supported.");
+      const key = edgeKey(a,b);
+      if (!seen.has(key)) { edges.push(a < b ? [a,b] : [b,a]); seen.add(key); }
+    }
+    edges.sort((a,b) => a[0] - b[0] || a[1] - b[1]);
+    const neighbors = Array.from({length: input.n}, () => []);
+    for (const [a,b] of edges) { neighbors[a].push(b); neighbors[b].push(a); }
+    neighbors.forEach(row => row.sort((a,b) => a-b));
+    return { n: input.n, edges, neighbors };
+  }
+
+  function listPresets() {
+    return Object.entries(PRESETS).map(([key,p]) => ({key, name:p.name, baseVertices:p.n,
+      maxGroup:Math.min(4, Math.floor(MAX_VERTICES / p.n))}));
+  }
+  function makeFixture(key, groupSize) {
+    const p = PRESETS[key];
+    need(p && Number.isInteger(groupSize) && groupSize >= 1 && groupSize <= 4,
+      "Choose one of the fixed presets and group sizes 1–4.");
+    need(p.n * groupSize <= MAX_VERTICES, "That blow-up exceeds the 18-variable cap.");
+    const edges = [];
+    for (const [a,b] of p.edges) for (let i=0;i<groupSize;i++) for (let j=0;j<groupSize;j++)
+      edges.push([a*groupSize+i,b*groupSize+j]);
+    return Object.assign(graphOf({n:p.n*groupSize,edges}),
+      {fixture:key, name:p.name, groupSize, baseVertices:p.n});
+  }
+
+  // Compare complete sorted open-neighborhood tuples. Supplied blow-up blocks
+  // play NO role here: e.g. opposite blocks of C4 must merge with one another.
+  function quotientGraph(input) {
+    const graph = graphOf(input), classes = [], tuples = [];
+    for (let v=0;v<graph.n;v++) {
+      let k = tuples.findIndex(tuple => equalTuple(tuple,graph.neighbors[v]));
+      if (k < 0) { k=classes.length; tuples.push(graph.neighbors[v].slice()); classes.push([]); }
+      classes[k].push(v);
+    }
+    const classOf = Array(graph.n).fill(-1);
+    classes.forEach((members,k) => members.forEach(v => { classOf[v]=k; }));
+    const edges = [], seen = new Set();
+    for (const [a,b] of graph.edges) {
+      const u=classOf[a], v=classOf[b], key=edgeKey(u,v);
+      need(u !== v, "An exact-neighborhood class must be independent.");
+      if (!seen.has(key)) { edges.push(u < v ? [u,v] : [v,u]); seen.add(key); }
+    }
+    const quotient = Object.assign(graphOf({n:classes.length,edges}), {classes,classOf});
+    verifyCoverage(graph,quotient);
+    return quotient;
+  }
+
+  // Public certificate check, also useful for later deliberately corrupted copies.
+  function verifyCoverage(input, quotient) {
+    const graph=graphOf(input), q=graphOf(quotient);
+    need(Array.isArray(quotient.classes) && quotient.classes.length === q.n,
+      "Missing class partition.");
+    const owner=Array(graph.n).fill(-1);
+    quotient.classes.forEach((members,c) => {
+      need(Array.isArray(members) && members.length > 0, "Empty class.");
+      for (const v of members) {
+        need(Number.isInteger(v) && v >= 0 && v < graph.n && owner[v] === -1,
+          "The partition must preserve each original vertex exactly once.");
+        owner[v]=c;
+      }
+      for (const v of members) need(equalTuple(graph.neighbors[v],graph.neighbors[members[0]]),
+        "A class merged unequal complete neighborhoods.");
+    });
+    need(owner.every(c => c >= 0), "A free or constrained original vertex was dropped.");
+    for (let a=0;a<q.n;a++) for (let b=a+1;b<q.n;b++)
+      need(!equalTuple(graph.neighbors[quotient.classes[a][0]],graph.neighbors[quotient.classes[b][0]]),
+        "Equal-neighborhood classes were not fully merged.");
+    const original=new Set(graph.edges.map(([a,b]) => edgeKey(a,b)));
+    const represented=new Set();
+    for (const [a,b] of q.edges) for (const u of quotient.classes[a]) for (const v of quotient.classes[b])
+      represented.add(edgeKey(u,v));
+    need(original.size === represented.size && [...original].every(key => represented.has(key)),
+      "Quotient cross-products do not exactly cover the original edges.");
+    need(graph.edges.every(([a,b]) => owner[a] !== owner[b]), "An internal class edge was lost.");
+    return true;
+  }
+
+  function orientForest(input, removed) {
+    const graph=graphOf(input), excluded=new Set(removed), parent=Array(graph.n).fill(-2);
+    const children=Array.from({length:graph.n},()=>[]), roots=[], order=[];
+    for (const v of excluded) need(Number.isInteger(v) && v>=0 && v<graph.n, "Invalid cutset vertex.");
+    for (let root=0;root<graph.n;root++) {
+      if (excluded.has(root) || parent[root] !== -2) continue;
+      roots.push(root); parent[root]=-1;
+      const stack=[root];
+      while (stack.length) {
+        const v=stack.pop(); order.push(v);
+        for (const u of graph.neighbors[v]) {
+          if (excluded.has(u) || u === parent[v]) continue;
+          need(parent[u] === -2, "The claimed remainder still contains a cycle.");
+          parent[u]=v; children[v].push(u); stack.push(u);
+        }
+      }
+    }
+    return {parent,children,roots,order};
+  }
+
+  function constructCutset(input) {
+    const q=graphOf(input), parent=Array.from({length:q.n},(_,i)=>i);
+    function find(v) { while(parent[v] !== v) v=parent[v]; return v; }
+    const treeEdges=[], nonTreeEdges=[];
+    for (const [a,b] of q.edges) {
+      const x=find(a), y=find(b);
+      if (x !== y) { parent[x]=y; treeEdges.push([a,b]); } else nonTreeEdges.push([a,b]);
+    }
+    const components=new Set(parent.map((_,v)=>find(v))).size;
+    const r=q.edges.length-q.n+components;
+    const S=[...new Set(nonTreeEdges.map(([a,b])=>Math.min(a,b)))].sort((a,b)=>a-b);
+    need(r === nonTreeEdges.length && S.length <= r, "Spanning-forest rank check failed.");
+    need(nonTreeEdges.every(([a,b])=>S.includes(a)||S.includes(b)), "Unhit non-tree edge.");
+    const forest=orientForest(q,S);
+    need(2 ** S.length <= MAX_BRANCHES, "The finite visual caps branching at 64 patterns.");
+    return {treeEdges,nonTreeEdges,components,r,S,forest,forestVerified:true};
+  }
+
+  function classWeights(quotient, mode) {
+    need(mode === "unit" || mode === "zero", "Only the two exhibited weight modes are supported.");
+    return quotient.classes.map(members => {
+      // Unit mode: each original w(0)=w(1)=1. Zero mode: w(0)=0,w(1)=1.
+      const a=mode === "unit" ? 1n : 0n;
+      const t=mode === "unit" ? (1n << BigInt(members.length)) : 1n;
+      return {a,b:t-a,t};
+    });
+  }
+
+  function countQuotient(input, certificate, mode) {
+    const q=graphOf(input), S=certificate.S.slice(), inS=new Set(S);
+    need(inS.size === S.length, "Duplicate cutset vertex.");
+    const forest=orientForest(q,S), weights=classWeights(input,mode);
+    const patterns=2 ** S.length;
+    need(patterns <= MAX_BRANCHES, "The finite visual caps branching at 64 patterns.");
+    const branches=[]; let total=0n;
+    for (let mask=0;mask<patterns;mask++) {
+      const occupied=S.filter((v,i)=>(mask & (1 << i)) !== 0);
+      const occupiedSet=new Set(occupied);
+      const conflict=q.edges.find(([a,b])=>occupiedSet.has(a)&&occupiedSet.has(b));
+      const forced=new Set();
+      for (const v of occupied) for (const u of q.neighbors[v]) if (!inS.has(u)) forced.add(u);
+      let factor=1n;
+      S.forEach((v,i)=> { factor *= (mask & (1 << i)) ? weights[v].b : weights[v].a; });
+      const rows=Array(q.n).fill(null); let forestTotal=1n;
+      if (!conflict) {
+        for (const v of forest.order.slice().reverse()) {
+          let E=weights[v].a, N=forced.has(v) ? 0n : weights[v].b;
+          for (const child of forest.children[v]) { E *= rows[child].E+rows[child].N; N *= rows[child].E; }
+          rows[v]={id:v,a:weights[v].a,b:weights[v].b,E,N,forced:forced.has(v),
+            parent:forest.parent[v],children:forest.children[v].slice()};
+        }
+        for (const root of forest.roots) forestTotal *= rows[root].E+rows[root].N;
+      } else forestTotal=0n;
+      const contribution=conflict ? 0n : factor*forestTotal;
+      total+=contribution;
+      branches.push({mask,occupied,forced:[...forced].sort((a,b)=>a-b),invalid:Boolean(conflict),
+        conflict:conflict ? conflict.slice() : null,factor,forestTotal,contribution,rows});
+    }
+    return {mode,total,branches,weights,forest};
+  }
+
+  // A real, small explicit graph encoding. L refers to ORIGINAL labels/universe:
+  // unary n + 0, unary m + 0, then sorted endpoints in ceil(log2 n) bits each.
+  // This is our declared encoding, NOT card378's encoding or a padded quotient size.
+  function encodeOriginal(input) {
+    const graph=graphOf(input), width=Math.max(1,Math.ceil(Math.log2(graph.n)));
+    const bits="1".repeat(graph.n)+"0"+"1".repeat(graph.edges.length)+"0"+
+      graph.edges.map(edge=>edge.map(v=>v.toString(2).padStart(width,"0")).join("")).join("");
+    return {bits,lengthBits:bits.length,endpointBits:width};
+  }
+
+  function analyze(input, mode) {
+    const graph=graphOf(input), quotient=quotientGraph(graph), certificate=constructCutset(quotient);
+    const unit=countQuotient(quotient,certificate,"unit");
+    const weighted=mode === "zero" ? countQuotient(quotient,certificate,"zero") : unit;
+    need(mode === "unit" || mode === "zero", "Unknown weight mode.");
+    return {graph,quotient,certificate,unit,weighted,mode,modelCount:unit.total,
+      weightedZ:weighted.total,satisfiable:unit.total>0n,coverageVerified:true,
+      forestVerified:true,encoding:encodeOriginal(graph)};
+  }
+
+  // Independent raw-CNF oracle: never reads classes, cutsets or forest-DP states.
+  // This optional UI check evaluates every ORIGINAL assignment and every edge.
+  function bruteForceOriginal(input, mode) {
+    const graph=graphOf(input);
+    need(mode === "unit" || mode === "zero", "Unknown weight mode.");
+    let models=0n, weightedZ=0n;
+    const assignments=2 ** graph.n;
+    for (let mask=0;mask<assignments;mask++) {
+      let satisfies=true;
+      for (const [a,b] of graph.edges) if ((mask & (1 << a)) && (mask & (1 << b))) { satisfies=false; break; }
+      if (!satisfies) continue;
+      models+=1n;
+      let weight=1n;
+      for (let v=0;v<graph.n;v++) weight *= mode === "unit" || (mask & (1 << v)) ? 1n : 0n;
+      weightedZ+=weight;
+    }
+    return {modelCount:models,weightedZ,assignmentsChecked:BigInt(assignments),
+      method:"exhaustive original all-negative binary CNF"};
+  }
+
+  return Object.freeze({MAX_VERTICES,MAX_BRANCHES,listPresets,makeFixture,graphOf,
+    quotientGraph,verifyCoverage,constructCutset,orientForest,classWeights,
+    countQuotient,encodeOriginal,analyze,bruteForceOriginal});
+});
+
+</script>
+  <script>
+(function () {
+  "use strict";
+  const Engine=window.CycleUntanglerEngine;
+  const $=id=>document.getElementById(id);
+  const state={fixture:"cycle5",group:1,mode:"unit",stage:0,branch:0,focus:null,analysis:null,oracle:null};
+  const stages=["ORIGINAL GRAPH","EXACT OPEN-NEIGHBORHOOD QUOTIENT","SPANNING FOREST + CONSTRUCTED CUTSET","SELECTED BRANCH + FOREST REMAINDER"];
+  const colors={mint:[.706,.957,.812,1],coral:[1,.608,.529,1],purple:[.769,.698,1,1],
+    quiet:[.39,.51,.54,1],white:[.96,.98,.94,1],dark:[.09,.17,.20,1]};
+  const diagnostics=window.cycleUntanglerDiagnostics={ready:false,renderBackend:"pending",
+    webglErrors:[],drawCalls:0,currentFixture:null,stage:null,modelCount:null,weightedZ:null,
+    coverageVerified:false,forestVerified:false,oracleStatus:"not-run",limits:{originalVertices:18,branchPatterns:64}};
+  const labels=new Map();
+  const fmt=value=>value.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  const className=v=>"C"+(v+1);
+  const variableName=v=>"x"+(v+1);
+  const joinClasses=xs=>xs.length ? xs.map(className).join(", ") : "none";
+
+  function errorCode(code) {
+    if (diagnostics.webglErrors.length<16 && !diagnostics.webglErrors.includes(code)) diagnostics.webglErrors.push(code);
+  }
+  function backend(name) {
+    diagnostics.renderBackend=name;
+    document.body.dataset.renderer=name; $("graph-canvas").dataset.renderer=name;
+    const available=name === "webgl2";
+    $("renderer-label").textContent=available ? "WEBGL2 · DRAW ON CHANGE" : "TEXT / TABLE FALLBACK";
+    $("gl-fallback").hidden=available;
+    $("graph-canvas").style.visibility=available ? "visible" : "hidden";
+    $("graph-labels").hidden=!available;
+  }
+
+  class GraphRenderer {
+    constructor(canvas) {
+      this.canvas=canvas; this.gl=null;
+      try {
+        const gl=canvas.getContext("webgl2",{alpha:true,antialias:true,preserveDrawingBuffer:false});
+        if (!gl) { errorCode("WEBGL2_UNAVAILABLE"); backend("fallback"); return; }
+        this.gl=gl;
+        this.lines=this.program(`#version 300 es
+          in vec2 a_position; in vec4 a_color; uniform vec2 u_resolution;
+          out vec4 v_color;
+          void main(){ vec2 p=a_position/u_resolution*2.0-1.0;
+            gl_Position=vec4(p.x,-p.y,0.0,1.0); v_color=a_color; }`,
+          `#version 300 es
+          precision mediump float; in vec4 v_color; out vec4 outColor;
+          void main(){ outColor=v_color; }`);
+        this.nodes=this.program(`#version 300 es
+          in vec2 a_position; in vec4 a_color; in float a_radius; in vec4 a_ring;
+          uniform vec2 u_resolution; uniform float u_dpr;
+          out vec4 v_color; out vec4 v_ring;
+          void main(){ vec2 p=a_position/u_resolution*2.0-1.0;
+            gl_Position=vec4(p.x,-p.y,0.0,1.0); gl_PointSize=a_radius*2.0*u_dpr;
+            v_color=a_color; v_ring=a_ring; }`,
+          `#version 300 es
+          precision mediump float; in vec4 v_color; in vec4 v_ring; out vec4 outColor;
+          void main(){ float r=length(gl_PointCoord*2.0-1.0);
+            if(r>1.0) discard;
+            float rim=smoothstep(0.80,0.86,r);
+            vec4 c=mix(v_color,v_ring,rim);
+            c.a*=1.0-smoothstep(0.94,1.0,r); outColor=c; }`);
+        this.buffer=gl.createBuffer();
+        if (!this.buffer) throw new Error("BUFFER_ALLOCATION");
+        gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        backend("webgl2");
+      } catch (_) { this.gl=null; errorCode("WEBGL_INITIALIZATION_FAILED"); backend("fallback"); }
+    }
+    program(vertex,fragment) {
+      const gl=this.gl, program=gl.createProgram();
+      if (!program) throw new Error("PROGRAM_ALLOCATION");
+      for (const [kind,source] of [[gl.VERTEX_SHADER,vertex],[gl.FRAGMENT_SHADER,fragment]]) {
+        const shader=gl.createShader(kind);
+        if (!shader) throw new Error("SHADER_ALLOCATION");
+        gl.shaderSource(shader,source); gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) throw new Error("SHADER_COMPILE");
+        gl.attachShader(program,shader); gl.deleteShader(shader);
+      }
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program,gl.LINK_STATUS)) throw new Error("PROGRAM_LINK");
+      return program;
+    }
+    upload(program,data,stride,attributes,w,h,dpr) {
+      const gl=this.gl;
+      gl.useProgram(program); gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);
+      // The line and point programs have different layouts; leave no stale
+      // enabled point attributes reading beyond the next line upload.
+      for (let i=0;i<gl.getParameter(gl.MAX_VERTEX_ATTRIBS);i++) gl.disableVertexAttribArray(i);
+      gl.uniform2f(gl.getUniformLocation(program,"u_resolution"),w,h);
+      const ratio=gl.getUniformLocation(program,"u_dpr");
+      if (ratio !== null) gl.uniform1f(ratio,dpr);
+      let offset=0;
+      for (const [name,size] of attributes) {
+        const location=gl.getAttribLocation(program,name);
+        if (location >= 0) { gl.enableVertexAttribArray(location); gl.vertexAttribPointer(location,size,gl.FLOAT,false,stride*4,offset*4); }
+        offset+=size;
+      }
+    }
+    draw(nodes,edges,w,h) {
+      const gl=this.gl;
+      if (!gl || diagnostics.renderBackend !== "webgl2") return;
+      const dpr=Math.min(window.devicePixelRatio||1,2);
+      this.canvas.width=Math.max(1,Math.round(w*dpr)); this.canvas.height=Math.max(1,Math.round(h*dpr));
+      gl.viewport(0,0,this.canvas.width,this.canvas.height); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+      const vertices=[];
+      function line(a,b,color,width,dashed) {
+        const dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);
+        if (!length) return;
+        const nx=-dy/length*width/2,ny=dx/length*width/2;
+        const pieces=dashed ? Math.ceil(length/13) : 1;
+        for (let k=0;k<pieces;k++) {
+          const t0=k/pieces,t1=(k+(dashed ? 0.53 : 1))/pieces;
+          const x0=a.x+dx*t0,y0=a.y+dy*t0,x1=a.x+dx*t1,y1=a.y+dy*t1;
+          for (const [x,y] of [[x0+nx,y0+ny],[x0-nx,y0-ny],[x1+nx,y1+ny],
+            [x1+nx,y1+ny],[x0-nx,y0-ny],[x1-nx,y1-ny]]) vertices.push(x,y,...color);
+        }
+      }
+      for (const edge of edges) line(nodes[edge.a],nodes[edge.b],edge.color,edge.width,edge.dashed);
+      this.upload(this.lines,vertices,6,[["a_position",2],["a_color",4]],w,h,dpr);
+      gl.drawArrays(gl.TRIANGLES,0,vertices.length/6);
+      const points=[];
+      const sizeLimit=gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)[1];
+      for (const node of nodes) points.push(node.x,node.y,...node.fill,Math.min(node.radius,sizeLimit/(2*dpr)),...node.ring);
+      this.upload(this.nodes,points,11,[["a_position",2],["a_color",4],["a_radius",1],["a_ring",4]],w,h,dpr);
+      gl.drawArrays(gl.POINTS,0,nodes.length);
+      const error=gl.getError();
+      if (error !== gl.NO_ERROR) { errorCode("WEBGL_DRAW_"+error); this.gl=null; backend("fallback"); return; }
+      diagnostics.drawCalls++;
+    }
+  }
+
+  let renderer;
+  function text(id,value) { $(id).textContent=value; }
+  function branch() { return state.analysis.weighted.branches[state.branch]; }
+  function setReady(value) {
+    diagnostics.ready=value; document.body.dataset.ready=String(value); $("graph-canvas").dataset.ready=String(value);
+  }
+  function fail(error) {
+    setReady(false); $("app-error").hidden=false;
+    $("app-error").textContent="The exact construction refused this state: "+error.message;
+  }
+  function updateAnalysis() {
+    try {
+      const preset=Engine.listPresets().find(p=>p.key===state.fixture);
+      state.group=Math.min(state.group,preset.maxGroup);
+      for (const option of $("group").options) option.disabled=Number(option.value)>preset.maxGroup;
+      $("group").value=String(state.group);
+      text("group-help","Each block has "+state.group+" original variable"+(state.group===1?"":"s")+
+        ". Complete edge blow-ups; this preset allows sizes 1–"+preset.maxGroup+" within the 18-variable cap.");
+      state.analysis=Engine.analyze(Engine.makeFixture(state.fixture,state.group),state.mode);
+      state.branch=Math.min(state.branch,state.analysis.weighted.branches.length-1);
+      state.focus=null; state.oracle=null; diagnostics.oracleStatus="not-run";
+      $("app-error").hidden=true; update(); setReady(true);
+    } catch (error) { fail(error); }
+  }
+  function addRow(body,cells) {
+    const row=document.createElement("tr");
+    cells.forEach(value=> { const cell=document.createElement("td"); cell.textContent=value; row.appendChild(cell); });
+    body.appendChild(row);
+  }
+  function updateTables() {
+    const a=state.analysis,q=a.quotient,weights=a.weighted.weights,b=branch();
+    const classes=$("class-table").tBodies[0],dp=$("dp-table").tBodies[0];
+    classes.replaceChildren(); dp.replaceChildren();
+    q.classes.forEach((members,v)=>addRow(classes,[className(v),members.map(variableName).join(", "),
+      joinClasses(q.neighbors[v]),fmt(weights[v].a),fmt(weights[v].b)]));
+    if (b.invalid) addRow(dp,["Rejected branch","Adjacent occupied cutset classes","—","—","—"]);
+    else if (!a.certificate.forest.order.length) addRow(dp,["Empty remainder","Empty product is 1","—","—","—"]);
+    else for (const v of a.certificate.forest.order.slice().reverse()) {
+      const row=b.rows[v];
+      addRow(dp,[className(v),joinClasses(row.children),row.forced?"Yes · N = 0":"No",fmt(row.E),fmt(row.N)]);
+    }
+    const certificate=$("certificate-list"); certificate.replaceChildren();
+    const c=a.certificate;
+    for (const sentence of [
+      "Original edge cross-products checked exactly; all "+a.graph.n+" original variables are preserved, including isolates.",
+      q.n+" canonical exact-neighborhood classes; "+q.edges.length+" quotient edges; "+c.components+" connected component"+(c.components===1?".":"s."),
+      c.treeEdges.length+" spanning-forest edges and "+c.nonTreeEdges.length+" non-tree edges. r = "+c.r+"; S = {"+joinClasses(c.S)+"}.",
+      "Every non-tree edge is hit by S. The actual remainder H − S is checked acyclic.",
+      "All "+a.weighted.branches.length+" occupancy patterns enumerated (2^|S| ≤ 2^r). Branch contributions sum to Z = "+fmt(a.weightedZ)+"."
+    ]) { const li=document.createElement("li"); li.textContent=sentence; certificate.appendChild(li); }
+  }
+  function updateBranch() {
+    const a=state.analysis,c=a.certificate,b=branch(),patterns=a.weighted.branches.length;
+    $("branch").max=String(patterns-1); $("branch").value=String(state.branch);
+    $("branch").disabled=patterns===1; $("branch-prev").disabled=state.branch===0;
+    $("branch-next").disabled=state.branch===patterns-1;
+    text("branch-label","Branch "+(state.branch+1)+" / "+patterns);
+    text("branch-occupancy",c.S.length ? c.S.map(v=>className(v)+": "+(b.occupied.includes(v)?"occupied":"empty")).join(" · ") : "S is empty: one branch, no cutset factor beyond 1.");
+    const status=$("branch-classification"); status.className="branch-classification";
+    if (b.invalid) { status.classList.add("invalid"); status.textContent="Invalid Boolean occupancy: "+joinClasses(b.conflict)+" are adjacent and both occupied. This branch is rejected, independent of weights."; }
+    else if (b.contribution===0n) { status.classList.add("zero-mass"); status.textContent="Valid Boolean branch, but weighted mass is zero. This is not an UNSAT result."; }
+    else status.textContent="Valid Boolean branch · "+(b.forced.length?joinClasses(b.forced)+" forced empty in the forest.":"no forest class is forced empty.");
+    text("branch-factor",fmt(b.factor)); text("forest-total",b.invalid?"not evaluated":fmt(b.forestTotal));
+    text("branch-contribution",fmt(b.contribution));
+    const list=$("branch-list"); list.replaceChildren();
+    a.weighted.branches.forEach((item,i)=> {
+      const button=document.createElement("button"); button.type="button";
+      button.className="branch-chip"+(item.invalid?" invalid":"");
+      button.setAttribute("aria-pressed",String(i===state.branch));
+      button.textContent=(i+1)+" · "+(item.invalid?"invalid":fmt(item.contribution));
+      button.setAttribute("aria-label","Branch "+(i+1)+", "+(item.invalid?"invalid occupancy":"contribution "+fmt(item.contribution)));
+      button.addEventListener("click",()=>chooseBranch(i)); list.appendChild(button);
+    });
+  }
+  function update() {
+    const a=state.analysis,c=a.certificate;
+    text("model-count",fmt(a.modelCount)); text("weighted-z",fmt(a.weightedZ));
+    text("r-stat",String(c.r)); text("s-stat",String(c.S.length)); text("patterns-stat","2^"+c.S.length+" = "+a.weighted.branches.length);
+    text("original-count",a.graph.n+" original variables · "+a.graph.edges.length+" original edges");
+    text("original-length","L = "+a.encoding.lengthBits+" bits · original encoding, before compression");
+    const modeNote=$("mode-note"); modeNote.className="mode-note"+(state.mode==="zero"?" zero-mode":"");
+    modeNote.textContent=state.mode==="zero" ? "Every w(0) = 0 and w(1) = 1. These graphs have edges: Z = 0, while Boolean models still exist." : "Every w(0) = w(1) = 1. Here Z equals the Boolean model count.";
+    document.querySelectorAll("[data-stage]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.stage)===state.stage)));
+    text("stage-kicker",stages[state.stage]);
+    const descriptions=[
+      "An edge forbids its two endpoints from both being 1. The all-zero assignment satisfies every clause. Blow-up blocks are only an input construction; the engine must discover exact classes itself.",
+      "Merge only identical complete open neighborhoods: "+a.graph.n+" original variables become "+a.quotient.n+" classes. Every quotient edge represents a verified complete cross-product of original edges.",
+      "Mint edges form a spanning forest. Coral edges are the "+c.r+" non-tree edges. Choose their lower-numbered endpoints: S = {"+joinClasses(c.S)+"}. Purple rings mark this constructed cutset; H − S is a forest.",
+      "The cutset is separated on the left. Occupied cutset classes force every neighboring forest class empty; those classes have N = 0. Forest states are evaluated leaf-to-root in the table below."
+    ];
+    text("graph-caption",descriptions[state.stage]);
+    text("inspect-text","Choose a labeled vertex to inspect its original members and neighbors.");
+    updateBranch(); updateTables(); renderGraph();
+    const oracle=$("oracle-status"); oracle.className="oracle-status";
+    if (!state.oracle) oracle.textContent="Optional exhaustive original-CNF oracle · not run for this configuration.";
+    else { oracle.classList.add(state.oracle.ok?"verified":"failed"); oracle.textContent=state.oracle.message; }
+    Object.assign(diagnostics,{currentFixture:{key:state.fixture,groupSize:state.group,n:a.graph.n,m:a.graph.edges.length},
+      stage:state.stage,weightMode:state.mode,modelCount:a.modelCount.toString(),weightedZ:a.weightedZ.toString(),
+      quotientVertices:a.quotient.n,cycleRank:c.r,cutset:c.S.slice(),branchIndex:state.branch,
+      selectedBranchInvalid:branch().invalid,selectedContribution:branch().contribution.toString(),
+      coverageVerified:a.coverageVerified,forestVerified:a.forestVerified,originalLengthBits:a.encoding.lengthBits});
+    text("live-summary","Stage "+(state.stage+1)+". "+a.graph.n+" original variables, "+fmt(a.modelCount)+" Boolean models. Weighted Z "+fmt(a.weightedZ)+". "+$("branch-classification").textContent);
+  }
+  function chooseBranch(value) { state.branch=value; state.focus=null; update(); }
+  function chooseStage(value) { state.stage=value; state.focus=null; update(); }
+
+  function layout() {
+    const a=state.analysis,q=a.quotient,w=$("graph-shell").clientWidth,h=$("graph-shell").clientHeight;
+    const graph=state.stage===0?a.graph:q,positions=[];
+    if (state.stage===0) {
+      const base=Engine.listPresets().find(p=>p.key===state.fixture).baseVertices;
+      for (let v=0;v<graph.n;v++) {
+        const block=Math.floor(v/state.group),member=v%state.group;
+        const angle=-Math.PI/2+2*Math.PI*block/base;
+        const radius=Math.min(w*.32,h*.30), cluster=state.group===1?0:20;
+        const inner=2*Math.PI*member/state.group+Math.PI/4;
+        positions[v]={x:w*.5+Math.cos(angle)*radius+Math.cos(inner)*cluster,
+          y:h*.48+Math.sin(angle)*radius+Math.sin(inner)*cluster};
+      }
+    } else if (state.stage===3 && a.certificate.S.length) {
+      const S=a.certificate.S,forest=a.certificate.forest,levels=new Map();
+      const depth=Array(q.n).fill(0);
+      for (const v of forest.order) {
+        depth[v]=forest.parent[v]<0?0:depth[forest.parent[v]]+1;
+        if (!levels.has(depth[v])) levels.set(depth[v],[]);
+        levels.get(depth[v]).push(v);
+      }
+      const maxDepth=Math.max(0,...forest.order.map(v=>depth[v]));
+      S.forEach((v,i)=> { positions[v]={x:w*.16,y:h*.48+(i-(S.length-1)/2)*65}; });
+      for (const [level,vs] of levels) vs.forEach((v,i)=> {
+        positions[v]={x:maxDepth? w*.39+level/maxDepth*w*.48:w*.64,
+          y:h*.48+(i-(vs.length-1)/2)*Math.min(82,(h-150)/vs.length)};
+      });
+    } else {
+      const radius=graph.n===1?0:Math.min(w*.32,h*.30);
+      for (let v=0;v<graph.n;v++) { const angle=-Math.PI/2+2*Math.PI*v/graph.n;
+        positions[v]={x:w*.5+Math.cos(angle)*radius,y:h*.48+Math.sin(angle)*radius}; }
+    }
+    return {graph,positions,w,h};
+  }
+  function inspect(v) {
+    state.focus=v; const a=state.analysis,q=a.quotient;
+    const classId=state.stage===0?q.classOf[v]:v;
+    text("inspect-text",(state.stage===0?variableName(v)+" belongs to ":"")+className(classId)+": members "+
+      q.classes[classId].map(variableName).join(", ")+". Quotient neighbors: "+joinClasses(q.neighbors[classId])+".");
+    renderGraph();
+  }
+  function renderGraph() {
+    if (!state.analysis) return;
+    const a=state.analysis,c=a.certificate,b=branch(),{graph,positions,w,h}=layout();
+    const original=state.stage===0,nonTree=new Set(c.nonTreeEdges.map(([u,v])=>u+":"+v));
+    const cutset=new Set(c.S),selected=new Set(b.occupied),forced=new Set(b.forced);
+    const nodes=positions.map((position,v)=> {
+      const classId=original?a.quotient.classOf[v]:v;
+      let ring=[colors.mint,colors.purple,colors.coral][classId%3],fill=[.08,.17,.20,1];
+      if (!original && state.stage>=2) ring=cutset.has(v)?colors.purple:colors.mint;
+      if (!original && state.stage===3) {
+        if (cutset.has(v)) fill=selected.has(v)?[.38,.19,.18,1]:[.13,.17,.20,1];
+        else if (forced.has(v)) { fill=[.12,.21,.22,1]; ring=colors.quiet; }
+      }
+      if (state.focus===v) ring=colors.white;
+      return Object.assign({},position,{radius:original?14:26,fill,ring});
+    });
+    const edges=graph.edges.map(([u,v])=> {
+      let color=[.40,.72,.65,.43],width=1.3,dashed=false;
+      if (!original && state.stage>=2 && nonTree.has(u+":"+v)) { color=[...colors.coral.slice(0,3),.9]; width=2.2; }
+      if (!original && state.stage===3 && (cutset.has(u)||cutset.has(v))) { dashed=true; color=[.61,.65,.72,.38]; }
+      if (!original && state.stage===3 && b.invalid && selected.has(u)&&selected.has(v)) { color=colors.coral; width=3; }
+      if (state.focus!==null && (state.focus===u||state.focus===v)) { color=[...color.slice(0,3),1]; width+=.7; }
+      return {a:u,b:v,color,width,dashed};
+    });
+    if (renderer) renderer.draw(nodes,edges,w,h);
+    const needed=new Set();
+    nodes.forEach((node,v)=> {
+      const key=(original?"variable-":"class-")+v; needed.add(key);
+      let button=labels.get(key);
+      if (!button) {
+        button=document.createElement("button"); button.type="button"; button.className="graph-node-label";
+        button.addEventListener("click",()=>inspect(v)); labels.set(key,button); $("graph-labels").appendChild(button);
+      }
+      button.style.left=node.x+"px"; button.style.top=node.y+"px";
+      button.style.width=(original?28:58)+"px"; button.style.minHeight=(original?28:54)+"px";
+      button.replaceChildren(document.createTextNode(original?variableName(v):className(v)));
+      if (!original) { const small=document.createElement("small");
+        small.textContent=state.stage===3&&cutset.has(v)?(selected.has(v)?"occupied":"empty"):
+          state.stage===3&&forced.has(v)?"forced ∅":a.quotient.classes[v].length+" vars";
+        button.appendChild(small); }
+      const members=original?[v]:a.quotient.classes[v];
+      button.setAttribute("aria-label",(original?variableName(v):className(v))+", original variables "+members.map(variableName).join(", ")+". Inspect neighbors.");
+      button.setAttribute("aria-pressed",String(state.focus===v));
+    });
+    for (const [key,button] of labels) if (!needed.has(key)) { button.remove(); labels.delete(key); }
+  }
+
+  try {
+    if (!Engine) throw new Error("The local exact engine is missing.");
+    Engine.listPresets().forEach(p=> { const option=document.createElement("option"); option.value=p.key; option.textContent=p.name; $("preset").appendChild(option); });
+    $("preset").value=state.fixture;
+    $("preset").addEventListener("change",event=> { state.fixture=event.target.value; state.branch=0; updateAnalysis(); });
+    $("group").addEventListener("change",event=> { state.group=Number(event.target.value); state.branch=0; updateAnalysis(); });
+    document.querySelectorAll("input[name=weight-mode]").forEach(input=>input.addEventListener("change",event=> {
+      if (event.target.checked) { state.mode=event.target.value; updateAnalysis(); }
+    }));
+    document.querySelectorAll("[data-stage]").forEach(button=>button.addEventListener("click",()=>chooseStage(Number(button.dataset.stage))));
+    $("show-branch").addEventListener("click",()=>chooseStage(3));
+    $("branch").addEventListener("input",event=>chooseBranch(Number(event.target.value)));
+    $("branch-prev").addEventListener("click",()=>chooseBranch(Math.max(0,state.branch-1)));
+    $("branch-next").addEventListener("click",()=>chooseBranch(Math.min(state.analysis.weighted.branches.length-1,state.branch+1)));
+    $("oracle-button").addEventListener("click",()=> {
+      try {
+        const a=state.analysis,actual=Engine.bruteForceOriginal(a.graph,state.mode);
+        const ok=actual.modelCount===a.modelCount && actual.weightedZ===a.weightedZ;
+        diagnostics.oracleStatus=ok?"verified":"mismatch";
+        diagnostics.oracleAssignments=actual.assignmentsChecked.toString();
+        state.oracle={ok,message:(ok?"MATCH":"MISMATCH")+" · "+fmt(actual.assignmentsChecked)+" original assignments checked; models "+fmt(actual.modelCount)+", Z "+fmt(actual.weightedZ)+"."};
+        update();
+      } catch (error) { diagnostics.oracleStatus="refused"; fail(error); }
+    });
+    renderer=new GraphRenderer($("graph-canvas"));
+    $("graph-canvas").addEventListener("webglcontextlost",event=> {
+      event.preventDefault(); errorCode("WEBGL_CONTEXT_LOST"); backend("fallback");
+    });
+    $("graph-canvas").addEventListener("webglcontextrestored",()=> { renderer=new GraphRenderer($("graph-canvas")); renderGraph(); });
+    if (typeof ResizeObserver === "function") new ResizeObserver(()=>renderGraph()).observe($("graph-shell"));
+    else window.addEventListener("resize",()=>renderGraph());
+    updateAnalysis();
+  } catch (error) { fail(error); }
+})();
+
+</script>
+</body>
+</html>

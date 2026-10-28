@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Two WebGL solution clouds separate Boolean existence from exact weighted counting. Pins remove models; zero weights do not.">
+<title>Zero is not empty · Card 378 microscope</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;--bg:#091320;--panel:#102132;--line:#2a4052;--ink:#f0f2eb;--muted:#b0bec8;--mint:#a5e7c6;--gold:#efc388;--red:#ff9b8b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1250px;margin:auto;padding:38px 28px}header{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:26px}.eyebrow{font-size:10px;letter-spacing:.18em;color:var(--mint);text-transform:uppercase}h1{font:400 clamp(38px,6vw,66px)/1.05 Georgia,serif;letter-spacing:-.045em;margin:13px 0}header p{max-width:620px;font-size:14px;line-height:1.8;color:var(--muted);margin:0}.badge{font-size:10px;white-space:nowrap;border:1px solid var(--line);border-radius:20px;padding:8px 13px;color:var(--gold)}.controls{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.4fr;gap:24px;padding:20px 22px;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:16px}label,.control-title{display:block;font-size:11px;color:var(--muted);margin-bottom:8px}select,button{font:inherit;font-size:12px;background:#142a3d;color:var(--ink);padding:9px 10px;border:1px solid #40586b;border-radius:6px}select{width:100%;font-size:12px}button{cursor:pointer;font-size:11px}button:hover{border-color:var(--mint)}input:focus-visible,select:focus-visible,button:focus-visible,canvas:focus-visible{outline:2px solid var(--mint);outline-offset:3px}input[type=range]{width:100%;accent-color:var(--mint)}.range{display:flex;gap:10px;align-items:center}.range output{min-width:22px;font:14px ui-monospace,monospace;color:var(--ink)}.view{border:1px solid var(--line);border-radius:15px;overflow:hidden;position:relative}.canvas-wrap{position:relative;height:440px;background:#0a1725}canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}.pane-label{position:absolute;top:17px;left:20px;pointer-events:none}.pane-label.two{left:calc(50% + 20px)}.pane-label small{display:block;font-size:10px;letter-spacing:.12em;color:var(--muted)}.pane-label strong{display:block;font:24px Georgia,serif;color:var(--mint);margin-top:7px}.pane-label.two strong{color:var(--gold)}.divider{position:absolute;top:0;left:50%;height:100%;border-left:1px solid var(--line);pointer-events:none}.stack .pane-label.two{left:20px;top:calc(50% + 17px)}.stack .divider{top:50%;left:0;height:0;width:100%;border:0;border-top:1px solid var(--line)}.orbit{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:10px;color:var(--muted);pointer-events:none}#tip{position:absolute;left:18px;bottom:40px;max-width:calc(100% - 36px);padding:8px 12px;background:#08121ef0;border:1px solid var(--line);border-radius:7px;font:11px/1.7 ui-monospace,monospace;pointer-events:none;overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:1fr 1fr;background:var(--panel)}.stat{padding:18px 22px}.stat+ .stat{border-left:1px solid var(--line)}.stat small{font-size:10px;letter-spacing:.08em;color:var(--muted)}.stat .value{font:500 35px ui-monospace,monospace;letter-spacing:-.05em;margin:9px 0;color:var(--mint)}.stat+ .stat .value{color:var(--gold)}.stat p{font-size:12px;line-height:1.7;color:var(--muted);margin:0}.pill{font:10px ui-sans-serif,system-ui;padding:4px 7px;border:1px solid #587367;border-radius:5px;letter-spacing:0;vertical-align:middle;margin-left:7px}.settings{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--line);background:var(--panel);padding:16px 22px}.pins{display:flex;align-items:center;gap:8px;font-size:11px}.pins label{margin:0}.pins select{width:86px}.pins button{white-space:nowrap}.broken-label{display:flex;gap:8px;align-items:center;line-height:1.6;margin:0;cursor:pointer}.broken-label input{accent-color:var(--red)}#wrong{padding:12px 18px;border-left:2px solid var(--red);margin-top:16px;background:#ff9b8b09;color:var(--red);font-size:12px;line-height:1.7}#wrong[hidden]{display:none}#checks{font:10px/1.8 ui-monospace,monospace;color:var(--mint);margin:13px 0}.notes{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:24px;padding:23px;border:1px solid var(--line);border-radius:13px}.notes h2{font:24px Georgia,serif;font-weight:400;margin:0 0 12px}.notes p{font-size:12px;color:var(--muted);line-height:1.9;margin:0 0 10px}.formula{font:12px/1.9 ui-monospace,monospace;color:var(--mint);margin:12px 0}#structure{font:11px/1.8 ui-monospace,monospace;color:var(--gold)}footer{display:flex;justify-content:space-between;gap:30px;font-size:10px;color:var(--muted);line-height:1.8;margin-top:20px}a{color:var(--mint)}#error{position:absolute;top:40%;left:10%;right:10%;text-align:center;font-size:12px;color:var(--gold);line-height:1.8}#announce{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}@media(max-width:800px){.controls{grid-template-columns:1fr 1fr;gap:17px 23px}header{display:block}.badge{display:inline-block;margin-top:16px}.notes{grid-template-columns:1fr;gap:15px}}@media(max-width:680px){.canvas-wrap{height:680px}.stats{grid-template-columns:1fr}.stat+ .stat{border-left:0;border-top:1px solid var(--line)}}@media(max-width:450px){main{padding:26px 14px}.controls{padding:16px;gap:15px}.pins{flex-wrap:wrap}.pins select{width:70px}.settings{padding:15px}.notes{padding:18px}footer{display:block}.stat .value{font-size:30px}}
+</style>
+<main><header><div><div class="eyebrow">Card 378 / the weight microscope</div><h1>Zero is not empty.</h1><p>Every dot is one complete satisfying assignment. Change its weight without changing its existence. Then pin a variable—or forget a constraint—and watch what actually changes.</p></div><span class="badge">Interactive research draft</span></header>
+<section class="controls" aria-label="Formula and weight controls">
+ <div><label for="family">Constraint shape</label><select id="family"><option value="cycle">Closed ring of blocks</option><option value="path">Open chain of blocks</option></select></div>
+ <div><label for="groups">Blocks</label><div class="range"><input id="groups" type="range" min="3" max="8" value="5"><output id="groups-value">5</output></div></div>
+ <div><label for="size">Variables per block</label><div class="range"><input id="size" type="range" min="1" max="2" value="2"><output id="size-value">2</output></div></div>
+ <div><label for="weights">Weight experiment</label><select id="weights"><option value="zero">Make both choices of x₁ weigh zero</option><option value="unit">Both choices of every variable weigh 1</option><option value="skew">False weighs 1; true weighs 2</option></select></div>
+</section>
+<section class="view" aria-label="Coordinated Boolean and weighted solution clouds"><div class="canvas-wrap" id="clouds"><canvas id="cloud" tabindex="0" role="img" aria-label="Two WebGL solution clouds. The left shows Boolean models; the right shows their weights. Drag or use arrow keys to rotate both views. Use the form controls to pin variables."></canvas><div class="divider"></div><div class="pane-label"><small>BOOLEAN EXISTENCE</small><strong>A model is still a model.</strong></div><div class="pane-label two"><small>WEIGHTED MASS</small><strong id="weight-title">Weight can vanish.</strong></div><div id="error" hidden></div><div id="tip" hidden></div><div class="orbit">Drag to orbit both views · hover a dot to inspect its bitstring · arrow keys rotate</div></div>
+<div class="stats"><div class="stat"><small>SATISFYING ASSIGNMENTS</small><div class="value"><span id="models">—</span><span class="pill" id="sat">…</span></div><p id="model-note">Pins restrict Boolean models; changing a weight does not.</p></div><div class="stat"><small>EXACT WEIGHTED MASS Z</small><div class="value" id="mass">—</div><p id="mass-note">A hollow circle is a real model with zero weight.</p></div></div>
+<div class="settings"><div class="pins"><label for="variable">Hard pin</label><select id="variable" aria-label="Variable"></select><select id="pin" aria-label="Pin value"><option value="-1">Free</option><option value="0">False</option><option value="1">True</option></select><button id="clear">Clear pins</button></div><label class="broken-label"><input id="broken" type="checkbox">Wrong shortcut: forget the cycle-closing constraints</label></div></section>
+<div id="wrong" hidden></div><p id="checks">Local exact checks run when this page opens.</p><details><summary style="font-size:11px;color:var(--muted);cursor:pointer">Read the first twelve models as text</summary><pre id="model-list" style="font-size:11px;line-height:1.8;white-space:pre-wrap"></pre></details>
+<section class="notes"><div><h2>Two questions. Two answers.</h2><p>“Does a satisfying assignment exist?” is Boolean. “How much weight do all satisfying assignments carry?” is arithmetic. Zero-weight assignments contribute nothing to the second answer and still matter to the first.</p><p>A hard pin is different: it removes assignments that disagree. Try pinning two adjacent variables true. Both clouds then lose every model, and the SAT indicator changes.</p><p>Each thin line connects two valid assignments differing in one variable. Positions are a fixed embedding of bitstrings, not a distance or cluster theorem. The right pane scales dot size relative to its largest weight; the displayed sum remains exact.</p></div><div><h2>A small exact-counting engine.</h2><p>The example formula forbids true–true pairs between neighboring blocks. The solver finds exact identical-neighborhood groups, verifies every edge, constructs a cycle-breaking set and counts the resulting forests.</p><div class="formula">time ≤ poly(L) · 2ʳ<br>r = quotient edges − groups + components</div><p>For this restricted family, logarithmic cycle rank gives polynomial time, including recognition. This visual deliberately stops at 12 original variables so it can independently enumerate every assignment; it is a finite check, not a complexity benchmark.</p><div id="structure"></div></div></section>
+<footer><span>Inspired by <a href="https://github.com/openai/math/blob/main/lean/docs/378.md">Card 378</a>. Marlow: symmetry and weighted-counting construction. Lattice: cycle-rank extension. No general polynomial-time SAT or novelty claim.</span><span>Dependency-free WebGL. No automatic network requests,<br>analytics, storage, autoplay or external fonts.</span></footer><div id="announce" aria-live="polite"></div></main>
+<script>
+'use strict';
+// Pure exact-integer model. No graph result is inferred from a render or animation.
+const byId=id=>document.getElementById(id), ONE=[1n,1n], ZERO=[0n,0n];
+const plus=(a,b)=>[a[0]+b[0],a[1]+b[1]], times=(a,b)=>[a[0]*b[0],a[1]*b[1]];
+const insist=(test,message)=>{if(!test)throw Error(message);};
+function graphFamily(k,m,cycle){
+ insist(Number.isInteger(k)&&k>=3&&k<=8&&Number.isInteger(m)&&m>=1&&m<=8,'Family research caps: 3–8 blocks, 1–8 variables per block');
+ const edges=[];
+ for(let i=0;i<(cycle?k:k-1);i++)for(let a=0;a<m;a++)for(let b=0;b<m;b++)edges.push([i*m+a,((i+1)%k)*m+b]);
+ return {n:k*m,edges,k,m,cycle};
+}
+function recognize(g){
+ insist(Number.isInteger(g.n)&&g.n>=0&&g.n<=64&&Array.isArray(g.edges)&&g.edges.length<=512,'Graph research caps: 64 variables, 512 clauses');
+ const adj=Array.from({length:g.n},()=>new Set());
+ for(const edge of g.edges){insist(Array.isArray(edge)&&edge.length===2,'Binary edge required');const [u,v]=edge;insist(Number.isInteger(u)&&Number.isInteger(v)&&u>=0&&v>=0&&u<g.n&&v<g.n&&u!==v,'Invalid original edge');adj[u].add(v);adj[v].add(u);}
+ const groups=[],map=new Map(),owner=[];
+ for(let v=0;v<g.n;v++){
+  const key=[...adj[v]].sort((a,b)=>a-b).join(',');
+  if(!map.has(key)){map.set(key,groups.length);groups.push([]);}
+  const i=map.get(key);groups[i].push(v);owner[v]=i;
+ }
+ const q=groups.map(()=>new Set());
+ for(const [u,v]of g.edges){insist(owner[u]!==owner[v],'A symmetry group contains an edge');q[owner[u]].add(owner[v]);q[owner[v]].add(owner[u]);}
+ for(let u=0;u<g.n;u++)for(let v=u+1;v<g.n;v++)insist(adj[u].has(v)===q[owner[u]].has(owner[v]),'Quotient lost an original edge');
+ const parents=new Map(),tree=new Set();let components=0;
+ const edgeKey=(u,v)=>Math.min(u,v)+':'+Math.max(u,v);
+ for(let root=0;root<q.length;root++)if(!parents.has(root)){
+  components++;parents.set(root,-1);const stack=[root];
+  while(stack.length){const u=stack.pop();for(const v of [...q[u]].sort((a,b)=>a-b))if(!parents.has(v)){parents.set(v,u);tree.add(edgeKey(u,v));stack.push(v);}}
+ }
+ const edges=[];for(let u=0;u<q.length;u++)for(const v of q[u])if(u<v)edges.push([u,v]);
+ const chords=edges.filter(([u,v])=>!tree.has(edgeKey(u,v))),cut=[...new Set(chords.map(([u])=>u))].sort((a,b)=>a-b);
+ const rank=edges.length-q.length+components;
+ insist(rank===chords.length&&cut.length<=rank,'Cycle-rank certificate failed');
+ return {groups,owner,q,edges,chords,cut,rank,components,tree,edgeKey};
+}
+function classFactors(cert,weights,pins){
+ const n=cert.owner.length;
+ insist(Array.isArray(weights)&&weights.length===n&&weights.every(w=>Array.isArray(w)&&w.length===2&&w.every(x=>typeof x==='bigint'&&x>=0n)),'Nonnegative exact-integer weight pairs required');
+ insist(pins instanceof Map&&[...pins].every(([v,b])=>Number.isInteger(v)&&v>=0&&v<n&&(b===0||b===1)),'Invalid hard pin');
+ return cert.groups.map(group=>{
+  let ew=1n,tw=1n,ec=1n,tc=1n;
+  for(const v of group){const allow0=!pins.has(v)||pins.get(v)===0,allow1=!pins.has(v)||pins.get(v)===1;
+   ew*=allow0?weights[v][0]:0n;tw*=(allow0?weights[v][0]:0n)+(allow1?weights[v][1]:0n);
+   ec*=allow0?1n:0n;tc*=BigInt(Number(allow0)+Number(allow1));
+  }
+  return [[ew,ec],[tw-ew,tc-ec]];
+ });
+}
+function forestCount(cert,factors,broken=false){
+ insist(cert.groups.length<=8&&cert.cut.length<=8,'Forest research cap: eight quotient groups');
+ const cut=broken?[]:cert.cut,cutset=new Set(cut);
+ const q=cert.q.map((ns,u)=>new Set([...ns].filter(v=>!broken||cert.tree.has(cert.edgeKey(u,v)))));
+ const parent=new Map(),order=[],roots=[];
+ for(let root=0;root<q.length;root++)if(!cutset.has(root)&&!parent.has(root)){
+  roots.push(root);parent.set(root,-1);const stack=[root];
+  while(stack.length){const u=stack.pop();order.push(u);for(const v of q[u])if(!cutset.has(v)&&v!==parent.get(u)){
+   insist(!parent.has(v),'Cycle survived the feedback set');parent.set(v,u);stack.push(v);
+  }}
+ }
+ let answer=ZERO,accepted=0;
+ for(let mask=0;mask<2**cut.length;mask++){
+  const occupied=new Set(cut.filter((u,i)=>mask&(1<<i)));
+  if([...occupied].some(u=>[...q[u]].some(v=>occupied.has(v))))continue;
+  accepted++;let factor=ONE;const forced=new Set();
+  cut.forEach((u,i)=>{factor=times(factor,factors[u][(mask>>i)&1]);});
+  for(const u of occupied)for(const v of q[u])forced.add(v);
+  const dp=new Map();
+  for(let i=order.length-1;i>=0;i--){const u=order[i];let e=factors[u][0],a=forced.has(u)?ZERO:factors[u][1];
+   for(const v of q[u])if(parent.get(v)===u){const [ce,ca]=dp.get(v);e=times(e,plus(ce,ca));a=times(a,ce);}dp.set(u,[e,a]);
+  }
+  for(const root of roots){const [e,a]=dp.get(root);factor=times(factor,plus(e,a));}
+  answer=plus(answer,factor);
+ }
+ return {answer,branches:2**cut.length,accepted};
+}
+function groupOracle(cert,factors){
+ insist(cert.groups.length<=8,'Group-pattern oracle cap: eight groups');
+ let answer=ZERO;
+ for(let mask=0;mask<2**cert.groups.length;mask++){
+  if(cert.edges.some(([u,v])=>(mask&(1<<u))&&(mask&(1<<v))))continue;
+  let mass=ONE;for(let u=0;u<cert.groups.length;u++)mass=times(mass,factors[u][(mask>>u)&1]);answer=plus(answer,mass);
+ }return answer;
+}
+function rawOracle(g,weights,pins){
+ insist(Number.isInteger(g.n)&&g.n>=0&&g.n<=12,'Original-variable brute-force oracle cap: twelve variables');
+ let answer=ZERO;
+ for(let mask=0;mask<2**g.n;mask++){
+  if([...pins].some(([v,b])=>((mask>>v)&1)!==b)||g.edges.some(([u,v])=>(mask&(1<<u))&&(mask&(1<<v))))continue;
+  let w=1n;for(let v=0;v<g.n;v++)w*=weights[v][(mask>>v)&1];answer=plus(answer,[w,1n]);
+ }return answer;
+}
+
+const state={pins:new Map(),g:null,cert:null,weights:null,models:[],extra:[],yaw:.4,pitch:.2,zoom:1,queued:false,maxWeight:0n};
+function enumerateCloud(g,weights,pins,cert){
+ insist(Number.isInteger(g.n)&&g.n>=0&&g.n<=12,'Cloud cap: twelve original variables');
+ const omitted=new Set(cert.chords.map(([u,v])=>cert.edgeKey(u,v))),badEdges=g.edges.filter(([u,v])=>!omitted.has(cert.edgeKey(cert.owner[u],cert.owner[v])));
+ const models=[],extra=[];let sum=0n;
+ for(let mask=0;mask<2**g.n;mask++){
+  if([...pins].some(([v,b])=>((mask>>v)&1)!==b))continue;
+  const good=!g.edges.some(([u,v])=>(mask&(1<<u))&&(mask&(1<<v)));
+  const bad=!badEdges.some(([u,v])=>(mask&(1<<u))&&(mask&(1<<v)));
+  if(!good&&!bad)continue;
+  let weight=1n;for(let v=0;v<g.n;v++)weight*=weights[v][(mask>>v)&1];
+  if(good){models.push({mask,weight});sum+=weight;}else if(bad)extra.push({mask,weight});
+ }
+ return {models,extra,answer:[sum,BigInt(models.length)]};
+}
+function syncPin(){const v=+byId('variable').value;byId('pin').value=state.pins.has(v)?state.pins.get(v):-1;}
+function rebuild(reset=false){
+ try{
+  if(reset)state.pins.clear();const k=+byId('groups').value,maxM=Math.min(4,Math.floor(12/k));byId('size').max=maxM;byId('size').value=Math.min(+byId('size').value,maxM);const m=+byId('size').value;
+  state.g=graphFamily(k,m,byId('family').value==='cycle');state.cert=recognize(state.g);const mode=byId('weights').value;
+  state.weights=Array.from({length:state.g.n},(_,v)=>mode==='zero'&&v===0?[0n,0n]:[1n,mode==='skew'?2n:1n]);
+  const selected=+byId('variable').value||0;byId('variable').replaceChildren(...Array.from({length:state.g.n},(_,v)=>{const o=document.createElement('option');o.value=v;o.textContent='x'+(v+1);return o;}));byId('variable').value=Math.min(selected,state.g.n-1);syncPin();
+  const factors=classFactors(state.cert,state.weights,state.pins),good=forestCount(state.cert,factors),group=groupOracle(state.cert,factors),raw=enumerateCloud(state.g,state.weights,state.pins,state.cert);
+  insist(good.answer.every((x,i)=>x===group[i]&&x===raw.answer[i]),'Independent original-assignment oracle disagrees');
+  state.models=raw.models;state.extra=raw.extra;state.maxWeight=raw.models.reduce((a,b)=>a>b.weight?a:b.weight,0n);
+  byId('model-list').textContent=raw.models.length?'Bits in x₁ → x'+state.g.n+' order; each row satisfies every original clause.\n'+raw.models.slice(0,12).map(model=>Array.from({length:state.g.n},(_,v)=>(model.mask>>v)&1).join('')+'  weight '+model.weight.toString()).join('\n')+(raw.models.length>12?'\n… '+(raw.models.length-12)+' more models.':''):'No satisfying assignments under these hard pins.';
+  byId('models').textContent=good.answer[1].toLocaleString('en-US');byId('mass').textContent=good.answer[0].toLocaleString('en-US');byId('sat').textContent=good.answer[1]>0n?'SAT':'UNSAT';byId('sat').style.color=good.answer[1]>0n?'var(--mint)':'var(--red)';
+  byId('weight-title').textContent=good.answer[0]===0n&&good.answer[1]>0n?'Weight vanished. Models remain.':'Same models. Different mass.';
+  byId('mass-note').textContent=good.answer[0]===0n&&good.answer[1]>0n?'Every hollow ring still represents a satisfying assignment. The exact sum of their weights is zero.':'Gold dots have positive weight; hollow gray rings have zero weight. The total is exact.';
+  byId('model-note').textContent=state.pins.size+' hard pin'+(state.pins.size===1?'':'s')+' · '+state.g.n+' original variables · '+state.g.edges.length+' original binary clauses.';
+  byId('groups-value').textContent=k;byId('size-value').textContent=m;
+  byId('checks').style.color='var(--mint)';byId('checks').textContent='MATCH · forest DP = group-pattern oracle = exhaustive original-assignment oracle ('+(2**state.g.n)+' assignments examined).';
+  byId('structure').textContent=state.cert.groups.length+' exact groups · cycle rank '+state.cert.rank+' · feedback set '+(state.cert.cut.map(u=>'C'+(u+1)).join(', ')||'empty')+' · '+good.branches+' occupancy branches.';
+  const wrong=byId('wrong');wrong.hidden=!byId('broken').checked;
+  if(!wrong.hidden){const bad=forestCount(state.cert,factors,true).answer;insist(bad[1]===BigInt(raw.models.length+raw.extra.length),'Broken-shortcut witness mismatch');wrong.textContent=state.cert.chords.length?'DELIBERATELY WRONG · '+bad[1].toLocaleString('en-US')+' claimed models; '+good.answer[1].toLocaleString('en-US')+' actually satisfy the original formula. '+raw.extra.length+' red dots violate constraints that the shortcut forgot. '+(raw.extra.length?'The original formula never changed.':'These pins conceal this particular error; try clearing them.'):'This quotient is already a forest, so there is no cycle-closing edge for this wrong rule to omit.';}
+  byId('announce').textContent=good.answer[1].toString()+' satisfying assignments; exact weighted mass '+good.answer[0].toString();byId('tip').hidden=true;requestDraw();
+ }catch(error){state.models=[];state.extra=[];byId('models').textContent='—';byId('mass').textContent='—';byId('sat').textContent='UNKNOWN';byId('model-list').textContent='Unavailable: a deciding check failed.';byId('wrong').hidden=true;byId('checks').style.color='var(--red)';byId('checks').textContent='CHECK FAILED · '+error.message;requestDraw();}
+}
+const canvas=byId('cloud'),gl=canvas.getContext('webgl',{antialias:true,alpha:false});let program,buffer,loc;
+function graphicsError(message){byId('error').hidden=false;byId('error').textContent=message;}
+function shader(kind,source){const s=gl.createShader(kind);gl.shaderSource(s,source);gl.compileShader(s);insist(gl.getShaderParameter(s,gl.COMPILE_STATUS),gl.getShaderInfoLog(s));return s;}
+if(gl)try{
+ program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,`attribute vec3 a_pos;attribute vec3 a_color;attribute float a_size;attribute float a_ghost;uniform vec4 u_view;uniform float u_aspect;uniform float u_dpr;varying mediump vec3 v_color;varying mediump float v_ghost;void main(){float cy=cos(u_view.x),sy=sin(u_view.x),cp=cos(u_view.y),sp=sin(u_view.y);vec3 p=vec3(cy*a_pos.x+sy*a_pos.z,a_pos.y,-sy*a_pos.x+cy*a_pos.z);p=vec3(p.x,cp*p.y-sp*p.z,sp*p.y+cp*p.z);float z=3./(5.-p.z);gl_Position=vec4(p.x*z*u_view.z/u_aspect,p.y*z*u_view.z,0.,1.);gl_PointSize=a_size*u_dpr*z;v_color=a_color;v_ghost=a_ghost;}`));
+ gl.attachShader(program,shader(gl.FRAGMENT_SHADER,`precision mediump float;varying mediump vec3 v_color;varying mediump float v_ghost;uniform float u_points;uniform float u_alpha;void main(){float a=u_alpha;if(u_points>.5){float r=length(gl_PointCoord-vec2(.5))*2.;if(r>1.||(v_ghost>.5&&r<.58))discard;a*=1.-smoothstep(.88,1.,r);}gl_FragColor=vec4(v_color,a);}`));
+ gl.linkProgram(program);insist(gl.getProgramParameter(program,gl.LINK_STATUS),gl.getProgramInfoLog(program));buffer=gl.createBuffer();loc={};for(const a of ['a_pos','a_color','a_size','a_ghost'])loc[a]=gl.getAttribLocation(program,a);for(const u of ['u_view','u_aspect','u_dpr','u_points','u_alpha'])loc[u]=gl.getUniformLocation(program,u);
+}catch(error){program=null;graphicsError('Graphics unavailable: '+error.message+'. Exact counts and controls still work.');}
+else graphicsError('WebGL is unavailable. Exact counts and controls still work; the two clouds need a WebGL browser.');
+function bitPosition(mask){const values=[0,0,0],counts=[0,0,0];for(let v=0;v<state.g.n;v++){const axis=v%3;values[axis]+=((mask>>v)&1)*2**counts[axis];counts[axis]++;}return values.map((x,i)=>counts[i]?1.8*x/(2**counts[i]-1)-.9:0);}
+function panes(){const w=canvas.clientWidth,h=canvas.clientHeight;return w<680?[{x:0,y:0,w,h:h/2},{x:0,y:h/2,w,h:h/2}]:[{x:0,y:0,w:w/2,h},{x:w/2,y:0,w:w/2,h}];}
+function projected(p,rect){const cy=Math.cos(state.yaw),sy=Math.sin(state.yaw),cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),x=cy*p[0]+sy*p[2],z=-sy*p[0]+cy*p[2],y=cp*p[1]-sp*z,zz=sp*p[1]+cp*z,s=3/(5-zz)*state.zoom;return [rect.x+(x*s/(rect.w/rect.h)+1)*rect.w/2,rect.y+(1-y*s)*rect.h/2];}
+function requestDraw(){if(state.queued)return;state.queued=true;requestAnimationFrame(()=>{state.queued=false;draw();});}
+function draw(){
+ byId('clouds').classList.toggle('stack',canvas.clientWidth<680);if(!gl||!program||!state.g||gl.isContextLost())return;
+ const dpr=Math.min(devicePixelRatio||1,2),w=canvas.clientWidth,h=canvas.clientHeight;if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}gl.clearColor(.035,.075,.12,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(program);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform4f(loc.u_view,state.yaw,state.pitch,state.zoom,0);gl.uniform1f(loc.u_dpr,dpr);
+ const put=(target,p,color,size=1,ghost=0)=>target.push(...p,...color,size,ghost),mint=[.65,.91,.78],gold=[.94,.77,.53],gray=[.57,.67,.75],red=[1,.61,.55],modelsByMask=new Set(state.models.map(m=>m.mask));
+ const links=[];for(const model of state.models)for(let v=0;v<state.g.n;v++){const next=model.mask^(1<<v);if(next>model.mask&&modelsByMask.has(next)){put(links,bitPosition(model.mask),gray);put(links,bitPosition(next),gray);}}
+ function batch(data,points,alpha){gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);for(const [a,size,offset]of [['a_pos',3,0],['a_color',3,12],['a_size',1,24],['a_ghost',1,28]]){gl.enableVertexAttribArray(loc[a]);gl.vertexAttribPointer(loc[a],size,gl.FLOAT,false,32,offset);}gl.uniform1f(loc.u_points,points?1:0);gl.uniform1f(loc.u_alpha,alpha);gl.drawArrays(points?gl.POINTS:gl.LINES,0,data.length/8);}
+ panes().forEach((rect,side)=>{gl.viewport(Math.round(rect.x*dpr),Math.round((h-rect.y-rect.h)*dpr),Math.round(rect.w*dpr),Math.round(rect.h*dpr));gl.uniform1f(loc.u_aspect,rect.w/rect.h);batch(links,false,.18);const points=[];
+  for(const model of state.models){const ghost=side===1&&model.weight===0n,ratio=state.maxWeight>0n?Number(model.weight)/Number(state.maxWeight):0;put(points,bitPosition(model.mask),side===0?mint:ghost?gray:gold,side===0?12:ghost?12:8+11*Math.sqrt(ratio),ghost?1:0);}
+  if(byId('broken').checked)for(const model of state.extra)put(points,bitPosition(model.mask),red,13,1);batch(points,true,.97);
+ });
+}
+for(const id of ['family','groups','size'])byId(id).addEventListener('input',()=>rebuild(true));for(const id of ['weights','broken'])byId(id).addEventListener('change',()=>rebuild());byId('variable').addEventListener('change',syncPin);byId('pin').addEventListener('change',()=>{const v=+byId('variable').value,b=+byId('pin').value;b<0?state.pins.delete(v):state.pins.set(v,b);rebuild();});byId('clear').addEventListener('click',()=>{state.pins.clear();rebuild();});
+let drag=null;canvas.addEventListener('pointerdown',event=>{drag={x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);});canvas.addEventListener('pointermove',event=>{if(drag){state.yaw+=(event.clientX-drag.x)*.007;state.pitch=Math.max(-1.1,Math.min(1.1,state.pitch+(event.clientY-drag.y)*.007));drag={x:event.clientX,y:event.clientY};byId('tip').hidden=true;requestDraw();return;}if(!state.g)return;const b=canvas.getBoundingClientRect(),x=event.clientX-b.left,y=event.clientY-b.top,rect=panes().find(p=>x>=p.x&&x<p.x+p.w&&y>=p.y&&y<p.y+p.h);if(!rect)return;let hit=null,best=12;for(const model of [...state.models,...(byId('broken').checked?state.extra:[])]){const p=projected(bitPosition(model.mask),rect),d=Math.hypot(p[0]-x,p[1]-y);if(d<best){hit=model;best=d;}}const tip=byId('tip');tip.hidden=!hit;if(hit)tip.textContent='x₁ → x'+state.g.n+': '+Array.from({length:state.g.n},(_,v)=>(hit.mask>>v)&1).join('')+' · weight '+hit.weight.toString()+' · '+(state.models.some(m=>m.mask===hit.mask)?'satisfies every original clause':'INVALID: omitted constraint violated');});
+for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{drag=null;});canvas.addEventListener('pointerleave',()=>{byId('tip').hidden=true;});canvas.addEventListener('keydown',event=>{const k=event.key;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','Home'].includes(k))return;event.preventDefault();if(k==='ArrowLeft')state.yaw-=.1;if(k==='ArrowRight')state.yaw+=.1;if(k==='ArrowUp')state.pitch=Math.max(-1.1,state.pitch-.1);if(k==='ArrowDown')state.pitch=Math.min(1.1,state.pitch+.1);if(k==='+')state.zoom=Math.min(1.6,state.zoom+.1);if(k==='-')state.zoom=Math.max(.6,state.zoom-.1);if(k==='Home'){state.yaw=.4;state.pitch=.2;state.zoom=1;}requestDraw();});canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();graphicsError('Graphics context lost. Exact counts still work; reload to restore WebGL.');});window.addEventListener('resize',requestDraw);rebuild(true);
+window.complexityMicroscope=Object.freeze({graphFamily,recognize,classFactors,forestCount,groupOracle,rawOracle,enumerateCloud});
+</script></html>

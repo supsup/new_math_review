@@ -1,0 +1,443 @@
+<title>The Eroding Cube</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a night map. The cube is the page; readouts and the solution curve sit beside it like a map legend. Single dark world by choice. */
+:root {
+  --ground: #0e1424;
+  --panel: #131b2f;
+  --ink: #e6e9f2;
+  --muted: #8b93a8;
+  --rule: #26304a;
+  --lit: #ffc65c;
+  --ember: #ff6b4a;
+  --shallow: #3d5383;
+  --deep: #151d33;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 24px;
+}
+header { display: grid; gap: 8px; max-width: 68ch; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(40px, 7vw, 72px);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 .glow { color: var(--lit); }
+header p { margin: 0; color: var(--ink); }
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 860px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.cube { display: grid; gap: 10px; min-width: 0; }
+#cube {
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1;
+  display: block;
+  image-rendering: pixelated;
+  border: 1px solid var(--rule);
+  background: var(--deep);
+  cursor: crosshair;
+}
+.probe {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  min-height: 3.2em;
+  overflow-wrap: anywhere;
+}
+.probe b { color: var(--ink); font-weight: 600; }
+.probe .alive { color: var(--lit); }
+.probe .dead { color: var(--ember); }
+.legend { display: grid; gap: 18px; min-width: 0; }
+.controls { display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--lit); }
+button {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--lit); outline-offset: 2px; }
+.readouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.readout { background: var(--panel); padding: 10px 12px; display: grid; gap: 2px; }
+.readout .k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.readout .v {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.readout .v.lit { color: var(--lit); }
+.chart { display: grid; gap: 6px; }
+#curve { width: 100%; height: auto; aspect-ratio: 16 / 10; max-width: 100%; display: block; }
+.key { display: flex; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+.notes { display: grid; gap: 10px; max-width: 68ch; color: var(--ink); }
+.notes h2 { font-family: var(--display); font-weight: 600; font-size: 26px; margin: 8px 0 0; letter-spacing: 0.02em; }
+.notes p { margin: 0; }
+.notes code, .mono { font-family: var(--mono); font-size: 0.86em; color: var(--lit); }
+.fallback { color: var(--ember); font-family: var(--mono); font-size: 13px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Card 378 companion · random 3-SAT · n = 20 variables</div>
+    <h1>The <span class="glow">Eroding</span> Cube</h1>
+    <p>Every pixel is one of the 2<sup>20</sup> = 1,048,576 ways to set twenty true/false variables. The lit ones satisfy every clause added so far. Each new clause switches off the eighth of the cube it forbids, and somewhere near 4.26 clauses per variable the last lights go out.</p>
+  </header>
+
+  <section class="stage">
+    <div class="cube">
+      <canvas id="cube" width="1024" height="1024" aria-label="Map of all 1,048,576 assignments; lit cells satisfy the formula"></canvas>
+      <div class="probe" id="probe">Hover the map to read an assignment: its twenty bits, and the clause that killed it, if one has.</div>
+      <div class="key">
+        <span><i class="sw" style="background:var(--lit)"></i>satisfies all m clauses</span>
+        <span><i class="sw" style="background:var(--ember)"></i>killed by one of the last 3</span>
+        <span><i class="sw" style="background:var(--shallow)"></i>died late</span>
+        <span><i class="sw" style="background:var(--deep);outline:1px solid var(--rule)"></i>died early</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="controls">
+        <label for="alpha">Clause density α = m / n</label>
+        <input id="alpha" type="range" min="0" max="120" step="1" value="40">
+        <div class="row">
+          <button id="play" type="button">Play the erosion</button>
+          <button id="reseed" type="button">New formula</button>
+          <span class="mono" id="seedLabel"></span>
+        </div>
+      </div>
+
+      <div class="readouts">
+        <div class="readout"><span class="k">α</span><span class="v" id="vAlpha">2.00</span></div>
+        <div class="readout"><span class="k">clauses m</span><span class="v" id="vM">40</span></div>
+        <div class="readout"><span class="k">solutions</span><span class="v lit" id="vS">–</span></div>
+        <div class="readout"><span class="k">log₂(solutions) / n</span><span class="v" id="vRate">–</span></div>
+      </div>
+
+      <div class="chart">
+        <label for="curve">Solutions left as clauses arrive (this formula, exact)</label>
+        <canvas id="curve" width="960" height="600"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h2>How to read the map</h2>
+    <p>The layout is a Gray code: bits 0–9 run along x and bits 10–19 along y, each in reflected-binary order. Two cells that touch differ in exactly one variable, so a lit patch is a set of solutions you can walk through by flipping one variable at a time. The map shows only part of that connectivity. Every assignment has 20 one-flip neighbours, and at most 4 of them touch it on a flat grid, so two islands that look separate may be one cluster in the cube. As α climbs, the lit patches shrink and vanish.</p>
+    <p>Dead cells are shaded by the clause that killed them, so the dark strata are the formula's history. Every count on this page is exact. The page records, for each assignment, the first clause it violates. The number of solutions with m clauses is then the number of assignments whose first violation comes at clause m or later.</p>
+    <h2>Why it sits beside card 378</h2>
+    <p>Card 378 is an algorithm claim: an upper bound on running time, stated in input length <span class="mono">L = m(12n + 22) + n + 2</span>. This page does not test that claim. It shows the objects the bound is measured over. The 4.26 mark is not from the card. It is the long-observed density where random 3-SAT flips from almost always satisfiable to almost never, and where random instances are empirically hardest for solvers. At that density the card's input length is about <span class="mono">51n²</span>.</p>
+    <p>At twenty variables the threshold is blurred. The formula shown here (seed 378) loses its last solution at m = 89, α = 4.45, and another seed will cross somewhere else nearby. As n grows, the drop in the chart sharpens into a cliff. A finite map can't show that limit, only the start of it.</p>
+    <p class="fallback" id="glNote" hidden>WebGL 2 is unavailable here, so the map is drawn on the CPU. It is the same picture, just slower to redraw.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+  const N = 20, SIZE = 1 << N, SIDE = 1 << (N / 2), MMAX = 6 * N, ALIVE = 255;
+  const css = getComputedStyle(document.documentElement);
+  const hex = name => {
+    const h = css.getPropertyValue(name).trim().replace('#', '');
+    return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+  };
+  const COLORS = { lit: hex('--lit'), ember: hex('--ember'), shallow: hex('--shallow'), deep: hex('--deep') };
+
+  // Seeded PRNG (mulberry32) so a formula can be named and reproduced.
+  const rng = seed => () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  let pos, neg, lits, fv, survivors, seed;
+  const gray = x => x ^ (x >> 1);
+
+  function buildFormula(s) {
+    seed = s;
+    const r = rng(s);
+    pos = new Int32Array(MMAX); neg = new Int32Array(MMAX); lits = [];
+    for (let j = 0; j < MMAX; j++) {
+      const vars = new Set();
+      while (vars.size < 3) vars.add(Math.floor(r() * N));
+      const clause = [];
+      for (const v of vars) {
+        const negated = r() < 0.5;
+        if (negated) neg[j] |= 1 << v; else pos[j] |= 1 << v;
+        clause.push({ v, negated });
+      }
+      lits.push(clause);
+    }
+    // First violated clause per assignment; ALIVE when it satisfies all MMAX.
+    fv = new Uint8Array(SIZE);
+    const hist = new Float64Array(MMAX + 1);
+    for (let a = 0; a < SIZE; a++) {
+      let j = 0;
+      for (; j < MMAX; j++) if (((a & pos[j]) | (~a & neg[j])) === 0) break;
+      fv[a] = j === MMAX ? ALIVE : j;
+      hist[j]++;
+    }
+    // survivors[m] = #assignments whose first violation index >= m
+    survivors = new Float64Array(MMAX + 1);
+    let acc = 0;
+    for (let m = MMAX; m >= 0; m--) { acc += hist[m]; survivors[m] = acc; }
+    document.getElementById('seedLabel').textContent = 'seed ' + s;
+  }
+
+  // ---- the map: WebGL2 with a CPU fallback ----
+  const cube = document.getElementById('cube');
+  const gl = cube.getContext('webgl2', { antialias: false, preserveDrawingBuffer: true });
+  let drawMap;
+
+  if (gl) {
+    const vs = `#version 300 es
+      in vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
+    const fs = `#version 300 es
+      precision highp float; precision highp int; precision highp usampler2D;
+      uniform usampler2D u_fv; uniform float u_m;
+      uniform vec3 u_lit, u_ember, u_shallow, u_deep;
+      out vec4 o;
+      uint g(uint x){ return x ^ (x >> 1u); }
+      float fvAt(int x, int y){
+        uint a = g(uint(x)) | (g(uint(y)) << ${N / 2}u);
+        return float(texelFetch(u_fv, ivec2(int(a & ${SIDE - 1}u), int(a >> ${N / 2}u)), 0).r);
+      }
+      void main(){
+        int x = int(gl_FragCoord.x);
+        int y = ${SIDE - 1} - int(gl_FragCoord.y);
+        float f = fvAt(x, y);
+        vec3 c;
+        if (f >= u_m) {
+          c = u_lit;
+        } else {
+          float age = u_m - f;
+          float band = floor((f / max(u_m, 1.0)) * 8.0) / 7.0;
+          vec3 strata = mix(u_deep, u_shallow, band);
+          c = age <= 3.0 ? mix(u_ember, strata, (age - 1.0) / 3.0) : strata;
+          // Halo: a lone surviving assignment is one pixel of a million, so let it light its
+          // neighbourhood. Glow only; the cell itself stays the only lit pixel.
+          float glow = 0.0;
+          for (int dy = -3; dy <= 3; dy++) for (int dx = -3; dx <= 3; dx++) {
+            int nx = x + dx, ny = y + dy;
+            if (nx < 0 || ny < 0 || nx > ${SIDE - 1} || ny > ${SIDE - 1}) continue;
+            if (fvAt(nx, ny) >= u_m) glow = max(glow, 1.0 - length(vec2(dx, dy)) / 4.3);
+          }
+          c = mix(c, u_lit, glow * 0.75);
+        }
+        o = vec4(c, 1.0);
+      }`;
+    const sh = (type, src) => {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    const U = n => gl.getUniformLocation(prog, n);
+    gl.uniform1i(U('u_fv'), 0);
+    for (const k of ['lit', 'ember', 'shallow', 'deep']) gl.uniform3fv(U('u_' + k), COLORS[k]);
+    const uM = U('u_m');
+    let uploaded = null;
+    drawMap = m => {
+      if (uploaded !== fv) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8UI, SIDE, SIDE, 0, gl.RED_INTEGER, gl.UNSIGNED_BYTE, fv);
+        uploaded = fv;
+      }
+      gl.viewport(0, 0, SIDE, SIDE);
+      gl.uniform1f(uM, m);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+  } else {
+    document.getElementById('glNote').hidden = false;
+    const ctx = cube.getContext('2d');
+    const img = ctx.createImageData(SIDE, SIDE);
+    const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+    drawMap = m => {
+      const d = img.data;
+      for (let y = 0; y < SIDE; y++) for (let x = 0; x < SIDE; x++) {
+        const a = gray(x) | (gray(y) << (N / 2));
+        const f = fv[a];
+        let c;
+        if (f >= m) c = COLORS.lit;
+        else {
+          const age = m - f;
+          const band = Math.floor((f / Math.max(m, 1)) * 8) / 7;
+          const strata = mix(COLORS.deep, COLORS.shallow, band);
+          c = age <= 3 ? mix(COLORS.ember, strata, (age - 1) / 3) : strata;
+        }
+        const o = (y * SIDE + x) * 4;
+        d[o] = c[0] * 255; d[o + 1] = c[1] * 255; d[o + 2] = c[2] * 255; d[o + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    };
+  }
+
+  // ---- the solution curve ----
+  const curve = document.getElementById('curve');
+  const cx = curve.getContext('2d');
+  function drawCurve(m) {
+    const W = curve.width, H = curve.height;
+    const L = 84, R = 24, T = 24, B = 70;
+    const X = a => L + (a / 6) * (W - L - R);
+    const Y = r => T + (1 - r) * (H - T - B);
+    cx.clearRect(0, 0, W, H);
+    cx.font = '22px "JetBrains Mono", ui-monospace, monospace';
+    cx.lineWidth = 1;
+    // grid + ticks
+    cx.strokeStyle = css.getPropertyValue('--rule').trim();
+    cx.fillStyle = css.getPropertyValue('--muted').trim();
+    cx.textAlign = 'center'; cx.textBaseline = 'top';
+    for (let a = 0; a <= 6; a++) {
+      cx.beginPath(); cx.moveTo(X(a), T); cx.lineTo(X(a), H - B); cx.stroke();
+      cx.fillText(String(a), X(a), H - B + 12);
+    }
+    cx.textAlign = 'right'; cx.textBaseline = 'middle';
+    for (const r of [0, 0.25, 0.5, 0.75, 1]) {
+      cx.beginPath(); cx.moveTo(L, Y(r)); cx.lineTo(W - R, Y(r)); cx.stroke();
+      cx.fillText(r.toFixed(2), L - 12, Y(r));
+    }
+    cx.textAlign = 'center'; cx.textBaseline = 'top';
+    cx.fillText('α = m / n', (L + W - R) / 2, H - B + 40);
+    // threshold
+    cx.strokeStyle = css.getPropertyValue('--ember').trim();
+    cx.setLineDash([8, 8]);
+    cx.beginPath(); cx.moveTo(X(4.26), T); cx.lineTo(X(4.26), H - B); cx.stroke();
+    cx.setLineDash([]);
+    cx.fillStyle = css.getPropertyValue('--ember').trim();
+    cx.textAlign = 'left'; cx.textBaseline = 'top';
+    cx.fillText('4.26', X(4.26) + 8, T + 4);
+    // area + line for log2(S)/n while S > 0
+    const lit = css.getPropertyValue('--lit').trim();
+    const pts = [];
+    for (let k = 0; k <= MMAX; k++) if (survivors[k] > 0) pts.push([X(k / N), Y(Math.log2(survivors[k]) / N)]);
+    if (pts.length) {
+      cx.beginPath(); cx.moveTo(pts[0][0], Y(0));
+      for (const [px, py] of pts) cx.lineTo(px, py);
+      cx.lineTo(pts[pts.length - 1][0], Y(0)); cx.closePath();
+      cx.globalAlpha = 0.14; cx.fillStyle = lit; cx.fill(); cx.globalAlpha = 1;
+      cx.beginPath(); pts.forEach(([px, py], i) => i ? cx.lineTo(px, py) : cx.moveTo(px, py));
+      cx.strokeStyle = lit; cx.lineWidth = 3; cx.stroke();
+    }
+    // current position
+    const s = survivors[m];
+    const here = s > 0 ? Y(Math.log2(s) / N) : Y(0);
+    cx.fillStyle = s > 0 ? lit : css.getPropertyValue('--ember').trim();
+    cx.beginPath(); cx.arc(X(m / N), here, 9, 0, Math.PI * 2); cx.fill();
+  }
+
+  // ---- state + readouts ----
+  const slider = document.getElementById('alpha');
+  const fmt = new Intl.NumberFormat('en-US');
+  function render() {
+    const m = +slider.value;
+    drawMap(m);
+    drawCurve(m);
+    const s = survivors[m];
+    document.getElementById('vAlpha').textContent = (m / N).toFixed(2);
+    document.getElementById('vM').textContent = m;
+    document.getElementById('vS').textContent = fmt.format(s);
+    document.getElementById('vRate').textContent = s > 0 ? (Math.log2(s) / N).toFixed(3) : 'none left';
+  }
+  slider.addEventListener('input', render);
+
+  document.getElementById('reseed').addEventListener('click', () => {
+    buildFormula((Math.random() * 1e9) >>> 0);
+    render();
+  });
+
+  let timer = null;
+  const playBtn = document.getElementById('play');
+  playBtn.addEventListener('click', () => {
+    if (timer) { clearInterval(timer); timer = null; playBtn.textContent = 'Play the erosion'; return; }
+    slider.value = 0; render();
+    playBtn.textContent = 'Stop';
+    timer = setInterval(() => {
+      if (+slider.value >= MMAX) { clearInterval(timer); timer = null; playBtn.textContent = 'Play the erosion'; return; }
+      slider.value = +slider.value + 1; render();
+    }, 70);
+  });
+
+  // ---- hover probe: the assignment under the cursor and what killed it ----
+  const probe = document.getElementById('probe');
+  cube.addEventListener('mousemove', e => {
+    const r = cube.getBoundingClientRect();
+    const x = Math.min(SIDE - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * SIDE)));
+    const y = Math.min(SIDE - 1, Math.max(0, Math.floor((e.clientY - r.top) / r.height * SIDE)));
+    const a = gray(x) | (gray(y) << (N / 2));
+    const bits = a.toString(2).padStart(N, '0').split('').reverse().join('');
+    const m = +slider.value, f = fv[a];
+    let verdict;
+    if (f >= m) verdict = '<span class="alive">satisfies all ' + m + ' clauses</span>';
+    else {
+      const c = lits[f].map(l => (l.negated ? '¬' : '') + 'x' + l.v).join(' ∨ ');
+      verdict = '<span class="dead">killed by clause #' + (f + 1) + '</span> (' + c + ')';
+    }
+    probe.innerHTML = '<b>x0…x19</b> ' + bits + '<br>' + verdict;
+  });
+
+  buildFormula(378);
+  render();
+})();
+</script>
