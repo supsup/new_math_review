@@ -81,6 +81,7 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 
 - `showcase.html`: the page.
 - `showcase.md`: the same content, readable on GitHub.
+- `tools/showcase_nav.py`: adds the "Cards" jump menu to `showcase.html` (re-run after regenerating the page).
 - `formulas/`: the Markdown version's formulas, typeset by LatteX (SVG).
 - `art/`: every picture the page shows (SVG).
 - `reviewers/`: the four reviewer cards (SVG).
