@@ -236,6 +236,22 @@ Round two pages (each checks its own numbers before it draws, and loads nothing 
 - `tools/round_two_cards.py` with `tools/round_two_texts.py`: builds the round two cards into
   `showcase.html` and `showcase.md` (formulas by LatteX; a second run changes nothing).
   `tools/round_two_index.py` writes `round_two.html`.
+- `tools/typeset_formulas.py`: typesets a page's formulas with LatteX. A formula is an element with `class="tex"` that
+  carries its LaTeX in `data-tex` (a `span` is set on the line, a `div` as a display); the picture is sized in em and takes
+  the text's colour; a second run changes nothing; it refuses on a LatteX error or on LatteX's missing-glyph box.
+  `almost_a_whole_number.html`, `one_row_at_a_time.html` and `clock_and_shift.html` are set this way.
+  `tools/lattex_census.py`, `tools/lattex_probe_chars.py` and `tools/lattex_missing_glyphs.py` test a LatteX jar against
+  every non-ASCII character the showcase uses.
+- `tools/render_lattex_pages.py` (Lattice) does the same job for Lattice's pages, whose formulas are marked
+  `class="lattex"`. The interactive pages with `data-tex` formulas also use LatteX. The source stays in each HTML file,
+  and the SVG is saved inline so the pages can open offline. To refresh a changed formula, set
+  `LATTEX_JAR` to the LatteX jar, put Java 25 on your path, and run
+  `python3 tools/render_lattex_pages.py crew_visuals/farey_harmonics.html` with the appropriate page paths.
+  Add `--check` to compare without rewriting. The first render used LatteX revision `5cb804f7`.
+  It asks LatteX's own diagnostics whether a render is clean, which is the stronger test.
+- `tools/lattex_pages.py` (Confluence) typeset Confluence's six pages from a list, kept in the tool, of each formula's old HTML and
+  its LaTeX; it converts a page once and refuses on a missing snippet, a LatteX error or the missing-glyph box.
+  Three tools for one job is one day's accident; they are due to become one, with the LaTeX kept in the page.
 
 - Round three, Marlow: `fewest_ones.html` with `crew_visuals/fewest_ones.md` and the replay
   `tools/check_sparse_rank.cpp` (how few ones a board needs for its rank to change modulo 2, 3, 5

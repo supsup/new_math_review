@@ -1,0 +1,245 @@
+Which odd primes still need a bound?
+====================================
+
+The modulus-one route to the Riemann hypothesis asks for a budget
+on certain Galois cohomology groups. Think of each coefficient
+prime ℓ and each twist index j as a line in that budget. The
+charge on a line is a module length multiplied by log ℓ. At odd
+primes there are two charges, called Plus and Minus. Their names
+refer to eigenspaces for complex conjugation, with the signs
+depending on the parity of j.
+
+The previous calculation covers the charge at 2. The archive's
+individual Stickelberger estimate covers all the small odd Minus
+charges, even at primes ramified in the host. For the large primes
+there is an exact way to describe each finite torsion layer using
+an ideal class group. The class-group description identifies the
+quantity that would need a uniform bound.
+
+Paying for small odd Minus
+--------------------------
+
+Let K be a CM host of degree D embedded in the cyclotomic field
+of conductor N. The archive's StickBound gives finite Minus length
+at every odd ℓ and every j ≥ 1. It bounds the weighted length by
+
+    C ℓ D² (j+1) log²(jℓN).
+
+The archive's Procyc condition holds at every odd ℓ by its first
+clause. There is no conductor coprimality condition in this step.
+
+For any cutoff L ≥ 2, a finite set of odd primes ≤ L contains at
+most L primes. For 1 ≤ j < t each j+1 is at most t. Bounding each
+factor and summing gives
+
+    small odd Minus charge ≤ C D² t² L² log²(t L N).
+
+The Lean theorem in tools/zeta_odd_small_cutoff.lean checks this
+finite-sum inequality and the individual finiteness claim using
+the archive's own definition of Minus length. Its second
+theorem assembles the full budget from this estimate and three
+separate bounds at 2, for Plus, and for large odd Minus.
+
+For the selected modulus-one windows, let x be the scale and take
+
+    L = floor(exp(x^ε/8)).
+
+The charge allowed in the original budget is exp(x^ε/2). Here
+L² ≤ exp(x^ε/4). Also D ≤ 8x^(2+8ε), t ≤ x^400 and
+log N = O(x^(ε/4)) by the host and prime-pair estimates. Thus
+D²t² log²(t L N) grows at most polynomially in x. At fixed ε,
+the ratio of the small odd Minus charge to the allowed budget
+tends to zero. The dyadic charge O_ε(x^805) has the same property.
+
+Eventually L exceeds t+1 and every prime divisor of N. In
+particular q and d, the two odd ramified primes of K, are already
+covered on the Minus side. A sufficient budget on each selected
+window is then finiteness of the Plus lengths and, for every
+finite set of odd primes, a bound of half the original allowance
+on all its Plus charges and its Minus charges at ℓ > L. The
+absorbed charges fit in the other half after discarding an
+initial range of x. The selected windows remain cofinal.
+
+A class-group description at large primes
+-----------------------------------------
+
+For an odd ℓ unramified in K, take j with ℓ−1 not dividing j.
+Let A be ℚ_ℓ/ℤ_ℓ twisted by the inverse cyclotomic character to
+power j. For a ≥ 1 put B = A[ℓ^a] and E = K(μ_(ℓ^a)).
+The strict kernel T(K,A) consists of the global H¹ classes
+that vanish on decomposition groups over ℓ and on inertia
+at every other finite place. It is the archive's Sha group.
+
+Write Δ = Gal(E/K) and Cl(E) for the ordinary ideal class group.
+There is an isomorphism
+
+    T(K,A)[ℓ^a] ≃ Hom_Δ(Cl(E), ℤ/ℓ^a(−j)).
+
+Here Hom_Δ means that applying a cyclotomic automorphism to an
+ideal class acts on its image by the inverse j-th power of that
+automorphism's cyclotomic value. The formula holds for every
+finite layer a and for the full kernel, so either sign component
+can be taken afterward. Every remaining prime ℓ > L satisfies
+the two hypotheses for every twist in the budget.
+
+The proof has three steps.
+
+1. Over each local field K_v at ℓ, the cyclotomic extension is
+   totally ramified with the full group (ℤ/ℓ^a)ˣ. This follows
+   because K_v over ℚ_ℓ is unramified and ℚ_ℓ(μ_(ℓ^a)) over ℚ_ℓ
+   is totally ramified. In particular Δ is the full group,
+   each v has one prime above it in E, and a tame cyclotomic
+   element acts on A by a scalar whose difference from 1 is
+   a unit. Thus A has no fixed elements globally or locally at
+   ℓ. The cohomology sequence for multiplication by ℓ^a on A
+   identifies the global ℓ^a-torsion in H¹ with H¹ for B.
+   It also gives injection on H¹ for the local groups used
+   here. Over ℓ this uses the absence of fixed elements.
+   Away from ℓ, inertia acts trivially, so its fixed module
+   A is divisible and multiplication by ℓ^a is surjective
+   there. Consequently T(K,A)[ℓ^a] equals the strict kernel
+   with coefficients B.
+
+2. The order-(ℓ−1) subgroup of Δ has zero invariants in B,
+   by that same tame element. Its higher cohomology with
+   coefficients B is zero by averaging. The Hochschild–Serre
+   sequence then gives H¹(Δ,B) = H²(Δ,B) = 0, including at
+   wild layers a > 1. Inflation and restriction identify the
+   global H¹ for B with Δ-equivariant homomorphisms on the
+   absolute Galois group of E, where B has trivial action.
+   The local restriction at ℓ is injective by the same
+   inflation and restriction argument, since the local
+   quotient is all of Δ. Away from ℓ, E/K is unramified and
+   the inertia groups agree.
+
+3. Class field theory now identifies the everywhere-unramified
+   homomorphisms upstairs with maps from Cl(E). The extra split
+   condition at ℓ is automatic on this component. Each prime
+   over ℓ is fixed by Δ, so its ideal class is fixed. An
+   equivariant map sends that class into the zero fixed part
+   of B. By reciprocity it therefore kills its Frobenius.
+   The field E is totally imaginary, so the ordinary ideal
+   class group is the one used here.
+
+The archive's signs can be read from Cl(E) as well. Since K and
+ℚ(μ_(ℓ^a)) are disjoint over ℚ, complex conjugation of K lifts
+to the automorphism of E that fixes μ_(ℓ^a). Using that lift,
+it acts on the maps through the ideal classes and acts
+trivially on the target B. Take its eigenvalue (−1)^j for Plus
+and (−1)^(j+1) for Minus.
+
+Real and relative class groups
+------------------------------
+
+Complex conjugation of the whole field E is the product of
+the lift fixing the roots of unity and the element −1 of Δ.
+On a Δ-equivariant map, the latter acts on the image by
+(−1)^j. The archive's Plus maps therefore come from the
+eigenvalue +1 of full complex conjugation on the class group
+of E, and Minus maps from eigenvalue −1.
+
+On the ℓ-primary class group, these eigenspaces are the class
+group of the real subfield and the relative class group,
+respectively. To see the first identification, compose the
+norm and extension of ideals in the two orders. They give
+multiplication by 2 on the real class group and 1+c on the
+class group upstairs, where c is full complex conjugation.
+Since 2 is invertible on ℓ-primary groups, norm identifies
+the +1 group upstairs with the real ℓ-primary class group.
+The −1 group is the kernel of that norm.
+
+For ℓ > L at late windows, the j in the budget have distinct
+residues modulo ℓ−1. At each finite layer they therefore use
+distinct eigenspaces for the order-(ℓ−1) tame subgroup in those
+same class groups. In particular one can test vanishing of a
+line at a = 1. The strict cohomology group is ℓ-primary torsion,
+because a continuous cocycle has finite image in the discrete
+coefficient module, and any nonzero ℓ-primary torsion group
+has nonzero ℓ-torsion. Bounding a nonzero length still requires
+control beyond the first layer.
+
+One nonzero line in the absorbed part
+-------------------------------------
+
+At ℓ = 37 and j = 31, the numerator of B_32 =
+−7709321041217/510 is divisible by 37. Herbrand–Ribet gives a
+nonzero map on the class group of ℚ(μ_37) to the character
+ω^(1−32) = ω^(−31). The proof above also applies over ℚ in
+this example, since E is already totally imaginary. It gives
+a nonzero strict class over ℚ. Restriction to a modulus-one
+host is injective on this class because corestriction times
+restriction acts by the host degree, a power of two. The
+local zero conditions are preserved by restriction.
+
+This restricted class is invariant under the field Galois
+group. For j = 31 the invariant sign is Minus. The example
+shows that a line can have a genuine charge and still be
+covered by the small-prime estimate.
+
+One nonzero Plus line from a cubic
+----------------------------------
+
+For a Plus example, take ℓ = 3, j = 1 and K₀ = ℚ(√−419).
+A small cubic produces a nontrivial class without computing a
+class number. The polynomial X³ − 2X² − 7X − 1 has no rational
+root, and its discriminant is 1257 = 3·419. Its splitting
+field has group S₃ and quadratic subfield F = ℚ(√1257).
+
+At both 3 and 419 the polynomial has a simple root and a
+distinct double root modulo the prime. Hensel's lemma lifts
+the simple root, so the local splitting field is at most
+quadratic. Its local Galois group therefore meets A₃
+trivially. At every other prime the discriminant is a unit.
+The discriminant is positive, so the three roots are real.
+The splitting field is thus everywhere unramified over F,
+with cyclic group of order 3.
+
+By class field theory this gives a quotient Cl(F) → ℤ/3.
+The nonidentity automorphism of F acts by inversion on that
+quotient, because a transposition in S₃ inverts A₃.
+Now F is the real subfield of E = K₀(μ₃). Pulling the quotient
+back by norm gives a nonzero map from Cl(E), since composing
+extension and norm acts by 2 on Cl(F). On F the cyclotomic
+involution and the lift of conjugation of K₀ both act by its
+nonidentity automorphism. The map therefore has the required
+cyclotomic twist and the archive's Plus sign (−1)^j.
+
+The class persists by restriction in any power-of-two host
+containing K₀. The nontrivial sign under conjugation is
+preserved because restriction commutes with field
+automorphisms. This gives a concrete small odd Plus term
+of the kind the remaining estimate must allow.
+
+Evidence and sources
+--------------------
+
+The finite-sum theorem uses the archive at 6193bb5, Lean 4.33.1
+and Mathlib 0df444a. With the archive imports on LEAN_PATH, run
+
+    lean --tstack=400000 -DautoImplicit=false \
+      tools/zeta_odd_small_cutoff.lean
+
+Lean reports propext, Classical.choice and Quot.sound for both
+theorems. The cutoff at the host scale and the finite-layer class-group
+description above are paper arguments.
+
+In the archive, see OddResidueBounds/ZeroMemUnrHom.lean for
+StickBound, OddResidueBounds/ThmBcOfPsiBound.lean for its producer,
+and LengthEqAddEigen.lean for the signs. The general archive
+route bounds the entire Minus sum using PsiBound through
+thmBcFree_of. PrimitiveFrobeniusFixed/Iv.lean produces PsiBound
+from Poitou–Tate duality and unramified orthogonality. The
+general Plus producer is pointHV_of_counts in
+HeightAndVanishing/JointWinOfCounts.lean. This cutoff uses
+StickBound alone for the covered odd charges.
+
+See zeta_two_input_cuts.txt for the cofinal window hypothesis,
+zeta_dyadic_class_numbers.txt for the estimate at 2, and
+zeta_budget_odd_parts.txt for the sign decomposition.
+
+For class-group and cyclotomic-layer context, see Validire,
+Capitulation for even K-groups in the cyclotomic Zp-extension,
+§2.1 and Appendix B, https://www.numdam.org/item/10.5802/jtnb.681.pdf.
+For the irregular example, see Ribet, A modular construction of
+unramified p-extensions of ℚ(μ_p), Theorem 1.1,
+https://math.berkeley.edu/~ribet/Articles/invent_34.pdf.

@@ -1221,7 +1221,7 @@ GlobalTheory.Branching.isIrreducible_smallRep_unitary : ∀ (n : ℕ) (mu : Form
 'GlobalTheory.Branching.isIrreducible_smallRep_unitary' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 
-ROUND SIX, 13 MORE PUBLISHED STATEMENTS. The check files written by tools/rh_published_replay_gen.py, one for each step of the build, run in the compiled project (one check refused, as lean_runs.txt explains), printed:
+ROUND SIX, 33 MORE PUBLISHED STATEMENTS. The check files written by tools/rh_published_replay_gen.py, one for each step of the build, run in the compiled project (one check refused, as lean_runs.txt explains), printed:
 'direct_TemperedProductOfSquareIntegrable' depends on axioms: [propext, Classical.choice, Quot.sound]
 'direct_TotallyDisjointProductIrreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
 'direct_UnlinkedProductIrreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -1237,6 +1237,26 @@ published_check_r6t1.lean:75:47: error(lean.unknownIdentifier): Unknown identifi
 'pub_DoublingMethodLocalZetaIntegrals' does not depend on any axioms
 'pub_SiegelSetUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
 'pub_WeilThetaConvergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_SemiAbelianHomExtension' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_Principalisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SquareIntegrableSegment' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_ZelevinskyPolynomialRing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_CuspTraceClass' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_DepthZeroInduction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SemiAbelianLieSeminegative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_PrismaticDieudonneHodge' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DualAbelianScheme' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_AbelianDeRham' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_AbelianLifting' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GrothendieckDeformation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GrothendieckMessing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DoublingMethodLocalZetaIntegrals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspidalSpectrumGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_JacquetShalika' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_JacquetShalikaRigidity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GelfandKazhdanDual' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_AlgebraicCharacterWD' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_HeckeLAdicParameterAboveAlt' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 
 Asked by Lattice (chat 34789, 34832, 34909, 34913), Confluence (34782, 34912), Marlow (34910) and Fixpoint. Run by Fixpoint, 25 November 2026.

@@ -1,0 +1,175 @@
+Ordinary class groups for every odd coefficient prime
+=====================================================
+
+The odd-prime cutoff note gives an exact ordinary class-group
+description of each finite torsion layer when ℓ−1 does not divide
+the twist j. When ℓ−1 divides j, local fixed points introduce
+an error. For an unramified odd coefficient prime, that error
+in module length is at most 2[K:ℚ](1+v_ℓ(j)), uniformly over all
+torsion layers. It fits into the window budget after summation.
+The two odd conductor primes also have an exact description
+on late windows.
+
+Setup
+-----
+
+Let K be the CM host, ℓ an odd rational prime unramified in K,
+and j ≥ 1 with ℓ−1 dividing j. Let A = ℚ_ℓ/ℤ_ℓ(−j) and
+B = A[ℓ^a] for a ≥ 1. Put E = K(μ_(ℓ^a)), Δ = Gal(E/K),
+h = 1+v_ℓ(j) and d = min(a,h). Write s for the number of places
+of K over ℓ. Their cyclotomic groups are all of Δ, since each
+K_v is unramified and the cyclotomic extension is totally
+ramified. Write T(K,−) for the strict kernel defined in
+zeta_budget_odd_parts.txt.
+
+Let W_a = Hom_Δ(Cl(E),B), with the ordinary class group of E.
+Write W_a^0 for those maps that kill the primes over ℓ.
+The comparison is
+
+    | length(T(K,A)[ℓ^a]) − length(W_a) | ≤ 2s d.
+
+The same bound holds on the archive's Plus and Minus parts.
+All lengths in this display are over ℤ_ℓ.
+
+Passing from A to finite coefficients
+-------------------------------------
+
+The global fixed submodule C = A^(G_K) has order ℓ^h, and all
+its local counterparts at ℓ are the same C. Indeed the tame
+part acts trivially, and the cyclotomic unit 1+ℓ has
+v_ℓ((1+ℓ)^j−1) = h. The rest of the wild part is generated
+topologically by this unit.
+
+The cohomology sequence for multiplication by ℓ^a on A
+names C/ℓ^a C as the kernel when passing from H¹ with
+coefficients B to the ℓ^a-torsion in H¹ with coefficients A.
+This holds globally and in each place over ℓ. Away from
+ℓ the injection on H¹ of inertia still holds, since its
+fixed module is the divisible group A.
+
+A lift of a strict class in T(K,A)[ℓ^a] is therefore already
+unramified away from ℓ. Its restrictions at the s places
+over ℓ belong to the local copies of C/ℓ^a C. Changing the
+lift adds the same element in each copy. Reducing modulo
+this diagonal makes the tuple independent of the lift.
+The tuple is zero exactly when a strict lift exists. The
+global kernel C/ℓ^a C injects into each local copy, so the
+strict lift, when it exists, is unique. Thus T(K,B) injects
+into T(K,A)[ℓ^a], with cokernel of length at most (s−1)d.
+
+Passing from finite coefficients to the class group
+---------------------------------------------------
+
+Restriction into E sends the strict finite kernel into W_a^0.
+It is injective there. An inflated H¹(Δ,B) class that vanishes
+locally at any v over ℓ must be zero, since the local
+cyclotomic quotient is all of Δ.
+
+Conversely, every map in W_a^0 admits a global H¹ lift.
+The transgression in H²(Δ,B) restricts to zero at a place
+over ℓ, because the map kills the local absolute group
+upstairs by reciprocity. At that place the quotient is
+all of Δ and the restriction map on the transgression
+target is the identity. Its global obstruction is zero.
+
+The lift is unramified away from ℓ since inertia is unchanged
+in E/K there. Its local values at ℓ are uniquely the
+inflations of a tuple in H¹(Δ,B)^s. Changing the global lift
+changes the tuple by a diagonal element of H¹(Δ,B). This
+again gives a well-defined obstruction, with kernel exactly
+T(K,B).
+
+Here H¹(Δ,B) has length d−1. To compute it, average away
+the tame subgroup and use the cyclic wild group of order
+ℓ^(a−1), with a generator acting by u = (1+ℓ)^(−j) on B.
+The cyclic cohomology quotient is the kernel of the norm
+operator divided by (u−1)B. The norm has valuation a−1 by
+the lifting-the-exponent identity, so its kernel in B is
+ℓB. The valuation of u−1 is h. The resulting length is d−1,
+including the trivial wild group at a=1.
+
+Consequently W_a^0/T(K,B) has length at most (s−1)(d−1).
+Allowing the primes over ℓ back in adds at most sd, by
+evaluating at their s fixed ideal classes and landing in
+(B^Δ)^s. Combining the two comparisons to T(K,B) gives the
+stated absolute error bound. The maps respect the action of
+conjugation of K, which permutes the places over ℓ. The two
+sign projectors at odd ℓ are exact, so the same inequalities
+apply to each sign. On W_a those signs again come from the
+real and relative class groups of E.
+
+What this buys at the window scale
+----------------------------------
+
+Every class in T(K,A) is killed by some ℓ^a, since a continuous
+cocycle into the discrete torsion module has finite image.
+The length of the full group is the supremum of the lengths
+of these finite layers. One may therefore use the supremum
+of the corresponding class-group lengths with the same
+additive error. No transition maps on the class groups are
+needed to make the numerical comparison.
+
+If ℓ−1 divides j and 1 ≤ j < t then ℓ ≤ t. The weighted error
+per line is at most
+
+    2s h log ℓ ≤ 2[K:ℚ](log ℓ + log j) ≤ 4[K:ℚ] log t.
+
+There are at most t² such lines, so the total error is at
+most 4[K:ℚ] t² log t. In a modulus-one window this grows
+polynomially in x and fits into the exponential allowance.
+For all other unramified twists the earlier class-group
+description is exact.
+
+Thus the unramified odd portion of the residual budget can
+be bounded using ordinary class groups for every twist.
+
+The two conductor primes
+------------------------
+
+For the modulus-one host K = R(√−q,√−d), the only odd
+ramified primes are q and d. Let ℓ be one of them. The
+congruences q ≡ 3 mod 8 and d ≡ 7 mod 16 imply ℓ ≡ 3 mod 4.
+The local ramified factor is ℚ_ℓ(√−ℓ), the quadratic subfield
+of ℚ_ℓ(μ_ℓ). The tower R and the other quadratic factor are
+unramified at ℓ. Thus K_v is the compositum of an unramified
+field and ℚ_ℓ(√−ℓ).
+
+The intersection of K_v with ℚ_ℓ(μ_(ℓ^a)) is exactly that
+quadratic subfield, since all subfields of the cyclotomic
+field are totally ramified and K_v has ramification degree
+two. Globally K already contains ℚ(√−ℓ), so the local and
+global relative cyclotomic groups again coincide at each
+place over ℓ. Each such place has a unique prime above it
+in E. The same local argument now gives the exact ordinary
+class-group description if (ℓ−1)/2 does not divide j. This
+is the order of the tame cyclotomic subgroup over K.
+
+This condition holds for all twists 1 ≤ j < t on sufficiently
+late selected windows. The lower bounds on log q and log d in
+WinPair, with Y ≥ x^(1/J) and fixed ε,J, grow at least as
+x^(ε/(5J))/2. Hence both primes eventually exceed 2t+1 when
+t = floor(x^400).
+
+For the sign comparison at these primes use full complex
+conjugation on E, which restricts to conjugation on K. It
+acts on the coefficient B by (−1)^j. Accordingly the
+archive's Plus eigenvalue (−1)^j means that the class-group
+map is even for full conjugation, and the Minus eigenvalue
+means it is odd. Norm identifies the even part with the
+ℓ-primary class group of the real subfield as before.
+
+The entire odd residual budget can therefore be expressed
+using ordinary real and relative class groups, with the
+polynomial error on the unramified tame-trivial lines.
+Uniform bounds on the selected components remain the
+arithmetic input.
+
+Scope
+-----
+
+This is a paper comparison using the same restriction
+sequences and class field theory as zeta_odd_prime_cutoff.txt.
+In a finite arithmetic check, the formula for the cyclic
+H¹ quotient agreed in 367 cases at ℓ = 3, 5, 7 and 11. The
+check used all positive multiples of ℓ−1 below 100 and layers
+through a = 4 at 3 and 5, or a = 3 at 7 and 11.

@@ -1,6 +1,9 @@
-# beyond the 17,280 files we had already compiled, 1,840 more (19 for Green's classification, then 1,821) took the number of statements checked to 43, 6,952 more took it to 78, and 3,343 more to 92; counted one at a time by the first scan, as new files for each table line, those 92 would have asked for 41,242. Then 115 files chosen by the proof's own count took it to 100, and 5,446 more, chosen the same way, to 113.
+# beyond the 17,280 files we had already compiled, 1,840 more (19 for Green's classification, then 1,821) took the number of statements checked to 43, 6,952 more took it to 78, and 3,343 more to 92; counted one at a time by the first scan, as new files for each table line, those 92 would have asked for 41,242. Then 115 files chosen by the proof's own count took it to 100, then 5,446 more, chosen the same way, to 113, 4,816 more to 119, 3,888 more to 127, and 1,541 more to 133.
 # Two of the names, DiscreteSeriesExists and DiscreteSeriesUpqExists, are one statement: the archive defines the first to be the second.
 AbMulNSt
+AbelianDeRham
+AbelianLifting
+AlgebraicCharacterWD  # replaced
 AutomorphicFormsFiniteGL
 BernsteinUnitaryProductIrreducible
 BernsteinZelevinskyFiniteness  # direct
@@ -22,10 +25,13 @@ CuspDecayBound
 CuspDecaySobolev
 CuspFormsBoundedGL
 CuspRapidDecay
+CuspTraceClass  # replaced
 CuspidalMirabolic
 CuspidalMultiplicityOne
+CuspidalSpectrumGL
 DeRhamPotSemistable
 DeligneRibet
+DepthZeroInduction  # replaced
 DepthZeroJacquetInjective
 DepthZeroSupport
 DiscreteSeriesClassification
@@ -36,6 +42,8 @@ DiscreteSeriesHermitianUnique  # direct
 DiscreteSeriesLowestKType  # direct
 DiscreteSeriesUpqExists
 DixmierMalliavinFactorisation
+DoublingMethodLocalZetaIntegrals
+DualAbelianScheme
 EllipticMainTheoremCM  # direct
 EssSquareIntegrableSegments
 FinitenessOfHermitianClasses  # outside the table
@@ -46,6 +54,7 @@ FormalAlgebraisation
 FormalDegreeCompactDual
 GKGlobalisation
 GLHoweDuality
+GelfandKazhdanDual
 GenericUnitaryDualGL
 GenericUnlinkedGL
 GeometricLemma
@@ -54,6 +63,8 @@ GlobalArtinReciprocity
 GreenCuspidal
 GreenRegularCharacters
 GreenSeriesSt  # replaced
+GrothendieckDeformation
+GrothendieckMessing
 GrothendieckRingPolynomial
 HarishChandraAnalyticity
 HarishChandraFinite
@@ -61,6 +72,7 @@ HarishChandraModules
 HasseNormSt
 HeckeLAdicCharacter
 HeckeLAdicCharacterDeRham
+HeckeLAdicParameterAboveAlt  # replaced
 HeckeLEntireAndNonzeroAtOne
 HeckeLPartialContinuation
 HeckeTateFunctionalEquation
@@ -72,6 +84,8 @@ HoweDualityReal
 IdealInvariantsOneOrbitSt  # direct
 InducedSimpleLowestAlcove
 IrreducibleAdmissibleGL
+JacquetShalika
+JacquetShalikaRigidity
 KFiniteVectorsUnitary
 KudlaSplittingSplitUnitary
 L2ExtensionLogCanonical
@@ -85,6 +99,8 @@ MoyPrasadJacquetIso  # direct
 NefNumerics
 PartialZetaFunctionalEquation  # direct
 PoitouTateNormalised
+Principalisation
+PrismaticDieudonneHodge
 QuadraticClassFieldTheory
 RadfordShufflePolynomial
 RayCharacterArtin
@@ -93,11 +109,14 @@ RealMetaplecticRepresentation
 RegularAlgebraicPurity
 SchurOrthogonalitySquareIntegrable
 SegmentRepresentation
+SemiAbelianHomExtension  # direct
+SemiAbelianLieSeminegative
 SemistableReductionSt
 SerreHolomorphicSections
 SiegelEisensteinContinuation
 SiegelKlingenDeligneRibet  # replaced
 SiegelSetUnitary
+SquareIntegrableSegment
 StandardCosocleGL
 StandardFunctorsFiniteLength
 StoneVonNeumann
@@ -113,4 +132,5 @@ WeilRepresentationExists  # direct
 WeilRepresentationUnitaryPair
 WeilThetaConvergence
 WeylBranching
+ZelevinskyPolynomialRing  # replaced
 principalPolarisationOneSection

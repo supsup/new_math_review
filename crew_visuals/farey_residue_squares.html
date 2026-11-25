@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the Farey total hides</title>
+<style>
+  :root { color-scheme:dark; --page:#131c29; --panel:#1a2839; --ink:#eef3f4; --soft:#bdcbd1; --edge:#455b6c; --total:#8bd5c8; --spread:#efb581; background:var(--page); color:var(--ink); font:100%/1.56 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; }
+  main { width:min(100%,66rem); margin:auto; padding:clamp(1rem,5vw,4rem); }
+  a { color:var(--total); text-underline-offset:.19em; }
+  :focus-visible { outline:.15rem solid var(--spread); outline-offset:.15rem; }
+  h1,h2 { font-family:Georgia,serif; font-weight:400; }
+  h1 { max-width:16ch; font-size:clamp(2.85rem,9vw,6.35rem); line-height:.96; letter-spacing:-.06em; text-wrap:balance; margin:.62rem 0 .84rem; }
+  h2 { font-size:1.7rem; line-height:1.18; margin:1.3rem 0 .5rem; }
+  h3 { font-size:1rem; margin:.12rem 0 .6rem; }
+  p { max-width:67ch; margin:.53rem 0; }
+  .muted { color:var(--soft); }
+  .explorer { margin:1.21rem 0; padding:clamp(.73rem,2.6vw,1.32rem); background:var(--panel); border:1px solid var(--edge); border-radius:.45rem; }
+  .controls,.layout { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap:.6rem 1rem; }
+  .layout { grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr)); gap:1rem 1.2rem; margin:.98rem 0; }
+  label { display:grid; gap:.19rem; min-width:0; }
+  label span { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.32rem; }
+  input[type=range] { width:100%; margin-inline:0; accent-color:var(--total); }
+  button,select { color:var(--ink); background:#132231; border:1px solid #617988; border-radius:.28rem; min-height:2.55rem; font:inherit; padding:.3rem .49rem; cursor:pointer; }
+  button[aria-pressed=true] { background:var(--total); border-color:var(--total); color:#183332; }
+  .actions { display:flex; flex-wrap:wrap; gap:.39rem; margin:.68rem 0 .05rem; }
+  output { color:var(--spread); font-variant-numeric:tabular-nums; }
+  .bucket { display:grid; grid-template-columns:2rem minmax(0,1fr) minmax(3.05rem,auto); gap:.39rem; align-items:center; margin:.32rem 0; }
+  .bucket output { text-align:right; }
+  .rail { position:relative; background:#101c2a; height:.8rem; border-radius:.16rem; }
+  .rail::before { content:""; position:absolute; left:50%; inset-block:0; width:1px; background:#8194a0; }
+  .rail i { position:absolute; inset-block:.1rem; background:var(--total); border-radius:.08rem; }
+  .negative .rail i { background:var(--spread); }
+  .share { display:flex; min-height:.82rem; background:#101c2a; border-radius:.2rem; overflow:hidden; margin:.46rem 0 .54rem; }
+  .share span:first-child { background:var(--total); }
+  .share span:last-child { background:var(--spread); }
+  dl { margin:0; }
+  dl div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.15rem .55rem; border-top:1px solid var(--edge); padding:.3rem 0; }
+  dt { color:var(--soft); }
+  dd { margin:0; font:1rem ui-monospace,monospace; text-align:right; }
+  .part-total dd { color:var(--total); }
+  .part-spread dd { color:var(--spread); }
+  .caption { margin:.37rem 0 0; color:var(--soft); font-size:.9rem; }
+  .formula { font:1.15rem/1.54 Georgia,serif; overflow-wrap:anywhere; }
+  details { border-top:1px solid var(--edge); margin-top:.76rem; padding-top:.62rem; }
+  summary { color:var(--total); font-weight:620; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <a href="complex_farey_norm.html">Back to the complex Farey arrows</a>
+  <h1>What the Farey total hides</h1>
+  <p class="muted">Group the Farey contributions by denominator remainder. The total can vanish even when the groups disagree. Squaring their differences keeps track of the disagreement.</p>
+  <section class="explorer" aria-label="Farey residue totals and character sums">
+    <div class="controls">
+      <label for="modulus">Denominator modulus <select id="modulus"><option value="5">Modulo 5</option><option value="8">Modulo 8</option></select></label>
+      <label for="order"><span>Largest denominator <var>N</var><output id="shown-order"></output></span><input id="order" type="range" min="2" max="240" value="2"></label>
+      <label for="turns"><span>Turns around the circle <var>k</var><output id="shown-turns"></output></span><input id="turns" type="range" min="1" max="24" value="1"></label>
+    </div>
+    <div class="actions">
+      <button type="button" id="cancel">Try a zero total</button>
+      <button type="button" id="common">Try a large common part</button>
+      <button type="button" id="center" aria-pressed="false">Subtract the average</button>
+    </div>
+    <div class="layout">
+      <div>
+        <h3 id="bucket-title">Totals by remainder</h3>
+        <div id="buckets" aria-label="Signed bucket values"></div>
+        <p id="average" class="caption"></p>
+      </div>
+      <div>
+        <h3>How the squares split</h3>
+        <div class="share" aria-hidden="true"><span id="total-segment"></span><span id="spread-segment"></span></div>
+        <dl aria-live="polite">
+          <div class="part-total"><dt>Square of the total</dt><dd id="total-square"></dd></div>
+          <div class="part-spread"><dt>Spread between buckets</dt><dd id="spread"></dd></div>
+          <div><dt>4 × sum of original bucket squares</dt><dd id="full"></dd></div>
+        </dl>
+      </div>
+    </div>
+    <details>
+      <summary>See the four character sums</summary>
+      <p class="caption">Multiply the original buckets by the character’s weights and add. The three nonprincipal squared magnitudes add to the spread.</p>
+      <dl id="projections"></dl>
+      <p id="conductor" class="caption" hidden></p>
+    </details>
+  </section>
+
+  <h2>Add the squares before the totals cancel</h2>
+  <p>After <var>k</var> turns, the reduced fractions with denominator <var>q</var> contribute the integer Ramanujan sum <var>c</var><sub><var>q</var></sub>(<var>k</var>). Put it in the bucket for <var>q</var> modulo the chosen modulus. Keep only remainders coprime to that modulus. At one turn, the contribution is simply the Möbius number μ(<var>q</var>). <a href="farey_harmonics.html">The circle and Ramanujan sums</a>.</p>
+  <p>Choose modulo 5. At <var>N</var> = 2 and one turn, the buckets are 1, −1, 0, 0. Their total vanishes and their spread is 8. At <var>N</var> = 179 and two turns, the buckets are −5, −3, −3, −4. The square of their total is 225, and their spread is 11. Click <strong>Subtract the average</strong> to see each bucket’s difference from the average.</p>
+
+  <details>
+    <summary>Why the same split works for any modulus</summary>
+    <p>Let <var>A</var><sub><var>r</var></sub> be the buckets, <var>h</var> their number, and <var>T</var> their total. Expanding the squares gives <span class="lattex" data-tex="h\sum_r A_r^2=T^2+\sum_{r&lt;s}(A_r-A_s)^2\text{.}" style="display:inline-block;width:13.248em;max-width:100%;vertical-align:-0.4845em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.12 -34.432 529.9111 53.812" width="529.9111" height="53.812" role="img" aria-label="h the sum from r of A sub r to the power of 2 = T squared + the sum from r &lt; s of ( A sub r - A sub s ) squared .">
+  <g fill="currentColor">
+    <path d="M528 112 L549 97 Q536 79 517 53 Q499 28 473 9 Q447 -10 411 -10 Q374 -10 360 8 Q346 27 346 49 Q346 61 348 72 Q350 84 351 88 L410 319 Q410 319 413 335 Q417 352 417 367 Q417 384 410 395 Q404 407 387 407 Q365 407 339 388 Q313 369 286 339 Q260 309 236 275 Q212 241 193 210 Q175 179 165 158 L129 0 L47 0 L179 610 Q179 610 180 621 Q182 633 182 644 Q182 670 150 670 Q140 670 128 669 Q117 668 117 668 L117 695 L255 706 L278 706 L177 259 L185 259 Q201 287 225 324 Q250 362 282 397 Q315 432 354 455 Q393 479 437 479 Q475 479 489 457 Q503 435 503 408 Q503 389 499 367 Q496 345 494 334 L438 103 Q438 103 436 95 Q434 88 434 79 Q434 60 453 60 Q480 60 498 79 Q517 98 528 112 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M861 70 L800 -248 L62 -248 L62 -224 L449 282 L69 758 L69 782 L817 782 L828 532 L789 532 Q778 616 751 658 Q724 700 678 714 Q633 729 566 729 L237 729 L237 725 L545 334 L545 315 L196 -145 L196 -150 L621 -150 Q684 -150 720 -123 Q756 -97 778 -47 Q801 2 821 70 L861 70 Z" transform="translate(29.4267 0.36) scale(0.04 -0.04)"/>
+    <path d="M161 259 L171 259 Q183 284 200 321 Q217 358 239 394 Q261 430 287 454 Q313 479 343 479 Q367 479 383 464 Q399 450 399 421 Q399 388 382 373 Q366 358 346 358 Q330 358 320 367 Q311 377 307 386 Q303 395 301 395 Q287 395 268 373 Q250 351 231 317 Q212 283 194 247 Q177 211 164 181 Q152 152 147 140 L117 0 L32 0 L106 348 Q109 362 112 379 Q115 397 115 410 Q115 424 109 432 Q103 440 82 440 Q74 440 62 439 Q51 438 51 438 L51 465 L190 476 L212 476 L161 259 Z" transform="translate(66.8667 16.68) scale(0.028 -0.028)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(86.6693 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(111.1093 -14.4) scale(0.028 -0.028)"/>
+    <path d="M161 259 L171 259 Q183 284 200 321 Q217 358 239 394 Q261 430 287 454 Q313 479 343 479 Q367 479 383 464 Q399 450 399 421 Q399 388 382 373 Q366 358 346 358 Q330 358 320 367 Q311 377 307 386 Q303 395 301 395 Q287 395 268 373 Q250 351 231 317 Q212 283 194 247 Q177 211 164 181 Q152 152 147 140 L117 0 L32 0 L106 348 Q109 362 112 379 Q115 397 115 410 Q115 424 109 432 Q103 440 82 440 Q74 440 62 439 Q51 438 51 438 L51 465 L190 476 L212 476 L161 259 Z" transform="translate(113.9093 8.4) scale(0.028 -0.028)"/>
+    <path d="M658 327 L62 327 L62 395 L658 395 L658 327 Z M658 123 L62 123 L62 190 L658 190 L658 123 Z" transform="translate(138.1564 0) scale(0.04 -0.04)"/>
+    <path d="M628 484 L597 484 Q597 539 591 567 Q586 596 562 607 Q538 618 482 618 L425 618 L326 131 Q317 86 319 64 Q322 43 342 36 Q362 30 404 30 L398 0 L113 0 L119 30 Q161 30 183 36 Q205 43 216 64 Q227 86 236 131 L335 618 L278 618 Q236 618 211 612 Q186 606 170 591 Q154 577 141 551 Q129 525 112 484 L80 484 L121 657 L658 657 L628 484 Z" transform="translate(178.0676 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(206.2676 -14.4) scale(0.028 -0.028)"/>
+    <path d="M658 225 L396 225 L396 -40 L324 -40 L324 225 L62 225 L62 293 L324 293 L324 558 L396 558 L396 293 L658 293 L658 225 Z" transform="translate(230.6164 0) scale(0.04 -0.04)"/>
+    <path d="M861 70 L800 -248 L62 -248 L62 -224 L449 282 L69 758 L69 782 L817 782 L828 532 L789 532 Q778 616 751 658 Q724 700 678 714 Q633 729 566 729 L237 729 L237 725 L545 334 L545 315 L196 -145 L196 -150 L621 -150 Q684 -150 720 -123 Q756 -97 778 -47 Q801 2 821 70 L861 70 Z" transform="translate(268.3053 0.36) scale(0.04 -0.04)"/>
+    <path d="M161 259 L171 259 Q183 284 200 321 Q217 358 239 394 Q261 430 287 454 Q313 479 343 479 Q367 479 383 464 Q399 450 399 421 Q399 388 382 373 Q366 358 346 358 Q330 358 320 367 Q311 377 307 386 Q303 395 301 395 Q287 395 268 373 Q250 351 231 317 Q212 283 194 247 Q177 211 164 181 Q152 152 147 140 L117 0 L32 0 L106 348 Q109 362 112 379 Q115 397 115 410 Q115 424 109 432 Q103 440 82 440 Q74 440 62 439 Q51 438 51 438 L51 465 L190 476 L212 476 L161 259 Z" transform="translate(305.7453 16.68) scale(0.028 -0.028)"/>
+    <path d="M650 -25 L71 255 L71 265 L650 547 L650 478 L207 260 L650 42 L650 -25 Z" transform="translate(317.2813 16.68) scale(0.028 -0.028)"/>
+    <path d="M378 479 L355 323 L331 323 Q329 381 304 415 Q280 449 236 449 Q197 449 180 428 Q163 407 163 385 Q163 364 177 344 Q192 325 214 304 Q236 284 258 260 Q290 226 313 193 Q337 161 337 113 Q337 84 322 55 Q308 27 275 8 Q242 -11 185 -11 Q138 -11 109 0 Q81 12 70 16 L67 16 L43 -11 L21 -11 L47 156 L72 156 Q80 91 102 57 Q125 23 176 23 Q211 23 232 40 Q254 57 254 96 Q254 137 231 165 Q209 194 180 221 Q160 241 139 260 Q119 279 105 302 Q92 326 92 357 Q92 408 126 443 Q160 479 228 479 Q268 479 294 468 Q321 457 330 452 L333 452 L359 479 L378 479 Z" transform="translate(337.4413 16.68) scale(0.028 -0.028)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(349.8493 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(364.1293 0) scale(0.04 -0.04)"/>
+    <path d="M161 259 L171 259 Q183 284 200 321 Q217 358 239 394 Q261 430 287 454 Q313 479 343 479 Q367 479 383 464 Q399 450 399 421 Q399 388 382 373 Q366 358 346 358 Q330 358 320 367 Q311 377 307 386 Q303 395 301 395 Q287 395 268 373 Q250 351 231 317 Q212 283 194 247 Q177 211 164 181 Q152 152 147 140 L117 0 L32 0 L106 348 Q109 362 112 379 Q115 397 115 410 Q115 424 109 432 Q103 440 82 440 Q74 440 62 439 Q51 438 51 438 L51 465 L190 476 L212 476 L161 259 Z" transform="translate(391.3693 8.4) scale(0.028 -0.028)"/>
+    <path d="M658 225 L62 225 L62 293 L658 293 L658 225 Z" transform="translate(413.3942 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(451.0831 0) scale(0.04 -0.04)"/>
+    <path d="M378 479 L355 323 L331 323 Q329 381 304 415 Q280 449 236 449 Q197 449 180 428 Q163 407 163 385 Q163 364 177 344 Q192 325 214 304 Q236 284 258 260 Q290 226 313 193 Q337 161 337 113 Q337 84 322 55 Q308 27 275 8 Q242 -11 185 -11 Q138 -11 109 0 Q81 12 70 16 L67 16 L43 -11 L21 -11 L47 156 L72 156 Q80 91 102 57 Q125 23 176 23 Q211 23 232 40 Q254 57 254 96 Q254 137 231 165 Q209 194 180 221 Q160 241 139 260 Q119 279 105 302 Q92 326 92 357 Q92 408 126 443 Q160 479 228 479 Q268 479 294 468 Q321 457 330 452 L333 452 L359 479 L378 479 Z" transform="translate(478.3231 8.4) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(490.7311 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(505.0111 -14.4) scale(0.028 -0.028)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(520.4711 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span> The last sum also equals <var>h</var> times the sum of squared distances from the average.</p>
+    <p>Characters are the Fourier basis on the reduced remainders. When you expand the sum of the squared character magnitudes, cross terms between distinct buckets disappear by orthogonality. Equal remainders contribute <var>h</var>, giving <var>h</var>Σ<var>A</var><sub><var>r</var></sub>² again. The principal character gives <var>T</var>. All the other squared magnitudes therefore add up to the spread. Modulo 5 and modulo 8 each have four reduced remainders, so the same scale applies to both. Modulo 5 gives one real nonprincipal sum and a complex conjugate pair. Modulo 8 gives three real nonprincipal sums. <a href="../tools/check_farey_residue_squares.py">Exact replay</a>.</p>
+    <p>Modulo 8 you can also group the buckets into the pairs (1, 5) and (3, 7). The pair totals record the contributions visible modulo 4. The pair differences <span class="lattex" data-tex="u=A_1-A_5" style="display:inline-block;width:5.1416em;max-width:100%;vertical-align:-0.2691em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.12 -28.44 205.664 39.204" width="205.664" height="39.204" role="img" aria-label="u = A sub 1 - A sub 5">
+  <g fill="currentColor">
+    <path d="M42 355 L22 371 Q35 390 54 414 Q73 439 100 458 Q127 477 162 477 Q198 477 211 459 Q225 441 225 419 Q225 406 223 395 Q221 384 220 380 L160 151 Q160 151 156 134 Q153 118 153 103 Q153 85 159 73 Q166 62 183 62 Q211 62 244 89 Q277 116 309 158 Q341 201 364 247 Q388 294 397 332 L427 470 L510 470 L438 119 Q438 119 435 103 Q432 87 432 76 Q432 70 436 64 Q441 59 453 59 Q471 59 487 72 Q504 85 515 98 Q526 111 526 111 L547 96 Q514 48 482 19 Q451 -9 405 -9 Q385 -9 365 1 Q345 12 345 45 Q345 80 354 114 Q364 148 377 197 L368 197 Q354 171 332 136 Q310 101 280 67 Q251 34 214 12 Q177 -10 133 -10 Q95 -10 81 12 Q67 34 67 62 Q67 82 70 103 Q74 125 77 135 L133 362 Q133 362 135 370 Q137 379 137 389 Q137 409 116 409 Q91 409 72 389 Q54 370 42 355 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M658 327 L62 327 L62 395 L658 395 L658 327 Z M658 123 L62 123 L62 190 L658 190 L658 123 Z" transform="translate(33.7111 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(73.6222 0) scale(0.04 -0.04)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(100.8622 8.4) scale(0.028 -0.028)"/>
+    <path d="M658 225 L62 225 L62 293 L658 293 L658 225 Z" transform="translate(125.2111 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(162.9 0) scale(0.04 -0.04)"/>
+    <path d="M417 549 L182 549 L155 435 L202 432 Q246 429 289 417 Q332 405 367 381 Q402 357 422 317 Q443 278 443 219 Q443 142 409 90 Q375 39 314 13 Q254 -13 174 -13 Q59 -13 59 43 Q59 60 69 73 Q80 86 99 86 Q119 86 138 74 Q158 62 181 49 Q204 37 236 37 Q272 37 302 51 Q333 65 351 96 Q370 127 370 179 Q370 273 314 310 Q258 347 154 352 Q135 354 127 354 Q120 354 109 354 L97 369 L159 630 L433 630 L417 549 Z" transform="translate(190.14 8.4) scale(0.028 -0.028)"/>
+  </g>
+</svg></span> and <span class="lattex" data-tex="v=A_3-A_7" style="display:inline-block;width:5.0643em;max-width:100%;vertical-align:-0.2691em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="0.12 -28.44 202.572 39.204" width="202.572" height="39.204" role="img" aria-label="v = A sub 3 - A sub 7">
+  <g fill="currentColor">
+    <path d="M200 476 L222 476 L175 284 Q168 258 160 221 Q153 185 153 151 Q153 112 169 83 Q185 55 231 55 Q282 55 319 79 Q356 104 379 142 Q403 180 414 222 Q426 264 426 299 Q426 325 417 344 Q408 363 395 378 Q383 393 374 407 Q365 421 365 437 Q365 457 376 468 Q387 479 403 479 Q437 479 458 445 Q479 411 479 358 Q479 312 467 261 Q456 211 433 163 Q410 115 376 76 Q342 37 298 14 Q254 -9 200 -9 Q150 -9 122 11 Q94 31 82 64 Q71 97 71 135 Q71 171 78 209 Q85 247 93 278 L113 354 Q115 362 119 378 Q123 394 123 409 Q123 422 118 431 Q113 440 99 440 Q87 440 70 438 Q53 437 53 437 L53 465 L200 476 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M658 327 L62 327 L62 395 L658 395 L658 327 Z M658 123 L62 123 L62 190 L658 190 L658 123 Z" transform="translate(31.2711 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(71.1822 0) scale(0.04 -0.04)"/>
+    <path d="M86 498 L63 511 Q120 644 244 644 Q321 644 363 605 Q405 567 405 510 Q405 458 374 426 Q344 394 297 364 L297 361 Q337 349 370 326 Q404 304 424 271 Q444 239 444 194 Q444 126 406 79 Q368 33 306 10 Q244 -13 171 -13 Q126 -13 102 -4 Q78 4 68 16 Q59 29 59 42 Q59 58 69 72 Q79 86 98 86 Q110 86 120 81 Q131 77 157 63 Q189 47 204 42 Q220 37 238 37 Q270 37 298 48 Q326 60 344 87 Q362 115 362 164 Q362 209 337 242 Q312 275 270 293 Q229 312 181 312 L161 312 L161 350 L180 350 Q214 350 246 367 Q278 384 298 415 Q319 446 319 486 Q319 530 291 554 Q264 579 217 579 Q172 579 142 558 Q112 538 86 498 Z" transform="translate(98.4222 8.4) scale(0.028 -0.028)"/>
+    <path d="M658 225 L62 225 L62 293 L658 293 L658 225 Z" transform="translate(122.7711 0) scale(0.04 -0.04)"/>
+    <path d="M642 0 L375 0 L381 30 Q418 30 439 40 Q461 50 461 87 Q461 99 460 109 Q460 120 459 129 L449 219 L191 219 L121 113 Q111 99 103 85 Q96 71 96 57 Q96 41 108 35 Q121 30 154 30 L147 0 L-62 0 L-55 30 Q-27 30 -8 39 Q11 48 34 75 Q57 103 94 160 L440 661 L482 661 L561 119 Q571 70 587 50 Q603 30 648 30 L642 0 Z M445 259 L412 548 L409 548 L215 259 L445 259 Z" transform="translate(160.46 0) scale(0.04 -0.04)"/>
+    <path d="M464 599 L230 -8 L151 -8 L387 549 L164 549 Q136 549 121 544 Q106 539 96 523 Q87 507 73 474 L42 477 L82 630 L464 630 L464 599 Z" transform="translate(187.7 8.4) scale(0.028 -0.028)"/>
+  </g>
+</svg></span> give the two primitive character sums of conductor 8, <var>u</var> − <var>v</var> and <var>u</var> + <var>v</var>. Their squared magnitudes add to <span class="lattex" data-tex="2(u^2+v^2)\text{.}" style="display:inline-block;width:4.4754em;max-width:100%;vertical-align:-0.246em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.48 -34.432 179.0178 44.272" width="179.0178" height="44.272" role="img" aria-label="2 ( u squared + v squared ) .">
+  <g fill="currentColor">
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(19.8 0) scale(0.04 -0.04)"/>
+    <path d="M42 355 L22 371 Q35 390 54 414 Q73 439 100 458 Q127 477 162 477 Q198 477 211 459 Q225 441 225 419 Q225 406 223 395 Q221 384 220 380 L160 151 Q160 151 156 134 Q153 118 153 103 Q153 85 159 73 Q166 62 183 62 Q211 62 244 89 Q277 116 309 158 Q341 201 364 247 Q388 294 397 332 L427 470 L510 470 L438 119 Q438 119 435 103 Q432 87 432 76 Q432 70 436 64 Q441 59 453 59 Q471 59 487 72 Q504 85 515 98 Q526 111 526 111 L547 96 Q514 48 482 19 Q451 -9 405 -9 Q385 -9 365 1 Q345 12 345 45 Q345 80 354 114 Q364 148 377 197 L368 197 Q354 171 332 136 Q310 101 280 67 Q251 34 214 12 Q177 -10 133 -10 Q95 -10 81 12 Q67 34 67 62 Q67 82 70 103 Q74 125 77 135 L133 362 Q133 362 135 370 Q137 379 137 389 Q137 409 116 409 Q91 409 72 389 Q54 370 42 355 Z" transform="translate(34.08 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(56.68 -14.4) scale(0.028 -0.028)"/>
+    <path d="M658 225 L396 225 L396 -40 L324 -40 L324 225 L62 225 L62 293 L324 293 L324 558 L396 558 L396 293 L658 293 L658 225 Z" transform="translate(81.0289 0) scale(0.04 -0.04)"/>
+    <path d="M200 476 L222 476 L175 284 Q168 258 160 221 Q153 185 153 151 Q153 112 169 83 Q185 55 231 55 Q282 55 319 79 Q356 104 379 142 Q403 180 414 222 Q426 264 426 299 Q426 325 417 344 Q408 363 395 378 Q383 393 374 407 Q365 421 365 437 Q365 457 376 468 Q387 479 403 479 Q437 479 458 445 Q479 411 479 358 Q479 312 467 261 Q456 211 433 163 Q410 115 376 76 Q342 37 298 14 Q254 -9 200 -9 Q150 -9 122 11 Q94 31 82 64 Q71 97 71 135 Q71 171 78 209 Q85 247 93 278 L113 354 Q115 362 119 378 Q123 394 123 409 Q123 422 118 431 Q113 440 99 440 Q87 440 70 438 Q53 437 53 437 L53 465 L200 476 Z" transform="translate(118.7178 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(139.4778 -14.4) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(154.9378 0) scale(0.04 -0.04)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(169.2178 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span></p>
+  </details>
+
+  <details>
+    <summary>Which Riemann hypotheses the two terms test</summary>
+    <p>Fix the modulus and the turn count <var>k</var>. For every ε &gt; 0, the full sum of squares grows at most as <var>N</var><sup>1+ε</sup> exactly when GRH holds for every character of that modulus. The same bound for the spread corresponds to the nonprincipal characters. The bound for the square of the total corresponds to ordinary RH, since the principal character’s L-function differs from ζ only by finitely many Euler factors.</p>
+    <p>At <var>k</var> = 1 this follows from the twisted Möbius growth criterion. For general fixed <var>k</var>, the Dirichlet series of a character’s contributions is <span class="lattex" data-tex="\frac{\sum_{d\mid k}\chi(d)d^{1-s}}{L(s,\chi)}\text{,}" style="display:inline-block;width:4.515em;max-width:100%;vertical-align:-0.7806em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -56.482 180.5987 87.706" width="180.5987" height="87.706" role="img" aria-label="the fraction the sum from d ∣ k of χ ( d ) d to the power of 1 - s over L ( s , χ ) ,">
+  <g fill="currentColor">
+    <path d="M861 70 L800 -248 L62 -248 L62 -224 L449 282 L69 758 L69 782 L817 782 L828 532 L789 532 Q778 616 751 658 Q724 700 678 714 Q633 729 566 729 L237 729 L237 725 L545 334 L545 315 L196 -145 L196 -150 L621 -150 Q684 -150 720 -123 Q756 -97 778 -47 Q801 2 821 70 L861 70 Z" transform="translate(0 -30.092) scale(0.028 -0.028)"/>
+    <path d="M529 705 L423 121 Q423 121 420 105 Q418 89 418 79 Q418 60 437 60 Q461 60 480 79 Q500 98 510 112 L530 97 Q515 75 496 50 Q477 25 452 7 Q428 -10 393 -10 Q363 -10 347 4 Q332 19 332 42 Q332 51 334 63 Q336 76 337 85 L329 85 Q292 39 249 13 Q207 -12 163 -12 Q108 -12 72 31 Q37 74 37 162 Q37 229 57 286 Q78 344 114 387 Q150 431 197 455 Q244 479 296 479 Q330 479 355 468 Q380 458 398 439 L401 439 L434 607 Q434 607 435 618 Q437 629 437 639 Q437 652 431 661 Q425 670 402 670 Q393 670 382 669 Q371 668 371 668 L371 694 L507 705 L529 705 Z M346 177 Q359 215 365 251 Q372 288 374 315 Q377 342 377 351 Q377 383 356 412 Q335 441 291 441 Q253 441 222 417 Q192 393 170 353 Q149 314 137 266 Q126 218 126 169 Q126 101 147 77 Q169 54 206 54 Q257 54 291 87 Q326 120 346 177 Z" transform="translate(26.208 -18.668) scale(0.022 -0.022)"/>
+    <path d="M170 -194 L102 -194 L102 706 L170 706 L170 -194 Z" transform="translate(38.44 -18.668) scale(0.022 -0.022)"/>
+    <path d="M256 705 L167 238 L172 238 L328 379 Q339 388 345 397 Q352 406 352 416 Q352 432 338 437 Q325 442 307 442 L310 467 L525 467 L522 442 Q471 441 443 423 Q415 405 390 382 L279 284 L353 112 Q364 87 374 72 Q385 58 407 58 Q433 58 451 75 Q470 93 486 116 L507 102 Q503 95 492 77 Q481 59 463 39 Q445 19 421 4 Q398 -10 369 -10 Q344 -10 328 2 Q312 14 302 32 Q293 50 285 68 L216 235 L158 184 L123 0 L41 0 L159 608 Q159 608 160 618 Q162 628 162 638 Q162 670 127 670 Q118 670 107 669 Q96 668 96 668 L96 694 L234 705 L256 705 Z" transform="translate(44.424 -18.668) scale(0.022 -0.022)"/>
+    <path d="M636 459 L360 139 L361 105 Q364 13 371 -38 Q379 -90 393 -110 Q408 -130 431 -130 Q471 -130 500 -95 L517 -110 Q498 -153 468 -180 Q438 -208 400 -208 Q367 -208 348 -191 Q330 -174 323 -131 Q316 -89 316 -14 Q316 9 316 35 Q316 61 315 93 L311 93 L97 -207 L5 -207 L5 -195 L308 173 Q308 175 308 189 Q308 204 307 232 Q306 315 290 361 Q275 408 232 408 Q202 408 185 394 Q168 381 153 364 L136 378 Q157 420 190 449 Q224 479 261 479 Q295 479 314 453 Q333 428 341 387 Q350 347 352 302 Q355 257 355 218 L358 218 L541 470 L635 472 L636 459 Z" transform="translate(61.9367 -30.344) scale(0.028 -0.028)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(79.8847 -30.344) scale(0.028 -0.028)"/>
+    <path d="M529 705 L423 121 Q423 121 420 105 Q418 89 418 79 Q418 60 437 60 Q461 60 480 79 Q500 98 510 112 L530 97 Q515 75 496 50 Q477 25 452 7 Q428 -10 393 -10 Q363 -10 347 4 Q332 19 332 42 Q332 51 334 63 Q336 76 337 85 L329 85 Q292 39 249 13 Q207 -12 163 -12 Q108 -12 72 31 Q37 74 37 162 Q37 229 57 286 Q78 344 114 387 Q150 431 197 455 Q244 479 296 479 Q330 479 355 468 Q380 458 398 439 L401 439 L434 607 Q434 607 435 618 Q437 629 437 639 Q437 652 431 661 Q425 670 402 670 Q393 670 382 669 Q371 668 371 668 L371 694 L507 705 L529 705 Z M346 177 Q359 215 365 251 Q372 288 374 315 Q377 342 377 351 Q377 383 356 412 Q335 441 291 441 Q253 441 222 417 Q192 393 170 353 Q149 314 137 266 Q126 218 126 169 Q126 101 147 77 Q169 54 206 54 Q257 54 291 87 Q326 120 346 177 Z" transform="translate(89.8807 -30.344) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(105.4487 -30.344) scale(0.028 -0.028)"/>
+    <path d="M529 705 L423 121 Q423 121 420 105 Q418 89 418 79 Q418 60 437 60 Q461 60 480 79 Q500 98 510 112 L530 97 Q515 75 496 50 Q477 25 452 7 Q428 -10 393 -10 Q363 -10 347 4 Q332 19 332 42 Q332 51 334 63 Q336 76 337 85 L329 85 Q292 39 249 13 Q207 -12 163 -12 Q108 -12 72 31 Q37 74 37 162 Q37 229 57 286 Q78 344 114 387 Q150 431 197 455 Q244 479 296 479 Q330 479 355 468 Q380 458 398 439 L401 439 L434 607 Q434 607 435 618 Q437 629 437 639 Q437 652 431 661 Q425 670 402 670 Q393 670 382 669 Q371 668 371 668 L371 694 L507 705 L529 705 Z M346 177 Q359 215 365 251 Q372 288 374 315 Q377 342 377 351 Q377 383 356 412 Q335 441 291 441 Q253 441 222 417 Q192 393 170 353 Q149 314 137 266 Q126 218 126 169 Q126 101 147 77 Q169 54 206 54 Q257 54 291 87 Q326 120 346 177 Z" transform="translate(115.4447 -30.344) scale(0.028 -0.028)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(132.4967 -40.424) scale(0.022 -0.022)"/>
+    <path d="M658 225 L62 225 L62 293 L658 293 L658 225 Z" transform="translate(143.3867 -40.424) scale(0.022 -0.022)"/>
+    <path d="M378 479 L355 323 L331 323 Q329 381 304 415 Q280 449 236 449 Q197 449 180 428 Q163 407 163 385 Q163 364 177 344 Q192 325 214 304 Q236 284 258 260 Q290 226 313 193 Q337 161 337 113 Q337 84 322 55 Q308 27 275 8 Q242 -11 185 -11 Q138 -11 109 0 Q81 12 70 16 L67 16 L43 -11 L21 -11 L47 156 L72 156 Q80 91 102 57 Q125 23 176 23 Q211 23 232 40 Q254 57 254 96 Q254 137 231 165 Q209 194 180 221 Q160 241 139 260 Q119 279 105 302 Q92 326 92 357 Q92 408 126 443 Q160 479 228 479 Q268 479 294 468 Q321 457 330 452 L333 452 L359 479 L378 479 Z" transform="translate(159.2267 -40.424) scale(0.022 -0.022)"/>
+    <path d="M541 195 L481 0 L-13 0 L-7 30 Q32 30 52 37 Q73 44 84 64 Q95 84 103 124 L189 541 Q196 574 194 593 Q192 612 173 619 Q155 627 112 627 L118 657 L402 657 L397 627 Q343 627 316 610 Q289 594 278 540 L187 92 Q180 59 194 48 Q208 38 252 38 L299 38 Q347 38 377 46 Q407 55 428 73 Q449 91 467 121 Q486 152 509 195 L541 195 Z" transform="translate(48.6493 23.4) scale(0.028 -0.028)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(64.5813 23.4) scale(0.028 -0.028)"/>
+    <path d="M378 479 L355 323 L331 323 Q329 381 304 415 Q280 449 236 449 Q197 449 180 428 Q163 407 163 385 Q163 364 177 344 Q192 325 214 304 Q236 284 258 260 Q290 226 313 193 Q337 161 337 113 Q337 84 322 55 Q308 27 275 8 Q242 -11 185 -11 Q138 -11 109 0 Q81 12 70 16 L67 16 L43 -11 L21 -11 L47 156 L72 156 Q80 91 102 57 Q125 23 176 23 Q211 23 232 40 Q254 57 254 96 Q254 137 231 165 Q209 194 180 221 Q160 241 139 260 Q119 279 105 302 Q92 326 92 357 Q92 408 126 443 Q160 479 228 479 Q268 479 294 468 Q321 457 330 452 L333 452 L359 479 L378 479 Z" transform="translate(74.5773 23.4) scale(0.028 -0.028)"/>
+    <path d="M70 -132 L58 -107 Q77 -99 96 -86 Q115 -74 128 -50 Q141 -26 141 14 Q125 8 110 8 Q81 8 68 24 Q55 40 55 62 Q55 86 71 103 Q87 121 117 121 Q155 121 174 97 Q194 74 194 33 Q194 -9 180 -38 Q167 -67 147 -85 Q127 -103 106 -114 Q85 -125 70 -132 Z" transform="translate(85.3853 23.4) scale(0.028 -0.028)"/>
+    <path d="M636 459 L360 139 L361 105 Q364 13 371 -38 Q379 -90 393 -110 Q408 -130 431 -130 Q471 -130 500 -95 L517 -110 Q498 -153 468 -180 Q438 -208 400 -208 Q367 -208 348 -191 Q330 -174 323 -131 Q316 -89 316 -14 Q316 9 316 35 Q316 61 315 93 L311 93 L97 -207 L5 -207 L5 -195 L308 173 Q308 175 308 189 Q308 204 307 232 Q306 315 290 361 Q275 408 232 408 Q202 408 185 394 Q168 381 153 364 L136 378 Q157 420 190 449 Q224 479 261 479 Q295 479 314 453 Q333 428 341 387 Q350 347 352 302 Q355 257 355 218 L358 218 L541 470 L635 472 L636 459 Z" transform="translate(92.2453 23.4) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(110.1933 23.4) scale(0.028 -0.028)"/>
+    <path d="M70 -132 L58 -107 Q77 -99 96 -86 Q115 -74 128 -50 Q141 -26 141 14 Q125 8 110 8 Q81 8 68 24 Q55 40 55 62 Q55 86 71 103 Q87 121 117 121 Q155 121 174 97 Q194 74 194 33 Q194 -9 180 -38 Q167 -67 147 -85 Q127 -103 106 -114 Q85 -125 70 -132 Z" transform="translate(168.8387 0) scale(0.04 -0.04)"/>
+    <rect x="0" y="-11.68" width="168.8387" height="2.72"/>
+  </g>
+</svg></span> with the whole divisor sum in the numerator. Its prime-power factors are geometric sums in χ(<var>p</var>)<var>p</var><sup>1−<var>s</var></sup>. For a prime dividing the modulus the factor is 1. Any zeros of the other factors lie on Re <var>s</var> = 1, so they leave poles from off-line zeros in the open strip. The finite divisor sum transfers the growth bound in the other direction. Squaring the magnitudes doubles the exponent, and the sum has finitely many nonnegative terms. <a href="https://arxiv.org/pdf/2208.07596#page=13">Garg and Maji, equation (4.22)</a> · <a href="farey_harmonics.html">The fixed-harmonic argument</a>.</p>
+  </details>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id);
+  const order=get('order'), turns=get('turns'), modulus=get('modulus'), center=get('center');
+  const groups={
+    5:{residues:[1,2,3,4], cancel:2, common:[179,2], names:['Principal','Quadratic','Quartic','Quartic conjugate']},
+    8:{residues:[1,3,5,7], cancel:3, common:[83,3], names:['Principal','χ₋₄','χ₈','χ₋₈']}
+  };
+  const mu=[0,1];
+  for(let q=2;q<=240;q++){
+    let sum=0;
+    for(let d=1;d<q;d++)if(q%d===0)sum+=mu[d];
+    mu[q]=-sum;
+  }
+  let centered=false;
+  const fmt=x=>String(x).replace('-','−');
+  function complex(a,b){
+    if(!b)return fmt(a);
+    const imag=(Math.abs(b)===1?'':Math.abs(b))+'i';
+    return a?fmt(a)+(b<0?' − ':' + ')+imag:(b<0?'−':'')+imag;
+  }
+  function render(){
+    const m=Number(modulus.value), n=Number(order.value), k=Number(turns.value), group=groups[m];
+    const original=group.residues.map(r=>{
+      let value=0;
+      for(let q=r;q<=n;q+=m){
+        for(let d=1;d<=k&&d<=q;d++)if(q%d===0&&k%d===0)value+=d*mu[q/d];
+      }
+      return value;
+    });
+    const [a,b,c,d]=original, total=a+b+c+d, average=total/4;
+    const shown=centered?original.map(value=>value-average):original;
+    const span=Math.max(1,...shown.map(Math.abs));
+    const totalSquare=total**2, full=4*original.reduce((sum,v)=>sum+v*v,0), spread=full-totalSquare;
+    get('shown-order').value=n; get('shown-turns').value=k;
+    center.setAttribute('aria-pressed',String(centered));
+    center.textContent=centered?'Show original totals':'Subtract the average';
+    get('bucket-title').textContent=centered?'Differences from the average':'Totals by remainder';
+    get('average').textContent='Original average '+fmt(average)+'. Only the four coprime remainders are shown.';
+    get('buckets').innerHTML=shown.map((value,i)=>{
+      const width=50*Math.abs(value)/span, left=value<0?50-width:50;
+      return '<div class="bucket'+(value<0?' negative':'')+'"><span>'+group.residues[i]+
+        '</span><span class="rail" aria-hidden="true"><i style="left:'+left+'%;width:'+width+
+        '%"></i></span><output>'+fmt(value)+'</output></div>';
+    }).join('');
+    get('total-square').textContent=totalSquare;
+    get('spread').textContent=spread;
+    get('full').textContent=full;
+    get('total-segment').style.width=(full?100*totalSquare/full:0)+'%';
+    get('spread-segment').style.width=(full?100*spread/full:0)+'%';
+    const sums=m===5?[[total,0],[a-b-c+d,0],[a-d,b-c],[a-d,c-b]]:
+      [[total,0],[a-b+c-d,0],[a-b-c+d,0],[a+b-c-d,0]];
+    get('projections').innerHTML=sums.map(([x,y],i)=>'<div><dt>'+group.names[i]+
+      '</dt><dd>'+complex(x,y)+'</dd></div>').join('');
+    const conductor=get('conductor');
+    conductor.hidden=m!==8;
+    if(m===8)conductor.textContent='Within the modulo 4 pairs, the differences are '+fmt(a-c)+' and '+fmt(b-d)+
+      '. Twice their squared sum is '+2*((a-c)**2+(b-d)**2)+', the contribution from conductor 8.';
+  }
+  function preset(common){
+    const group=groups[Number(modulus.value)];
+    const [n,k]=common?group.common:[group.cancel,1];
+    order.value=n; turns.value=k;
+    render();
+  }
+  get('cancel').addEventListener('click',()=>preset(false));
+  get('common').addEventListener('click',()=>preset(true));
+  center.addEventListener('click',()=>{centered=!centered;render();});
+  modulus.addEventListener('change',render);
+  for(const input of [order,turns])input.addEventListener('input',render);
+  render();
+})();
+</script>
+</body>
+</html>

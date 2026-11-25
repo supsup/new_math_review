@@ -7,3 +7,6 @@
 29415 92 the third
 29530 100 eight more by the corrected count, for 115 files
 34976 113 round six, first step: thirteen of fourteen accepted
+39792 119 round six, second step: all six accepted
+43680 127 round six, third step: all eight accepted, the one refused at the first step among them
+45221 133 round six, fourth step: all six accepted

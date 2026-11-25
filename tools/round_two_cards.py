@@ -33,6 +33,16 @@ F_ANT = r"\text{Anthropic, in Lean:}\quad \text{every circuit for } \mathrm{HC}_
 F_OAI = r"\text{OpenAI, paper:}\quad \text{border circuits for } f_n \text{ need } \exp\!\big(\Omega\big((\log n)^{5/4}\big)\big) \text{ gates};\qquad \text{in Lean:}\ \ \mathrm{VP}\neq\mathrm{VNP}"
 FORMULAS = [F_DEF, F_ANT, F_OAI]
 
+# The dated note on card 379 (editor, 25 November 2026): what upstream did to the family the day after the card was written.
+OAI_NEW = "https://github.com/openai/math/blob/3344da599"
+NOTE_379 = ("Update, 25 November 2026. On 24 November the collection rebuilt family 379 around seven new manuscripts, under the title "
+            "\"Euclidean tensor geometry and its applications to complexity and combinatorics\". Its history page says that two of them subsume the manuscript this card describes, "
+            "which remains available. The new paper's bound, for Hamiltonian cycle over every field and for the permanent outside characteristic two, is stronger, of the form exp(c (log N)^2 / (log log N)^2), and holds for circuits "
+            "that need only approximate the part of degree N; what Lean states in the new edition is more than N^C gates for every fixed C. Everything above describes the edition of 23 November. "
+            "We have read the new edition's contents entry, its history and its Lean scope page, and the introduction of one paper; not the proofs.")
+PAGE_COVERS = ("crew_visuals/characteristic_two_cycle_covers.html", "What happens when every sign becomes +1?")
+PAGE_ANSWERS = ("crew_visuals/program_answers_as_coefficients.html", "How a polynomial stores a program's answers")
+
 
 def render(sources):
     if not JAR or not os.path.exists(JAR):
@@ -298,6 +308,7 @@ def card_379(svgs, facts):
   <div class="levels"><div class="tag">from the crew's debate</div><p>Two labs, one day, and by Fixpoint's reading of both overviews the same shape of argument: lay a tensor network out in space and charge for wire. Either wire can never be saved, and a direct bound follows; or it can, and then a circuit can replay itself and a diagonal argument closes. OpenAI's paper credits Anthropic's October 3-SAT paper for a grid method it adapts (Paper.tex lines 176 and 1099; Marlow). This is a reading of two overviews, not a checked equivalence. Play with the pieces: {lnk("round_two_pictures.html#cross", "a crossing paid for in cheaper pieces")}.</p></div>
   <p class="claim"><b>Pages to play with.</b> {lnk("round_two_pictures.html", "Round two: four pictures")} (Fixpoint) · {lnk("crew_visuals/two_products_three.html", "Two products approach three")}: the limit that approximate circuits allow (Lattice) · {lnk("nine_solutions_two_ranks.html", "Nine solutions, two ranks")}: one table whose rank depends on the arithmetic (Marlow) · {lnk("crew_visuals/sat_four_square_swap.html", "Four shapes, same totals")}: same row and column totals, different rank (Lattice).</p>
   <p class="status">Lean: STATEMENTS READ; ONE PUBLISHER RUN READ; ANTHROPIC'S vp-vnp BUILT BY FIXPOINT ON 2026-11-25 (9,032 jobs; five theorems on the three standard axioms; Comparator not run by us); OPENAI'S NOT BUILT BY US. OpenAI: lean/ComparatorChallenges/VPVNP.lean, one target, enable_nanoda false. Anthropic: vp-vnp/Statement.lean and comparator.json, five targets, enable_nanoda true, CI run 45272623486.</p>
+  <p class="claim">{html.escape(NOTE_379)} Two of our pages carry the update: {lnk(*PAGE_COVERS)} and {lnk(*PAGE_ANSWERS)} (Lattice). {lnk(OAI_NEW + "/history.md", "The collection's history")} · {lnk(OAI_NEW + "/lean/docs/379.md", "the new scope page")}.</p>
   <p class="sources"><span class="tag">in the original repositories</span> {lnk(OAI + "/lean/ComparatorChallenges/VPVNP.lean", "openai/math: VPVNP.lean")} · {lnk(OAI + "/lean/docs/379.md", "scope note 379")} · {lnk(OAI + "/preprints/VP-and-VNP-are-different-November-23-2026/paper.pdf", "OpenAI's paper")} · {lnk(ANT + "/vp-vnp/Statement.lean", "anthropics/formal-math: Statement.lean")} · {lnk(ANT + "/vp-vnp/comparator.json", "comparator.json")} · {lnk(ANT + "/vp-vnp/paper.pdf", "Anthropic's paper")}</p>
 </article>"""
 
@@ -362,6 +373,8 @@ def md_379(names, facts):
 **From the crew's debate.** Two labs, one day, and by Fixpoint's reading of both overviews the same shape of argument: lay a tensor network out in space and charge for wire. Either wire can never be saved, and a direct bound follows; or it can, and then a circuit can replay itself and a diagonal argument closes. OpenAI's paper credits Anthropic's October 3-SAT paper for a grid method it adapts (Paper.tex lines 176 and 1099; Marlow). This is a reading of two overviews, not a checked equivalence.
 
 *Lean: STATEMENTS READ; ONE PUBLISHER RUN READ; ANTHROPIC'S vp-vnp BUILT BY FIXPOINT ON 2026-11-25 (9,032 jobs; five theorems on the three standard axioms; Comparator not run by us); OPENAI'S NOT BUILT BY US. OpenAI: lean/ComparatorChallenges/VPVNP.lean, one target, enable_nanoda false. Anthropic: vp-vnp/Statement.lean and comparator.json, five targets, enable_nanoda true, CI run 45272623486.*
+
+{NOTE_379} Two of our pages carry the update: [{PAGE_COVERS[1]}]({PAGE_COVERS[0]}) and [{PAGE_ANSWERS[1]}]({PAGE_ANSWERS[0]}) (Lattice). [The collection's history]({OAI_NEW}/history.md) · [the new scope page]({OAI_NEW}/lean/docs/379.md).
 
 In the original repositories: [openai/math: VPVNP.lean]({OAI}/lean/ComparatorChallenges/VPVNP.lean) · [scope note 379]({OAI}/lean/docs/379.md) · [OpenAI's paper]({OAI}/preprints/VP-and-VNP-are-different-November-23-2026/paper.pdf) · [anthropics/formal-math: Statement.lean]({ANT}/vp-vnp/Statement.lean) · [comparator.json]({ANT}/vp-vnp/comparator.json) · [Anthropic's paper]({ANT}/vp-vnp/paper.pdf)
 """
