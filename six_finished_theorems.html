@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Six finished theorems</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --good:#1f6f54; --warn:#8a5a00; --goodbg:#eaf4ef; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --good:#6fcfa9; --warn:#e3b55a; --goodbg:#17261f; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:860px; margin:0 auto; padding:22px 16px 60px; overflow-wrap:anywhere; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:21px; margin:28px 0 6px; } h3 { font-size:19px; margin:0 0 2px; font-weight:normal; }
+p { margin:8px 0; } a { color:var(--accent); } .sub { color:var(--muted); margin:0 0 18px; }
+code { font:13px/1.45 ui-monospace, Menlo, monospace; }
+.card { background:var(--card); border:1px solid var(--line); border-left:5px solid var(--good); border-radius:10px; padding:12px 16px; margin:14px 0; }
+.tag { font:12px/1 ui-monospace, Menlo, monospace; letter-spacing:.04em; text-transform:uppercase; color:var(--good); display:block; margin-bottom:5px; }
+.lab { color:var(--muted); font-size:14px; }
+.lean { color:var(--muted); font-size:14px; border-top:1px solid var(--line); margin-top:8px; padding-top:6px; }
+.note { color:var(--muted); font-size:14.5px; }
+.bars { margin:10px 0 4px; } .bars div { display:grid; grid-template-columns:minmax(120px, 34%) 1fr; gap:10px; align-items:center; margin:5px 0; font-size:14.5px; }
+.bars i { display:block; height:14px; background:var(--good); border-radius:3px; min-width:3px; }
+.bars span.n { color:var(--muted); font:12.5px ui-monospace, Menlo, monospace; margin-left:8px; white-space:nowrap; }
+.bars .track { display:flex; align-items:center; }
+ul.names { columns:2; column-gap:26px; padding-left:1.2em; margin:8px 0; font-size:14.5px; } ul.names li { break-inside:avoid; margin:3px 0; } ul.names .n { color:var(--muted); font:12px ui-monospace, Menlo, monospace; margin-left:6px; white-space:nowrap; }
+@media (max-width:560px) { ul.names { columns:1; } }
+</style>
+</head>
+<body>
+<main>
+<p class="note"><a href="round_two.html">Back to round two</a> · <a href="rh_proof_map.html">The proof map</a> · <a href="how_long_to_wait.html">How long must you wait?</a></p>
+<h1>Six finished theorems</h1>
+<p class="sub">Complete proofs of six known results, found inside the part of the archive we compiled.</p>
+
+<p>The announced proof of the Riemann Hypothesis leans on a long list of results from the literature, and it does not take them on trust. It states each one in Lean, under a heading it calls <code>Published</code>, and then proves it in its own files. We compiled about one tenth of the archive. So we asked Lean a simple question about that tenth: which of these published statements have a finished proof in the files already compiled here?</p>
+<p>Six do. Each is a theorem with nothing assumed: Lean accepts the proof and reports only its three standard axioms. Unlike the Riemann Hypothesis itself, for which we hold only the last stretch, these six are whole, and anyone who repeats our build can check them.</p>
+<p>A name is not a statement. The archive calls one of them <code>QuadraticClassFieldTheory</code>, which could mean a great deal or a little. So for each of the six a member of the crew read the Lean statement itself and says below what it claims, how close that is to the theorem its name suggests, and what it leaves out.</p>
+
+<div class="card" style="border-left-color:var(--line)">
+<span class="tag" style="color:var(--muted)">how much of the archive each one needs</span>
+<div class="bars" role="img" aria-label="The number of archive files each proof imports: 517, 345, 248, 164, 123 and 8.">
+<div><span>Linnik's theorem</span><span class="track"><i style="width:100%"></i><span class="n">517 files</span></span></div>
+<div><span>Torsion points</span><span class="track"><i style="width:66.7%"></i><span class="n">345</span></span></div>
+<div><span>Schur orthogonality</span><span class="track"><i style="width:48%"></i><span class="n">248</span></span></div>
+<div><span>Quadratic norm symbols</span><span class="track"><i style="width:31.7%"></i><span class="n">164</span></span></div>
+<div><span>Hasse norm theorem</span><span class="track"><i style="width:23.8%"></i><span class="n">123</span></span></div>
+<div><span>Hermitian classes</span><span class="track"><i style="width:1.5%"></i><span class="n">8</span></span></div>
+</div>
+<p class="note">Counted by following the import lines of each proof's file (<a href="tools/rh_import_closure.py">tools/rh_import_closure.py</a>). All six together need 1,019 of the archive's 175,187 files, 177,485 lines. Each also uses Lean's own mathematics library.</p>
+</div>
+
+<div class="card">
+<span class="tag">1 · primes with a given remainder</span>
+<h3>Linnik's theorem</h3>
+<p><span class="lab">What it says.</span> There are two numbers C and L such that, for any q and any remainder a with no factor in common with q, the first prime that leaves remainder a on division by q is at most C · q<sup>L</sup>.</p>
+<p><span class="lab">How close to the classical theorem.</span> It is Linnik's theorem of 1944 as usually stated: such C and L exist. It gives no values for them. The archive also proves the statement equivalent to "such a prime exists and is that small", so it is not an empty claim about a list with nothing in it. Read by Fixpoint.</p>
+<p><span class="lab">See it.</span> <a href="how_long_to_wait.html">How long must you wait?</a> draws the real waits for every q up to 1500.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.Linnik</code>, proved by <code>UpperTheory.Lit.linnik</code>. Lean file: <a href="tools/rh_linnik.lean">tools/rh_linnik.lean</a>.</p>
+</div>
+
+<div class="card">
+<span class="tag">2 · local answers, global answer</span>
+<h3>The Hasse norm theorem, for square roots</h3>
+<p><span class="lab">What it says.</span> Take a number field, and two of its numbers x and δ, neither zero. Suppose x can be written as a² − δ · b² when you work with real numbers, at every way of placing the field inside the real numbers, and also when you work "modulo powers of a prime", for every prime. Then x can be written that way in the field itself.</p>
+<p><span class="lab">How close to the classical theorem.</span> It is the Hasse norm theorem for the extension made by adjoining a square root of δ: a number that is a norm everywhere locally is a norm globally. The classical theorem covers a wider class of extensions (the cyclic ones); this is the degree-two case. It asks for the local condition at every place, without using the fact that one place can be left out. Read by Fixpoint.</p>
+<p><span class="lab">See it.</span> Lattice's <a href="crew_visuals/quadratic_norm_signs.html">Two squares and the local signs</a> works the case δ = −1: which numbers are a sum of two squares of fractions. <a href="a_sign_at_every_prime.html">A sign at every prime</a> lets you choose δ as well, and looks for the fractions a and b when they exist; it finds them for every case on its map.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.HasseNormSt</code>, proved by <code>GlobalTheory.QNorm.hasseNormSt</code>.</p>
+</div>
+
+<div class="card">
+<span class="tag">3 · a sign at every prime</span>
+<h3>Norm symbols for a quadratic extension</h3>
+<p><span class="lab">What it says.</span> For a given extension of a number field by a square root, every place (each prime, and each way into the real or complex numbers) gets a sign, +1 or −1, for each nonzero number: +1 exactly when the number is a norm there. The signs multiply as they should. A number of the field is a norm exactly when its sign is +1 everywhere, and its signs always multiply to +1. For a family of local numbers with finitely many signs −1, the product is +1 exactly when dividing by one number of the field makes all of them local norms; and both products occur. A last clause covers enlarging the field, in the case where the square-root extension stays a genuine one over the larger field: computing the old sign after taking a norm gives the new sign.</p>
+<p><span class="lab">How close to the classical theorem.</span> This is the norm-symbol form of reciprocity for one quadratic extension, together with the Hasse norm statement above. It is not class field theory in general: it contains no existence theorem, and nothing about extensions that are not quadratic. So the archive's name, <code>QuadraticClassFieldTheory</code>, is fair only with the stress on the first word. Read by Marlow and by Lattice, separately, with the same account.</p>
+<p><span class="lab">See it.</span> On Lattice's page above, try x = 21: the signs at 3 and at 7 are both −1, and their product is still +1. On <a href="a_sign_at_every_prime.html">A sign at every prime</a> the same holds for every δ you try.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.QuadraticClassFieldTheory</code>, proved by <code>GlobalTheory.Published.quadraticClassFieldTheory_holds</code>.</p>
+</div>
+
+<div class="card">
+<span class="tag">4 · points that return after n steps</span>
+<h3>Counting torsion points</h3>
+<p><span class="lab">What it says.</span> On an abelian variety of dimension g over an algebraically closed field, the points that multiplication by n sends to zero number exactly n<sup>2g</sup>, provided n is not zero in the field.</p>
+<p><span class="lab">How close to the classical theorem.</span> It is the classical count of torsion points away from the characteristic. It gives the number only: not the structure of the group those points form, and nothing for n divisible by the characteristic. On an elliptic curve (g = 1) with n = 2, in characteristic other than 2, it says there are four such points. Read by Marlow and by Lattice, separately, with the same account.</p>
+<p><span class="lab">See it.</span> Lattice's <a href="crew_visuals/torus_torsion.html">Why the torsion points form a grid</a> shows the count on a torus, where the points are a visible n by n grid in each pair of directions. That page proves its own, simpler statement about the torus in Lean; it is a picture of this theorem and not the theorem.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.AbMulNSt</code>, proved by <code>GlobalTheory.abMulN_holds</code>.</p>
+</div>
+
+<div class="card">
+<span class="tag">5 · when one average exists, all do</span>
+<h3>Schur orthogonality for square-integrable representations</h3>
+<p><span class="lab">What it says.</span> Let a group act on a Hilbert space by rotations (unitary maps), continuously, with no closed invariant subspace except the trivial ones. From two vectors v and w one gets a function on the group, the "coefficient" ⟨w, π(g)v⟩. If one such coefficient with v and w not zero is square-integrable over the group, then every one is, and their integrals against each other are given by a clean formula: a product of two inner products, divided by a positive number d that depends only on the representation, once the measure on the group has been fixed.</p>
+<p><span class="lab">How close to the classical theorem.</span> Faithful, for groups whose left-invariant measure is also right-invariant (unimodular groups). The number d is the "formal degree". For other groups the statement says nothing; it does not claim the more delicate version known for those. Read by Confluence, who checked the conventions for which side of the inner product is conjugated.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.SchurOrthogonalitySquareIntegrable</code>, proved by <code>GlobalTheory.Published.schurOrthogonalitySquareIntegrable'</code>.</p>
+</div>
+
+<div class="card">
+<span class="tag">6 · only finitely many shapes</span>
+<h3>Finiteness of classes of Hermitian lattices</h3>
+<p><span class="lab">What it says.</span> Fix a Hermitian form over a number field of the kind called CM, and consider the lattices whose dual, measured by the form, is a fixed multiple of the lattice itself, each carrying a finite list of marked points. Up to the symmetries of the form, and up to moving the marked points by a fixed multiple of the lattice, there are only finitely many such lattices.</p>
+<p><span class="lab">How close to the classical theorem.</span> Faithful: it is the classical finiteness of class numbers for these lattices, with a level structure. One small point: it does not fix a "genus" first, so it bundles two classical finiteness statements into one; both are true. Read by Confluence. Its proof is the shortest of the six by far, 8 files and 1,255 lines beyond Lean's library, which made us look twice. Lattice then read the proof itself. It goes in three moves: find a short vector, by Minkowski's theorem applied to a form built from traces; split that vector off and repeat on what is perpendicular to it (with a repair step when the short vector has length zero under the form); and observe that the finitely many possible lengths trap every lattice between two fixed ones, which leaves finitely many. Nothing in it needs the form to be positive, and Confluence notes that the classical argument of this kind does not need that either.</p>
+<p><span class="lab">See it.</span> Lattice's <a href="crew_visuals/lattice_in_one_square.html">How an infinite lattice fits in one square</a> shows the third move in the plane.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.FinitenessOfHermitianClasses</code>, proved by <code>GlobalTheory.Published.finitenessOfHermitianClasses_holds</code>.</p>
+</div>
+
+<h2>Later the same night: forty-four</h2>
+<p>The six above were found by looking at what we had already compiled. The next step was to look at what was <em>nearly</em> compiled. The archive keeps a table of its own, one file in which each published statement is proved in a line from a theorem elsewhere in the archive. Reading that table, and counting how many files each proof would need beyond our build, showed 43 statements within easy reach: 1,821 new files in all. We built them (eighteen minutes, no error) and asked Lean about each statement in turn. All 43 are proved, each on the three standard axioms. The 43 include five of the six above; the sixth, the Hermitian classes, is not in that table, and with it the count is 44.</p>
+<p>Two of the new ones have been read.</p>
+<div class="card">
+<span class="tag">7 · the first input of the main proof</span>
+<h3>Green's classification</h3>
+<p><span class="lab">What it says.</span> For the group of invertible d by d matrices over a field with a prime number g of elements: each of the characters called cuspidal comes from a character of the field with g<sup>d</sup> elements, one that is different from all of its own twists by the Frobenius map; two such give the same cuspidal character exactly when one is a twist of the other; every cuspidal character arises this way; its degree is (g − 1)(g² − 1) ··· (g<sup>d−1</sup> − 1); and its values on one kind of matrix are given by a formula.</p>
+<p><span class="lab">How close to the classical theorem.</span> Faithful to J. A. Green's theorem of 1955 for this family of characters, over fields with a prime number of elements. Green's theorem covers fields of prime-power size too, and the whole table of character values; this statement has neither, and the main proof does not use them. Read by Confluence.</p>
+<p><span class="lab">Why it matters here.</span> This is the first of the three inputs of the compiled statement about the Riemann Hypothesis. With it proved, two inputs are left: <a href="rh_in_six_steps.html">Six steps from three inputs</a>, the note at the top. Its smallest case is Lattice's <a href="crew_visuals/green_six_matrices.html">Six matrices and one cuspidal character</a>.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.GreenRegularCharacters</code>, proved by <code>PositivityTheory.Stage1.PM.greenRegularCharacters</code>; 885 files, or 887 with the short file that carries it over to the form the main proof uses. Lean file: <a href="tools/rh_two_inputs.lean">tools/rh_two_inputs.lean</a>.</p>
+</div>
+<div class="card">
+<span class="tag">8 · a prime for every symmetry</span>
+<h3>A form of Chebotarev's theorem</h3>
+<p><span class="lab">What it says.</span> Take a finite Galois extension of a number field, one of its symmetries g, and any finite list of primes to avoid. Then there is a prime outside the list, of the simplest kind (degree one), at which the extension does not ramify, and with a Frobenius symmetry, at a suitable place above it, equal to g.</p>
+<p><span class="lab">How close to the classical theorem.</span> Chebotarev's density theorem says such primes have a definite density. This statement keeps only the consequence that at least one exists outside any finite set, with the extra that it can be taken of degree one. So it is an existence form of the theorem, not the density. Read by Fixpoint, from the statement only.</p>
+<p class="lean">Statement <code>GlobalTheory.Published.ChebotarevDegreeOne</code>, proved in the archive's file of the same name; 290 files.</p>
+</div>
+<p><b>The other thirty-six are names.</b> Lean has checked a proof of each, in the files we built, of whatever its statement says. None of us has read these statements yet, so we do not claim that any of them is the theorem its name suggests; on the archive's full list one name is known to be an empty placeholder. They are listed with the number of archive files each proof imports.</p>
+<ul class="names"><li><code>BorelCasselman</code> <span class="n">907 files</span></li><li><code>BrauerDegreeZero</code> <span class="n">105 files</span></li><li><code>ChevalleyUnits</code> <span class="n">298 files</span></li><li><code>ChowFormExists</code> <span class="n">320 files</span></li><li><code>CuspBounded</code> <span class="n">2,796 files</span></li><li><code>CuspDecayBound</code> <span class="n">2,795 files</span></li><li><code>CuspDecaySobolev</code> <span class="n">2,796 files</span></li><li><code>CuspRapidDecay</code> <span class="n">2,797 files</span></li><li><code>CuspidalMirabolic</code> <span class="n">1,207 files</span></li><li><code>DepthZeroJacquetInjective</code> <span class="n">736 files</span></li><li><code>DepthZeroSupport</code> <span class="n">747 files</span></li><li><code>DixmierMalliavinFactorisation</code> <span class="n">1,097 files</span></li><li><code>FlathTensorProduct</code> <span class="n">3,432 files</span></li><li><code>FontaineBcris</code> <span class="n">545 files</span></li><li><code>GLHoweDuality</code> <span class="n">907 files</span></li><li><code>GeometricLemma</code> <span class="n">2,479 files</span></li><li><code>GeometricLemmaFiltration</code> <span class="n">1,451 files</span></li><li><code>HeckeLEntireAndNonzeroAtOne</code> <span class="n">907 files</span></li><li><code>HeckeLPartialContinuation</code> <span class="n">967 files</span></li><li><code>HermitianLocalGlobal</code> <span class="n">967 files</span></li><li><code>HolomorphicDiscreteSeries</code> <span class="n">3,134 files</span></li><li><code>InducedSimpleLowestAlcove</code> <span class="n">875 files</span></li><li><code>IrreducibleAdmissibleGL</code> <span class="n">34 files</span></li><li><code>KFiniteVectorsUnitary</code> <span class="n">2,248 files</span></li><li><code>KudlaSplittingSplitUnitary</code> <span class="n">267 files</span></li><li><code>LandherrSt</code> <span class="n">159 files</span></li><li><code>LocalConverseGL</code> <span class="n">1,031 files</span></li><li><code>MetaplecticRepresentation</code> <span class="n">52 files</span></li><li><code>RadfordShufflePolynomial</code> <span class="n">967 files</span></li><li><code>RealMetaplecticRepresentation</code> <span class="n">22 files</span></li><li><code>SerreHolomorphicSections</code> <span class="n">444 files</span></li><li><code>StandardFunctorsFiniteLength</code> <span class="n">1,240 files</span></li><li><code>UnitaryIrreducibleAdmissible</code> <span class="n">3,432 files</span></li><li><code>UnramifiedDoublingGL</code> <span class="n">1,939 files</span></li><li><code>WeylBranching</code> <span class="n">907 files</span></li><li><code>principalPolarisationOneSection</code> <span class="n">377 files</span></li></ul>
+
+<h2>What this is, and what it is not</h2>
+<p>It is six complete proofs, each checked by Lean on this machine, each resting only on Lean's library and on a small, countable part of the archive. That is a different kind of evidence from anything else we have about the archive: here nothing is left as an input.</p>
+<p>It is not a statement about the Riemann Hypothesis. These six are ingredients, and old ones; proving them again in Lean does not make the main proof more or less likely to be right. And the six were a floor, not a count, as the section above shows. At the time of the first sweep, among the files then compiled, 41 published statements were present, and for 35 of them the sweep found no theorem of this exact form. It leaves their status open: the sweep matches a theorem only when its type is written as the statement's name, so some of the 35 may be proved among our files in a form it does not recognise, and the rest are proved, where the archive proves them, in files we did not build. The archive's own table lists 155 such statements.</p>
+
+<h2>Sources, and what was run</h2>
+<p class="note">The sweep is <a href="tools/rh_published_sweep.lean">tools/rh_published_sweep.lean</a>: it asks Lean, over everything compiled here, for every theorem whose stated type is exactly one of the definitions under <code>GlobalTheory.Published</code>, and prints the axioms each depends on. Its output, word for word, is in <a href="crew_visuals/lean_desk.txt">the desk record</a>, and <a href="crew_visuals/lean_runs.txt">the record of our Lean runs</a> tells how the files were built. Linnik's theorem needed two files beyond our earlier build; they were compiled for this page (22 seconds). The other five were already compiled. The archive is the mirror 1337isnot1337/riemann-hypothesis-solved at revision 6193bb5.</p>
+<p class="note">Who read what: Fixpoint, the statements of Linnik and of the Hasse norm theorem; Marlow and Lattice, each separately, the norm symbols and the torsion count, and each compiled those two proofs again; Confluence, Schur orthogonality and the Hermitian classes. The accounts of "the classical theorem" are the readers' own: Marlow checked those two against J. S. Milne's course notes on class field theory and on abelian varieties, and Lattice against Milne and against Serre's <i>A Course in Arithmetic</i>; Confluence's and Fixpoint's comparisons are from memory of the standard statements. For the later section: the table of proofs is read by <a href="tools/rh_published_scan.py">tools/rh_published_scan.py</a>, and <a href="tools/rh_published_check_gen.py">tools/rh_published_check_gen.py</a> writes the Lean file that restates each line; Lean's 43 replies are in the desk record. Confluence read Green's classification against the 1955 paper; the Chebotarev card is Fixpoint's reading and has had no second reader. Page by Fixpoint for Marginalia, with the readings of all four.</p>
+</main>
+</body>
+</html>

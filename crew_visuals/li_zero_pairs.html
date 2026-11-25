@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What each zero adds to Li’s sum</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf6ee;
+      --ink: #2b3442;
+      --muted: #555e6a;
+      --violet: #544781;
+      --teal: #216b66;
+      --rust: #934c2e;
+      --line: #c5c5cf;
+      background: #e8e8ee;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--violet); text-underline-offset: .16em; }
+    :focus-visible { outline: .17rem solid var(--rust); outline-offset: .14rem; }
+    h1 { max-width: 13ch; font: clamp(2.7rem, 8vw, 5.1rem)/1 Georgia, serif; letter-spacing: -.048em; margin: .53rem 0 .74rem; }
+    h2 { font: 1.6rem/1.15 Georgia, serif; margin: 1.15rem 0 .5rem; }
+    p, figcaption { max-width: 69ch; }
+    .intro, figcaption { color: var(--muted); }
+    .modes { display: flex; flex-wrap: wrap; gap: .43rem; margin: .84rem 0 .52rem; }
+    button { min-height: 2.65rem; padding: .35rem .59rem; border: 1px solid var(--line); border-radius: .25rem; background: #eceaf3; color: var(--violet); font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--violet); color: white; }
+    .control { display: grid; grid-template-columns: auto minmax(4rem, 1fr) 3.85rem; align-items: center; gap: .55rem; margin: .43rem 0; }
+    label { font-weight: 650; }
+    input[type="range"] { width: 100%; min-height: 2.55rem; margin: 0; accent-color: var(--violet); }
+    output, .reading { font-variant-numeric: tabular-nums; }
+    .visuals { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: .66rem; }
+    figure { margin: .58rem 0 .7rem; min-width: 0; }
+    canvas { display: block; width: 100%; height: 13.8rem; border: 1px solid var(--line); border-radius: .3rem; background: #fffdf7; }
+    figcaption { margin-top: .34rem; font-size: .87rem; }
+    .reading { border-left: .21rem solid var(--violet); background: #eeebf2; margin: .45rem 0 .85rem; padding: .54rem .67rem; }
+    .reading p { margin: .16rem 0; }
+    #contribution, #partial-count { font-weight: 700; }
+    meter { display: block; width: 100%; height: 1.2rem; accent-color: var(--teal); }
+    meter::-webkit-meter-bar { border-color: var(--line); background: #efede4; }
+    meter::-webkit-meter-optimum-value { background: var(--teal); }
+    .formula { overflow-wrap: anywhere; font: 1.08rem/1.55 Georgia, serif; }
+    details { border-top: 1px solid var(--line); padding-top: .62rem; margin: .87rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 42rem) { .visuals { grid-template-columns: 1fr; gap: 0; } }
+    @media (max-width: 27rem) {
+      .control { grid-template-columns: 1fr auto; gap: .12rem .45rem; }
+      input[type="range"] { grid-row: 2; grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="zeta_prime_windows.html">Back to the smoothed prime sums</a>
+    <h1>What each zero adds to Li’s sum</h1>
+    <p class="intro">Send a zeta zero ρ to <var>w</var> = (ρ−1)/ρ. The critical line becomes a circle. Powers of a point on that circle can change its angle, and every conjugate pair gives a nonnegative contribution to Li’s coefficients.</p>
+    <div class="modes" aria-label="Zero pair or example quartet">
+      <button type="button" data-mode="first">First zeta pair</button>
+      <button type="button" data-mode="quarter">Quarter-turn pair</button>
+      <button type="button" data-mode="off">Off-line quartet</button>
+    </div>
+    <div class="control">
+      <label for="power">Power <var>n</var></label>
+      <input id="power" type="range" min="1" max="48" step="1" value="4">
+      <output id="power-value" for="power"></output>
+    </div>
+    <div class="visuals">
+      <figure>
+        <canvas id="plane" role="img" aria-label="The powered points in the complex plane. A circle with radius one separates shrinking and growing magnitudes."></canvas>
+        <figcaption id="plane-note"></figcaption>
+      </figure>
+      <figure>
+        <canvas id="sequence" role="img" aria-label="The contributions for powers one through forty-eight. The chosen power is highlighted."></canvas>
+        <figcaption id="sequence-note"></figcaption>
+      </figure>
+    </div>
+    <div class="reading" role="status" aria-atomic="true">
+      <p id="example"></p>
+      <p id="contribution"></p>
+    </div>
+    <p>Li’s criterion says RH holds exactly when all the coefficients λ<sub><var>n</var></sub> are nonnegative. Each coefficient adds the contributions from the full set of zeros. The off-line quartet here uses invented points with the same symmetries as zeta zeros. <a href="https://doi.org/10.1006/jnth.1997.2137">Li’s 1997 paper</a>.</p>
+
+    <h2>Add the first actual pairs</h2>
+    <p>For <var>n</var> = 1, a pair at height <var>t</var> contributes just 1/(<var>t</var>² + ¼). The full coefficient is 1 + γ/2 − log(4π)/2, about 0.023095709. Move the slider to add the first 50 pairs in order.</p>
+    <div class="control">
+      <label for="count">Number of pairs</label>
+      <input id="count" type="range" min="0" max="50" step="1" value="50">
+      <output id="count-value" for="count">50</output>
+    </div>
+    <meter id="share" min="0" max="1" value="0" aria-label="Share of the first Li coefficient"></meter>
+    <div class="reading" role="status" aria-atomic="true">
+      <p id="partial-count"></p>
+      <p id="last-height"></p>
+    </div>
+    <p>The first 50 pairs contribute 80.283% of λ₁. The replay encloses each height and the sum with interval arithmetic. <a href="../tools/check_li_pair_prefix.py">Replay the first 50 pairs</a> · <a href="https://www.lmfdb.org/zeros/zeta/Source">Source of the LMFDB zero tables</a>.</p>
+    <p>Taking second differences puts the same contributions into a matrix. The synthetic quartet can give away its off-line points before the first negative coefficient appears. <a href="li_difference_matrix.html">Try the matrix test</a>.</p>
+
+    <details>
+      <summary>Why the critical line gives a circle</summary>
+      <p>The magnitude of <var>w</var> is the distance from ρ to 1 divided by the distance from ρ to 0. Those distances agree on the vertical line halfway between 0 and 1. A conjugate pair gives <span class="formula">2(1 − Re <var>w</var><sup><var>n</var></sup>)</span>, which is nonnegative for a point on the unit circle. At <var>n</var> = 1, summing 1/ρ and its conjugate gives <span class="formula">1/(<var>t</var>² + ¼)</span>.</p>
+      <p>The closed form for λ₁ comes from the logarithmic derivative of the completed zeta function ξ at 1. The derivative of <var>s</var>(<var>s</var>−1)ζ(<var>s</var>) contributes 1+γ there. The factor π<sup>−<var>s</var>/2</sup>Γ(<var>s</var>/2) contributes −½ log π − γ/2 − log 2.</p>
+    </details>
+    <details>
+      <summary>Where the negative contribution comes from</summary>
+      <p>Reflection ρ ↦ 1−ρ maps <var>w</var> to 1/<var>w</var>. For the synthetic ρ = 0.8 + 0.4<var>i</var>, the images are <var>i</var>/2 and −2<var>i</var>. Add their conjugates. At <var>n</var> = 4 the two powers are 1/16 and 16, so the quartet contributes 4−2(1/16+16) = −225/8.</p>
+      <p>Lean checks the map, the sign of every pair on the line, the formula for <var>n</var> = 1, and the exact negative quartet. <a href="../tools/li_pair_positivity.lean">Read the Lean check</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      // Generated by check_li_pair_prefix.py --plot-data.
+      const full = 0.023095708966121033;
+      const pairs = [
+        [14.134725141734695,0.004998988833723139,0.004998988833723139], [21.022039638771556,0.002261542144915976,0.007260530978639115], [25.01085758014569,0.0015979725004318897,0.008858503479071005],
+        [30.424876125859512,0.0010800033110138782,0.009938506790084883], [32.93506158773919,0.0009216859301655028,0.010860192720250387], [37.586178158825675,0.0007077287146183907,0.011567921434868777],
+        [40.9187190121475,0.0005971605378560719,0.012165081972724848], [43.327073280915,0.0005326273452779395,0.012697709318002789], [48.00515088116716,0.0004338875719948991,0.013131596889997687],
+        [49.7738324776723,0.0004036026542345714,0.01353519954423226], [52.970321477714464,0.00035636585771469905,0.013891565401946958], [56.44624769706339,0.0003138309493006097,0.014205396351247568],
+        [59.34704400260235,0.0002839036591543973,0.014489300010401964], [60.83177852460981,0.0002702151114445458,0.014759515121846511], [65.1125440480816,0.00023585498677616403,0.014995370108622674],
+        [67.07981052949417,0.00022222464295610592,0.015217594751578781], [69.54640171117398,0.00020674176668829218,0.015424336518267072], [72.0671576744819,0.00019253261426605917,0.015616869132533132],
+        [75.70469069908393,0.00017447591206045545,0.015791345044593588], [77.1448400688748,0.00016802271218878598,0.015959367756782375], [79.33737502024937,0.00015886458653643004,0.016118232343318804],
+        [82.91038085408603,0.00014546763747062079,0.016263699980789425], [84.73549298051705,0.00013926890400405725,0.016402968884793482], [87.42527461312523,0.00013083133851898854,0.01653380022331247],
+        [88.80911120763446,0.0001267859668212204,0.01666058619013369], [92.49189927055849,0.00011689068764084155,0.016777476877774533], [94.65134404051989,0.0001116180190280758,0.016889094896802608],
+        [95.87063422824531,0.00010879701661204816,0.016997891913414657], [98.83119421819369,0.00010237662261141125,0.017100268536026066], [101.31785100573138,0.00009741312688470966,0.017197681662910778],
+        [103.72553804047834,0.000092943391573912,0.017290625054484688], [105.44662305232609,0.00008993420160353249,0.01738055925608822], [107.1686111842764,0.0000870673530043569,0.01746762660909258],
+        [111.02953554316967,0.00008111742324591258,0.01754874403233849], [111.87465917699264,0.00007989652207716012,0.01762864055441565], [114.32022091545271,0.00007651482378094874,0.0177051553781966],
+        [116.22668032085755,0.00007402532034882548,0.017779180698545425], [118.79078286597621,0.00007086418831060037,0.017850044886856025], [121.37012500242065,0.00006788425107052586,0.01791792913792655],
+        [122.94682929355258,0.00006615431108293166,0.017984083449009484], [124.25681855434577,0.00006476681019438243,0.018048850259203865], [127.5166838795965,0.00006149776073982085,0.018110348019943687],
+        [129.57870419995606,0.000059556102465683945,0.01816990412240937], [131.08768853093267,0.00005819288258500705,0.01822809700499438], [133.4977372029976,0.00005611075325947097,0.01828420775825385],
+        [134.75650975337388,0.000055067392540538926,0.018339275150794386], [138.11604205453344,0.000052421091510044515,0.018391696242304433], [139.7362089521214,0.000051212564781207144,0.01844290880708564],
+        [141.12370740402113,0.00005021050555758045,0.01849311931264322], [143.11184580762063,0.00004882514397114567,0.018541944456614366]
+      ];
+      const firstHeight = pairs[0][0];
+      const examples = {
+        first: {name: 'Actual pair at height ' + firstHeight.toFixed(6), angle: 2 * Math.atan(1/(2*firstHeight)), radius: 1, quartet: false},
+        quarter: {name: 'Example pair at ρ = ½ ± ½i', angle: Math.PI/2, radius: 1, quartet: false},
+        off: {name: 'Example quartet at real parts 0.2 and 0.8, heights ±0.4', angle: Math.PI/2, radius: .5, quartet: true}
+      };
+      const get = id => document.getElementById(id);
+      const power = get('power'), count = get('count');
+      const modes = [...document.querySelectorAll('[data-mode]')];
+      let selected = 'quarter';
+
+      function phaseAt(example,n) {
+        if (example.angle === Math.PI/2) return [[1,0],[0,1],[-1,0],[0,-1]][n%4];
+        return [Math.cos(n*example.angle),Math.sin(n*example.angle)];
+      }
+      function term(example,n) {
+        const [cos] = phaseAt(example,n);
+        return example.quartet
+          ? 4 - 2*(example.radius**n + example.radius**(-n))*cos
+          : 2*(1-cos);
+      }
+      function prepare(canvas) {
+        const w = canvas.clientWidth, h = canvas.clientHeight, dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w*dpr);
+        canvas.height = Math.round(h*dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr,dpr);
+        return {ctx,w,h};
+      }
+      function drawPlane(example,n) {
+        const {ctx,w,h} = prepare(get('plane'));
+        const originX = w/2, originY = h/2, unit = Math.min(w,h)*.224;
+        ctx.strokeStyle = '#c5c5cf';
+        ctx.beginPath();
+        ctx.moveTo(originX-2*unit,originY);ctx.lineTo(originX+2*unit,originY);
+        ctx.moveTo(originX,originY-2*unit);ctx.lineTo(originX,originY+2*unit);ctx.stroke();
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.arc(originX,originY,unit,0,2*Math.PI);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#58606b';
+        ctx.font = '12px system-ui';
+        ctx.fillText('1',originX+unit-3,originY+16);
+        const [cos,sin] = phaseAt(example,n);
+        function drawPair(radius,paint) {
+          ctx.strokeStyle = paint;ctx.fillStyle = paint;ctx.lineWidth = 2;
+          for (const ordinate of new Set([sin,-sin])) {
+            const r = Math.min(radius,2), x = originX + r*unit*cos, y = originY-r*unit*ordinate;
+            ctx.beginPath();ctx.moveTo(originX,originY);ctx.lineTo(x,y);ctx.stroke();
+            ctx.beginPath();ctx.arc(x,y,3.6,0,2*Math.PI);ctx.fill();
+          }
+        }
+        if (example.quartet) drawPair(example.radius**(-n),'#934c2e');
+        drawPair(example.radius**n,'#216b66');
+      }
+      function drawSequence(example,n) {
+        const {ctx,w,h} = prepare(get('sequence'));
+        const values = Array.from({length:48},(_,i)=>term(example,i+1));
+        const scaled = values.map(v => example.quartet ? Math.sign(v)*Math.log10(1+Math.abs(v)) : v);
+        const bottom = example.quartet ? -Math.max(...scaled.map(Math.abs)) : 0;
+        const top = example.quartet ? -bottom : 4;
+        const y = v => 12+(h-38)*(top-v)/(top-bottom);
+        const width = (w-40)/48;
+        ctx.strokeStyle = '#aab0ba';
+        ctx.beginPath();ctx.moveTo(24,y(0));ctx.lineTo(w-16,y(0));ctx.stroke();
+        for (const [i,v] of scaled.entries()) {
+          ctx.fillStyle = i+1===n ? '#544781' : v<0 ? '#ab6d52' : '#60938b';
+          const from = Math.min(y(v),y(0));
+          ctx.fillRect(24+i*width,from,Math.max(1,width-.8),Math.max(1,Math.abs(y(v)-y(0))));
+        }
+        ctx.fillStyle = '#515c6b';ctx.font = '12px system-ui';ctx.textAlign = 'center';
+        for (const tick of [1,12,24,36,48]) ctx.fillText(String(tick),24+(tick-.5)*width,h-6);
+        ctx.textAlign = 'left';ctx.fillText('0',10,y(0)+4);
+      }
+      const formatted = value => Math.abs(value) >= 1e6 ? value.toExponential(4) : Number(value.toPrecision(7)).toString();
+      function render() {
+        const n = Number(power.value), example = examples[selected];
+        get('example').textContent = example.name + '.';
+        get('contribution').textContent = 'At n = ' + n + ' the contribution is ' + formatted(term(example,n)) + '.';
+        get('power-value').textContent = n;
+        get('plane-note').textContent = example.quartet
+          ? 'Teal shows the inner pair and rust the reciprocal pair after taking powers. Lengths above 2 stop at the outer edge of the diagram.'
+          : 'The conjugate points move around the dashed unit circle as the power changes.';
+        get('sequence-note').textContent = example.quartet
+          ? 'The bars use a signed logarithmic scale so both small and large contributions fit.'
+          : 'The bars show the contribution from this pair for each power.';
+        drawPlane(example,n);
+        drawSequence(example,n);
+      }
+      function renderPrefix() {
+        const n = Number(count.value), row = pairs[n-1];
+        const sum = row?.[2] ?? 0;
+        get('count-value').textContent = n;
+        get('share').value = sum/full;
+        get('partial-count').textContent = sum.toFixed(9) + ' of ' + full.toFixed(9) +
+          ' · ' + (100*sum/full).toFixed(3) + '%.';
+        get('last-height').textContent = row
+          ? 'The last pair is at height ' + row[0].toFixed(6) + '.'
+          : 'The sum starts at zero.';
+      }
+
+      for (const button of modes) {
+        button.addEventListener('click', () => {
+          selected = button.dataset.mode;
+          for (const item of modes) item.setAttribute('aria-pressed',String(item===button));
+          render();
+        });
+        button.setAttribute('aria-pressed',String(button.dataset.mode===selected));
+      }
+      power.addEventListener('input',render);
+      count.addEventListener('input',renderPrefix);
+      window.addEventListener('resize',render);
+      render();
+      renderPrefix();
+    })();
+  </script>
+</body>
+</html>

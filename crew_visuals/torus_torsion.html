@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why the torsion points form a grid</title>
+  <style>
+    :root { color-scheme: light; background: #e6ece7; color: #283637; font: 100%/1.57 system-ui, sans-serif; --paper: #fbf6e9; --green: #215c51; --muted: #53625c; --line: #c5cec4; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 55rem); margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .17em; overflow-wrap: anywhere; }
+    h1 { margin: .53rem 0 .7rem; font: clamp(2.65rem, 8vw, 5rem)/1 Georgia, serif; max-width: 16ch; letter-spacing: -.04em; }
+    h2 { margin: 1.35rem 0 .32rem; font: 1.63rem/1.2 Georgia, serif; }
+    p { max-width: 68ch; }
+    :focus-visible { outline: .14rem solid #a95230; outline-offset: .13rem; }
+    .intro { color: var(--muted); }
+    .sliders { display: flex; flex-wrap: wrap; gap: .65rem 1.65rem; align-items: start; margin: 1.15rem 0 .82rem; }
+    label { display: flex; gap: .85rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    input[type=range] { width: 8.7rem; max-width: 100%; accent-color: var(--green); }
+    .squares { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.7rem), 1fr)); gap: .62rem; }
+    figure { margin: 0; border: 1px solid var(--line); border-radius: .36rem; padding: .63rem; background: #f7f9ed; }
+    figcaption { font-weight: 660; }
+    .square { --n: 4; display: grid; grid-template-columns: repeat(var(--n), 1fr); grid-template-rows: repeat(var(--n), 1fr);
+      aspect-ratio: 1; max-width: 19rem; margin: .41rem auto; border: 1px dashed #81958b;
+      background-image: linear-gradient(to right, #dfe8dc 1px, transparent 1px), linear-gradient(to top, #dfe8dc 1px, transparent 1px);
+      background-size: calc(100% / var(--n)) calc(100% / var(--n)); }
+    .point { appearance: none; position: relative; display: grid; place-items: center; border: 0; border-radius: .16rem; padding: 0; background: transparent; cursor: pointer; }
+    .point::before { content: ''; width: .5rem; aspect-ratio: 1; border-radius: 50%; background: #6d8a80; }
+    .point[data-origin=true]::before { border: 1px solid #466057; background: transparent; }
+    .point[aria-pressed=true]::before { width: .85rem; border: 2px solid var(--green); background: var(--green); box-shadow: 0 0 0 .2rem #80a298; }
+    .point:focus-visible { outline-offset: -.16rem; }
+    .picked { color: var(--muted); font-size: .89rem; min-height: 1.52em; }
+    .controls { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem .9rem; margin: .84rem 0 .55rem; }
+    #multiply { min-height: 2.65rem; padding: .31rem .72rem; border: 1px solid var(--green); border-radius: .31rem; background: var(--green); color: white; font: inherit; cursor: pointer; }
+    #count { font-weight: 680; }
+    #result { background: #eaf0e5; border-left: .23rem solid var(--green); padding: .57rem .73rem; margin: 0; min-height: 2.6rem; }
+    .formula { font: 1.12rem/1.56 Georgia, serif; }
+    details { border-top: 1px solid var(--line); margin: 1rem 0 0; padding-top: .61rem; }
+    summary { font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_source_build.html">Back to where the Lean build grows</a>
+    <h1>Why the torsion points form a grid</h1>
+    <p class="intro">Identify opposite edges of a square to make a torus. Pick a dot in each square, then multiply by <var>n</var>. The point returns to the origin in every square. The grid shows all the points that return, and changing the dimension shows why their count is <var>n</var><sup>2<var>g</var></sup>.</p>
+    <div class="sliders">
+      <label for="size"><span>Multiplier <var>n</var> <output id="n"></output></span><input id="size" type="range" min="1" max="8" value="4"></label>
+      <label for="dimensions"><span>Dimension <var>g</var> <output id="g"></output></span><input id="dimensions" type="range" min="1" max="4" value="2"></label>
+    </div>
+    <div class="squares" id="squares"></div>
+    <div class="controls">
+      <button id="multiply" type="button"></button>
+      <span id="count"></span>
+    </div>
+    <p id="result" role="status" aria-atomic="true"></p>
+
+    <h2>Two coordinates per square</h2>
+    <p>In each square, moving by an integer in either direction brings you back to the same point. So <var>n</var> times <span class="formula">(<var>a</var>/<var>n</var>, <var>b</var>/<var>n</var>)</span> is the integer pair <span class="formula">(<var>a</var>, <var>b</var>)</span>, which is the origin on the torus. Conversely, if multiplication by <var>n</var> reaches the origin, both coordinates were integer multiples of 1/<var>n</var>.</p>
+    <p>Choose <var>a</var> and <var>b</var> independently from 0 through <var>n</var> − 1. Each square has <var>n</var>² choices, and there are <var>g</var> independent squares. The single-square model is ℂ/(ℤ + iℤ). For a complex torus of dimension <var>g</var>, a lattice basis gives the same count using 2<var>g</var> real coordinates.</p>
+
+    <details>
+      <summary>What the archive proves</summary>
+      <p>The same count holds for a <var>g</var>-dimensional abelian scheme over an algebraically closed field, whenever <var>n</var> is nonzero in that field. In positive characteristic, this means <var>n</var> is prime to the characteristic. The statement counts the points killed by <var>n</var>, including the identity. <a href="https://jmilne.org/math/articles/1986b.pdf">Milne, <cite>Abelian Varieties</cite>, Theorem 8.2</a>.</p>
+      <p>We checked the archive theorem <code>GlobalTheory.abMulN_holds</code> in Lean 4.33.1. It uses <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>. A separate Mathlib proof formalizes the circle-grid argument on this page. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/PublishedTheorems/Landherr%E2%82%82/DimEqZero.lean#L10">Archive statement</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/Proofs/CoherentCohomologyProofs/AbelianVarietyTorsionCardEqPowProof.lean#L18">Archive proof</a> · <a href="../tools/torus_torsion.lean">Circle-grid proof</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const get = id => document.getElementById(id);
+      const size = get('size'), dimensions = get('dimensions'), squares = get('squares');
+      const chosen = [[1,1], [2,3], [0,0], [0,0]];
+      let grids = [];
+      const directions = {ArrowLeft: [-1,0], ArrowRight: [1,0], ArrowUp: [0,1], ArrowDown: [0,-1]};
+
+      function build() {
+        const n = Number(size.value), g = Number(dimensions.value);
+        grids = [];
+        squares.replaceChildren();
+        for (let j = 0; j < g; j++) {
+          chosen[j] = chosen[j].map(x => x % n);
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption');
+          caption.textContent = 'Square ' + (j + 1);
+          const grid = document.createElement('div');
+          grid.className = 'square';
+          grid.style.setProperty('--n', n);
+          grid.setAttribute('role', 'group');
+          grid.setAttribute('aria-label', 'Choose a point in square ' + (j + 1));
+          const points = [];
+          for (let y = 0; y < n; y++) {
+            for (let x = 0; x < n; x++) {
+              const point = document.createElement('button');
+              point.type = 'button';
+              point.className = 'point';
+              point.dataset.origin = x === 0 && y === 0;
+              point.style.gridColumn = x + 1;
+              point.style.gridRow = n - y;
+              point.setAttribute('aria-label', '(' + x + '/' + n + ', ' + y + '/' + n + ')');
+              point.addEventListener('click', () => select(j, x, y));
+              point.addEventListener('keydown', event => {
+                if (!Object.hasOwn(directions, event.key)) return;
+                event.preventDefault();
+                const [dx,dy] = directions[event.key];
+                const nextX = (x + dx + n) % n, nextY = (y + dy + n) % n;
+                select(j, nextX, nextY);
+                points[nextY * n + nextX].focus();
+              });
+              points.push(point);
+              grid.append(point);
+            }
+          }
+          const picked = document.createElement('div');
+          picked.className = 'picked';
+          figure.append(caption, grid, picked);
+          squares.append(figure);
+          grids.push({points,picked});
+        }
+        get('n').value = n;
+        get('g').value = g;
+        get('multiply').textContent = 'Multiply the point by ' + n;
+        get('count').textContent = (n * n).toLocaleString('en-US') + ' choices per square · ' +
+          (n ** (2 * g)).toLocaleString('en-US') + ' points in total';
+        get('result').textContent = 'Choose the coordinates independently in each square.';
+        renderSelections();
+      }
+
+      function renderSelections() {
+        const n = Number(size.value);
+        for (const [j,{points,picked}] of grids.entries()) {
+          const [x,y] = chosen[j], index = y * n + x;
+          for (const [i,point] of points.entries()) {
+            point.setAttribute('aria-pressed', String(i === index));
+            point.tabIndex = i === index ? 0 : -1;
+          }
+          picked.textContent = 'Selected (' + x + '/' + n + ', ' + y + '/' + n + ')';
+        }
+      }
+
+      function select(square, x, y) {
+        chosen[square] = [x,y];
+        renderSelections();
+        get('result').textContent = 'Multiplication turns the selected fractions into integer coordinates.';
+      }
+
+      get('multiply').addEventListener('click', () => {
+        const n = Number(size.value);
+        const before = chosen.slice(0, grids.length).map(([x,y]) => '(' + x + ', ' + y + ')').join(', ');
+        for (let j = 0; j < grids.length; j++) chosen[j] = [0,0];
+        renderSelections();
+        get('result').textContent = 'Times ' + n + ' gives ' + before + '. Each integer pair wraps to (0, 0).';
+      });
+      size.addEventListener('input', build);
+      dimensions.addEventListener('input', build);
+      build();
+    })();
+  </script>
+</body>
+</html>

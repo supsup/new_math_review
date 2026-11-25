@@ -1,0 +1,72 @@
+At least 51 readings for an eight-tap board of this kind
+
+An n-reading circular board has eight distinct taps, each with coefficient
+1. The wiring opens seven directions of ambiguity modulo a prime p, and
+any seven direct probes must distinguish them. We also require the same
+0–1 board to be invertible over the rationals. No board in this class
+has 50 or fewer readings. This is a lower bound on size. The smallest
+working size is still unknown here.
+
+The 43-reading example in seven_probes.html explains why rank alone is
+insufficient. Its ordinary rank is 43 and its rank modulo 47 is 36.
+Seven consecutive probes resolve the ambiguity. Probes at positions
+0, 3, 14, 16, 20, 29, 37 leave an entire direction invisible, even if
+every mixed reading is kept.
+
+1. Two bounds leave only finitely many primes at each small size
+
+Take a matrix whose seven rows generate the modular kernel. Any seven
+columns are independent because any seven probes recover the kernel
+element. Put the first seven columns into identity form by row operations
+and call the remaining 7 by (n−7) array P. Every entry and every 2 by 2
+minor of P is nonzero, by choosing which identity columns to replace.
+The ratios on any two rows of P must be distinct across its columns. The
+ratios on any two columns must be distinct across its rows. This gives
+p−1 ≥ n−7 and p−1 ≥ 7. Sizes below 8 cannot hold eight distinct taps,
+and at size 8 every row is all ones, so n ≥ 9 and P has at least two columns.
+
+The integer determinant of the board is divisible by p^7, since seven
+rows can be eliminated modulo p by integer row swaps and additions.
+It is also divisible by 8, the eigenvalue of the all-ones vector. The
+sum of the squared singular values is 8n, counting the ones in the board.
+One singular value is 8 because both row and column sums are 8. Applying
+the arithmetic–geometric mean inequality to the other n−1 squared
+singular values gives the exact necessary condition
+
+    p^14 (n−1)^(n−1) ≤ [8(n−8)]^(n−1).
+
+The prime is at least 8, so it is coprime to 8. Ordinary invertibility
+makes the nonzero integer determinant at least 8p^7 in absolute value.
+
+2. A finite search with exact rejection witnesses
+
+Write H(T) for the polynomial with a 1 at each tap exponent. The board
+acts by multiplication by H modulo T^n−1. Rotate the eight offsets to
+the least binary mask. Distinct translates cannot share more than four
+taps. Their difference would have fewer than eight nonzero coordinates,
+and would restrict a set of seven or fewer coordinates of the kernel.
+An invertible board has distinct rows, so this difference is nonzero.
+
+For each prime passing the first two bounds, factor T^n−1 modulo p. If
+p = n, the polynomial reduces to (T−1)^p and H(1) = 8 rules out any rank
+drop. The remaining candidates have p not dividing n, so the factors are
+distinct. A degree-seven greatest common divisor can only use factors
+of degree 1 through 7. That gives a fast exact modular filter. The replay
+checks the full modular gcd and the rational gcd on every survivor.
+
+Only 138 rotated shapes in the search pass both rank tests. The six of
+length 43 and the 132 of length 46 all use p = 47. For each one, let g be
+the degree-seven modular gcd. The kernel has basis H0, T·H0, …, T^6·H0
+with H0 = (T^n−1)/g. The replay finds and checks seven probe positions
+whose minor in this basis is zero. Its choice of candidate probe sets
+uses a fixed seed. A displayed zero determinant is exact, and the replay
+fails if it cannot exhibit a witness for any surviving shape.
+
+    python3 -B tools/check_eight_tap_minimum.py
+    python3 -B tools/check_eight_tap_minimum.py 43 46 --show-witnesses
+
+The replay needs python-flint and a C++20 compiler. It uses temporary
+files for the scan, then removes them.
+
+See seven_loss_mixer.txt for two working boards and the proof that eight
+taps are necessary for this rank-drop construction.

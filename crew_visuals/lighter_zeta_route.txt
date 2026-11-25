@@ -1,0 +1,86 @@
+What a lighter zeta proof would have to supply
+
+Lean can check the analytic finish using 31 files of the archive. Its
+one input is a bound on a weighted sum of primes and prime powers. This
+puts the outstanding mathematics into a short, explicit statement.
+
+The target
+
+Give each prime power n = p^k the weight Λ(n) = log p and every other
+integer weight zero. Define the corrected sum for x ≥ 1 by
+
+    G(x) = sum over 1 ≤ n ≤ x of Λ(n)(x/n − 1)
+           − x log x + (1 + γ)x,
+
+where γ is Euler's constant. The retained hypothesis is:
+
+    For every θ strictly between 1/2 and 1 and every cutoff Y₀,
+    some Y ≥ Y₀ satisfies G(x) ≤ x^θ throughout [Y, Y^(3/2)].
+
+The bound is one-sided, and the interval can change with θ and Y₀.
+tools/rh_zeta_prime_bound.lean applies the archive's Landau criterion to
+the single L-function ζ, then uses the functional equation to finish.
+
+How the archive reaches the target
+
+The earlier modulus-one variant still takes Green, the bundle, and the
+weighted-length budget for the modulus-one character. The first cut asks
+only for a tied family for that character at scale 3/2, for each sufficiently
+small positive ε, with its windows and character data. In
+tools/rh_mod_one_tied_windows.lean, Lean checks both that this suffices
+for RH and that these same families supply the displayed prime-sum bound.
+The two files expose an arithmetic construction followed by an analytic
+finish. The prime-sum file checks the finish with the bound as an input.
+
+    Starting input                     Reached archive    Files   Imports
+    Three inputs, one budget character       96,528       5,699    17,274
+    Tied zeta families at scale 3/2            3,888         185       408
+    Corrected sum bounded on windows            120          31        31
+
+The middle columns count archive declarations reachable through types
+and proofs and the files containing them. The last column counts all
+archive imports, including unused declarations. Mathlib and the local
+wrapper theorems are outside those counts. This measures the retained
+proof after making each input explicit. It gives no size estimate for
+proving the new inputs. All three compiled endpoints and the bridge
+report propext, Classical.choice and Quot.sound.
+
+Why the bound itself carries the hard part
+
+There is a classical converse on paper. On RH, Schoenfeld's bound gives
+E(t) = ψ(t) − t = O(√t log²t), with ψ(t) = sum of Λ(n) through t.
+Partial summation gives the weighted sum in G(x) as
+x log x + x times the integral of E(t)/t² from 1 to x. For real s > 1,
+the integral of E(t)/t^(s+1) from 1 to infinity is
+(−ζ′(s)/ζ(s))/s − 1/(s−1). The Laurent expansion at 1 and dominated
+convergence give its limit −(1+γ). Consequently G(x) is −x times the
+integral of E(t)/t² from x to infinity. The same estimate gives
+|G(x)| = O(√x log²x), which supplies all sufficiently large intervals
+for each θ in the display. Together with the checked implication this
+makes the prime-window criterion classically equivalent to RH. This
+converse is a paper calculation here.
+
+A bounded look at the sum
+
+tools/check_zeta_prime_window_prefix.py uses ball arithmetic to certify
+G(x) < √x for every real x from 4 through 1,000,000. The first crossing
+of that threshold is between 3.346873827339 and 3.346873827340. On each
+[n,n+1], G(x)−√x is at most its chord plus 1/(8n), so checking the integer
+endpoints covers the full continuum. This certificate covers a finite
+prefix. The analytic input above asks for arbitrarily large intervals.
+
+Sources and replay
+
+The pinned archive is 1337isnot1337/riemann-hypothesis-solved at 6193bb5,
+using Lean 4.33.1 and Mathlib 0df444a. The three archive steps used here are
+ChebyshevInequalityAtWindowScale in TopWin.lean, the analytic theorem
+zeroFree_of_rpow_window in ZeroFreeOfRpowWindow.lean, and rh_of_right in
+RhOfRight.lean. The formula for G is in DedekindLFunctions/CharFamily.lean.
+The classical estimate is Schoenfeld (1976), §6, inequality (6.2).
+https://doi.org/10.1090/S0025-5718-1976-0457374-X
+
+Two isolated replays with prebuilt Mathlib took 125–131 seconds on this
+machine and produced about 9.6 MB of compiled archive output. The replay copies
+and builds only the 31 required archive source files in a temporary folder.
+
+    python3 -B tools/replay_rh_prime_bound.py ARCHIVE_SRC MATHLIB_PROJECT

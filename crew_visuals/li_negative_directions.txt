@@ -1,0 +1,168 @@
+How many directions can an off-line quartet spoil?
+==================================================
+
+The three-by-three test in li_cousin_quartet.html sees a single quartet on
+its own. The masking experiment mixes one such quartet with the true ζ
+coefficients, and its first 24 matrix tests can all pass. What happens if
+we let the matrix grow as large as needed?
+
+For the full ζ Li second-difference matrices, each distinct off-line
+quartet eventually accounts for two negative eigenvalues. If there are
+exactly Q distinct off-line quartets, the number of negative eigenvalues
+is exactly 2Q for every sufficiently large size. If there are infinitely
+many, that number grows without bound. The count uses distinct quartets
+and multiplicities enter the form as positive weights.
+
+A negative eigenvalue means that some real choice of weights makes the
+matrix's quadratic form negative. Two negative eigenvalues give a plane
+of choices on which every nonzero choice makes the form negative.
+
+The calculation
+---------------
+
+Write w = (ρ−1)/ρ for a zero. The zero symmetries turn into conjugation
+and inversion of w. For an off-line quartet choose the outer node
+w with |w| > 1. Its nodes are w, conj(w), 1/w, conj(1/w). These
+are distinct since the ζ zeros in the open strip are nonreal.
+For real s in (0,1) the alternating zeta series is positive and
+ζ(s) is that series divided by 1−2^(1−s), so ζ(s) < 0. Set
+c = 2 − w − 1/w. Write m for the positive multiplicity of each of its
+zeros.
+
+The Li second-difference matrix has diagonal 2λ₁ and entry
+λ_{k+1} − 2λ_k + λ_{k−1} at distance k ≥ 1 from the diagonal.
+Here λ₀ = 0. A real vector in the matrix of size N can be read as
+the coefficients of a real polynomial p of degree < N. The quartet
+contributes the following to that vector's quadratic form.
+
+    4m Re(c p(w) p(1/w))
+
+This follows by taking the second difference of
+4 − 2 Re(wⁿ + w⁻ⁿ). For an on-line pair, |w| = 1 and 1/w = conj(w).
+The corresponding contribution is 2m c |p(w)|², with
+c = 2 − 2 Re(w) ≥ 0.
+
+If there are Q off-line quartets, the form can have at most 2Q negative
+directions at any size. Indeed, impose the Q complex linear evaluations
+p(w) = 0 on the real coefficient vectors. The surviving subspace has
+real codimension at most 2Q. Each off-line contribution vanishes there,
+and the sum of the on-line contributions is nonnegative.
+
+To get the lower bound, select any Q distinct off-line quartets and let
+R > 1 be the smallest outer modulus of the selected nodes. Collect all
+the off-line quartets with outer modulus at least R.
+There are only finitely many, because w tends to 1 as the zeros tend to
+infinite height. Every remaining exterior modulus is at most R₁ for
+some 1 ≤ R₁ < R. For example, there are finitely many outer moduli
+above (1+R)/2, and the remaining ones below R have a maximum below R.
+
+Choose a complex parameter α_j per selected quartet. For each integer
+k ≥ 0 use real polynomial interpolation to obtain A and B_k on all
+the collected nodes. Use the following values at the selected nodes.
+
+    A(1/w_j) = α_j              B_k(1/w_j) = 0
+    A(w_j)   = 0                B_k(w_j) = −conj(c_j α_j) (w_j/|w_j|)^(−k)
+
+Use conjugate values at conjugate nodes and set both polynomials to
+zero at the nodes of the unselected collected quartets. Standard
+Lagrange interpolation on the finite set gives real coefficients
+because the node and value lists respect conjugation. The degrees of
+A and B_k are bounded by a constant independent of k. Their
+coefficients are bounded by a constant times ||α||, the Euclidean
+norm of the Q complex parameters.
+
+Now put p_k(z) = A(z) + z^k B_k(z). At each selected inner node its
+value is α_j. At each selected outer node its value is
+−conj(c_j α_j) |w_j|^k. Thus the selected quartets contribute
+
+    −4 ∑_j m_j |c_j|² |α_j|² |w_j|^k ≤ −C R^k ||α||²
+
+for some C > 0. The unselected collected quartets contribute zero.
+For every remaining pair or quartet, the product p_k(z) p_k(1/z)
+contains powers 1, z^k and z^(−k). Both z and 1/z lie in the fixed
+annulus 1/R₁ ≤ |z| ≤ R₁, so the product is bounded in absolute value
+by C₁ R₁^k ||α||² for a constant C₁ independent of k and the node.
+
+The sum of m |c| over all pairs and quartets is finite.
+In terms of ρ, c = −1/(ρ(ρ−1)). Its absolute value is of order
+1/|ρ|² at large height, and the ζ zero count through height T is
+O(T log T). This also justifies summing the second differences
+absolutely for each fixed entry. Therefore the total contribution of
+the remaining roots is bounded by C₂ R₁^k ||α||². The selected negative
+term wins for all sufficiently large k since R₁ < R.
+
+The map from the Q complex parameters to p_k is real-linear and
+injective because p_k(1/w_j) = α_j. This yields a 2Q-dimensional
+negative subspace, in size at most k plus a fixed constant. Increasing
+the matrix size preserves it by padding coefficient vectors with
+zeros. This proves the eventual lower bound for every finite choice
+of Q. The upper bound above completes the finite count.
+
+How fast the negative eigenvalues grow in magnitude
+---------------------------------------------------
+
+List the outer moduli of the distinct off-line quartets in decreasing
+order, keeping ties between different quartets. Write r_q for the qth
+modulus. Let μ_j(N) be the jth smallest eigenvalue of the size-N
+matrix. If q = ceil(j/2) and there are at least q quartets, then
+
+    lim_{N → ∞} (−μ_j(N))^(1/N) = r_q.
+
+For the lower bound on −μ_j(N), choose the first q quartets above
+and let R = r_q. The coefficient norm of p_k is at most D ||α||
+for a constant D, because multiplying by z^k only shifts the
+coefficients of B_k. The negative quadratic bound therefore gives
+a Rayleigh quotient at most −C₃ R^k on the whole 2q-dimensional
+subspace for all large k. Take k = N−1−d with d a fixed bound on the
+interpolation degrees. The minimum-maximum principle then gives
+−μ_j(N) ≥ C₄ R^N.
+
+For the upper bound, impose p(w) = 0 at the outer nodes of the s
+quartets with modulus strictly greater than R. This costs at most
+2s < j real dimensions. Every remaining off-line quartet has
+|w| ≤ R, so Cauchy–Schwarz bounds |p(w)p(1/w)| by
+N R^(N−1) times the squared coefficient norm. The on-line terms
+are nonnegative and the weights m |c| are summable. Hence the
+Rayleigh quotient on this subspace is at least −C₅ N R^(N−1).
+The same minimum-maximum principle bounds −μ_j(N) from above
+by C₅ N R^(N−1). Taking Nth roots gives the claimed rate.
+
+An exact small example
+----------------------
+
+Take w = 2i, with multiplicity one, and an on-line pair at i, −i
+with weight 100. The polynomials
+
+    A(z) = (16 + 4z²)/15
+    B(z) = (z² + 1/4)(8/15 + z/5)
+
+give A(−i/2) = 1, A(2i) = 0, B(−i/2) = 0 and
+B(2i) = −conj(2 − 3i/2). Use p_k(z) = A(z) + z^k B(z) for k a
+multiple of four. The on-line pair contributes 73 each time because
+i^k = 1. The off-line quartet contributes −25·2^k. For k = 0 the
+sum on this vector is 48. For k = 4 it is −327.
+
+Relation to the literature
+--------------------------
+
+The Li zero sum and its convention come from Li's criterion.
+Xian-Jin Li, The positivity of a sequence of numbers and the
+Riemann hypothesis. https://doi.org/10.1006/jnth.1997.2137
+
+The identity (1−w)(1−1/w) = c writes the matrix form as Weil's
+zero-side quadratic form on functions (1−w)p(w). Its basis functions
+(1−w)w^j are differences of the test polynomials 1−w^j used in §4 of
+Enrico Bombieri and Jeffrey C. Lagarias, Complements to Li's criterion
+for the Riemann hypothesis. https://websites.umich.edu/~lagarias/doc/bombieri.pdf
+
+Bombieri obtains the analogous negative-eigenvalue count for finite
+Fourier truncations of Weil's quadratic functional. The construction
+above gives polynomial witnesses for the Li second-difference
+truncations. Enrico Bombieri, Remarks on Weil's quadratic functional
+in the theory of prime numbers, I, Theorems 8–9.
+https://www.bdim.eu/item?fmt=pdf&id=RLIN_2000_9_11_3_183_0
+
+Anthropic's E2 transcript gives a related full Weil-form argument using
+Gaussian times polynomial test functions and makes the distinct-zero
+qualification explicit. See its Theorem 1, summarized on PDF page 20.
+https://assets.claude.com/8a0d1add3c637b858a9a181e98c40e9548c3f44f.pdf#page=20

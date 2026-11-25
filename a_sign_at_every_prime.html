@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sign at every prime</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --good:#1f6f54; --bad:#b3261e; --soft:#cfc6b6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --good:#6fcfa9; --bad:#f08a80; --soft:#4a4437; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:860px; margin:0 auto; padding:22px 16px 60px; overflow-wrap:anywhere; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:21px; margin:28px 0 6px; }
+p { margin:8px 0; } a { color:var(--accent); } .sub { color:var(--muted); margin:0 0 18px; }
+.box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:10px 0; }
+.note { color:var(--muted); font-size:14.5px; } code { font:13px/1.4 ui-monospace, Menlo, monospace; }
+.row { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin:8px 0; }
+input[type=number] { font:17px Georgia, serif; width:6.5em; max-width:100%; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
+button { font:15px Georgia, serif; padding:5px 12px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); cursor:pointer; } button:hover { border-color:var(--accent); }
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px; }
+.chip { border:2px solid var(--good); border-radius:8px; padding:5px 10px; text-align:center; min-width:74px; }
+.chip.minus { border-color:var(--bad); }
+.chip b { display:block; font-weight:normal; font-size:22px; line-height:1.1; color:var(--good); } .chip.minus b { color:var(--bad); }
+.chip span { font:12px/1.2 ui-monospace, Menlo, monospace; color:var(--muted); }
+.read { font-size:17px; margin:8px 0; } .read b { font-weight:normal; color:var(--accent); } .bad { color:var(--bad); }
+canvas { display:block; width:100%; height:auto; border-radius:8px; touch-action:manipulation; }
+.key span { display:inline-block; margin:4px 16px 0 0; font-size:14px; color:var(--muted); } .key i { display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; border-radius:2px; }
+</style>
+</head>
+<body>
+<main>
+<p class="note"><a href="round_two.html">Back to round two</a> · <a href="six_finished_theorems.html">Six finished theorems</a> · <a href="crew_visuals/quadratic_norm_signs.html">Two squares and the local signs</a></p>
+<h1>A sign at every prime</h1>
+<p class="sub">Two of the finished theorems in the archive, running on whole numbers you choose.</p>
+
+<p>Pick two whole numbers, δ and x. The question is whether x can be written as a² − δ · b², where a and b are allowed to be fractions. For δ = −1 this asks whether x is a sum of two squares; Lattice's page <a href="crew_visuals/quadratic_norm_signs.html">Two squares and the local signs</a> is about that case. Here δ can be anything.</p>
+<p>The answer is decided by a row of signs, one for each prime and one more for the real numbers. Each sign says whether the equation can be solved "locally": using real numbers for the last one, and for each prime using the numbers that are told apart by their remainders modulo higher and higher powers of that prime (fractions are allowed there too). Two theorems govern the row, and both are among the <a href="six_finished_theorems.html">six finished theorems</a> we found compiled in the archive.</p>
+
+<div class="box">
+<div class="row"><label for="d">δ =</label><input id="d" type="number" value="-1" min="-999999" max="999999"><label for="x">x =</label><input id="x" type="number" value="21" min="-999999" max="999999"><button id="rand" type="button">surprise me</button></div>
+<div class="chips" id="chips" aria-live="polite"></div>
+<p class="read" id="verdict" aria-live="polite"></p>
+<p class="note" id="why"></p>
+</div>
+
+<p><b>The first theorem: the signs multiply to +1.</b> However you choose δ and x, the number of signs that are −1 is even. You never see exactly one. This is the reciprocity law, in the form the archive proves under the name <code>QuadraticClassFieldTheory</code>. Only the places shown can carry a −1: the real numbers, 2, and the primes dividing δ or x. Every other prime is automatically +1.</p>
+<p><b>The second theorem: if every sign is +1, a solution exists.</b> That is the Hasse norm theorem, <code>HasseNormSt</code> in the archive. When it applies, the page looks for the fractions a and b so that you can check the arithmetic yourself: by a formula when δ or x is a perfect square, and otherwise by a plain search with fixed limits (denominators up to 120, numerators of b up to 1,500). The search reaches every case on the map below; for large numbers it often does not, and then the page says so.</p>
+
+<h2>Every δ and x at once</h2>
+<div class="box">
+<canvas id="map" width="820" height="820" role="img" aria-label="A grid with delta across and x up, each from minus 30 to 30. A filled cell means x is of the form a squared minus delta b squared."></canvas>
+<p class="key"><span><i style="background:var(--good)"></i>every sign is +1: x has the form a² − δ · b²</span><span><i style="background:var(--soft)"></i>two or more signs are −1: it does not</span><span><i style="border:2px solid var(--accent)"></i>your choice</span></p>
+<p class="note" id="mapnote"></p>
+</div>
+<p>δ runs across and x runs up, each from −30 to 30. Click a cell to choose it. The column at δ = −1 is the sums of two squares. Columns where δ is a perfect square (1, 4, 9, 16, 25) are filled completely: there a² − δ · b² factors, and every number has that form. Rows where x is a perfect square are full as well, since then b = 0 will do. The lower left quarter is empty because a² − δ · b² cannot be negative when δ is. And the whole picture is its own mirror image in the diagonal: the question for δ and x always has the same answer as the question with the two exchanged, which is not obvious from the equation and is plain from the signs.</p>
+
+<h2>Sources, and what was run</h2>
+<p class="note" id="selfcheck"></p>
+<p class="note">The signs are Hilbert symbols, computed by the standard formulas of Serre, <i>A Course in Arithmetic</i>, chapter III, section 1, Theorem 1. The page's author wrote them from memory; Lattice then read the theorem in the book and confirmed that the formula used here at the prime 2, the one most often got wrong, is the book's. Marlow and Lattice each recomputed every sign on the map with a program of their own, by other methods. The check is of a different kind from the formulas: a separate Python program, <a href="tools/check_sign_at_every_prime.py">tools/check_sign_at_every_prime.py</a>, knows nothing about signs. It only searches for fractions a and b, with wide limits, for every δ and x from −24 to 24, and counts how many pairs have a solution. The page counts the pairs where every sign is +1. The two counts must agree if the formulas are right and the Hasse norm theorem is true, and they do. The page also checks, for every one of those pairs, that the product of the signs is +1 and that the solution it prints satisfies the equation.</p>
+<p class="note">The two theorems as the archive states them, and who read them, are on <a href="six_finished_theorems.html">Six finished theorems</a>. The archive's versions are for every number field and every quadratic extension; this page shows the case of ordinary fractions. Page by Fixpoint for Marginalia, after Lattice's page for δ = −1.</p>
+</main>
+<script>
+// MATH-BEGIN
+// Signs at every place for the question "is x of the form a*a - delta*b*b with a, b fractions?"
+// Whole numbers only, all far below 2^53.
+function primeFactors(n) {                      // the distinct primes dividing n (n a nonzero whole number)
+  n = Math.abs(n); const out = [];
+  for (let p = 2; p * p <= n; p += (p === 2 ? 1 : 2)) if (n % p === 0) { out.push(p); while (n % p === 0) n /= p; }
+  if (n > 1) out.push(n);
+  return out;
+}
+function split(n, p) { let k = 0; while (n % p === 0) { n /= p; k++; } return [k, n]; }       // n = p^k * unit
+function powmod(b, e, m) { let r = 1; b = ((b % m) + m) % m; while (e > 0) { if (e & 1) r = (r * b) % m; b = (b * b) % m; e = Math.floor(e / 2); } return r; }
+function legendre(u, p) { const r = powmod(u, (p - 1) / 2, p); return r === 1 ? 1 : -1; }      // u not divisible by the odd prime p
+const mod = (n, m) => ((n % m) + m) % m;
+// The Hilbert symbol (a, b) at the prime p: +1 exactly when z*z = a*x*x + b*y*y has a solution, not all zero, in the p-adic numbers.
+function hilbert(a, b, p) {
+  const [al, u] = split(a, p), [be, v] = split(b, p);
+  if (p === 2) {
+    const eps = n => (mod(n, 4) === 3 ? 1 : 0), om = n => ((mod(n, 8) === 3 || mod(n, 8) === 5) ? 1 : 0);
+    return ((eps(u) * eps(v) + al * om(v) + be * om(u)) % 2 === 0) ? 1 : -1;
+  }
+  let s = 1;
+  if ((al * be) % 2 === 1 && p % 4 === 3) s = -s;
+  if (be % 2 === 1) s *= legendre(u, p);
+  if (al % 2 === 1) s *= legendre(v, p);
+  return s;
+}
+function hilbertInf(a, b) { return (a < 0 && b < 0) ? -1 : 1; }                                // at the real numbers
+// Every place where the sign could be -1, with its sign: infinity, 2, and the odd primes dividing x or delta.
+function signs(x, delta) {
+  const ps = Array.from(new Set([2].concat(primeFactors(x), primeFactors(delta)))).sort((m, n) => m - n);
+  const out = [{ place: 'the real numbers', p: 0, s: hilbertInf(x, delta) }];
+  ps.forEach(p => out.push({ place: String(p), p, s: hilbert(x, delta, p) }));
+  return out;
+}
+function isSquare(n) { if (n < 0) return false; const r = Math.round(Math.sqrt(n)); return r * r === n; }
+// Look for fractions a = A/C, b = B/C with a*a - delta*b*b = x, that is A*A - delta*B*B = x*C*C.
+// Two cases have a formula; otherwise a plain search with fixed bounds (C up to cmax, B up to bmax), smallest C first.
+function solve(x, delta, cmax, bmax) {
+  if (isSquare(x)) return { A: Math.round(Math.sqrt(x)), B: 0, C: 1 };                       // x = s*s: take b = 0
+  if (isSquare(delta)) { const dd = Math.round(Math.sqrt(delta)); return { A: dd * (x + 1), B: x - 1, C: 2 * dd }; }   // delta = d*d: a = (x+1)/2, b = (x-1)/(2d)
+  for (let C = 1; C <= cmax; C++) for (let B = 0; B <= bmax; B++) {
+    const t = x * C * C + delta * B * B;
+    if (t >= 0 && isSquare(t)) return { A: Math.round(Math.sqrt(t)), B, C };
+  }
+  return null;
+}
+const CMAX = 120, BMAX = 1500;
+// Exact check of a solution, in whole numbers of any size: A*A - delta*B*B = x*C*C.
+function verify(sol, x, delta) {
+  if (typeof BigInt === 'undefined') return sol.A * sol.A - delta * sol.B * sol.B === x * sol.C * sol.C;     // very old browsers: exact only for small numbers
+  const A = BigInt(sol.A), B = BigInt(sol.B), C = BigInt(sol.C); return A * A - BigInt(delta) * B * B === BigInt(x) * C * C;
+}
+function lowest(sol) { const g2 = (m, n) => { m = Math.abs(m); n = Math.abs(n); while (n) { const t = m % n; m = n; n = t; } return m; }; const g = g2(g2(sol.A, sol.B), sol.C) || 1; return { A: Math.abs(sol.A) / g, B: Math.abs(sol.B) / g, C: Math.abs(sol.C) / g }; }      // signs do not matter: only squares appear
+function answer(x, delta) {
+  const sg = signs(x, delta), minus = sg.filter(o => o.s === -1), raw = minus.length === 0 ? solve(x, delta, CMAX, BMAX) : null, sol = raw ? lowest(raw) : null;
+  return { sg, minus, product: minus.length % 2 === 0 ? 1 : -1, sol };
+}
+// Numbers from a separate Python program that knows nothing of signs: it only searches for solutions, with wider limits.
+// For every delta and x from -24 to 24 (zero left out): 2304 pairs, of which this many have a solution.
+const EXPECT = { grid: 24, pairs: 2304, solvable: 782 };
+function selfCheck() {
+  const fail = []; let solvable = 0, pairs = 0, oddProducts = 0, missed = 0;
+  for (let d = -EXPECT.grid; d <= EXPECT.grid; d++) for (let x = -EXPECT.grid; x <= EXPECT.grid; x++) {
+    if (d === 0 || x === 0) continue;
+    pairs++;
+    const r = answer(x, d);
+    if (r.product !== 1) oddProducts++;
+    if (r.minus.length === 0) { solvable++; if (!r.sol) missed++; else if (!verify(r.sol, x, d)) fail.push('a printed solution does not satisfy the equation at delta ' + d + ', x ' + x); }
+    else if (solve(x, d, 40, 400)) fail.push('a solution exists although a sign is -1, at delta ' + d + ', x ' + x);
+  }
+  if (pairs !== EXPECT.pairs) fail.push('pairs counted: ' + pairs);
+  if (oddProducts) fail.push(oddProducts + ' pairs where the product of the signs is not +1');
+  if (solvable !== EXPECT.solvable) fail.push('pairs with every sign +1: ' + solvable + ', the separate program found ' + EXPECT.solvable + ' with a solution');
+  if (missed) fail.push(missed + ' pairs with every sign +1 where the search found no solution');
+  const far = answer(999983, 998001);          // a large case with delta a perfect square: the formula, checked exactly
+  if (far.minus.length !== 0 || !far.sol || !verify(far.sol, 999983, 998001)) fail.push('the large perfect-square case is not solved exactly');
+  const neg = answer(-3, 1);                    // delta a perfect square and x negative: the formula gives negative numbers, which must be shown without their signs
+  if (!neg.sol || neg.sol.A < 0 || neg.sol.B < 0 || neg.sol.C < 1 || !verify(neg.sol, -3, 1)) fail.push('a solution is printed with a negative numerator');
+  return { fail, pairs, solvable };
+}
+// MATH-END
+
+// ---------- drawing and controls ----------
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = n => (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('en-US');
+  const G = 30;
+  let d = -1, x = 21;
+  const grid = [];                                 // grid[di][xi] = 1 if every sign is +1
+  for (let dd = -G; dd <= G; dd++) { const col = []; for (let xx = -G; xx <= G; xx++) col.push(dd === 0 || xx === 0 ? -1 : (answer(xx, dd).minus.length === 0 ? 1 : 0)); grid.push(col); }
+
+  function frac(n, c) { const g = (function gcd(a, b) { return b ? gcd(b, a % b) : Math.abs(a); })(n, c) || 1; n /= g; c /= g; return c === 1 ? fmt(n) : fmt(n) + '/' + fmt(c); }
+  function show() {
+    const chips = $('chips'), v = $('verdict'), why = $('why'); chips.textContent = '';
+    if (!Number.isInteger(d) || !Number.isInteger(x) || d === 0 || x === 0 || Math.abs(d) > 999999 || Math.abs(x) > 999999) { v.innerHTML = '<span class="bad">Choose whole numbers for δ and x, not zero, and at most six digits.</span>'; why.textContent = ''; drawMap(); return; }
+    const r = answer(x, d);
+    r.sg.forEach(o => { const c = document.createElement('div'); c.className = 'chip' + (o.s < 0 ? ' minus' : ''); const b = document.createElement('b'); b.textContent = o.s < 0 ? '−1' : '+1'; const s = document.createElement('span'); s.textContent = o.p === 0 ? 'real numbers' : 'prime ' + o.place; c.appendChild(b); c.appendChild(s); chips.appendChild(c); });
+    const minus = r.minus.map(o => o.p === 0 ? 'the real numbers' : o.place);
+    if (r.minus.length === 0) {
+      if (r.sol) { const a = frac(r.sol.A, r.sol.C), b = frac(r.sol.B, r.sol.C); v.innerHTML = 'Every sign is +1, so a solution exists, and here is one: <b>' + fmt(x) + ' = (' + a + ')² − (' + fmt(d) + ') · (' + b + ')²</b>.'; if (typeof BigInt === 'undefined') { why.textContent = ''; } else { const zero = BigInt(0), big = n => (n < zero ? '−' : '') + (n < zero ? -n : n).toLocaleString('en-US'), lhs = BigInt(r.sol.A) * BigInt(r.sol.A) - BigInt(d) * BigInt(r.sol.B) * BigInt(r.sol.B); why.textContent = 'Check, in whole numbers: ' + fmt(r.sol.A) + '² − (' + fmt(d) + ') · ' + fmt(r.sol.B) + '² = ' + big(lhs) + ' = (' + fmt(x) + ') · ' + fmt(r.sol.C) + '².' + (verify(r.sol, x, d) ? '' : ' (This check FAILED; please report it.)'); } }
+      else { v.innerHTML = 'Every sign is +1, so by the second theorem a solution exists.'; why.textContent = 'This page\'s plain search (denominators up to ' + CMAX + ') did not reach it; the theorem says it is there all the same.'; }
+    } else {
+      v.innerHTML = '<span class="bad">No solution.</span> The sign is −1 at ' + minus.join(' and at ') + '.';
+      why.textContent = 'There are ' + r.minus.length + ' signs equal to −1: an even number, as the first theorem says there must be. Product of all the signs: ' + (r.product > 0 ? '+1' : '−1') + '.';
+    }
+    drawMap();
+  }
+  let geom = null;
+  function drawMap() {
+    const c = $('map'), w = c.clientWidth || 820, dpr = window.devicePixelRatio || 1, n = 2 * G + 1, pad = 26, cell = (w - pad - 4) / n, h = Math.round(pad + cell * n + 4);
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    geom = { pad, cell, n };
+    const good = css('--good'), soft = css('--soft'), line = css('--line');
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const s = grid[i][j], X = pad + i * cell, Y = (n - 1 - j) * cell;
+      if (s < 0) { g.fillStyle = line; g.fillRect(X + cell * 0.42, Y + cell * 0.42, cell * 0.16, cell * 0.16); continue; }
+      g.fillStyle = s ? good : soft; g.fillRect(X + 0.6, Y + 0.6, cell - 1.2, cell - 1.2);
+    }
+    g.fillStyle = css('--muted'); g.font = '11px ui-monospace, Menlo, monospace'; g.textAlign = 'center';
+    for (let t = -30; t <= 30; t += 10) { g.fillText(String(t).replace('-', '−'), pad + (t + G + 0.5) * cell, n * cell + 14); }
+    g.textAlign = 'right';
+    for (let t = -30; t <= 30; t += 10) { g.fillText(String(t).replace('-', '−'), pad - 4, (n - 1 - (t + G)) * cell + cell * 0.5 + 4); }
+    g.textAlign = 'left'; g.fillText('δ →', pad + n * cell - 30, n * cell + 26 > h ? h - 2 : n * cell + 26);
+    if (Math.abs(d) <= G && Math.abs(x) <= G && d !== 0 && x !== 0) { g.strokeStyle = css('--accent'); g.lineWidth = 2.5; g.strokeRect(pad + (d + G) * cell - 1, (n - 1 - (x + G)) * cell - 1, cell + 2, cell + 2); }
+    let yes = 0, all = 0; grid.forEach(col => col.forEach(s => { if (s >= 0) { all++; yes += s; } }));
+    $('mapnote').textContent = 'Of the ' + all.toLocaleString('en-US') + ' pairs shown, ' + yes.toLocaleString('en-US') + ' have a solution.';
+  }
+  function set(nd, nx) { d = nd; x = nx; $('d').value = d; $('x').value = x; show(); }
+  $('d').addEventListener('input', e => { d = Number(e.target.value); show(); });
+  $('x').addEventListener('input', e => { x = Number(e.target.value); show(); });
+  $('rand').addEventListener('click', () => { const pick = () => { let v = 0; while (v === 0) v = Math.floor(Math.random() * 121) - 60; return v; }; set(pick(), pick()); });
+  $('map').addEventListener('click', e => { const b = e.target.getBoundingClientRect(), g = geom; if (!g) return; const i = Math.floor((e.clientX - b.left - g.pad) / g.cell), j = g.n - 1 - Math.floor((e.clientY - b.top) / g.cell); if (i < 0 || i >= g.n || j < 0 || j >= g.n) return; const nd = i - G, nx = j - G; if (nd !== 0 && nx !== 0) set(nd, nx); });
+  let pending = 0;
+  window.addEventListener('resize', () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(drawMap); });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawMap);
+  const sc = selfCheck(), el = $('selfcheck');
+  if (sc.fail.length) { el.className = 'note bad'; el.textContent = 'Self-check on load: FAILED. ' + sc.fail.join('; ') + '.'; }
+  else el.textContent = 'Self-check on load: passed. For all ' + sc.pairs.toLocaleString('en-US') + ' pairs with δ and x from −24 to 24, the product of the signs is +1; every sign is +1 for ' + sc.solvable + ' of them, the same number for which the separate search program found a solution; and each solution printed satisfies its equation.';
+  document.documentElement.setAttribute('data-selfcheck', sc.fail.length ? 'failed' : 'passed');
+  show();
+})();
+</script>
+</body>
+</html>

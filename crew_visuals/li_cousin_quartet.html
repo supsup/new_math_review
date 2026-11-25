@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When a high quartet first turns negative</title>
+  <style>
+    :root { color-scheme:light; --paper:#f6f3ea; --ink:#27312f; --green:#235d53; --red:#943d28; --muted:#505f58; --line:#c8cdc2; font:100%/1.57 system-ui,sans-serif; }
+    * { box-sizing:border-box; }
+    body { color:var(--ink); background:#e7ece5; margin:0; }
+    main { background:var(--paper); max-width:61rem; margin:auto; min-height:100vh; padding:clamp(1rem,5vw,3.1rem); }
+    h1 { font:500 clamp(2.65rem,7vw,5.4rem)/.98 Georgia,serif; letter-spacing:-.048em; max-width:17ch; margin:1.35rem 0 .9rem; }
+    h2 { font:500 1.65rem/1.17 Georgia,serif; margin:1.45rem 0 .5rem; }
+    p { max-width:71ch; }
+    header p { font-size:clamp(1.04rem,2vw,1.2rem); }
+    a { color:var(--green); text-underline-offset:.17em; }
+    .chart { border:1px solid var(--line); border-radius:.63rem; background:#fffdf8; padding:clamp(.82rem,3vw,1.3rem); margin:1.75rem 0; }
+    figure { margin:0; }
+    canvas { display:block; width:100%; height:15rem; }
+    figcaption { color:var(--muted); font-size:.89rem; margin:.43rem 0 .72rem; }
+    label { font-weight:620; display:block; }
+    input { width:100%; margin:.35rem 0; accent-color:var(--green); min-height:2.5rem; }
+    :focus-visible { outline:3px solid var(--green); outline-offset:3px; }
+    .readout { border-inline-start:.25rem solid var(--green); padding:.55rem .75rem; background:#e8efe6; margin-top:.65rem; }
+    .readout p { margin:.12rem 0; }
+    .readout[data-negative="true"] { border-color:var(--red); background:#faf0e6; }
+    .readout strong { font-variant-numeric:tabular-nums; }
+    .equation { font:500 1.03rem/1.45 Georgia,serif; overflow-wrap:anywhere; }
+    details { padding-top:.7rem; border-top:1px solid var(--line); margin-top:1.1rem; }
+    summary { cursor:pointer; color:var(--green); }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <a href="spira_peak_pairs.html">Other pairs from the mod-five dial</a>
+    <h1>When a high quartet first turns negative</h1>
+    <p>Take the certified zero at height 1,174,561 in the 135° mix of the two mod-five functions. In Li’s sum, its quartet first contributes a negative term at power <strong>7,379,974</strong>. The first negative run lasts 23 powers.</p>
+  </header>
+  <section class="chart" aria-label="First negative run">
+    <figure>
+      <canvas id="chart" role="img" aria-label="Quartet contribution near the first full phase turn. Powers 7,379,974 through 7,379,996 are below zero."></canvas>
+      <figcaption>The shaded band marks the negative powers. The contribution at each integer power is plotted in units of 10<sup>−10</sup>.</figcaption>
+    </figure>
+    <label for="power">Choose an integer power</label>
+    <input id="power" type="range" min="7379954" max="7380016" value="7379974" step="1">
+    <div class="readout" id="readout" role="status">
+      <p><strong id="term"></strong></p>
+      <p id="phase"></p>
+    </div>
+    <noscript><p>The first negative power is 7,379,974 and the last in this run is 7,379,996.</p></noscript>
+  </section>
+
+  <h2>A full turn brings the negative term into view</h2>
+  <p>Send the upper-right zero ρ to <var>w</var> = (ρ−1)/ρ. Write its magnitude as e<sup>−κ</sup> and its angle as φ. Conjugation and reflection supply the other three values <span class="equation">conj(w), 1/w, conj(1/w)</span>. Together they give</p>
+  <p class="equation">Q<sub>n</sub> = 4[1 − cosh(nκ) cos(nφ)].</p>
+  <p>The angle φ is about 0.851 millionths of a radian. Raising to a power takes millions of steps to make one full turn. The magnitude factor changes slowly, so at the first turn the negative window is only about twenty millionths of a radian wide.</p>
+  <details>
+    <summary>Why no earlier power is negative</summary>
+    <p>Negativity requires <var>n</var>φ to lie within <var>d</var>(<var>n</var>) = arctan(sinh(<var>n</var>κ)) of a multiple of 2π. Here φ &gt; κ and <var>d</var>(<var>n</var>) &lt; <var>n</var>κ, so the interval never reaches zero for positive powers. Both endpoints increase because <var>d</var> has derivative κ/cosh(<var>n</var>κ). The upper endpoint first passes 2π at 7,379,974. The lower endpoint stays beneath it through 7,379,996 and passes it at the next power.</p>
+    <p>The replay encloses φ and κ over the whole certified disk of radius 10<sup>−6</sup> around 2.378755863122 + 1174561.0989005927i. It checks those four endpoint inequalities and the signs at adjacent powers. The chart uses the center of the disk. <a href="../tools/check_li_cousin_quartet.py">Replay the sign proof</a> · <a href="https://github.com/supsup/new_math_review/blob/1bba76db5e0ad582368689d350c7241c0b1ddb31/tools/check_spira_high_root.py">Replay the zero enclosure</a>.</p>
+  </details>
+  <h2>Three powers already detect it in a matrix</h2>
+  <p>Take the second differences <var>d</var><sub><var>k</var></sub> = <var>Q</var><sub><var>k</var>+1</sub> − 2<var>Q</var><sub><var>k</var></sub> + <var>Q</var><sub><var>k</var>−1</sub>, with <var>Q</var><sub>−<var>k</var></sub> = <var>Q</var><sub><var>k</var></sub>. Put <var>d</var><sub>|<var>i</var>−<var>j</var>|</sub> in position <var>i</var>, <var>j</var>. The 1×1 and 2×2 matrices are positive definite. At size three the vector (1, −1.999999999999275149, 1) gives a negative quadratic form, about −1.56 × 10<sup>−47</sup>, from the first three positive terms.</p>
+  <details>
+    <summary>Why the three-by-three test works</summary>
+    <p>Write <var>w</var> + 1/<var>w</var> = <var>a</var> + <var>b</var><var>i</var> and η = 2−<var>a</var>. Then <var>d</var>₀ = 4η and <var>d</var>₁ = 2η<var>a</var> + 2<var>b</var>², with <var>d</var>₀−<var>d</var>₁ = 2(η²−<var>b</var>²). The replay verifies <var>a</var> &gt; 0 and η &gt; |<var>b</var>|, so both eigenvalues of the two-by-two matrix are positive.</p>
+    <p>In size three, put weights (1, −<var>x</var>, 1) and let δ = <var>x</var>−<var>a</var>. Expanding the form gives 4ηδ² − 8<var>b</var>²δ − 4η<var>b</var>². Taking <var>x</var> close to <var>a</var> leaves the last term dominant. The replay uses the same exact decimal vector throughout the root enclosure.</p>
+    <p>The size-three test works for every single quartet from a nonreal <var>w</var> off the unit circle. Then <var>b</var> ≠ 0. When <var>a</var> &lt; 2, choose <var>x</var> = <var>a</var> in the formula. When <var>a</var> = 2, the vector (1, −1, 0) works. When <var>a</var> &gt; 2, the diagonal itself is negative. <a href="../tools/li_quartet_matrix_witness.lean">Read the Lean proof for a single quartet</a>.</p>
+  </details>
+  <p>This is one quartet’s contribution for the mod-five cousin. Li’s criterion for ζ uses the full sum over the nontrivial zeros of ζ. <a href="https://doi.org/10.1006/jnth.1997.2137">Xian-Jin Li’s original paper</a>.</p>
+</main>
+<script>
+  (() => {
+    const first = 7379974, last = 7379996;
+    const beta = 2.378755863122, height = 1174561.0989005927;
+    const square = beta*beta + height*height;
+    const phi = Math.atan(height/(square - beta));
+    const kappa = -Math.log1p((1 - 2*beta)/square)/2;
+    const turn = 2*Math.PI;
+    const locale = new Intl.NumberFormat('en-US');
+    const slider = document.getElementById('power'), canvas = document.getElementById('chart');
+    const start = Number(slider.min), end = Number(slider.max);
+    const value = n => {
+      const a = Math.sin((n*phi-turn)/2)**2, b = Math.sinh(n*kappa/2)**2;
+      return 8*(a-b*(1-2*a));
+    };
+    const samples = Array.from({length:end-start+1}, (_, i) => [start+i, value(start+i)*1e10]);
+
+    function draw() {
+      const chosen = Number(slider.value);
+      const width = canvas.clientWidth, height = canvas.clientHeight, dpi = window.devicePixelRatio || 1;
+      canvas.width = Math.round(width*dpi);
+      canvas.height = Math.round(height*dpi);
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpi,dpi);
+      const top = Math.max(...samples.map(point => point[1]))*1.08;
+      const bottom = Math.min(...samples.map(point => point[1]))*1.3;
+      const x = n => 22 + (n-start)*(width-42)/(end-start);
+      const y = q => 10 + (top-q)*(height-34)/(top-bottom);
+
+      ctx.fillStyle = '#f7eadf';
+      ctx.fillRect(x(first-.5), 10, x(last+.5)-x(first-.5), height-34);
+      ctx.strokeStyle = '#73867c';
+      ctx.beginPath();
+      ctx.moveTo(x(start), y(0));
+      ctx.lineTo(x(end), y(0));
+      ctx.stroke();
+      ctx.fillStyle = '#465751';
+      ctx.font = '11px system-ui';
+      ctx.fillText('0', 6, y(0)+4);
+
+      for (const [n, q] of samples) {
+        ctx.fillStyle = n >= first && n <= last ? '#943d28' : '#235d53';
+        ctx.beginPath();
+        ctx.arc(x(n), y(q), n === chosen ? 4 : 2, 0, turn);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#465751';
+      for (const [n, alignment] of [[start, 'left'], [Math.round((first+last)/2), 'center'], [end, 'right']]) {
+        ctx.textAlign = alignment;
+        ctx.fillText(locale.format(n), x(n), height-5);
+      }
+
+      const negative = chosen >= first && chosen <= last;
+      document.getElementById('readout').dataset.negative = String(negative);
+      document.getElementById('term').textContent = `Power ${locale.format(chosen)} · ${value(chosen).toExponential(3)}`;
+      const away = Math.abs(chosen*phi-turn)*1e6;
+      const radius = Math.atan(Math.sinh(chosen*kappa))*1e6;
+      document.getElementById('phase').textContent = `Distance from one full turn ${away.toFixed(3)} µrad. Negative within ${radius.toFixed(3)} µrad.`;
+    }
+    slider.addEventListener('input', draw);
+    window.addEventListener('resize', draw);
+    draw();
+  })();
+</script>
+</body>
+</html>

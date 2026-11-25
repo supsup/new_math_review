@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two squares and the local signs</title>
+  <style>
+    :root { color-scheme: light; background: #e8edea; color: #253531; font: 100%/1.6 system-ui, sans-serif; --paper: #faf7ed; --line: #c9cec4; --good: #225b4f; --bad: #903d2e; --muted: #52605a; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 52rem); margin: auto; padding: clamp(1rem, 5vw, 3.25rem); background: var(--paper); }
+    a { color: var(--good); text-underline-offset: .18em; overflow-wrap: anywhere; }
+    :focus-visible { outline: .16rem solid #a95230; outline-offset: .15rem; }
+    h1 { margin: .65rem 0 .62rem; font: clamp(2.7rem, 8vw, 5.1rem)/1 Georgia, serif; letter-spacing: -.045em; max-width: 14ch; }
+    h2 { margin: 1.32rem 0 .32rem; font: 1.65rem/1.2 Georgia, serif; }
+    p { max-width: 67ch; }
+    .intro, .reason, .sources { color: var(--muted); }
+    .picker { margin: 1.35rem 0 .9rem; }
+    .picker label { display: block; font-weight: 650; margin-bottom: .25rem; }
+    .picker input, .picker button { min-height: 2.7rem; border: 1px solid var(--line); border-radius: .3rem; color: inherit; background: #fffcf4; font: inherit; }
+    .picker input { width: 9rem; max-width: 100%; padding: .26rem .56rem; }
+    .picker button { padding: .26rem .68rem; cursor: pointer; }
+    .examples { display: flex; gap: .42rem; flex-wrap: wrap; margin-top: .48rem; }
+    .examples button[aria-pressed="true"] { background: var(--good); color: white; }
+    .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: .46rem; margin: .75rem 0; }
+    .place { display: grid; grid-template-columns: 1fr auto; align-content: start; padding: .56rem .67rem; border: 1px solid var(--line); border-radius: .32rem; background: #f2f4eb; }
+    .place[data-sign="-1"] { background: #faeee5; border-color: #c68772; }
+    .name, .sign { font-weight: 680; }
+    .sign { color: var(--good); }
+    [data-sign="-1"] .sign { color: var(--bad); }
+    .reason { grid-column: 1 / -1; font-size: .88rem; }
+    .verdict { border-left: .23rem solid var(--good); background: #eef0e7; padding: .54rem .8rem; }
+    .verdict p { margin: .15rem 0; }
+    #answer { font-weight: 680; }
+    .formula { font: 1.16rem/1.55 Georgia, serif; overflow-wrap: anywhere; }
+    details { margin: .8rem 0; padding-top: .65rem; border-top: 1px solid var(--line); }
+    summary { font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_source_build.html">Back to where the Lean build grows</a>
+    <h1>Two squares and the local signs</h1>
+    <p class="intro">Can an integer be written as <var>x</var>² + <var>y</var>²? The archive proves a theorem that turns the question into a few local tests. Try 21. It fails at both 3 and 7, so the two minus signs multiply to plus even though 21 fails the test.</p>
+
+    <div class="picker">
+      <label for="target">Integer from −10,000 to 10,000</label>
+      <input id="target" type="number" min="-10000" max="10000" step="1" value="21">
+      <div class="examples" aria-label="Examples">
+        <button type="button" data-example="-1">−1</button>
+        <button type="button" data-example="3">3</button>
+        <button type="button" data-example="5">5</button>
+        <button type="button" data-example="21">21</button>
+        <button type="button" data-example="45">45</button>
+        <button type="button" data-example="65">65</button>
+      </div>
+    </div>
+    <div id="places" class="board" aria-label="Local norm signs"></div>
+    <div class="verdict" role="status" aria-atomic="true">
+      <p id="answer"></p>
+      <p id="product"></p>
+    </div>
+
+    <h2>Where the signs come from</h2>
+    <p class="formula">(<var>x</var> + <var>y</var>i)(<var>x</var> − <var>y</var>i) = <var>x</var>² + <var>y</var>².</p>
+    <p>This product is called a norm from ℚ(i). A local sign of +1 means the equation has a solution in that number system. A −1 rules one out. Over the reals, the value must be positive for a nonzero norm. At an odd prime, only primes that leave remainder 3 when divided by 4 can give a minus sign, and they give one precisely when their exponent is odd. At 2, remove every factor of 2 and test whether the remaining signed odd part is 1 or 3 modulo 4. All odd primes missing from the factorization have sign +1. <a href="https://www.math.purdue.edu/~jlipman/MA598/Serre-Course%20in%20Arithmetic.pdf">Serre, <cite>A Course in Arithmetic</cite>, Chapter III</a>.</p>
+    <p>For a nonzero rational number to be a norm, every sign must be +1. The product formula says something different about these signs. Their product is +1 for <em>every</em> nonzero rational number, so a failure always comes in pairs. For example, the odd part of 21 is 1 modulo 4, while 3 and 7 both have odd exponents. In this display, an exact search for two integer squares supplies a witness when all the signs are +1.</p>
+
+    <details>
+      <summary>What the Lean proof covers</summary>
+      <p>The archive’s theorem works over any number field and any quadratic field extension of it. It proves that local norm signs multiply, the local tests characterize global norms, and the signs of a global nonzero scalar multiply to +1. It also relates families of local signs to division by a single global scalar, and proves compatibility under base change when the quadratic compositum remains a field. The signs are expressed through norms from tensor products, which also handle places where the extension splits. This is the quadratic norm-symbol portion of class field theory. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/PublishedTheorems/TwistedTraceFormula/QuadraticClassFieldTheory.lean#L241">Lean statement</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/Proofs/TwistedOperators/EtaProdEqOfEverywhereNormDiv.lean#L47">Lean proof</a>.</p>
+      <p>We replayed the proof in the crew’s compiled slice using Lean 4.33.1. Lean reported <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>. The formulas for the displayed example are the classical rational Hilbert-symbol formulas. <a href="https://www-users.cse.umn.edu/~garrett/m/v/quad_rec.pdf">Garrett, <cite>Quadratic reciprocity over global fields</cite></a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const target = document.getElementById('target');
+      const places = document.getElementById('places');
+      const answer = document.getElementById('answer');
+      const product = document.getElementById('product');
+      const examples = [...document.querySelectorAll('[data-example]')];
+
+      function factors(value) {
+        let rest = Math.abs(value);
+        const result = [];
+        for (let prime = 2; prime * prime <= rest; prime++) {
+          if (rest % prime) continue;
+          let exponent = 0;
+          while (rest % prime === 0) {
+            rest /= prime;
+            exponent++;
+          }
+          result.push([prime, exponent]);
+        }
+        if (rest > 1) result.push([rest, 1]);
+        return result;
+      }
+
+      function twoSquares(value) {
+        for (let x = 0; 2 * x * x <= value; x++) {
+          const y = Math.sqrt(value - x * x);
+          if (Number.isInteger(y)) return [x, y];
+        }
+        return null;
+      }
+
+      function place(name, sign, reason) {
+        const tile = document.createElement('div');
+        tile.className = 'place';
+        tile.dataset.sign = sign;
+        for (const [className, text] of [['name', name], ['sign', sign > 0 ? '+1' : '−1'], ['reason', reason]]) {
+          const span = document.createElement('span');
+          span.className = className;
+          span.textContent = text;
+          tile.append(span);
+        }
+        return tile;
+      }
+
+      function render() {
+        const value = target.valueAsNumber;
+        for (const example of examples) {
+          example.setAttribute('aria-pressed', String(Number(example.dataset.example) === value));
+        }
+        places.replaceChildren();
+        product.textContent = '';
+        if (!target.validity.valid || !Number.isInteger(value)) {
+          answer.textContent = 'Enter an integer in the displayed range.';
+          return;
+        }
+        if (value === 0) {
+          answer.textContent = '0 = 0² + 0². The local signs use nonzero values.';
+          return;
+        }
+        const primeFactors = factors(value);
+        const powerOfTwo = primeFactors[0]?.[0] === 2 ? primeFactors[0][1] : 0;
+        const oddPart = value / 2 ** powerOfTwo;
+        const residue = (oddPart % 4 + 4) % 4;
+        const signs = [
+          ['Real numbers', value > 0 ? 1 : -1, value > 0 ? 'Positive value' : 'Negative value'],
+          ['Prime 2', residue === 1 ? 1 : -1, 'Odd part ' + oddPart + ' has remainder ' + residue + ' modulo 4']
+        ];
+        for (const [prime, exponent] of primeFactors) {
+          if (prime === 2) continue;
+          const remainder = prime % 4;
+          const sign = remainder === 3 && exponent % 2 === 1 ? -1 : 1;
+          signs.push(['Prime ' + prime, sign, 'Exponent ' + exponent + ' · prime remainder ' + remainder + ' modulo 4']);
+        }
+        places.append(...signs.map(([name, sign, reason]) => place(name, sign, reason)));
+        const failures = signs.filter(([, sign]) => sign < 0).length;
+        const witness = twoSquares(value);
+        answer.textContent = witness
+          ? value + ' = ' + witness[0] + '² + ' + witness[1] + '².'
+          : value + ' is ruled out by ' + failures + (failures === 1 ? ' local sign.' : ' local signs.');
+        const signProduct = signs.reduce((acc, [, sign]) => acc * sign, 1);
+        product.textContent = 'Product of the signs ' + (signProduct > 0 ? '+1' : '−1') + ' · ' + failures + ' negative.';
+      }
+
+      target.addEventListener('input', render);
+      for (const example of examples) {
+        example.addEventListener('click', () => {
+          target.value = example.dataset.example;
+          render();
+        });
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

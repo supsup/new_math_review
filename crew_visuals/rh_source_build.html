@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Where the Lean build grows</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ec;
+      --ink: #26343d;
+      --muted: #53616a;
+      --edge: #bec7c6;
+      --blue: #285b78;
+      --brown: #985b33;
+      --card: #e9eeeb;
+      background: #e5e9e5;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .15em; }
+    h1 { max-width: 13ch; font: clamp(2.65rem, 8vw, 4.9rem)/1 Georgia, serif; letter-spacing: -.05em; margin: .54rem 0 .7rem; }
+    h2 { font: 1.62rem/1.18 Georgia, serif; margin: 1.2rem 0 .5rem; }
+    p, li, figcaption { max-width: 69ch; }
+    .intro, figcaption { color: var(--muted); }
+    code { overflow-wrap: anywhere; }
+    :focus-visible { outline: .17rem solid var(--brown); outline-offset: .13rem; }
+    figure { margin: .8rem 0 .95rem; }
+    .chart { border-block: 1px solid var(--edge); padding: .34rem 0 .3rem; }
+    .source-row { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(3rem, 1.45fr) 5.25rem;
+      align-items: center; gap: .65rem; width: 100%; min-height: 2.65rem; border: 1px solid transparent;
+      border-radius: .27rem; background: transparent; padding: .35rem .54rem; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+    .source-row:hover { background: #eff1e9; }
+    .source-row[aria-pressed="true"] { border-color: var(--edge); background: var(--card); }
+    .source-row strong { color: var(--blue); line-height: 1.3; }
+    .bars { height: .88rem; background: #e7e8e0; display: flex; }
+    .loaded { background: var(--blue); }
+    .outside { background: repeating-linear-gradient(135deg, #995b37, #995b37 5px, #ba835f 5px, #ba835f 8px); }
+    .total { text-align: right; font-variant-numeric: tabular-nums; }
+    figcaption { font-size: .86rem; margin-top: .43rem; }
+    .answer { padding: .62rem .78rem; border-left: 3px solid var(--blue); background: var(--card); }
+    .answer p { margin: .18rem 0; }
+    #selected-files { font-weight: 650; font-variant-numeric: tabular-nums; }
+    .steps { padding-left: 1.35rem; }
+    .steps li { margin: .5rem 0; }
+    @media (max-width: 34rem) {
+      .source-row { grid-template-columns: minmax(8rem, 1fr) minmax(2rem, 1fr) 4.3rem; gap: .32rem; font-size: .88rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the argument map</a>
+    <h1>Where the Lean build grows</h1>
+    <p class="intro">The short outline assumes three inputs. Open each part of the route below to see how many source files are imported when Lean builds it. The bar counts the entry file and every archive file its imports reach.</p>
+
+    <figure>
+      <div class="chart" id="rows"></div>
+      <figcaption>Solid blue files are in the 17,278-file build we used for the conditional outline. Striped files are outside that build. Each bar uses the same scale of 175,187 archive files. One file can appear in several bars.</figcaption>
+    </figure>
+    <div class="answer" role="status" aria-atomic="true">
+      <p id="selected-files"></p>
+      <p id="selected-entry"></p>
+      <p id="selected-detail"></p>
+    </div>
+
+    <h2>Where a shorter proof could come from</h2>
+    <ol class="steps">
+      <li><strong>Prove the budget for one character.</strong> Marlow’s variant uses only the modulus-one character. The ten-declaration saving measures the conditional assembly. A new proof of that one budget could simplify the much larger construction that supplies it.</li>
+      <li><strong>Check which hypotheses actually reach the conclusion.</strong> All 46 fields of the family record are projected by the selector. To shorten that part, follow their uses through the called lemmas, prove a smaller input suffices, and recheck the result with Lean. <a href="rh_hypothesis_bundle.html">Open the family record</a>.</li>
+      <li><strong>Measure the large import separately.</strong> One file imported by the budget assembly, <code>TemperedProductOfSquareIntegrable</code>, reaches 146,663 files. Of those, 99,397 are outside our build and come in through that file alone among the assembly’s direct imports. Check the declarations the budget uses there before deciding how much work splitting that import could save.</li>
+    </ol>
+    <p>The modulus-one field test itself does simplify. Lean checks that the cyclotomic embedding is governed by the power-of-two congruences and the two Jacobi-symbol tests for the window parameters <var>q</var> and <var>d</var>. The budget still ranges over the fields that meet those tests. <a href="../tools/rh_mod_one_field.lean">Read the checked field criterion</a>.</p>
+    <p>The source count measures the footprint of building the files as written. The compiled dependency count follows names in the statements and proofs Lean checked. Both measurements are useful when choosing what to try shortening. <a href="../tools/rh_path_union.lean">Compiled declaration count</a> · <a href="../tools/count_rh_source_imports.py">Replay the source count</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/tree/6193bb5/extracted/lean/src">Archive at 6193bb5</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const data = [
+        { name: 'Conditional build', entry: 'CritLine and TopPlug', total: 17278, outside: 0,
+          detail: 'These two builds cover the conditional theorem and the final symmetry argument.' },
+        { name: 'Green translation', entry: 'SumRangeEqRoots', total: 233, outside: 2,
+          detail: 'This bridge takes the regular-character classification as an input and converts it to polynomial labels. We added its two files in a scratch build, and Lean accepted the translation on the three standard axioms.' },
+        { name: 'Cohomology budget', entry: 'VwinOfRow', total: 157604, outside: 140401,
+          detail: 'The supplier combines a Galois representation input, base change and results from automorphy. Among the four supplier entries shown, 36,920 additional files appear only here.' },
+        { name: 'Family record', entry: 'SiegelEisensteinSecondTermHypotheses', total: 112385, outside: 95109,
+          detail: 'Here local matching and estimates supply the record of linked families. Among the four supplier entries shown, 3,916 additional files appear only here.' },
+        { name: 'Galois input', entry: 'RowSrc', total: 66168, outside: 50756,
+          detail: 'This file supplies the Galois row used in the final assembly. Among the four supplier entries shown, 13,055 additional files appear only here.' },
+        { name: 'Literature route', entry: 'EveryCharacterOfLiteratureOfVWin', total: 151286, outside: 134010,
+          detail: 'This route takes two Galois rows, local Langlands existence and the budget. Many of its named literature results are still proved inside the imported files.' },
+        { name: 'Final RH file', entry: 'MainTheorems', total: 175179, outside: 157901,
+          detail: 'Its last route combines the supplied inputs, then applies the mirror step to reach the Riemann Hypothesis.' }
+      ];
+      const get = id => document.getElementById(id);
+      const number = new Intl.NumberFormat('en-US');
+      const scale = n => (100 * n / 175187) + '%';
+      const template = document.createElement('template');
+      template.innerHTML = '<button type="button" class="source-row"><strong></strong><span class="bars" aria-hidden="true"><span class="loaded"></span><span class="outside"></span></span><span class="total"></span></button>';
+      const rows = data.map(({name,total,outside}, index) => {
+        const row = template.content.firstElementChild.cloneNode(true);
+        row.querySelector('strong').textContent = name;
+        row.querySelector('.total').textContent = number.format(total);
+        row.querySelector('.loaded').style.width = scale(total-outside);
+        row.querySelector('.outside').style.width = scale(outside);
+        row.addEventListener('click', () => select(index));
+        get('rows').append(row);
+        return row;
+      });
+      function select(index) {
+        const {entry,total,outside,detail} = data[index];
+        get('selected-files').textContent = number.format(total) + ' source files · ' +
+          number.format(outside) + ' outside the conditional build';
+        get('selected-entry').textContent = 'Entry file: ' + entry + '.';
+        get('selected-detail').textContent = detail;
+        for (const [i,row] of rows.entries()) row.setAttribute('aria-pressed', String(i === index));
+      }
+      select(2);
+    })();
+  </script>
+</body>
+</html>

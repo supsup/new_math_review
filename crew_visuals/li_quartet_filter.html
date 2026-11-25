@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Make a polynomial listen to one quartet</title>
+  <style>
+    :root { color-scheme: light; background: #e6ece8; color: #293733; font: 100%/1.57 system-ui, sans-serif; --paper: #faf6ec; --green: #245c4d; --warm: #983e2f; --line: #cad1c5; --muted: #535f5a; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 53rem); margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .18em; overflow-wrap: anywhere; }
+    :focus-visible { outline: .15rem solid #a8522c; outline-offset: .13rem; }
+    h1 { margin: .58rem 0 .7rem; font: clamp(2.6rem, 8vw, 5rem)/1 Georgia, serif; max-width: 15ch; letter-spacing: -.046em; }
+    h2 { margin: 1.25rem 0 .34rem; font: 1.63rem/1.18 Georgia, serif; }
+    p { max-width: 69ch; }
+    .intro, .hint { color: var(--muted); }
+    .modes { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 .65rem; }
+    button { min-height: 2.65rem; padding: .32rem .64rem; border: 1px solid var(--line); border-radius: .28rem; background: #fffcf5; color: var(--green); cursor: pointer; font: inherit; }
+    .modes button[aria-pressed=true] { background: var(--green); color: white; }
+    .pairs { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,6rem),1fr)); gap: .4rem; }
+    .pair { min-height: 4.05rem; padding: .36rem .3rem; }
+    .pair[aria-pressed=false] { background: #f1eee4; color: var(--muted); }
+    .pair[aria-pressed=true] { border-color: #86a397; background: #e7efe4; }
+    .pair span { display: block; }
+    .pair .amount { font-weight: 650; }
+    .result { margin: .85rem 0; padding: .57rem .74rem; border-left: .23rem solid var(--green); background: #ebf0e6; }
+    .result[data-negative=true] { border-color: var(--warm); background: #f8ece4; }
+    .result p { margin: .13rem 0; overflow-wrap: anywhere; }
+    #total { font-weight: 680; }
+    #coefficients { font-variant-numeric: tabular-nums; }
+    details { margin: .85rem 0; border-top: 1px solid var(--line); padding-top: .64rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    .formula { font: 1.09rem/1.55 Georgia, serif; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="li_quartet_masking.html">Back to the finite zeta experiment</a>
+    <h1>Make a polynomial listen to one quartet</h1>
+    <p class="intro">A few positive pairs can hide one negative quartet. Choose which pairs to include. Then switch to a polynomial whose roots cancel them all, leaving a negative contribution from the quartet. This small model uses exact arithmetic.</p>
+    <div class="modes" aria-label="Weights to use in the matrix">
+      <button type="button" data-mode="plain">Use weights (1, 0, 1)</button>
+      <button type="button" data-mode="filter">Cancel the selected pairs</button>
+    </div>
+    <p class="hint">Each tile shows a conjugate pair on the unit circle and its contribution to the test. Click to include or exclude it.</p>
+    <div class="pairs" id="pairs" aria-label="Which on-circle conjugate pairs to include"></div>
+    <div class="result" id="result" role="status" aria-atomic="true">
+      <p id="total"></p>
+      <p id="pieces"></p>
+      <p id="coefficients"></p>
+    </div>
+
+    <h2>Choose the weights by choosing roots</h2>
+    <p>The weights are the coefficients of a polynomial <var>p</var>(<var>z</var>). A conjugate pair on the unit circle contributes a positive number times |<var>p</var>(<var>z</var>)|². Give the polynomial a root at that pair and its contribution becomes zero. Each pair needs a real quadratic factor. Then one final factor keeps the off-circle quartet’s contribution negative.</p>
+    <p>With <var>P</var> selected pairs, this construction uses at most 2<var>P</var> + 3 coefficients. That many slots suffice for a negative test in this example. The experiment on the previous page uses the full zeta matrix, where there are infinitely many pair contributions. <a href="li_difference_matrix.html">How the matrix test works</a>.</p>
+
+    <details>
+      <summary>Follow the exact calculation</summary>
+      <p>The tiles are indexed by <var>k</var> from −3 to 3, with 4 cos θ = <var>k</var>. A pair’s contribution is (4 − <var>k</var>)|<var>p</var>(e<sup>iθ</sup>)|². The polynomial <var>D</var>(<var>z</var>) multiplies the factors 2<var>z</var>² − <var>kz</var> + 2 over the selected tiles. Each kills its one pair because e<sup>iθ</sup> + e<sup>−iθ</sup> = <var>k</var>/2.</p>
+      <p>For the quartet take <var>w</var> = i/2. Then <var>w</var> + 1/<var>w</var> = −3i/2, and grouping the factors shows <var>D</var>(<var>w</var>)/<var>w</var><sup><var>P</var></sup> = ∏(−<var>k</var> − 3i) = <var>A</var> + i<var>B</var>. Choose the final factor as 2<var>Az</var>² − 3<var>Bz</var> + 2<var>A</var>. At <var>w</var> this makes the centered value <var>p</var>(<var>w</var>)/<var>w</var><sup><var>P</var>+1</sup> equal to −3i(<var>A</var>² + <var>B</var>²).</p>
+      <p>The coefficients read the same forward and backward. Thus <var>p</var>(<var>w</var>)<var>p</var>(1/<var>w</var>) is the square of that centered value. The quartet contributes 4 Re[(2 − <var>w</var> − 1/<var>w</var>)<var>p</var>(<var>w</var>)<var>p</var>(1/<var>w</var>)] = −72(<var>A</var>² + <var>B</var>²)². All factors in the product for <var>A</var> + i<var>B</var> are nonzero, so this is strictly negative. Marlow’s interpolation argument gives a broader construction for a finite list of distinct modes. <a href="li_zero_pairs.html">The quartet used in this example</a>.</p>
+      <p>Lean checks the quadratic factor and the negative quartet identity. For a related use of negative directions to count off-line zeros in the Weil form, see Anthropic’s E2 research transcript. <a href="../tools/li_quartet_filter.lean">Lean identities</a> · <a href="https://assets.claude.com/8a0d1add3c637b858a9a181e98c40e9548c3f44f.pdf#page=20">Anthropic E2 transcript</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const get = id => document.getElementById(id);
+      const keys = [-3,-2,-1,0,1,2,3];
+      const selected = new Set([-3,-2,1,2,3]);
+      const modes = [...document.querySelectorAll('[data-mode]')];
+      const numbers = new Intl.NumberFormat('en-US');
+      let mode = 'plain';
+
+      function multiply(p, factor) {
+        const product = Array(p.length + factor.length - 1).fill(0n);
+        for (const [i,x] of p.entries()) {
+          for (const [j,y] of factor.entries()) product[i+j] += x*y;
+        }
+        return product;
+      }
+
+      function isolatingWeights() {
+        let p = [1n], real = 1n, imaginary = 0n;
+        for (const key of keys.filter(k => selected.has(k))) {
+          const k = BigInt(key);
+          p = multiply(p, [2n,-k,2n]);
+          [real, imaginary] = [-k*real+3n*imaginary, -3n*real-k*imaginary];
+        }
+        return {
+          p: multiply(p, [2n*real,-3n*imaginary,2n*real]),
+          quartet: -72n*(real*real+imaginary*imaginary)**2n
+        };
+      }
+
+      const tiles = keys.map(k => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pair';
+        button.setAttribute('aria-label', 'Pair with 4 cosine theta equal to ' + k);
+        const name = document.createElement('span');
+        name.textContent = 'k = ' + k;
+        const amount = document.createElement('span');
+        amount.className = 'amount';
+        button.append(name, amount);
+        button.addEventListener('click', () => {
+          if (selected.has(k)) selected.delete(k);
+          else selected.add(k);
+          render();
+        });
+        get('pairs').append(button);
+        return {k,button,amount};
+      });
+
+      function render() {
+        const filtering = mode === 'filter';
+        const {p,quartet} = filtering ? isolatingWeights() : {p:[1n,0n,1n],quartet:-18n};
+        let pairs = 0;
+        for (const {k,button,amount} of tiles) {
+          const included = selected.has(k);
+          const value = filtering ? 0 : (4-k)*k*k/4;
+          button.setAttribute('aria-pressed', String(included));
+          amount.textContent = included ? numbers.format(value) : 'Excluded';
+          if (included) pairs += value;
+        }
+        for (const button of modes) {
+          button.setAttribute('aria-pressed', String(mode === button.dataset.mode));
+        }
+        const total = filtering ? quartet : Number(quartet) + pairs;
+        get('result').dataset.negative = total < 0;
+        get('total').textContent = 'Test value ' + numbers.format(total) + ' · ' + p.length + ' weight slots';
+        get('pieces').textContent = 'Selected pairs ' + numbers.format(pairs) + ' · quartet ' + numbers.format(quartet);
+        get('coefficients').textContent = 'Weights from constant term upward (' + p.map(n=>n.toString()).join(', ') + ')';
+      }
+
+      for (const button of modes) {
+        button.addEventListener('click', () => { mode = button.dataset.mode; render(); });
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

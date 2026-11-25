@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When the first zero reaches each marker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf7ec;
+      --ink: #28353d;
+      --muted: #536268;
+      --line: #bac5c6;
+      --blue: #295978;
+      --rust: #9a5137;
+      --light: #e9efee;
+      background: #e6ebe7;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 54rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .16em; }
+    :focus-visible { outline: .16rem solid var(--rust); outline-offset: .15rem; }
+    h1 { max-width: 14ch; font: clamp(2.65rem, 8vw, 4.85rem)/1 Georgia, serif; margin: .55rem 0 .65rem; letter-spacing: -.05em; }
+    h2 { font: 1.52rem/1.17 Georgia, serif; margin: 1.05rem 0 .5rem; }
+    p, figcaption { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    figure { margin: .8rem 0; }
+    figcaption { font-size: .88rem; margin: .43rem 0; }
+    .chart { border-block: 1px solid var(--line); padding: .47rem 0 .3rem; }
+    .chart-row, .ticks { display: grid; grid-template-columns: 3.65rem minmax(0, 1fr) 5.5rem; align-items: center; gap: .65rem; width: 100%; }
+    .ticks { padding-inline: .52rem; margin-bottom: .16rem; font-size: .79rem; color: var(--muted); }
+    .scale { display: flex; justify-content: space-between; }
+    .chart-row { min-height: 2.56rem; border: 1px solid transparent; border-radius: .27rem; background: transparent; padding: .28rem .49rem; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+    .chart-row:hover { background: #eff1e9; }
+    .chart-row[aria-pressed="true"] { border-color: var(--line); background: var(--light); }
+    .marker { color: var(--blue); font-weight: 700; }
+    .rounded { text-align: right; font-variant-numeric: tabular-nums; }
+    .track { height: 1px; background: var(--line); position: relative; }
+    .track span { position: absolute; height: 100%; top: 0; background: var(--blue); }
+    .track i { position: absolute; top: 50%; width: .63rem; height: .63rem; transform: translate(-50%, -50%); border-radius: 50%; background: var(--blue); }
+    .chart-row[aria-pressed="true"] .track i { background: var(--rust); width: .87rem; height: .87rem; }
+    .result { padding: .58rem .75rem; margin: .7rem 0; border-left: .21rem solid var(--rust); background: #f2e9e1; font-variant-numeric: tabular-nums; }
+    .result p { margin: .16rem 0; }
+    .zoom { padding: .25rem 0 .1rem; }
+    .zoom-rail { position: relative; height: 1.6rem; margin: 0 1rem .2rem; border-bottom: 1px solid var(--line); }
+    .zoom-rail span { position: absolute; bottom: -.42rem; transform: translateX(-50%); background: var(--paper); padding: .05rem .27rem; font-size: .86rem; color: var(--blue); font-weight: 650; }
+    .zoom-rail span::before { position: absolute; content: ""; height: .95rem; border-left: 2px solid var(--blue); left: 50%; top: -.85rem; }
+    .zoom-rail span.active { color: var(--rust); }
+    .zoom-rail span.active::before { border-color: var(--rust); border-width: 3px; }
+    .zoom-scale { display: flex; justify-content: space-between; margin-top: .63rem; color: var(--muted); font-size: .84rem; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin: .85rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 28rem) {
+      .chart-row, .ticks { grid-template-columns: 2.9rem minmax(0, 1fr) 4rem; gap: .42rem; font-size: .86rem; }
+      .ticks { font-size: .68rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="prime_turns_at_one_height.html">Back to the prime turns</a>
+    <h1>When the first zero reaches each marker</h1>
+    <p class="intro">Let the mixing angle change. For each real-part marker, how high do you have to go before any mix reaches it? Select a row for the first height and the angle that gets there.</p>
+    <figure>
+      <div class="chart">
+        <div class="ticks" aria-hidden="true"><span>Re <var>s</var></span><span class="scale"><span>100</span><span>1k</span><span>10k</span><span>100k</span><span>1m</span></span><span></span></div>
+        <div id="rows"></div>
+      </div>
+      <figcaption>The horizontal position is height on a logarithmic scale. Each tick is ten times the previous height.</figcaption>
+    </figure>
+    <div class="result" role="status" aria-atomic="true">
+      <p id="first"></p>
+      <p id="angle"></p>
+    </div>
+
+    <h2>Three crossings in one rise</h2>
+    <div class="zoom" aria-label="Zoom on the first crossings of 2.36, 2.37 and 2.375">
+      <div class="zoom-rail" id="zoom-marks"></div>
+      <div class="zoom-scale"><span>1,649.70</span><span>Height</span><span>1,649.90</span></div>
+    </div>
+    <p>One rising trajectory crosses 2.36, 2.37 and 2.375 in about 0.1524 units of height. Move the marker just 0.001 farther right and its first crossing comes after height 43,000.</p>
+    <details>
+      <summary>How the earlier heights were ruled out</summary>
+      <p>Near the right wall, cancellation needs a turn of about 31.717° in the ratio of the two <var>L</var>-functions. At a crossing, the phase drops as the real part increases. If a height falls short at the marker, moving to the right at that height cannot reach the required phase.</p>
+      <p>Primes 2 and 3 already supply most of the possible turn. Each prime can fall short of its own limit by only as much as the total slack. That keeps the height in short intervals where the important primes are close to lining up. Within those intervals a partial prime sum excludes more heights, and an interval calculation checks all the rest.</p>
+      <p>The smallest remaining height hits the turn at the marker itself. Its positive height derivative makes the zero move to the right immediately after the hit. The replay gives one tight interval for each height and checks that the three close crossings belong to one trajectory. <a href="../tools/check_mirror_mix_first_heights.py">Replay the interval certificate</a>.</p>
+    </details>
+    <p>The sharp right edge for all heights is about 2.382286109. Confluence’s search found the example at height 1,649.7283. The first-height calculations here certify that no mix reaches those markers earlier. <a href="mirror_mix_sharp_walls.html">See how the sharp edge is found</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const records = [
+        { sigma: '2.35', height: 425.939725230605, angle: 136.60841558 },
+        { sigma: '2.36', height: 1649.728318534075, angle: 136.96705922 },
+        { sigma: '2.37', height: 1649.79982831788, angle: 135.97529413 },
+        { sigma: '2.375', height: 1649.880702854975, angle: 134.86467106 },
+        { sigma: '2.376', height: 43102.725125981815, angle: 135.42045741 },
+        { sigma: '2.377', height: 148833.61813565869, angle: 135.46019371 },
+        { sigma: '2.378', height: 808291.969717210645, angle: 135.34008164 }
+      ];
+      const get = id => document.getElementById(id);
+      const format = new Intl.NumberFormat('en-US', {minimumFractionDigits: 6, maximumFractionDigits: 6});
+      const whole = new Intl.NumberFormat('en-US', {maximumFractionDigits: 0});
+      const rowTemplate = document.createElement('template');
+      rowTemplate.innerHTML = '<button type="button" class="chart-row"><span class="marker"></span><span class="track" aria-hidden="true"><span></span><i></i></span><span class="rounded"></span></button>';
+      const rows = records.map(({sigma, height}, index) => {
+        const row = rowTemplate.content.firstElementChild.cloneNode(true);
+        const x = ((Math.log10(height) - 2) / 4) * 100 + '%';
+        row.querySelector('.marker').textContent = sigma;
+        row.querySelector('.rounded').textContent = whole.format(height);
+        row.querySelector('.track span').style.width = x;
+        row.querySelector('.track i').style.left = x;
+        row.setAttribute('aria-label', 'Real part ' + sigma + ', first height ' + format.format(height));
+        row.addEventListener('click', () => select(index));
+        get('rows').append(row);
+        return row;
+      });
+      const zoom = new Map();
+      for (const index of [1, 2, 3]) {
+        const {sigma, height} = records[index];
+        const mark = document.createElement('span');
+        mark.textContent = sigma;
+        mark.style.left = (100 * (height - 1649.70) / .20) + '%';
+        get('zoom-marks').append(mark);
+        zoom.set(index, mark);
+      }
+
+      function select(index) {
+        const {sigma, height, angle} = records[index];
+        get('first').textContent = 'First at real part ' + sigma + ' and height ' + format.format(height) + '.';
+        get('angle').textContent = 'Mixing angle about ' + angle.toFixed(5) + '°.';
+        for (const [i, row] of rows.entries()) row.setAttribute('aria-pressed', String(i === index));
+        for (const [i, mark] of zoom) mark.classList.toggle('active', i === index);
+      }
+      select(4);
+    })();
+  </script>
+</body>
+</html>

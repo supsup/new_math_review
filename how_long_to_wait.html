@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How long must you wait</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --good:#1f6f54; --warn:#b07200; --soft:#cfc6b6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --good:#6fcfa9; --warn:#e3b55a; --soft:#4a4437; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:880px; margin:0 auto; padding:22px 16px 60px; overflow-wrap:anywhere; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:21px; margin:28px 0 6px; }
+p { margin:8px 0; } a { color:var(--accent); } .sub { color:var(--muted); margin:0 0 18px; }
+.box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:10px 0; }
+.note { color:var(--muted); font-size:14.5px; }
+ol.five { margin:6px 0; padding-left:1.4em; } ol.five li { margin:5px 0; } code { font:13px/1.4 ui-monospace, Menlo, monospace; }
+canvas { display:block; width:100%; height:auto; border-radius:8px; }
+.row { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; margin:8px 0; }
+.row label { font-size:15px; } input[type=range] { flex:1 1 220px; min-width:160px; accent-color:var(--accent); }
+input[type=number], input[type=text] { font:16px Georgia, serif; width:9.5em; max-width:100%; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
+button { font:15px Georgia, serif; padding:5px 12px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); cursor:pointer; }
+button:hover { border-color:var(--accent); }
+.read { font-size:17px; margin:6px 0; } .read b { font-weight:normal; color:var(--accent); }
+.queue { display:flex; flex-wrap:wrap; gap:3px; margin:8px 0 2px; font:12px/1 ui-monospace, Menlo, monospace; }
+.queue span { padding:4px 5px; border:1px solid var(--line); border-radius:4px; color:var(--muted); }
+.queue span.hit { background:var(--good); border-color:var(--good); color:var(--card); }
+.key span { display:inline-block; margin:4px 16px 0 0; font-size:14px; color:var(--muted); }
+.key i { display:inline-block; width:18px; height:0; border-top:3px solid var(--ink); margin-right:6px; vertical-align:middle; }
+.bad { color:#b3261e; }
+</style>
+</head>
+<body>
+<main>
+<p class="note"><a href="round_two.html">Back to round two</a> · <a href="rh_buys.html">What RH buys</a> · <a href="rh_in_six_steps.html">Six steps from three inputs</a></p>
+<h1>How long must you wait?</h1>
+<p class="sub">The announced proof ends with five theorems, not one. Here is what the last three promise.</p>
+
+<p>The proof that made the news is of the Riemann Hypothesis, a statement about one function, zeta. But the last file of the archive states five theorems. Two are about zeta. The other three say the same thing about a whole family of functions, the Dirichlet L-functions: one for each way of sorting whole numbers by their remainders. That larger statement has a name, the generalised Riemann hypothesis for Dirichlet characters, and for a century people have proved things on the assumption that it is true. If the proof stands, each of those becomes a plain theorem. This page shows two of them. Both are promises about waiting.</p>
+<p>A caution first. "If the proof stands" is doing real work in that sentence. We compiled about one tenth of the archive ourselves and found no fault in it (<a href="crew_visuals/lean_runs.txt">the record</a>); others report building all of it. This page takes the five theorems as given and asks what follows.</p>
+
+<div class="box">
+<b>The five endings</b>, as the archive's last file <code>Main.lean</code> states them:
+<ol class="five">
+<li><code>riemannHypothesis</code>: every zero of zeta, apart from the known ones at the negative even numbers, has real part one half.</li>
+<li><code>riemannZeta_eq_zero_re</code>: the same sentence written out in full, without the library's name for it.</li>
+<li><code>LFunction_ne_zero_of_half_lt_re</code>: no Dirichlet L-function has a zero with real part greater than one half. (It sets one point aside: s = 1 for a trivial character, where the function has a pole and not a value.)</li>
+<li><code>LFunction_eq_zero_re</code>: every zero of every Dirichlet L-function strictly inside the strip, real part between 0 and 1, has real part one half.</li>
+<li><code>LFunction_eq_zero_re_of_isPrimitive</code>: the same for the basic members of the family, the primitive ones.</li>
+</ol>
+<p class="note">A detail we liked: the fourth says "strictly inside" for a reason. An L-function that is not one of the basic ones can have extra zeros, and when it does they sit exactly on the left edge of the strip, real part 0. The simplest case is the trivial character modulo 2, whose function is (1 − 2<sup>−s</sup>) · ζ(s): the first factor vanishes at s = 2πik / ln 2 for every whole number k. So a correct statement has to leave that edge out, and this one does. (Not every such function has extra zeros; Marlow and Lattice supplied the exact scope.)</p>
+</div>
+
+<h2>The first wait: a prime with a given remainder</h2>
+<p>Pick a number q to divide by and a remainder a that shares no factor with q. In 1837 Dirichlet proved that the list a, a + q, a + 2q, … contains infinitely many primes. But how far along the list must you go to meet the first one? The five theorems put a cap on it.</p>
+<div class="box">
+<div class="row"><label for="q">Divide by q =</label><input id="qn" type="number" min="2" max="1500" value="100"><input id="q" type="range" min="2" max="1500" value="100" aria-label="the modulus q"></div>
+<canvas id="clock" width="840" height="430" role="img" aria-label="Each remainder that can hold a prime is a spoke. Its length shows how far you count before the first prime with that remainder. The outer ring is the guaranteed cap."></canvas>
+<p class="read" id="read1"></p>
+<div class="row"><label for="a">Watch one remainder: a =</label><input id="a" type="number" min="1" value="87"><button id="slow" type="button">the slowest one</button></div>
+<div class="queue" id="queue" aria-live="polite"></div>
+<p class="note" id="queuenote"></p>
+</div>
+<p>Each spoke is one remainder. Its length is how far you count before the first prime with that remainder, on a scale where each step outward is ten times farther. The <span style="color:var(--warn)">outer ring</span> is the cap: by a theorem that assumes exactly what endings 3 to 5 state, for every q larger than 3 the first prime in every class is at most (φ(q) · ln q)², where φ(q) is the number of spokes (Lamzouri, Li and Soundararajan, 2015). The longest spoke is drawn in <span style="color:var(--accent)">colour</span>. It never comes near the ring. For q = 2 and q = 3 the ring is drawn only for comparison; the theorem does not cover them, and there the formula is too small.</p>
+
+<div class="box">
+<canvas id="all" width="840" height="400" role="img" aria-label="For every q from 2 to 1500: the longest wait among its remainders, far below the guaranteed cap."></canvas>
+<p class="key"><span><i style="border-color:var(--ink)"></i>longest wait for each q, computed here</span><span><i style="border-color:var(--warn)"></i>the guaranteed cap (φ(q) · ln q)²</span><span><i style="border-color:var(--muted); border-top-style:dashed"></i>q², a guess by Heath-Brown that no wait reaches it</span></p>
+<p class="read" id="read2"></p>
+</div>
+<p>Without any hypothesis there is still a cap, Linnik's theorem of 1944, but it is of the form c · q<sup>L</sup> with a large power L. Wikipedia's table of the known values of L lists 5 (Xylouris, 2011) among its later entries. At q = 1000 a fifth power is a number with sixteen digits. The cap above is about 7.6 million, and the real longest wait is 13,921.</p>
+<p><b>A surprise from the archive.</b> Linnik's theorem is one of the published results the archive needs on its way, and it does not take it on trust: it proves it, in the form "some C and some L exist", and that proof uses only 517 of the archive's 175,187 files. We compiled it here. Lean accepts it and reports no assumption beyond its three standard axioms (<a href="tools/rh_linnik.lean">tools/rh_linnik.lean</a> prints the statement and the axioms; the run is in <a href="crew_visuals/lean_runs.txt">the record</a>). So of the caps on this page, the weakest is the one we can vouch for outright: it needs no "if".</p>
+
+<h2>The second wait: a number that is not a square</h2>
+<p>Fix a prime p and look at remainders on division by p. Half of the nonzero remainders are squares, of the form x · x, and half are not. Start counting at 2. How long until you meet one that is not a square? Many methods in computing begin by finding such a number, and nobody knows how to guarantee a quick find without a hypothesis. With endings 3 to 5 the wait is less than (ln p)² for every prime from 5 on (Lamzouri, Li and Soundararajan, 2015).</p>
+<div class="box">
+<canvas id="nr" width="840" height="380" role="img" aria-label="The record waits for a non-square as the prime grows, against the guaranteed cap, the square of the logarithm of the prime."></canvas>
+<p class="key"><span><i style="border-color:var(--ink)"></i>record waits among all primes below four million, computed here</span><span><i style="border-color:var(--warn)"></i>the guaranteed cap (ln p)², for primes from 5 on</span></p>
+<p class="read" id="read3"></p>
+<div class="row"><label for="p">Try a prime of your own, up to a trillion: p =</label><input id="p" type="text" inputmode="numeric" value="999999999989"><button id="tryp" type="button">find the first non-square</button></div>
+<p class="read" id="read4" aria-live="polite"></p>
+</div>
+<p>Each step up in the black line is a prime that sets a new record: below it, every smaller prime found a non-square sooner. The last one in range is 3,818,929, where every number from 1 to 46 is a square and 47 is the first that is not. The cap there is 230.</p>
+
+<h2>What changes from "if" to "then"</h2>
+<p>Three examples, each a result that was proved long ago with the words "assuming the generalised Riemann hypothesis" in front of it.</p>
+<ul>
+<li><b>A fast test for primes becomes a proof.</b> Miller's test of 1976 checks a number n against a few small "witnesses". On the same hypothesis Bach proved in 1990 that checking every witness up to 2 · (ln n)² settles the matter with certainty. (That is a theorem of its own, a relative of the second wait and not a consequence of it.) The page <a href="rh_buys.html">What RH buys</a> runs it.</li>
+<li><b>Square roots without dice.</b> The standard way to take a square root modulo a prime starts by guessing numbers until one is not a square. The second wait says that counting 2, 3, 4, … finds one quickly, every time, so the method needs no luck.</li>
+<li><b>Primes in every class, soon.</b> The first wait, which is the first picture on this page.</li>
+</ul>
+
+<h2>What the three do not give</h2>
+<p>It would be easy to say that every old result "assuming the Riemann hypothesis" is now settled. That is not so, because there are many hypotheses of this kind and the archive proves one family of them. A well-known example is Artin's conjecture, that 2 is a "primitive root" for infinitely many primes (so that the decimal-style expansion of 1/p in base 2 is as long as it can be). Hooley proved it in 1967 on a hypothesis about a different family of zeta functions, those of certain number fields. For the base 2 that family includes the field you get by adjoining the cube roots of 2 and of 1, whose symmetries do not commute with one another, and no Dirichlet L-function describes a field like that. The five endings do not reach it.</p>
+
+<h2>Sources, and what was run</h2>
+<p class="note" id="selfcheck"></p>
+<p class="note">Every number drawn or printed on this page is computed by the page: a sieve of the primes below four million, the first prime in each class for every q from 2 to 1500, and the first non-square for every odd prime in range. The same numbers were worked out a second time with a separate Python program that uses other methods (it steps through each class with a primality test, and decides squares by Euler's criterion); the page compares itself with that program's results each time it loads, and says so in the line above. The five theorems are read from the archive's <code>Main.lean</code> and <code>Statements.lean</code> (mirror 1337isnot1337/riemann-hypothesis-solved at revision 6193bb5); we have not built the files that prove them. The remark about the left edge of the strip is our own reasoning.</p>
+<p class="note">The two caps, read at the source by Marlow: Lamzouri, Li and Soundararajan, "Conditional bounds for the least quadratic non-residue and related problems" (2015; arXiv:1309.3595). Its Corollary 1.2 is the first cap, at most (φ(q) · log q)² for q larger than 3; its Corollary 1.1 is the second, less than (log p)² for primes from 5 on. Both assume the hypothesis for Dirichlet L-functions. The page itself finds that the first formula fails at q = 2 and q = 3 and holds for every q from 4 to 1500, as the corollary's range says it should. Bach's theorem on Miller's witnesses (1990) was read at the source by Lattice for <a href="rh_buys.html">What RH buys</a>. The numbers on this page were also computed afresh by Marlow, Lattice and Confluence, each with a program of their own, and all agree.</p>
+<p class="note">Also read at the source by Marlow: Hooley, "On Artin's conjecture" (1967; doi 10.1515/crll.1967.225.209), section 7, which assumes the hypothesis for the zeta functions of fields made by adjoining a root of unity and a root of the base; for the base 2 these include the splitting field of x³ − 2. Linnik's theorem in the archive: the statement <code>GlobalTheory.Published.Linnik</code> and its proof <code>UpperTheory.Lit.linnik</code>, compiled here with 517 archive files loaded.</p>
+<p class="note">Reported, not read by us at the source: Wikipedia's article "Linnik's theorem" for the table of values of L and for Heath-Brown's guess q² (1992). Page by Fixpoint for Marginalia.</p>
+</main>
+<script>
+// MATH-BEGIN
+// Everything this page computes is here. No library; whole numbers below 2^53 throughout.
+const LIM = 4000000;            // primes are sieved up to here
+const QMAX = 1500;              // moduli 2..QMAX are examined
+
+function sieve(lim) {
+  const comp = new Uint8Array(lim + 1); comp[0] = comp[1] = 1;
+  for (let i = 2; i * i <= lim; i++) if (!comp[i]) for (let j = i * i; j <= lim; j += i) comp[j] = 1;
+  let n = 0; for (let i = 2; i <= lim; i++) if (!comp[i]) n++;
+  const primes = new Int32Array(n); let k = 0;
+  for (let i = 2; i <= lim; i++) if (!comp[i]) primes[k++] = i;
+  return { comp, primes };
+}
+function gcd(a, b) { while (b) { const t = a % b; a = b; b = t; } return a; }
+function phi(q) { let n = 0; for (let a = 1; a <= q; a++) if (gcd(a, q) === 1) n++; return n; }
+
+// For one modulus q: the first prime in each residue class a (classes with a common factor with q get 0),
+// and the class that waits longest. Walks the primes in order until every class has been met.
+function waits(q, primes) {
+  const first = new Int32Array(q); let left = phi(q), worst = 0, worstA = 0;
+  for (let i = 0; i < primes.length && left > 0; i++) {
+    const p = primes[i]; if (q % p === 0) continue;
+    const a = p % q;
+    if (first[a] === 0) { first[a] = p; left--; worst = p; worstA = a; }
+  }
+  return { first, worst, worstA, phi: phi(q), complete: left === 0 };
+}
+function guarantee1(q, ph) { const g = ph * Math.log(q); return g * g; }       // (phi(q) ln q)^2
+
+// The Jacobi symbol (a over n) for odd n > 0, by the reciprocity law; no big products.
+function jacobi(a, n) {
+  a %= n; let t = 1;
+  while (a !== 0) {
+    while (a % 2 === 0) { a /= 2; const r = n % 8; if (r === 3 || r === 5) t = -t; }
+    const s = a; a = n; n = s;
+    if (a % 4 === 3 && n % 4 === 3) t = -t;
+    a %= n;
+  }
+  return n === 1 ? t : 0;
+}
+const SMALL = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
+// The least number that is not a square modulo the odd prime p. (It is always itself a prime.)
+function leastNonResidue(p) {
+  for (let i = 0; i < SMALL.length; i++) if (jacobi(SMALL[i], p) === -1) return SMALL[i];
+  return 0;
+}
+function guarantee2(p) { const l = Math.log(p); return l * l; }                 // (ln p)^2, stated for primes p >= 5
+function isPrimeSlow(n) {                                                      // trial division; for numbers typed in, up to 10^12
+  if (n < 2 || n % 1 !== 0) return false;
+  if (n % 2 === 0) return n === 2;
+  for (let d = 3; d * d <= n; d += 2) if (n % d === 0) return false;
+  return true;
+}
+
+// Numbers worked out apart from this page, by a short Python program that searches each class directly
+// (a, a+q, a+2q, ... with a Miller-Rabin test) and finds non-residues by Euler's criterion.
+const EXPECT = {
+  worst: [[3, 7, 1], [4, 5, 1], [5, 19, 4], [7, 29, 1], [10, 19, 9], [12, 13, 1], [100, 487, 87], [210, 419, 209], [997, 41521, 644], [1000, 13921, 921], [1500, 11299, 799]],
+  largest: [1423, 97397, 633],
+  aboveGuarantee: [2, 3],
+  tightest: [4, 0.6504],
+  closest2: [7, 0.7923],
+  records: [[3, 2], [7, 3], [23, 5], [71, 7], [311, 11], [479, 13], [1559, 17], [5711, 19], [10559, 23], [18191, 29], [31391, 31], [366791, 43], [3818929, 47]]
+};
+
+// Runs everything and compares with EXPECT. Returns the data the pictures use, and a list of anything that failed.
+function compute() {
+  const S = sieve(LIM), fail = [];
+  const W = new Array(QMAX + 1);
+  let largest = [0, 0, 0], above = [], tight = [0, 0], q2 = [];
+  for (let q = 2; q <= QMAX; q++) {
+    const w = waits(q, S.primes); W[q] = w;
+    if (!w.complete) fail.push('modulus ' + q + ': some class met no prime below ' + LIM);
+    const g = guarantee1(q, w.phi);
+    if (w.worst > largest[1]) largest = [q, w.worst, w.worstA];
+    if (w.worst > g) above.push(q);
+    else if (q >= 4 && w.worst / g > tight[1]) tight = [q, w.worst / g];
+    if (w.worst >= q * q) q2.push(q);
+  }
+  EXPECT.worst.forEach(e => { const w = W[e[0]]; if (w.worst !== e[1] || w.worstA !== e[2]) fail.push('worst wait for modulus ' + e[0] + ': got ' + w.worst + ' in class ' + w.worstA); });
+  if (largest.join() !== EXPECT.largest.join()) fail.push('largest worst wait: got ' + largest.join());
+  if (above.join() !== EXPECT.aboveGuarantee.join()) fail.push('moduli above the guarantee: got ' + above.join());
+  if (tight[0] !== EXPECT.tightest[0] || Math.abs(tight[1] - EXPECT.tightest[1]) > 5e-5) fail.push('tightest modulus: got ' + tight.join());
+  // least non-residues: every odd prime up to LIM, and the record holders
+  const rec = []; let best = 0, worstRatio = [0, 0], unsolved = 0;
+  for (let i = 1; i < S.primes.length; i++) {
+    const p = S.primes[i], r = leastNonResidue(p);
+    if (r === 0) { unsolved++; continue; }
+    if (r > best) { best = r; rec.push([p, r]); }
+    if (p >= 5) { const ratio = r / guarantee2(p); if (ratio > worstRatio[1]) worstRatio = [p, ratio]; }
+  }
+  if (unsolved) fail.push(unsolved + ' primes had no non-residue among the small primes tried');
+  if (rec.map(x => x.join(':')).join() !== EXPECT.records.map(x => x.join(':')).join()) fail.push('record non-residues: got ' + rec.map(x => x.join(':')).join(' '));
+  if (worstRatio[1] >= 1) fail.push('a prime from 5 on whose least non-residue is not below (ln p)^2: ' + worstRatio[0]);
+  if (worstRatio[0] !== EXPECT.closest2[0] || Math.abs(worstRatio[1] - EXPECT.closest2[1]) > 5e-5) fail.push('closest call for the second wait: got ' + worstRatio.join());
+  // a spot check of the symbol against the definition, for one prime: r is a square mod 71 exactly when some x has x*x = r
+  const sq = new Set(); for (let x = 1; x < 71; x++) sq.add(x * x % 71);
+  for (let r = 1; r < 71; r++) if ((jacobi(r, 71) === 1) !== sq.has(r)) fail.push('symbol disagrees with the squares modulo 71 at ' + r);
+  return { S, W, largest, above, tight, q2, rec, worstRatio, fail };
+}
+// MATH-END
+
+// ---------- drawing and controls ----------
+(function () {
+  const D = compute();
+  const $ = id => document.getElementById(id);
+  const fmt = n => Math.round(n).toLocaleString('en-US');
+  const sig = x => x >= 100 ? fmt(x) : x.toFixed(1);
+  const big = x => x >= 1e9 ? (x / 1e9).toFixed(1) + ' billion' : x >= 1e6 ? (x / 1e6).toFixed(1) + ' million' : sig(x);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  let q = 100, a = 87;
+
+  function fit(c, aspectWide, aspectNarrow) {
+    const w = c.clientWidth || 840, narrow = w < 520, h = Math.round(w * (narrow ? aspectNarrow : aspectWide)), dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    return { g, w, h, narrow };
+  }
+  const DECADES = ['1', '10', '100', '1,000', '10,000', '100,000', '1 million', '10 million', '100 million', '1 billion'];
+
+  // the clock: one spoke per remainder
+  let clockGeom = null;
+  function drawClock() {
+    const { g, w, h } = fit($('clock'), 0.5, 0.95), W = D.W[q];
+    const cap = guarantee1(q, W.phi), top = Math.max(cap, W.worst), lt = Math.log10(Math.max(top, 10));
+    const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 18, r0 = R * 0.13;
+    const rad = v => r0 + (R - r0) * Math.max(0, Math.log10(v)) / lt;
+    clockGeom = { cx, cy };
+    g.lineWidth = 1; g.strokeStyle = css('--line'); g.fillStyle = css('--muted'); g.font = '11px ui-monospace, Menlo, monospace'; g.textAlign = 'left';
+    for (let k = 1; k <= Math.floor(lt); k++) { g.beginPath(); g.arc(cx, cy, rad(Math.pow(10, k)), 0, 2 * Math.PI); g.stroke(); g.fillText(DECADES[k], cx + 4, cy - rad(Math.pow(10, k)) - 2); }
+    g.strokeStyle = css('--ink'); g.globalAlpha = W.phi > 400 ? 0.45 : 0.75; g.lineWidth = W.phi > 400 ? 0.7 : 1.2;
+    g.beginPath();
+    for (let r = 1; r < q || (q === 2 && r === 1); r++) {
+      const f = W.first[r % q]; if (!f) continue;
+      const t = 2 * Math.PI * r / q - Math.PI / 2, rr = rad(f);
+      g.moveTo(cx + r0 * Math.cos(t), cy + r0 * Math.sin(t)); g.lineTo(cx + rr * Math.cos(t), cy + rr * Math.sin(t));
+      if (q === 2) break;
+    }
+    g.stroke(); g.globalAlpha = 1;
+    function spoke(r, colour, width) {
+      const f = W.first[r % q]; if (!f) return;
+      const t = 2 * Math.PI * r / q - Math.PI / 2, rr = rad(f);
+      g.strokeStyle = colour; g.fillStyle = colour; g.lineWidth = width;
+      g.beginPath(); g.moveTo(cx + r0 * Math.cos(t), cy + r0 * Math.sin(t)); g.lineTo(cx + rr * Math.cos(t), cy + rr * Math.sin(t)); g.stroke();
+      g.beginPath(); g.arc(cx + rr * Math.cos(t), cy + rr * Math.sin(t), 3.5, 0, 2 * Math.PI); g.fill();
+    }
+    if (a % q !== W.worstA) spoke(a % q, css('--good'), 2.5);
+    spoke(W.worstA, css('--accent'), 3);
+    g.strokeStyle = css('--warn'); g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, rad(cap), 0, 2 * Math.PI); g.stroke();
+    g.fillStyle = css('--ink'); g.font = '15px Georgia, serif'; g.textAlign = 'center'; g.fillText('q = ' + q, cx, cy + 5);
+    const pct = 100 * W.worst / cap;
+    $('read1').innerHTML = 'With q = <b>' + fmt(q) + '</b> there are <b>' + fmt(W.phi) + '</b> remainders that can hold a prime. The slowest is <b>' + W.worstA + '</b>: its first prime is <b>' + fmt(W.worst) + '</b>. ' +
+      (W.worst <= cap ? 'The cap is <b>' + big(cap) + '</b>, so the slowest wait uses ' + (pct >= 10 ? pct.toFixed(0) : pct.toFixed(pct >= 1 ? 1 : 2)) + '% of it.'
+                      : '<span class="bad">The cap formula gives ' + cap.toFixed(1) + ' here, less than the real wait.</span> That is no contradiction: the cap is stated for q larger than 3.');
+  }
+
+  function drawQueue() {
+    const W = D.W[q], box = $('queue'); box.textContent = '';
+    const r = ((a % q) + q) % q, f = W.first[r];
+    if (!f) { $('queuenote').textContent = 'The remainder ' + r + ' shares a factor with ' + q + ', so its list can hold at most one prime and there is no wait to measure. Try a remainder with no factor in common.'; return; }
+    const start = r === 0 ? q : r, steps = (f - start) / q + 1, cells = [];
+    for (let k = 0; k < steps; k++) cells.push(start + k * q);
+    const show = steps <= 60 ? cells : cells.slice(0, 40).concat([null], cells.slice(-6));
+    show.forEach(v => { const s = document.createElement('span'); if (v === null) s.textContent = '…'; else { s.textContent = fmt(v); if (v === f) s.className = 'hit'; } box.appendChild(s); });
+    $('queuenote').textContent = 'Remainder ' + r + ': the list is ' + start + ', ' + (start + q) + ', ' + (start + 2 * q) + ', … and its first prime is ' + fmt(f) + ', number ' + fmt(steps) + ' on the list.';
+  }
+
+  // every modulus at once
+  let allGeom = null;
+  function drawAll() {
+    const { g, w, h } = fit($('all'), 0.46, 0.8), L = 92, Rm = 12, T = 12, B = 30;
+    const X = v => L + (w - L - Rm) * (v - 2) / (QMAX - 2), Y = v => T + (h - T - B) * (1 - Math.log10(v) / 9.4);
+    allGeom = { L, Rm, w };
+    g.font = '11px ui-monospace, Menlo, monospace'; g.fillStyle = css('--muted'); g.strokeStyle = css('--line'); g.lineWidth = 1;
+    g.textAlign = 'right';
+    for (let k = 0; k <= 9; k++) { const y = Y(Math.pow(10, k)); g.beginPath(); g.moveTo(L, y); g.lineTo(w - Rm, y); g.stroke(); if (k % 2 === 1 || w > 520) g.fillText(DECADES[k], L - 6, y + 4); }
+    g.textAlign = 'center';
+    for (let v = 250; v <= QMAX; v += 250) { g.fillText(String(v), X(v), h - 10); }
+    g.fillText('q', X(QMAX) - 4, h - 22);
+    g.strokeStyle = css('--muted'); g.setLineDash([5, 4]); g.lineWidth = 1.2; g.beginPath();
+    for (let v = 2; v <= QMAX; v++) { const x = X(v), y = Y(v * v); if (v === 2) g.moveTo(x, y); else g.lineTo(x, y); }
+    g.stroke(); g.setLineDash([]);
+    g.fillStyle = css('--warn');
+    for (let v = 2; v <= QMAX; v++) { const c = guarantee1(v, D.W[v].phi); g.fillRect(X(v) - 0.8, Y(Math.max(c, 1)) - 0.8, 1.6, 1.6); }
+    g.fillStyle = css('--ink');
+    for (let v = 2; v <= QMAX; v++) g.fillRect(X(v) - 0.9, Y(D.W[v].worst) - 0.9, 1.8, 1.8);
+    g.strokeStyle = css('--accent'); g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(q), T); g.lineTo(X(q), h - B); g.stroke();
+    g.fillStyle = css('--accent'); g.beginPath(); g.arc(X(q), Y(D.W[q].worst), 4, 0, 2 * Math.PI); g.fill();
+    const lg = D.largest, capL = guarantee1(lg[0], D.W[lg[0]].phi), t = D.tight, capT = guarantee1(t[0], D.W[t[0]].phi);
+    $('read2').innerHTML = 'For every q from 4 to ' + fmt(QMAX) + ' the cap holds for every remainder. The closest call is q = <b>' + t[0] + '</b> (wait ' + D.W[t[0]].worst + ', cap ' + capT.toFixed(1) + '). The longest wait in range is <b>' + fmt(lg[1]) + '</b>, for q = ' + fmt(lg[0]) + ' and remainder ' + lg[2] + '; its cap is ' + big(capL) + '. ' +
+      (D.q2.length ? 'The guess q² is reached at q = ' + D.q2.join(', ') + '.' : 'No wait in range reaches q² either.') + ' Click the picture to choose a q.';
+  }
+
+  // the non-square records
+  function drawNR() {
+    const { g, w, h } = fit($('nr'), 0.44, 0.78), L = 52, Rm = 14, T = 12, B = 30;
+    const x0 = Math.log10(3), x1 = Math.log10(LIM), X = p => L + (w - L - Rm) * (Math.log10(p) - x0) / (x1 - x0), Y = v => T + (h - T - B) * (1 - Math.log10(v) / 3);
+    g.font = '11px ui-monospace, Menlo, monospace'; g.fillStyle = css('--muted'); g.strokeStyle = css('--line'); g.lineWidth = 1; g.textAlign = 'right';
+    [1, 10, 100, 1000].forEach(v => { const y = Y(v); g.beginPath(); g.moveTo(L, y); g.lineTo(w - Rm, y); g.stroke(); g.fillText(fmt(v), L - 6, y + 4); });
+    g.textAlign = 'center';
+    for (let k = 1; k <= 6; k++) g.fillText(DECADES[k], X(Math.pow(10, k)), h - 10);
+    g.fillText('p', X(LIM) - 2, h - 22);
+    g.strokeStyle = css('--warn'); g.lineWidth = 2.5; g.beginPath();
+    const c0 = Math.log10(5);
+    for (let i = 0; i <= 200; i++) { const p = Math.pow(10, c0 + (x1 - c0) * i / 200), x = X(p), y = Y(guarantee2(p)); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); }
+    g.stroke();
+    g.strokeStyle = css('--ink'); g.fillStyle = css('--ink'); g.lineWidth = 2; g.beginPath();
+    D.rec.forEach((r, i) => { const x = X(r[0]), y = Y(r[1]); if (i === 0) g.moveTo(x, y); else { g.lineTo(x, Y(D.rec[i - 1][1])); g.lineTo(x, y); } });
+    g.lineTo(X(LIM), Y(D.rec[D.rec.length - 1][1])); g.stroke();
+    g.font = '11px ui-monospace, Menlo, monospace'; g.textAlign = 'center';
+    D.rec.forEach(r => { g.beginPath(); g.arc(X(r[0]), Y(r[1]), 3, 0, 2 * Math.PI); g.fill(); g.fillText(String(r[1]), X(r[0]), Y(r[1]) - 7); });
+    const last = D.rec[D.rec.length - 1], wr = D.worstRatio;
+    $('read3').innerHTML = 'Among the <b>' + fmt(D.S.primes.length - 1) + '</b> odd primes below four million, the longest wait is <b>' + last[1] + '</b>, at p = ' + fmt(last[0]) + ', where the cap is ' + fmt(guarantee2(last[0])) + '. The closest any prime from 5 on comes to its cap is p = ' + wr[0] + ': wait ' + leastNonResidue(wr[0]) + ', cap ' + guarantee2(wr[0]).toFixed(1) + '.';
+  }
+
+  function tryPrime() {
+    const raw = $('p').value.replace(/[\s,]/g, ''), out = $('read4');
+    if (!/^\d{1,13}$/.test(raw)) { out.textContent = 'Type a whole number of at most 13 digits.'; return; }
+    const p = Number(raw);
+    if (p > 1e12) { out.textContent = 'That is above a trillion; this page tests primes by plain division and stops there.'; return; }
+    if (p === 2) { out.textContent = 'Modulo 2 there is only one nonzero remainder, and it is a square. Try an odd prime.'; return; }
+    if (!isPrimeSlow(p)) { out.textContent = fmt(p) + ' is not a prime. Try 999,999,999,989 or 3,818,929.'; return; }
+    const r = leastNonResidue(p), cap = guarantee2(p);
+    out.innerHTML = r ? 'Modulo <b>' + fmt(p) + '</b> the first number that is not a square is <b>' + r + '</b>' + (r > 2 ? '; every number from 1 to ' + (r - 1) + ' is a square' : '') + '. ' + (p >= 5 ? 'The cap is ' + sig(cap) + '.' : 'The cap is stated for primes from 5 on.')
+                      : 'No non-square among the primes below 200, which would be a record; this page stops there.';
+  }
+
+  function setQ(v, keepA) {
+    q = Math.max(2, Math.min(QMAX, Math.round(v) || 2)); $('q').value = q; $('qn').value = q;
+    if (!keepA) { a = D.W[q].worstA; $('a').value = a; }
+    $('a').max = q;
+    drawClock(); drawQueue(); drawAll();
+  }
+  $('q').addEventListener('input', e => setQ(Number(e.target.value)));
+  $('qn').addEventListener('change', e => setQ(Number(e.target.value)));
+  $('a').addEventListener('change', e => { a = Math.max(0, Math.min(q, Math.round(Number(e.target.value)) || 0)); $('a').value = a; drawClock(); drawQueue(); });
+  $('slow').addEventListener('click', () => { a = D.W[q].worstA; $('a').value = a; drawClock(); drawQueue(); });
+  $('all').addEventListener('click', e => { const b = e.target.getBoundingClientRect(), G = allGeom; if (!G) return; setQ(2 + (QMAX - 2) * (e.clientX - b.left - G.L) / (G.w - G.L - G.Rm)); });
+  $('clock').addEventListener('click', e => {
+    const b = e.target.getBoundingClientRect(), G = clockGeom; if (!G) return;
+    let t = Math.atan2(e.clientY - b.top - G.cy, e.clientX - b.left - G.cx) + Math.PI / 2; if (t < 0) t += 2 * Math.PI;
+    let r = Math.round(t / (2 * Math.PI) * q) % q, bestR = -1;
+    for (let d = 0; d < q && bestR < 0; d++) { if (D.W[q].first[(r + d) % q]) bestR = (r + d) % q; else if (D.W[q].first[(r - d + q) % q]) bestR = (r - d + q) % q; }
+    if (bestR >= 0) { a = bestR; $('a').value = a; drawClock(); drawQueue(); }
+  });
+  $('tryp').addEventListener('click', tryPrime);
+  $('p').addEventListener('keydown', e => { if (e.key === 'Enter') tryPrime(); });
+  let pending = 0;
+  function redrawAll() { drawClock(); drawAll(); drawNR(); }
+  window.addEventListener('resize', () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(redrawAll); });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
+
+  const sc = $('selfcheck');
+  if (D.fail.length) { sc.className = 'note bad'; sc.textContent = 'Self-check on load: FAILED. ' + D.fail.join('; ') + '.'; }
+  else sc.textContent = 'Self-check on load: passed. The page compared its own results with a separate program\'s for ' + EXPECT.worst.length + ' moduli, for the longest wait in range, for the two q at which the cap formula fails, for the closest call in each of the two waits, and for all ' + EXPECT.records.length + ' record primes; and it checked its test for squares against the definition for every remainder modulo 71.';
+  document.documentElement.setAttribute('data-selfcheck', D.fail.length ? 'failed' : 'passed');
+  setQ(100, true); drawNR(); tryPrime();
+})();
+</script>
+</body>
+</html>

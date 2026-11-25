@@ -1,0 +1,70 @@
+A wall at twelve fifths, from seven primes
+
+Every setting of the mod-five mirror dial is zero-free at Re s ≥ 12/5.
+The seven primes through 37 that can turn the quotient use up less than
+the available angle, even after we allow for every remaining prime.
+
+1. Measure the turn
+
+Let χ be the odd quartic character modulo 5 with χ(2) = i. Put
+Q(s) = L(s, χ) / L(s, conjugate χ), and let ε be the root number of χ.
+In Re s > 1 these L-functions have nonzero Euler products. At a zero of
+a genuine mix, Q(s) would be −ε tan τ, on the line through ε and 0.
+The two settings with only one nonzero coefficient are already zero-free.
+The common nonzero gamma and conductor factor and the constant unit phase
+preserve this cancellation test for the completed dial on this half-plane.
+
+Primes where χ is real cancel in Q. At each of the other primes, those
+congruent to 2 or 3 modulo 5, the factor is (1 + z)/(1 − z) with
+z = χ(p) p^(−s). Rationalizing the denominator gives a numerator
+1 − |z|² + 2i Im(z). For r = |z| the absolute argument is at most
+arctan(2r/(1−r²)) = 2 arctan(r) < 2r. The sum of these arguments converges
+absolutely, and its exponential gives the phase of Q.
+
+2. Leave room before the target
+
+For Re s ≥ 12/5, the total possible turn is below
+
+    2 · (sum p^(−12/5) for p = 2, 3, 7, 13, 17, 23, 37
+         + sum (a^(−12/5) + a^(−7/5)/7) for a = 38, 42).
+
+Past 37 every contributing prime belongs to 38+5k or 42+5k for k ≥ 0.
+For each progression, bound the first term directly and the rest by
+the integral of (a+5x)^(−12/5) over x ≥ 0. Rounding each power upward
+to a multiple of 1/1000000 gives 967103/1750000 < 553/1000 radians.
+
+The explicit Gauss sum gives ε in the first quadrant with
+(Re ε)² = (5+√5)/10. At x = 553/1000, the cosine lower bound
+1 − x²/2 + x⁴/24 − x⁶/720 is positive and its square is greater than
+(5+2.2361)/10. Since √5 < 2.2361, the angle of ε is greater than x.
+The ray through −ε is farther from the positive axis. Both rays miss Q.
+
+3. Check all numerical claims with integers and fractions
+
+    from fractions import Fraction as F
+    from math import isqrt
+
+    D = 10**6
+    primes = {2: 189465, 3: 71600, 7: 9371, 13: 2121,
+              17: 1115, 23: 540, 37: 173}
+    tail = {38: (162, 6142), 42: (128, 5339)}
+    assert set(primes) == {
+        n for n in range(2, 38) if n % 5 in (2, 3)
+        and all(n % k for k in range(2, isqrt(n) + 1))
+    }
+    assert all(a**5 * p**12 > D**5 for p, a in primes.items())
+    assert all(a**5 * n**12 > D**5 and b**5 * n**7 > D**5
+               for n, (a, b) in tail.items())
+    turn = 2 * (F(sum(primes.values()), D)
+                + sum(F(a, D) + F(b, 7*D) for a, b in tail.values()))
+    x = F(553, 1000)
+    lower_cos = 1 - x**2/2 + x**4/24 - x**6/720
+    assert turn == F(967103, 1750000) < x
+    assert F(22361, 10000)**2 > 5
+    assert lower_cos > 0 and lower_cos**2 > (5 + F(22361, 10000))/10
+
+The sharper published wall is about 2.382286109. This is a short
+rational certificate for 2.4 using the same prime-angle argument.
+See mirror_mix_sharp_walls.html and mod5_gauss_sum.html for the fuller
+derivations, and Bombieri and Ghosh, Theorem 7 and §6, for the sharp wall.
+https://doi.org/10.1070/RM2011v066n02ABEH004740

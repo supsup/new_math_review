@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eight readings, one parity</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6eb;
+      --ink: #28383c;
+      --muted: #56646a;
+      --line: #c4c8c3;
+      --green: #255d57;
+      --ochre: #935827;
+      --panel: #edf0e8;
+      background: #e6ebe4;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 54rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .17em; }
+    :focus-visible { outline: .16rem solid var(--ochre); outline-offset: .15rem; }
+    h1 { max-width: 12ch; font: clamp(2.85rem, 8.6vw, 5.2rem)/1 Georgia, serif; margin: .54rem 0 .72rem; letter-spacing: -.05em; }
+    h2 { font: 1.61rem/1.15 Georgia, serif; margin: 1.04rem 0 .48rem; }
+    p { max-width: 68ch; }
+    .intro { color: var(--muted); }
+    .modes { display: flex; flex-wrap: wrap; gap: .43rem; margin: .86rem 0 .66rem; }
+    button { min-height: 2.65rem; border: 1px solid var(--line); border-radius: .26rem; background: #ecf0e9; color: var(--green);
+      padding: .3rem .5rem; font: inherit; cursor: pointer; }
+    .modes button[aria-pressed="true"] { background: var(--green); color: white; }
+    .channels { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); gap: .45rem; }
+    .channel { border: 1px solid var(--line); border-radius: .3rem; padding: .34rem; display: grid; gap: .31rem; text-align: center; background: #fffdf6; }
+    .channel span { font-variant-numeric: tabular-nums; }
+    .channel .tag, .channel .report-label { font-size: .78rem; color: var(--muted); }
+    .channel .bit { font: 1.4rem/1 Georgia, serif; }
+    .bit:disabled { color: var(--muted); cursor: default; }
+    .channel .hide { min-height: 2.25rem; font-size: .8rem; padding: .27rem .18rem; }
+    .channel .hide[aria-pressed="true"] { color: var(--ochre); background: #f3e8df; }
+    .channel .report-value { font-size: 1.15rem; color: var(--green); font-weight: 650; }
+    .state { background: var(--panel); border-left: .21rem solid var(--green); padding: .55rem .7rem; margin: .69rem 0; }
+    .state p { margin: .16rem 0; }
+    #answer { font-weight: 700; }
+    .formula { overflow-wrap: anywhere; font: 1.07rem/1.52 Georgia, serif; }
+    details { border-top: 1px solid var(--line); padding-top: .63rem; margin: .87rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 39rem) { .channels { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="four_loss_mixer.html">Back to the four-loss mixer</a>
+    <h1>Eight readings, one parity</h1>
+    <p class="intro">Give each bit weight three in its own report and weight one in the other reports. Try hiding a direct bit. Modulo two, the eight mixed reports all give the same parity, which is enough to recover one hidden bit.</p>
+    <div class="modes" aria-label="Arithmetic for the mixed readings">
+      <button type="button" data-mode="mod">Modulo two</button>
+      <button type="button" data-mode="rational">Ordinary arithmetic</button>
+    </div>
+    <div class="channels" id="channels" aria-label="Direct bits and their mixed reports"></div>
+    <div class="state" role="status" aria-atomic="true">
+      <p id="answer"></p>
+      <p id="calculation"></p>
+    </div>
+
+    <h2>Why three changes the board</h2>
+    <p>Write <var>S</var> for the sum of the input bits. Report <var>i</var> equals <var>S</var> + 2<var>x</var><sub><var>i</var></sub>. Modulo two the extra 2 disappears. Every report tells you <var>S</var> modulo two, and you can subtract the sum of the known bits to find the parity of the hidden ones.</p>
+    <p>In ordinary arithmetic, add all eight reports to get 10<var>S</var>. Divide by ten, subtract <var>S</var> from each report, then halve the result to recover each input. Lean checks this inverse as an identity over the rationals and proves that any seven direct bits determine the eighth from a mixed reading. <a href="../tools/eight_tap_parity.lean">Read the checked recovery</a>.</p>
+
+    <details>
+      <summary>Why weights one and two cannot give this rank drop at length eight</summary>
+      <p>Eight taps on an eight-place circle fill every offset. For rank one modulo a prime, rotating any nonzero row must multiply it by a fixed nonzero number. Work first modulo two. The multiplier must be 1, so a rank-one row must have the same residue at every offset. Positive weights drawn from 1 and 2 can do that only when they are all equal, which makes the ordinary matrix singular.</p>
+      <p>For every odd prime, both weights have nonzero residues. If both occur, some adjacent weights go from 1 to 2 and some go from 2 to 1. The fixed multiplier would have to satisfy <var>a</var> = 2 and 2<var>a</var> = 1, forcing prime 3. In that case the weights must alternate all the way around. The ordinary matrix then has at most two distinct rows and is singular. Thus weight three is enough and is the smallest maximum positive integer weight at length eight for this rank drop.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const bits = [1,0,1,1,0,1,0,1], hidden = bits.map((_,i)=>i===3);
+      const get = id => document.getElementById(id);
+      const modes = [...document.querySelectorAll('[data-mode]')];
+      const template = document.createElement('template');
+      template.innerHTML = '<div class="channel"><span class="tag"></span><button class="bit" type="button"></button><button class="hide" type="button"></button><span class="report-label">Mix</span><span class="report-value"></span></div>';
+      let mode = 'mod';
+      const cells = bits.map((_,i)=>{
+        const node = template.content.firstElementChild.cloneNode(true);
+        node.querySelector('.tag').textContent = 'Input '+(i+1);
+        const bit = node.querySelector('.bit'), hide = node.querySelector('.hide');
+        bit.addEventListener('click',()=>{bits[i] = 1-bits[i];render();});
+        hide.addEventListener('click',()=>{hidden[i] = !hidden[i];render();});
+        get('channels').append(node);
+        return {bit,hide,report:node.querySelector('.report-value')};
+      });
+      const total = values => values.reduce((sum,x)=>sum+x,0);
+      function render() {
+        const s = total(bits);
+        const read = bits.map(x => mode==='mod' ? s%2 : s+2*x);
+        const blanks = hidden.flatMap((isHidden,i)=>isHidden?[i]:[]);
+        const knownParity = total(bits.filter((_,i)=>!hidden[i]))%2;
+        const missingParity = (read[0]+knownParity)%2;
+        for (const [i,{bit,hide,report}] of cells.entries()) {
+          bit.textContent = hidden[i] ? '?' : bits[i];
+          bit.setAttribute('aria-label','Input '+(i+1)+(hidden[i]?' hidden':', '+bits[i]+'. Flip this bit'));
+          bit.disabled = hidden[i];
+          hide.textContent = hidden[i] ? 'Show' : 'Hide';
+          hide.setAttribute('aria-label',(hidden[i]?'Show':'Hide')+' input '+(i+1));
+          hide.setAttribute('aria-pressed',String(hidden[i]));
+          report.textContent = read[i];
+        }
+        if (mode==='rational') {
+          const recoveredSum = total(read)/10;
+          const recovered = blanks.map(i=>'input '+(i+1)+' = '+((read[i]-recoveredSum)/2));
+          get('answer').textContent = recovered.length
+            ? 'The mixed reports recover '+recovered.join(', ')+'.'
+            : 'The mixed reports recover all eight inputs.';
+          get('calculation').textContent = 'The reports add to '+total(read)+', so the input sum is '+recoveredSum+'.';
+        } else {
+          if (blanks.length===0) get('answer').textContent = 'All direct bits are visible.';
+          else if (blanks.length===1) {
+            get('answer').textContent = 'Input '+(blanks[0]+1)+' must be '+missingParity+'.';
+          } else {
+            get('answer').textContent = 2**(blanks.length-1)+' assignments fit the mixed reports and the visible bits.';
+          }
+          get('calculation').textContent = 'Mixed parity '+read[0]+' · visible parity '+knownParity+
+            (blanks.length ? ' · hidden parity '+missingParity : '')+'.';
+        }
+      }
+      for (const button of modes) {
+        button.setAttribute('aria-pressed',String(button.dataset.mode===mode));
+        button.addEventListener('click',()=>{
+          mode=button.dataset.mode;
+          for (const item of modes) item.setAttribute('aria-pressed',String(item===button));
+          render();
+        });
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

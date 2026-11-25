@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How much can one off-line quartet hide?</title>
+  <style>
+    :root { color-scheme: light; background: #e7ebe5; color: #273631; font: 100%/1.56 system-ui, sans-serif; --paper: #faf6eb; --green: #235c50; --warm: #963f31; --muted: #54615a; --line: #c9cec3; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 54rem); margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .17em; overflow-wrap: anywhere; }
+    :focus-visible { outline: .15rem solid #a8522b; outline-offset: .12rem; }
+    h1 { margin: .56rem 0 .71rem; font: clamp(2.6rem, 8vw, 5.1rem)/1 Georgia, serif; max-width: 14ch; letter-spacing: -.044em; }
+    h2 { margin: 1.26rem 0 .34rem; font: 1.62rem/1.23 Georgia, serif; }
+    p { max-width: 68ch; }
+    .intro, .note { color: var(--muted); }
+    .control { margin: 1.15rem 0 .75rem; }
+    .control label { display: block; font-weight: 660; margin-bottom: .17rem; }
+    input[type=range] { width: min(100%, 28rem); accent-color: var(--green); }
+    .presets { display: flex; gap: .5rem; flex-wrap: wrap; margin: .44rem 0; }
+    .presets button, .row button { color: var(--green); border: 1px solid var(--line); background: #fffcf4; border-radius: .29rem; cursor: pointer; font: inherit; }
+    .presets button { min-height: 2.55rem; padding: .3rem .62rem; }
+    .presets button[aria-pressed=true], .row button[aria-pressed=true] { background: var(--green); color: white; }
+    .readout { background: #eaf0e6; border-left: .23rem solid var(--green); padding: .49rem .73rem; margin: .7rem 0; }
+    .readout p { margin: .14rem 0; }
+    #summary { font-weight: 670; }
+    .plot { --amp: -2%; }
+    .row, .headings { display: grid; grid-template-columns: 3.1rem minmax(0, 1fr) clamp(5.1rem, 18vw, 7.4rem); align-items: center; gap: .6rem; }
+    .headings { font-weight: 650; line-height: 1.4; margin-bottom: .36rem; }
+    .axis { display: flex; justify-content: space-between; font-weight: 500; color: var(--muted); }
+    .row { min-height: 2.04rem; border-top: 1px solid #e4e4d9; }
+    .row button { min-height: 1.8rem; }
+    .row [data-decision] { font-weight: 630; color: var(--green); }
+    .row[data-pass=false] [data-decision] { color: var(--warm); }
+    .bar { position: relative; height: .39rem; border-radius: .13rem; background: linear-gradient(to right, #c9decf var(--limit), #eed1bf var(--limit)); }
+    .bar::before, .bar::after { position: absolute; content: ''; top: 50%; }
+    .bar::before { left: var(--limit); width: .57rem; height: .57rem; border-radius: 50%; background: #42685d; transform: translate(-50%, -50%); }
+    .bar::after { left: var(--amp); width: 2px; height: 1rem; background: #303735; transform: translateY(-50%); }
+    .plot[data-outside=true] .bar::after { display: none; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: 1rem; }
+    summary { font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="li_difference_matrix.html">Back to Li’s positive matrices</a>
+    <h1>How much can one off-line quartet hide?</h1>
+    <p class="intro">A high quartet from the mod-five cousin fails its own 3×3 matrix test. Add one copy of it to the zeta matrix and all sizes through 24 still pass. Turn up the quartet to see when the first negative direction appears.</p>
+
+    <div class="control">
+      <label for="power">Quartet weight <output id="weight"></output></label>
+      <input id="power" type="range" min="0" max="44" value="35" step="1">
+      <div class="presets" aria-label="Try a weight">
+        <button type="button" data-power="0">One copy</button>
+        <button type="button" data-power="35">10<sup>35</sup> copies</button>
+        <button type="button" data-power="41">10<sup>41</sup> copies</button>
+      </div>
+    </div>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="summary"></p>
+      <p id="detail"></p>
+    </div>
+    <p class="note">A dot marks a size’s threshold on the log scale. The dark line shows the chosen weight when it’s within the plotted range. Select a size for its certified bracket.</p>
+    <div class="plot" id="plot" aria-label="Quartet thresholds by matrix size">
+      <div class="headings" aria-hidden="true">
+        <span>Size</span>
+        <span class="axis"><span>10<sup>34</sup></span><span>10<sup>38</sup></span><span>10<sup>42</sup></span></span>
+        <span>Chosen weight</span>
+      </div>
+    </div>
+
+    <h2>Why the larger test sees more</h2>
+    <p>Each size allows a different set of weights on the inputs. A 3×3 test can use only three weights. Every larger test can use those same three weights and fill the extra slots with zeros, or use a new combination. The first amplification that makes a negative sum can only stay the same or decrease with size. Here it falls from about <strong>1.84 × 10<sup>40</sup></strong> at size 3 to <strong>5.44 × 10<sup>34</sup></strong> at size 24.</p>
+
+    <details>
+      <summary>What the interval check proves</summary>
+      <p>The mod-five zero lies in a disk of radius 10<sup>−6</sup> around 2.378755863122 + 1174561.0989005927i. Its quartet consists of that point and its three symmetric partners. The quartet’s second differences form the matrix <var>Q</var>. The unperturbed matrix <var>T</var> uses the real Li coefficients of ζ, obtained from a Taylor expansion. The experiment tests <var>T</var> + <var>a</var><var>Q</var> for the displayed finite sizes. Every bracket holds for every point in the disk. <a href="https://github.com/supsup/new_math_review/blob/1bba76db5e0ad582368689d350c7241c0b1ddb31/tools/check_spira_high_root.py">Mod-five zero enclosure</a>.</p>
+      <p>At the center of the disk, the lower weight gives strictly positive leading determinants, so the matrix is positive definite. At the upper weight a leading determinant is negative, so some set of weights gives a negative quadratic form. Below the bracket, positivity follows by taking a weighted average with the positive matrix at zero. Above it, the same negative direction continues to decrease. The calculation uses exact decimal inputs and Arb intervals, including for the zeta coefficients. <a href="../tools/check_li_quartet_masking.py">Replay the center check</a>.</p>
+      <p>The quartet’s own 1×1 and 2×2 matrices are positive definite. Those two sizes therefore pass at every nonnegative weight. In the zeta criterion the matrices are built from the full zeta sum. The extra quartet here is a deliberate perturbation and the test is finite. <a href="https://doi.org/10.1006/jnth.1997.2137">Li’s criterion</a>.</p>
+    </details>
+    <details>
+      <summary>Why four directions suffice for the model quartet</summary>
+      <p>Marlow pointed out that the quartet adds a matrix of rank at most four, whatever the test size. Put <var>w</var> = (ρ − 1)/ρ. The quartet uses powers of <var>w</var>, its reciprocal, and their two conjugates. Each term in the added matrix factors into one of these powers for the row and another for the column.</p>
+      <p>Both matrices also stay the same when we reverse the list of weights. So we can test mirrored weights and weights that change sign under reversal separately. Each uses at most two of the quartet’s directions. This gives two small eigenvalue calculations that work over the whole disk. The first failure always uses mirrored weights. At size 24 the sign-changing weights first fail near 4.28 × 10<sup>42</sup>, over seventy million times later on the amplification scale. <a href="../tools/check_li_quartet_masking_disk.py">Replay the disk check</a>.</p>
+    </details>
+  </main>
+  <script id="brackets" type="application/json">[[3,1843,1844,40],[4,1841,1842,40],[5,9446,9447,38],[6,9442,9443,38],[7,1162,1163,38],[8,1162,1163,38],[9,2586,2587,37],[10,2585,2586,37],[11,7808,7809,36],[12,7807,7808,36],[13,2474,2475,36],[14,2474,2475,36],[15,9278,9279,35],[16,9278,9279,35],[17,4321,4322,35],[18,4320,4321,35],[19,2044,2045,35],[20,2044,2045,35],[21,1037,1038,35],[22,1037,1038,35],[23,5438,5439,34],[24,5438,5439,34]]</script>
+  <script>
+    (() => {
+      const get = id => document.getElementById(id);
+      const plot = get('plot'), power = get('power');
+      const presets = [...document.querySelectorAll('[data-power]')];
+      const brackets = JSON.parse(get('brackets').textContent);
+      let selected = 24;
+      const rows = brackets.map(([size,lo,hi,decade]) => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = size;
+        button.setAttribute('aria-label', 'Show bracket for size ' + size);
+        button.addEventListener('click', () => { selected = size; render(); });
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.setAttribute('aria-hidden', 'true');
+        const logThreshold = decade + Math.log10((lo + hi) / 2000);
+        bar.style.setProperty('--limit', (logThreshold - 34) * 12.5 + '%');
+        const decision = document.createElement('span');
+        decision.dataset.decision = '';
+        row.append(button, bar, decision);
+        plot.append(row);
+        return {size,lo,hi,decade,row,button,decision};
+      });
+
+      function tenTo(exponent) {
+        const element = document.createElement('span');
+        const superScript = document.createElement('sup');
+        superScript.textContent = exponent;
+        element.append('10', superScript);
+        return element;
+      }
+
+      function render() {
+        const exponent = Number(power.value);
+        get('weight').replaceChildren(exponent === 0 ? '1' : tenTo(exponent));
+        power.setAttribute('aria-valuetext', exponent === 0 ? 'one copy' : 'ten to the ' + exponent);
+        plot.style.setProperty('--amp', (exponent - 34) * 12.5 + '%');
+        plot.dataset.outside = exponent < 34 || exponent > 42;
+        for (const preset of presets) {
+          preset.setAttribute('aria-pressed', String(Number(preset.dataset.power) === exponent));
+        }
+        let firstFailure;
+        for (const {size,decade,row,button,decision} of rows) {
+          const passes = exponent <= decade;
+          if (!passes && firstFailure === undefined) firstFailure = size;
+          row.dataset.pass = passes;
+          button.setAttribute('aria-pressed', String(size === selected));
+          decision.textContent = passes ? 'Passes' : 'Fails';
+        }
+        get('summary').textContent = firstFailure === undefined
+          ? 'All 24 sizes pass at this weight.'
+          : 'First failure at size ' + firstFailure + '.';
+        const {lo,hi,decade} = rows[selected - 3];
+        get('detail').replaceChildren('Size ' + selected + ' threshold is between ' +
+          (lo / 1000).toFixed(3) + ' and ' + (hi / 1000).toFixed(3) + ', times ', tenTo(decade), '.');
+      }
+
+      power.addEventListener('input', render);
+      for (const preset of presets) preset.addEventListener('click', () => {
+        power.value = preset.dataset.power;
+        render();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

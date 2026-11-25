@@ -450,4 +450,107 @@ theorem modFive_mix_wall (tau : ℝ) {s : ℂ} (hs : (5 / 2 : ℝ) ≤ s.re) :
 
 #print axioms modFive_mix_wall
 
+/-! ## Reflection for the completed mixture -/
+
+private theorem dirichletFive_odd : dirichletFive.Odd := by
+  unfold DirichletCharacter.Odd
+  rw [show (-1 : ZMod 5) = 4 by decide]
+  rfl
+
+private theorem dirichletFive_star_odd : (star dirichletFive).Odd := by
+  show (star dirichletFive) (-1) = -1
+  rw [MulChar.star_apply, dirichletFive_odd]
+  simp
+
+private theorem primitive_of_odd_five {χ : DirichletCharacter ℂ 5} (hχ : χ.Odd) : χ.IsPrimitive := by
+  rcases (Nat.dvd_prime (by decide : Nat.Prime 5)).mp χ.conductor_dvd_level with h | h
+  · have hone := (χ.eq_one_iff_conductor_eq_one).mpr h
+    unfold DirichletCharacter.Odd at hχ
+    rw [hone, MulChar.one_apply (isUnit_one.neg)] at hχ
+    norm_num at hχ
+  · exact h
+
+/-- The same real-angle mix with the common Gamma factor included. -/
+noncomputable def completedMix (tau : ℝ) (s : ℂ) : ℂ :=
+  (Real.cos tau : ℂ) * dirichletFive.completedLFunction s +
+    (Real.sin tau : ℂ) * dirichletFive.rootNumber * (star dirichletFive).completedLFunction s
+
+theorem completedMix_ne_zero_right (tau : ℝ) {s : ℂ} (hs : (5 / 2 : ℝ) ≤ s.re) :
+    completedMix tau s ≠ 0 := by
+  have hχ := DirichletCharacter.LFunction_eq_completed_div_gammaFactor dirichletFive s
+    (.inr (by decide))
+  have hbar := DirichletCharacter.LFunction_eq_completed_div_gammaFactor (star dirichletFive) s
+    (.inr (by decide))
+  rw [dirichletFive_odd.gammaFactor_def] at hχ
+  rw [dirichletFive_star_odd.gammaFactor_def] at hbar
+  have wall := modFive_mix_wall tau hs
+  rw [hχ, hbar, ← mul_div_assoc, ← mul_div_assoc, ← add_div] at wall
+  change completedMix tau s / _ ≠ 0 at wall
+  exact fun hzero => wall (by rw [hzero, zero_div])
+
+private theorem rootNumbers_mul :
+    dirichletFive.rootNumber * (star dirichletFive).rootNumber = 1 := by
+  let s : ℂ := 3
+  have hn : dirichletFive.completedLFunction s ≠ 0 := by
+    simpa [completedMix] using completedMix_ne_zero_right 0
+      (s := s) (by norm_num [s] : (5 / 2 : ℝ) ≤ s.re)
+  -- Applying the functional equation twice returns the same L-function.
+  have hχ := DirichletCharacter.IsPrimitive.completedLFunction_one_sub
+    (primitive_of_odd_five dirichletFive_odd) (1 - s)
+  have hbar := DirichletCharacter.IsPrimitive.completedLFunction_one_sub
+    (primitive_of_odd_five dirichletFive_star_odd) s
+  rw [sub_sub_cancel, ← MulChar.star_eq_inv] at hχ
+  rw [← MulChar.star_eq_inv, star_star] at hbar
+  rw [hbar] at hχ
+  have hpow : (5 : ℂ) ^ (1 - s - 1/2) * (5 : ℂ) ^ (s - 1/2) = 1 := by
+    rw [← Complex.cpow_add _ _ (by norm_num), show 1 - s - 1/2 + (s - 1/2) = 0 by ring,
+      Complex.cpow_zero]
+  have hcancel : dirichletFive.completedLFunction s =
+      (dirichletFive.rootNumber * (star dirichletFive).rootNumber) *
+        dirichletFive.completedLFunction s := by
+    calc
+      _ = _ := hχ
+      _ = ((5 : ℂ) ^ (1 - s - 1/2) * (5 : ℂ) ^ (s - 1/2)) *
+            ((dirichletFive.rootNumber * (star dirichletFive).rootNumber) *
+              dirichletFive.completedLFunction s) := by push_cast; ring
+      _ = _ := by rw [hpow, one_mul]
+  exact mul_right_cancel₀ hn (by simpa using hcancel.symm)
+
+/-- Reflection swaps the two real weights in the completed mixture. -/
+theorem completedMix_reflect (tau : ℝ) (s : ℂ) :
+    completedMix tau (1 - s) =
+      (5 : ℂ) ^ (s - 1/2) * completedMix (Real.pi / 2 - tau) s := by
+  have hχ := DirichletCharacter.IsPrimitive.completedLFunction_one_sub
+    (primitive_of_odd_five dirichletFive_odd) s
+  have hbar := DirichletCharacter.IsPrimitive.completedLFunction_one_sub
+    (primitive_of_odd_five dirichletFive_star_odd) s
+  rw [← MulChar.star_eq_inv] at hχ
+  rw [← MulChar.star_eq_inv, star_star] at hbar
+  rw [completedMix, completedMix, hχ, hbar, Real.cos_pi_div_two_sub, Real.sin_pi_div_two_sub]
+  calc
+    _ = (5 : ℂ) ^ (s - 1/2) *
+          ((Real.sin tau : ℂ) * (dirichletFive.rootNumber * (star dirichletFive).rootNumber) *
+            dirichletFive.completedLFunction s +
+          (Real.cos tau : ℂ) * dirichletFive.rootNumber * (star dirichletFive).completedLFunction s) := by
+        push_cast
+        ring
+    _ = _ := by rw [rootNumbers_mul, mul_one]
+
+/-- The completed mixture is zero-free on both sides of the resulting strip. -/
+theorem completedMix_ne_zero_outside (tau : ℝ) {s : ℂ}
+    (hs : s.re ≤ -(3 / 2 : ℝ) ∨ (5 / 2 : ℝ) ≤ s.re) :
+    completedMix tau s ≠ 0 := by
+  rcases hs with left | right
+  · have hright : (5 / 2 : ℝ) ≤ (1 - s).re := by
+      simp only [Complex.sub_re, Complex.one_re]
+      linarith
+    have hmirror := completedMix_reflect tau (1 - s)
+    rw [sub_sub_cancel] at hmirror
+    rw [hmirror]
+    exact mul_ne_zero (by exact Complex.cpow_ne_zero_iff.mpr (Or.inl (by norm_num)))
+      (completedMix_ne_zero_right _ hright)
+  · exact completedMix_ne_zero_right tau right
+
+#print axioms completedMix_ne_zero_outside
+
 end MixWall

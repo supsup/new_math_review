@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One height turns every prime</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #262c34;
+      --muted: #565f66;
+      --paper: #fbf8ef;
+      --blue: #255876;
+      --ochre: #9a541d;
+      --line: #c6c9c7;
+      --panel: #eef2f0;
+      background: #e7eae7;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 54rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .17em; }
+    :focus-visible { outline: .16rem solid var(--ochre); outline-offset: .16rem; }
+    h1 { font: clamp(2.7rem, 8vw, 5rem)/.99 Georgia, serif; margin: .55rem 0 .74rem; letter-spacing: -.052em; max-width: 13ch; }
+    p, figcaption { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .presets { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0; }
+    button { border: 1px solid var(--line); border-radius: .28rem; background: #e9efee; color: var(--blue);
+      padding: .38rem .65rem; min-height: 2.65rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--blue); color: white; }
+    .dial { display: grid; grid-template-columns: auto minmax(4rem, 1fr) auto; align-items: center; gap: .65rem; }
+    label, .number { font-weight: 650; }
+    input[type="range"] { accent-color: var(--blue); width: 100%; margin: 0; min-height: 2.65rem; }
+    output, dd, td { font-variant-numeric: tabular-nums; }
+    dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: .55rem 0; background: var(--panel); }
+    dl > div { padding: .6rem .65rem; border-left: 1px solid var(--line); }
+    dl > div:first-child { border-left: .2rem solid var(--blue); }
+    dt { color: var(--muted); line-height: 1.25; }
+    dd { margin: .2rem 0 0; font: clamp(1.24rem, 5vw, 1.8rem)/1 Georgia, serif; }
+    #setting { color: var(--muted); margin: .15rem 0 .7rem; font-size: .9rem; }
+    figure { margin: .7rem 0 .9rem; }
+    figcaption { font-size: .86rem; margin-top: .44rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .91rem; }
+    th, td { border-bottom: 1px solid var(--line); text-align: right; padding: .34rem .25rem; }
+    th:first-child { text-align: left; }
+    th[scope="col"] { font-size: .84rem; color: var(--muted); }
+    th[scope="row"] { font-weight: 600; }
+    .bar-cell { width: 54%; }
+    .track { position: relative; height: .86rem; background: #eeece5; }
+    .track::before { position: absolute; content: ""; inset: 0 auto 0 50%; border-left: 1px solid #838885; }
+    .fill, .cap { position: absolute; height: 100%; }
+    .fill { background: var(--blue); }
+    .fill.negative { background: var(--ochre); }
+    .cap { border-left: 1px solid #4b545a; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: .86rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 28rem) {
+      .dial { grid-template-columns: 1fr auto; gap: .1rem .5rem; }
+      input[type="range"] { grid-row: 2; grid-column: 1 / -1; }
+      .bar-cell { width: 36%; }
+      dt { font-size: .85rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="mirror_mix_sharp_walls.html">Back to the prime-angle walls</a>
+    <h1>One height turns every prime</h1>
+    <p class="intro">Each prime turns the ratio of the two <var>L</var>-functions a little. The primes turn at different speeds, but one height controls them all. Move the height to see which ones help reach the turn needed for cancellation.</p>
+
+    <div class="presets" aria-label="Certified zero examples">
+      <button type="button" data-example="0" aria-pressed="true">Farthest through height 201</button>
+      <button type="button" data-example="1" aria-pressed="false">High 135° zero</button>
+    </div>
+    <div class="dial">
+      <label for="offset">Height</label>
+      <input id="offset" type="range" min="-4" max="4" step=".02" value="0">
+      <output id="height" for="offset"></output>
+    </div>
+    <dl aria-label="Total turns in degrees">
+      <div><dt>Actual turn</dt><dd id="actual"></dd></div>
+      <div><dt>Turn needed</dt><dd id="target"></dd></div>
+      <div><dt>Prime limits added</dt><dd id="limit"></dd></div>
+    </dl>
+    <p id="setting"></p>
+    <figure>
+      <table aria-label="Contribution from each prime">
+        <thead><tr><th scope="col">Prime</th><th scope="col" class="bar-cell">← Turn →</th><th scope="col">Actual</th><th scope="col">Limit</th></tr></thead>
+        <tbody id="contributions"></tbody>
+      </table>
+      <figcaption>Bars to the right add turn. Bars to the left take it away. The thin marks are the positive and negative limits for each row.</figcaption>
+    </figure>
+    <p>Near height 99.89418 the required turn is reached at a mix of about 134.56611°. This is the rightmost zero across the whole dial through height 201, at real part 2.346000334548824–2.346000334548825. At the higher 135° example the primes line up more closely, leaving less turn unused. That zero reaches real part about 2.378756. <a href="../tools/check_mirror_mix_finite_peak.py">Replay the finite-height maximum</a> · <a href="../tools/check_spira_high_root.py">Replay the high disk</a>.</p>
+    <p>Turn is only one requirement at a fixed mix. The size of the ratio has to match too. <a href="mirror_mix_all_angle_walls.html">See what changes across the dial</a>.</p>
+    <details>
+      <summary>How to calculate a turn</summary>
+      <p>At real part σ and height <var>t</var>, set <var>r</var> = <var>p</var><sup>−σ</sup>. Only primes with remainder 2 or 3 modulo 5 remain after dividing the Euler products. Their contribution is arctan(±2<var>r</var> cos(<var>t</var> log <var>p</var>)/(1 − <var>r</var>²)), with a plus sign for remainder 2. Setting the cosine to ±1 gives the two extremes, ±2 arctan(<var>r</var>).</p>
+      <p>The display sums primes up to 10,000 and rounds the angle values. The omitted turn is less than 0.0004° at both real parts, by comparing the remaining terms to the integral of 2<var>x</var><sup>−σ</sup>. The finite-height peak comes from Marlow’s phase calculation and the independent interval replay linked above. The sharp all-height wall comes from the Euler product analysis of Bombieri and Ghosh. <a href="https://doi.org/10.1070/RM2011v066n02ABEH004740">Theorem 7 and Section 6</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const examples = [
+        { sigma: 2.3460003345488247, height: 99.89417975166881 },
+        { sigma: 2.378755863122, height: 1174561.0989005927 }
+      ];
+      const visiblePrimes = [2, 3, 7, 13, 17, 23];
+      const toDegrees = 180 / Math.PI;
+      const target = Math.atan(Math.sin(4 * Math.PI / 5) / Math.sin(2 * Math.PI / 5)) * toDegrees;
+      const cutoff = 10000;
+      const eligible = [];
+      const composite = new Uint8Array(cutoff + 1);
+      for (let p = 2; p <= cutoff; p++) {
+        if (composite[p]) continue;
+        if (p % 5 === 2 || p % 5 === 3) eligible.push(p);
+        for (let i = p * p; i <= cutoff; i += p) composite[i] = 1;
+      }
+      for (const example of examples) {
+        example.primes = eligible.map(p => {
+          const r = p ** -example.sigma;
+          const sign = p % 5 === 2 ? 1 : -1;
+          return { p, log: Math.log(p), coefficient: sign * 2 * r / (1 - r * r),
+            cap: 2 * Math.atan(r) * toDegrees };
+        });
+      }
+
+      const get = id => document.getElementById(id);
+      const offset = get('offset');
+      const presets = [...document.querySelectorAll('[data-example]')];
+      const rowTemplate = document.createElement('template');
+      rowTemplate.innerHTML = '<tr><th scope="row"></th><td><div class="track" aria-hidden="true"><span class="fill"></span><span class="cap"></span><span class="cap"></span></div></td><td class="number"></td><td></td></tr>';
+      const rows = [...visiblePrimes, 'Other primes'].map(name => {
+        const row = rowTemplate.content.firstElementChild.cloneNode(true);
+        const [label, , actual, limit] = row.cells;
+        label.textContent = name;
+        get('contributions').append(row);
+        return { fill: row.querySelector('.fill'), marks: [...row.querySelectorAll('.cap')], actual, limit };
+      });
+      const formatHeight = new Intl.NumberFormat('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 });
+      const degrees = v => (Math.abs(v) < .005 ? 0 : v).toFixed(2) + '°';
+      let selected = 0;
+
+      function drawRow(row, phase, cap) {
+        const width = v => 50 * v / 24;
+        row.fill.style.left = (50 + Math.min(width(phase), 0)) + '%';
+        row.fill.style.width = width(Math.abs(phase)) + '%';
+        row.fill.classList.toggle('negative', phase < 0);
+        row.marks[0].style.left = (50 - width(cap)) + '%';
+        row.marks[1].style.left = (50 + width(cap)) + '%';
+        row.actual.textContent = degrees(phase);
+        row.limit.textContent = degrees(cap);
+      }
+
+      function render() {
+        const { sigma, height, primes } = examples[selected];
+        const current = height + Number(offset.value);
+        let phase = 0, totalCap = 0, other = 0, otherCap = 0;
+        for (const { p, log, coefficient, cap } of primes) {
+          const turn = Math.atan(coefficient * Math.cos(current * log)) * toDegrees;
+          phase += turn;
+          totalCap += cap;
+          const position = visiblePrimes.indexOf(p);
+          if (position === -1) {
+            other += turn;
+            otherCap += cap;
+          } else {
+            drawRow(rows[position], turn, cap);
+          }
+        }
+        drawRow(rows.at(-1), other, otherCap);
+        get('height').textContent = formatHeight.format(current);
+        offset.setAttribute('aria-valuetext', formatHeight.format(current));
+        get('actual').textContent = degrees(phase);
+        get('limit').textContent = degrees(totalCap);
+        get('setting').textContent = 'Real part held at ' + sigma.toFixed(9) + '.';
+      }
+
+      get('target').textContent = degrees(target);
+      offset.addEventListener('input', render);
+      for (const button of presets) {
+        button.addEventListener('click', () => {
+          selected = Number(button.dataset.example);
+          for (const preset of presets) preset.setAttribute('aria-pressed', preset === button);
+          offset.value = 0;
+          render();
+        });
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

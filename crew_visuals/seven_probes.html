@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When seven probes miss</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f2e9;
+      --panel: #fffcf5;
+      --ink: #222723;
+      --muted: #4f5b54;
+      --line: #cdcfc5;
+      --green: #155343;
+      --orange: #934112;
+      --orange-pale: #fff0d9;
+      font-family: system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.55; }
+    main { max-width: 64rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); }
+    a { color: var(--green); text-underline-offset: .2em; }
+    h1 { font: 500 clamp(2.6rem, 7vw, 5.6rem)/.98 Georgia, serif; letter-spacing: -.045em; margin: 1.5rem 0 1rem; }
+    h2 { margin: 0; font: 500 clamp(1.35rem, 3vw, 1.9rem) Georgia, serif; }
+    p { max-width: 66ch; }
+    header p { font-size: clamp(1.05rem, 2vw, 1.2rem); }
+    .experiment { margin-top: 1.9rem; padding: clamp(1rem, 3vw, 1.6rem); background: var(--panel); border: 1px solid var(--line); border-radius: .65rem; }
+    .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+    button { cursor: pointer; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid #929e93; border-radius: .35rem; }
+    button:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+    .toolbar button { padding: .45rem .75rem; min-height: 2.75rem; }
+    .toolbar button:hover { background: #e7eee4; }
+    .status { background: #e7eee4; border-inline-start: .25rem solid var(--green); padding: .65rem .85rem; margin: 1rem 0; min-height: 4.9rem; }
+    .status p { margin: 0; }
+    .status strong { color: #134638; }
+    .legend { display: flex; flex-wrap: wrap; gap: .35rem 1rem; margin: 1rem 0 .7rem; font-size: .9rem; color: var(--muted); }
+    .legend span { display: inline-flex; align-items: center; gap: .38rem; }
+    .key { width: .76rem; height: .76rem; border-radius: .16rem; background: var(--orange-pale); border: 1px solid var(--orange); }
+    .key.probe { background: var(--green); border-color: var(--green); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(3.05rem, 1fr)); gap: .38rem; }
+    .tile { min-height: 3.65rem; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .08rem; font-variant-numeric: tabular-nums; }
+    .tile:hover { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+    .tile .index { font-size: .76rem; color: var(--muted); }
+    .tile [data-value] { font: 500 1.2rem ui-monospace, monospace; }
+    .tile.changed { background: var(--orange-pale); color: var(--orange); border-color: #c9875b; }
+    .tile[aria-pressed="true"] { color: white; background: var(--green); border-color: var(--green); }
+    .tile[aria-pressed="true"] .index { color: #d9efe6; }
+    .foot { color: var(--muted); font-size: .91rem; margin-bottom: 0; }
+    details { padding-top: 1.1rem; }
+    summary { color: var(--green); cursor: pointer; }
+    code { font: 500 .91em ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <a href="seven_loss_mixer.txt">Eight connections recover seven missing readings</a>
+    <h1>When seven probes miss</h1>
+    <p>This 43-reading mixer hides seven independent differences modulo 47. Seven direct probes can pin them down. The positions you choose determine whether they do.</p>
+  </header>
+  <section class="experiment" aria-labelledby="experiment-title">
+    <h2 id="experiment-title">Choose where to look</h2>
+    <p>Pick up to seven positions to read directly. The tiles show a possible change to the original input that agrees with your probes and with every mixed reading.</p>
+    <div class="toolbar" role="group" aria-label="Probe presets">
+      <button id="miss" type="button">Seven that miss</button>
+      <button id="work" type="button">Seven that work</button>
+      <button id="clear" type="button">Clear probes</button>
+    </div>
+    <div class="status" role="status" aria-live="polite">
+      <p><strong id="result"></strong></p>
+      <p id="explanation"></p>
+    </div>
+    <div class="legend"><span><i class="key probe" aria-hidden="true"></i> Direct probe</span><span><i class="key" aria-hidden="true"></i> Hidden nonzero change</span></div>
+    <div id="tiles" class="grid" role="group" aria-label="Input positions"></div>
+    <p class="foot" id="mixed"></p>
+    <noscript><p>JavaScript runs the modular arithmetic for this board.</p></noscript>
+  </section>
+  <details>
+    <summary>Why this board can miss</summary>
+    <p>Reading <var>j</var> adds the inputs at <var>j</var> minus each of the eight offsets <code>0, 1, 8, 15, 17, 20, 26, 30</code>, wrapping around at 43. The result is reduced modulo 47.</p>
+    <p>The 43 mixed equations have rank 36. To rule out any difference between two candidate inputs, the probes have to supply seven independent equations on the remaining seven directions. The first preset supplies six. The second supplies seven.</p>
+    <p>In the first preset even keeping all 43 mixed readings leaves ambiguity. That rules out this board for the guarantee that <em>every</em> set of seven probes repairs <em>every</em> set of seven missing mixed readings.</p>
+    <p><a href="seven_probe_floor.txt">Read the exact search that rules out all boards through size 50.</a></p>
+  </details>
+</main>
+<script>
+  (() => {
+    const length = 43;
+    const prime = 47;
+    const probeLimit = 7;
+    const offsets = [0, 1, 8, 15, 17, 20, 26, 30];
+    const missingPreset = [0, 3, 14, 16, 20, 29, 37];
+    const workingPreset = [0, 1, 2, 3, 4, 5, 6];
+    const positions = Array.from({length}, (_, index) => index);
+    const mod = value => ((value % prime) + prime) % prime;
+    const inverses = Array.from({length: prime}, (_, value) => {
+      for (let candidate = 1; candidate < prime; candidate++) {
+        if (mod(value * candidate) === 1) return candidate;
+      }
+      return 0;
+    });
+
+    function nullspace(rows, columns) {
+      const matrix = rows.map(row => row.slice());
+      const pivots = [];
+      for (let column = 0; column < columns; column++) {
+        const rank = pivots.length;
+        const next = matrix.findIndex((row, index) => index >= rank && row[column] !== 0);
+        if (next === -1) continue;
+        [matrix[rank], matrix[next]] = [matrix[next], matrix[rank]];
+        const inverse = inverses[matrix[rank][column]];
+        const pivot = matrix[rank].map(value => mod(value * inverse));
+        matrix[rank] = pivot;
+        matrix.forEach((row, index) => {
+          if (index === rank || row[column] === 0) return;
+          const scale = row[column];
+          matrix[index] = row.map((value, k) => mod(value - scale * pivot[k]));
+        });
+        pivots.push(column);
+      }
+      return Array.from({length: columns}, (_, index) => index)
+        .filter(column => !pivots.includes(column))
+        .map(free => {
+          const vector = Array(columns).fill(0);
+          vector[free] = 1;
+          pivots.forEach((column, index) => { vector[column] = mod(-matrix[index][free]); });
+          return vector;
+        });
+    }
+
+    const mixing = positions.map(reading => {
+      const locations = offsets.map(offset => (reading + length - offset) % length);
+      return positions.map(position => Number(locations.includes(position)));
+    });
+    const basis = nullspace(mixing, length);
+    if (basis.length !== probeLimit) throw new Error('Unexpected mixing rank');
+
+    const byId = id => document.getElementById(id);
+    let selected = new Set(missingPreset);
+    const tiles = positions.map(position => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'tile';
+      const index = document.createElement('span');
+      index.className = 'index';
+      index.textContent = String(position).padStart(2, '0');
+      const value = document.createElement('span');
+      value.dataset.value = '';
+      button.append(index, value);
+      button.addEventListener('click', () => {
+        if (selected.delete(position)) {
+          update();
+          return;
+        }
+        if (selected.size === probeLimit) {
+          byId('explanation').textContent = 'Remove an existing probe before adding another.';
+          return;
+        }
+        selected.add(position);
+        update();
+      });
+      byId('tiles').append(button);
+      return {button, value};
+    });
+
+    function update() {
+      const constraints = [...selected].map(position => basis.map(vector => vector[position]));
+      const remaining = nullspace(constraints, basis.length);
+      const coefficients = remaining[0] ?? Array(basis.length).fill(0);
+      const change = positions.map(position => mod(
+        basis.reduce((total, vector, index) => total + coefficients[index] * vector[position], 0)
+      ));
+      tiles.forEach(({button, value}, position) => {
+        const atProbe = selected.has(position);
+        button.setAttribute('aria-pressed', atProbe);
+        button.setAttribute('aria-label', `Position ${position}, change ${change[position]}`);
+        button.classList.toggle('changed', change[position] !== 0);
+        value.textContent = String(change[position]);
+      });
+      byId('result').textContent = `${selected.size} of 7 probes selected`;
+      byId('explanation').textContent = remaining.length === 0
+        ? 'These probes force the difference to be zero.'
+        : remaining.length === 1 ? 'One independent hidden difference remains.'
+        : `${remaining.length} independent hidden differences remain.`;
+      const same = mixing.filter(row => mod(row.reduce((sum, entry, position) => sum + entry * change[position], 0)) === 0).length;
+      byId('mixed').textContent = `${same} of ${length} mixed readings stay the same modulo ${prime}.`;
+    }
+
+    function preset(probes) {
+      selected = new Set(probes);
+      update();
+    }
+    byId('miss').addEventListener('click', () => preset(missingPreset));
+    byId('work').addEventListener('click', () => preset(workingPreset));
+    byId('clear').addEventListener('click', () => preset([]));
+    update();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How an infinite lattice fits in one square</title>
+  <style>
+    :root { color-scheme: light; background: #e7ece5; color: #283932; font: 100%/1.57 system-ui, sans-serif; --paper: #faf6ea; --green: #205c4e; --warm: #9a492b; --line: #c5ccc1; --muted: #526056; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 51rem); margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .17em; overflow-wrap: anywhere; }
+    :focus-visible { outline: .15rem solid #a8522c; outline-offset: .13rem; }
+    h1 { margin: .55rem 0 .69rem; font: clamp(2.6rem, 8vw, 5.1rem)/1 Georgia, serif; max-width: 15ch; letter-spacing: -.045em; }
+    h2 { margin: 1.3rem 0 .4rem; font: 1.65rem/1.2 Georgia, serif; }
+    p { max-width: 67ch; }
+    .intro, .note { color: var(--muted); }
+    .controls { display: flex; gap: .56rem; flex-wrap: wrap; align-items: center; margin: 1.05rem 0 .55rem; }
+    select, button { min-height: 2.65rem; padding: .3rem .6rem; border: 1px solid var(--line); border-radius: .3rem; background: #fffdf4; color: var(--green); font: inherit; cursor: pointer; }
+    .stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: .75rem; align-items: stretch; }
+    figure { margin: 0; padding: .6rem; border: 1px solid var(--line); border-radius: .3rem; background: #f2f5e9; min-width: 0; }
+    figcaption { font-weight: 660; }
+    #grid { display: grid; grid-template-columns: repeat(var(--m), minmax(0, 1fr)); gap: .28rem; padding-top: .4rem; }
+    .residue { min-height: 2.35rem; padding: .17rem .08rem; font-size: .87rem; color: var(--muted); background: #fdf9ec; }
+    .residue[data-member=true] { color: var(--green); background: #dfece0; border-color: #8eaa9a; }
+    .residue[aria-pressed=true] { color: white; background: var(--green); border-color: var(--green); }
+    .residue:disabled { color: var(--green); cursor: default; }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; margin-top: .4rem; border: 1px solid var(--line); border-radius: .28rem; background: #fffdf3; }
+    .readout { margin: .73rem 0; padding: .54rem .73rem; border-left: .22rem solid var(--green); background: #eaf0e5; }
+    .readout p { margin: .13rem 0; }
+    #count { font-weight: 680; }
+    details { margin: 1rem 0 0; padding-top: .6rem; border-top: 1px solid var(--line); }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 39rem) { .stage { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_source_build.html">Back to where the Lean build grows</a>
+    <h1>How an infinite lattice fits in one square</h1>
+    <p class="intro">Every lattice in this example contains the integer grid. It may also contain some fractional points. Pick a fractional point to add. All its integer translates and all sums of the chosen points must come along too. The repeating pattern is determined by one square.</p>
+    <div class="controls">
+      <label for="denominator">Denominator <var>m</var></label>
+      <select id="denominator">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+      <button id="reset" type="button">Clear choices</button>
+    </div>
+    <div class="stage">
+      <figure>
+        <figcaption>One square, with opposite edges identified</figcaption>
+        <div id="grid" aria-label="Choose fractional points"></div>
+      </figure>
+      <figure>
+        <figcaption>The same points repeated</figcaption>
+        <canvas id="pattern" width="640" height="480" role="img" aria-label="Periodic lattice produced by the chosen points"></canvas>
+      </figure>
+    </div>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="count"></p>
+      <p id="description"></p>
+    </div>
+
+    <h2>Where the finiteness comes from</h2>
+    <p>Any lattice between ℤ² and (1/<var>m</var>)ℤ² is determined by its points modulo integer translations. Those residues form a subgroup of (ℤ/<var>m</var>ℤ)². Conversely, start from any subgroup of that finite grid and take all integer translates of its points. That gives an intermediate lattice. For <var>m</var> = 2 there are exactly five choices, including three ways to add just one nonzero residue.</p>
+
+    <details>
+      <summary>How this appears in the Hermitian proof</summary>
+      <p>The archive starts with a Hermitian form over a number field and a family of lattices whose duals are a fixed multiple of the original lattices. A short-vector argument and induction find an orthogonal basis of the surrounding vector space made of lattice vectors, with self-pairings from a fixed finite list. In those coordinates the lattice contains the integral grid. A common denominator puts it inside a fixed finer grid. The quotient between those grids is finite, just as above. For each possible lattice, the markings also have finitely many residues modulo the level.</p>
+      <p>The short-vector argument allows indefinite forms. It takes absolute values of diagonal coefficients when bounding vectors. If a short vector has self-pairing zero, the proof pairs it with a second vector and adjusts that second vector to have one of finitely many nonzero lengths. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/PublishedTheorems/AdelicLattices%E2%82%82/ExistsFiniteOrthogonalLengths.lean">Orthogonal-length argument</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AbelianVarietyTheory/PublishedTheorems/AdelicLattices%E2%82%82/ExistsFiniteRepresentatives.lean#L107">Finite-quotient argument</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const get = id => document.getElementById(id);
+      const select = get('denominator'), grid = get('grid'), canvas = get('pattern'), ctx = canvas.getContext('2d');
+      const choices = new Set([4]);
+      const element = (x,y,m) => x + y*m;
+      const coords = (i,m) => [i % m, Math.floor(i/m)];
+
+      function closure(generators,m) {
+        const group = new Set([0]);
+        const queue = [0];
+        for (const a of queue) {
+          const [x,y] = coords(a,m);
+          for (const b of generators) {
+            const [u,v] = coords(b,m);
+            const sum = element((x+u)%m,(y+v)%m,m);
+            if (group.has(sum)) continue;
+            group.add(sum);
+            queue.push(sum);
+          }
+        }
+        return group;
+      }
+
+      function countGroups(m) {
+        const visited = new Set(['0']);
+        const queue = [new Set([0])];
+        for (const group of queue) {
+          for (let i=1; i<m*m; i++) {
+            if (group.has(i)) continue;
+            const larger = closure([...group,i],m);
+            const key = [...larger].sort((a,b)=>a-b).join(',');
+            if (visited.has(key)) continue;
+            visited.add(key);
+            queue.push(larger);
+          }
+        }
+        return queue.length;
+      }
+
+      function draw(m,members) {
+        ctx.clearRect(0,0,640,480);
+        ctx.strokeStyle = '#b9c7b5';
+        ctx.lineWidth = 1.4;
+        for (let i=0;i<=4;i++) {
+          const x=48+136*i;
+          ctx.beginPath(); ctx.moveTo(x,36); ctx.lineTo(x,444); ctx.stroke();
+        }
+        for (let j=0;j<=3;j++) {
+          const y=36+136*j;
+          ctx.beginPath(); ctx.moveTo(48,y); ctx.lineTo(592,y); ctx.stroke();
+        }
+        for (let j=0;j<=3*m;j++) for (let i=0;i<=4*m;i++) {
+          const key=element(i%m,j%m,m);
+          if (!members.has(key)) continue;
+          ctx.fillStyle=key===0?'#293932':choices.has(key)?'#9a492b':'#397766';
+          ctx.beginPath();
+          ctx.arc(48+i*136/m,444-j*136/m,key===0?5:choices.has(key)?4.7:3.4,0,2*Math.PI);
+          ctx.fill();
+        }
+        canvas.setAttribute('aria-label','Repeated pattern with '+members.size+' residues per unit square.');
+      }
+
+      let count;
+      function refresh() {
+        const m=Number(select.value), members=closure(choices,m);
+        for (const tile of grid.children) {
+          const i=Number(tile.dataset.index);
+          tile.dataset.member=members.has(i);
+          tile.setAttribute('aria-pressed', String(choices.has(i)));
+        }
+        draw(m,members);
+        get('count').textContent=members.size+' of '+m*m+' residues in the resulting lattice.';
+        get('description').textContent='There are '+count+' different intermediate lattices for this denominator.';
+      }
+
+      function rebuild() {
+        const m=Number(select.value);
+        count=countGroups(m);
+        grid.replaceChildren();
+        grid.style.setProperty('--m',m);
+        for (let y=m-1;y>=0;y--) for (let x=0;x<m;x++) {
+          const i=element(x,y,m), button=document.createElement('button');
+          button.type='button';
+          button.className='residue';
+          button.textContent='('+x+','+y+')';
+          button.setAttribute('aria-label','Point '+x+'/'+m+', '+y+'/'+m);
+          button.dataset.index=i;
+          button.disabled=i===0;
+          button.addEventListener('click',()=>{
+            if (choices.has(i)) choices.delete(i);
+            else choices.add(i);
+            refresh();
+          });
+          grid.append(button);
+        }
+        refresh();
+      }
+
+      select.addEventListener('change',()=>{choices.clear();rebuild();});
+      get('reset').addEventListener('click',()=>{choices.clear();refresh();});
+      rebuild();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The other wall by reflection</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ec;
+      --ink: #2d3736;
+      --muted: #52625d;
+      --teal: #236761;
+      --brown: #924d2a;
+      --line: #b8c5bd;
+      background: #e7ebe6;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 52rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .15em; }
+    h1 { max-width: 13ch; font: clamp(2.7rem, 8vw, 5rem)/1 Georgia, serif; letter-spacing: -.048em; margin: .55rem 0 .7rem; }
+    p, figcaption { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    .dial { display: grid; grid-template-columns: minmax(6rem, auto) minmax(5rem, 1fr) 4.4rem; align-items: center; gap: .45rem; margin: .32rem 0; }
+    label, .point-name { font-weight: 650; }
+    input[type="range"] { width: 100%; accent-color: var(--teal); margin: 0; min-height: 2.5rem; }
+    output, dd { font-variant-numeric: tabular-nums; }
+    :focus-visible { outline: .16rem solid var(--brown); outline-offset: .16rem; }
+    figure { margin: .65rem 0 .85rem; }
+    .plot { height: 13rem; position: relative; border: 1px solid var(--line); background: #fffcf4; }
+    .excluded { position: absolute; inset: 0 auto 0 0; width: 16.6667%; background: #e0ece4; }
+    .excluded:last-of-type { inset: 0 0 0 auto; }
+    .edge { position: absolute; top: 0; height: 100%; border-left: 2px solid var(--teal); }
+    .edge.left { left: 16.6667%; }
+    .edge.right { left: 83.3333%; }
+    .edge span { position: absolute; top: .28rem; white-space: nowrap; left: 0; transform: translateX(-50%); padding: .11rem .28rem; background: var(--paper); border-radius: .18rem; font-size: .8rem; }
+    .axis { position: absolute; background: #9ca7a1; }
+    .axis.horizontal { width: 100%; top: 50%; height: 1px; }
+    .axis.vertical { height: 100%; left: 50%; width: 1px; }
+    .connector { position: absolute; left: 50%; top: 50%; height: 1px; background: #8a796e; transform-origin: 0 50%; }
+    .point { position: absolute; display: grid; place-items: center; border-radius: 50%; width: 1.6rem; height: 1.6rem; transform: translate(-50%, -50%); background: var(--brown); color: white; font: 1rem Georgia, serif; }
+    #reflected { background: var(--teal); }
+    figcaption { margin-top: .42rem; font-size: .86rem; }
+    dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .5rem; margin: .55rem 0; }
+    dl > div { border-left: 3px solid var(--brown); background: #f2e9df; padding: .52rem .62rem; }
+    dl > div + div { border-color: var(--teal); background: #e7efea; }
+    dd { margin: .16rem 0 0; }
+    #report { margin: .66rem 0; font-weight: 650; }
+    .formula { overflow-wrap: anywhere; font: 1.06rem/1.58 Georgia, serif; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="mirror_mix_wall.html">Back to the wall at five halves</a>
+    <h1>The other wall by reflection</h1>
+    <p class="intro">The functional equation trades the two weights in the completed mixture. If one angle had a zero to the left, the angle with the weights swapped would have a zero to the right.</p>
+    <div class="dial">
+      <label for="real">Real part of <var>s</var></label>
+      <input id="real" type="range" min=".5" max="3.2" step=".05" value="2.5">
+      <output id="real-value" for="real"></output>
+    </div>
+    <div class="dial">
+      <label for="angle">Angle at <var>s</var></label>
+      <input id="angle" type="range" min="0" max="180" step="1" value="120">
+      <output id="angle-value" for="angle"></output>
+    </div>
+    <figure>
+      <div class="plot" role="img" aria-label="Two sample points at opposite heights, symmetric about one half. Shaded regions start at minus three halves and five halves.">
+        <span class="excluded"></span><span class="excluded"></span>
+        <i class="axis horizontal"></i><i class="axis vertical"></i>
+        <i class="edge left"><span>−1½</span></i><i class="edge right"><span>2½</span></i>
+        <i class="connector"></i>
+        <i class="point" id="original" style="top: 28%">s</i>
+        <i class="point" id="reflected" style="top: 72%">1−s</i>
+      </div>
+      <figcaption>The two points have opposite heights. They move together and reach the shaded regions at the same time.</figcaption>
+    </figure>
+    <dl>
+      <div><dt class="point-name">At <var>s</var></dt><dd id="here"></dd></div>
+      <div><dt class="point-name">At 1 − <var>s</var></dt><dd id="there"></dd></div>
+    </dl>
+    <p id="report" role="status"></p>
+    <p>If the original angle is τ, the swapped angle is 90° − τ. Its cosine equals the original sine, and its sine equals the original cosine.</p>
+    <p class="formula"><var>F</var><sub>90°−τ</sub>(1 − <var>s</var>) = 5<sup><var>s</var>−½</sup> <var>F</var><sub>τ</sub>(<var>s</var>).</p>
+    <p>The factor 5<sup><var>s</var>−½</sup> never vanishes. The right wall works at every angle, so the reflected wall holds at every angle too. Here <var>F</var> uses completed <var>L</var>-functions, which include the common gamma factor. <a href="../tools/mirror_mix_wall.lean">See the Lean reflection and both walls</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const get = id => document.getElementById(id);
+      const real = get('real'), angle = get('angle');
+      const plot = document.querySelector('.plot'), connector = document.querySelector('.connector');
+      const decimal = n => n.toFixed(2).replace('-', '−');
+      const degrees = n => String(n).replace('-', '−') + '°';
+      const x = n => 100 * (n + 2.5) / 6;
+      function render() {
+        const a = Number(real.value), b = 1 - a;
+        const tau = Number(angle.value);
+        get('original').style.left = x(a) + '%';
+        get('reflected').style.left = x(b) + '%';
+        const dx = (x(a) - 50) * plot.clientWidth / 100;
+        const dy = .22 * plot.clientHeight;
+        connector.style.width = (2 * Math.hypot(dx, dy)) + 'px';
+        connector.style.left = x(b) + '%';
+        connector.style.top = '72%';
+        connector.style.transform = 'rotate(' + Math.atan2(-dy, dx) + 'rad)';
+        get('real-value').textContent = decimal(a);
+        get('angle-value').textContent = degrees(tau);
+        get('here').textContent = 'Real part ' + decimal(a) + ' · ' + degrees(tau);
+        get('there').textContent = 'Real part ' + decimal(b) + ' · ' + degrees(90 - tau);
+        get('report').textContent = a >= 2.5
+          ? 'Both points are in zero-free regions.'
+          : 'Both points are between the walls.';
+        angle.setAttribute('aria-valuetext', degrees(tau));
+      }
+      real.addEventListener('input', render);
+      angle.addEventListener('input', render);
+      window.addEventListener('resize', render);
+      render();
+    })();
+  </script>
+</body>
+</html>

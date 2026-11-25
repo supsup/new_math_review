@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When Li’s coefficients make a positive matrix</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ef;
+      --ink: #29343c;
+      --muted: #57616a;
+      --violet: #4f4c80;
+      --teal: #246b61;
+      --rust: #944c35;
+      --line: #c4c8cd;
+      background: #e7e9eb;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 55rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--violet); text-underline-offset: .16em; }
+    :focus-visible { outline: .17rem solid var(--rust); outline-offset: .13rem; }
+    h1 { max-width: 14ch; font: clamp(2.65rem, 8vw, 4.95rem)/1 Georgia, serif; letter-spacing: -.051em; margin: .53rem 0 .72rem; }
+    h2 { font: 1.57rem/1.16 Georgia, serif; margin: 1.12rem 0 .53rem; }
+    p, figcaption { max-width: 69ch; }
+    .intro, figcaption { color: var(--muted); }
+    .modes { display: flex; flex-wrap: wrap; gap: .43rem; margin: .88rem 0 .48rem; }
+    button { min-height: 2.63rem; border: 1px solid var(--line); border-radius: .28rem; background: #eaeaf1; color: var(--violet);
+      padding: .34rem .59rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--violet); color: white; }
+    .lab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 1fr); gap: .9rem; margin: .53rem 0; }
+    figure { margin: 0; }
+    table { border-collapse: collapse; table-layout: fixed; width: 100%; line-height: 1.4; background: #fffdf7; }
+    td { text-align: right; border: 1px solid var(--line); padding: .55rem .62rem; font-variant-numeric: tabular-nums; }
+    td.diagonal { background: #e5eeea; color: var(--teal); font-weight: 650; }
+    td.negative { background: #f3e6df; color: var(--rust); }
+    figcaption { margin: .39rem 0 .2rem; font-size: .87rem; }
+    .controls { display: grid; align-content: start; gap: .18rem; }
+    .control { display: grid; grid-template-columns: auto minmax(4rem, 1fr) 3rem; align-items: center; gap: .45rem; }
+    label { font-weight: 650; }
+    input[type="range"] { margin: 0; width: 100%; min-height: 2.46rem; accent-color: var(--violet); }
+    output, .answer, #coefs { font-variant-numeric: tabular-nums; }
+    .reset { justify-self: start; margin-top: .24rem; }
+    .answer { padding: .51rem .67rem; margin: .59rem 0 .79rem; border-left: .21rem solid var(--teal); background: #e9efea; }
+    .answer[data-sign="negative"] { border-color: var(--rust); background: #f3e7e1; }
+    .answer p { margin: .14rem 0; }
+    #value { font-weight: 700; }
+    .formula { overflow-wrap: anywhere; font: 1.075rem/1.54 Georgia, serif; }
+    details { border-top: 1px solid var(--line); padding-top: .62rem; margin: .88rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 38rem) {
+      .lab { grid-template-columns: minmax(0, 1fr); gap: .48rem; }
+      td { font-size: .88rem; padding: .5rem .38rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="li_zero_pairs.html">Back to Li’s zero pairs</a>
+    <h1>When Li’s coefficients make a positive matrix</h1>
+    <p class="intro">Take second differences of Li’s coefficients and put the same difference on each diagonal of a matrix. RH makes every weighted sum <var>c</var><sup>T</sup><var>Tc</var> nonnegative. A small synthetic quartet can already fail this test using just its first three coefficients.</p>
+    <div class="modes" aria-label="Example matrices">
+      <button type="button" data-mode="quarter">Quarter-turn pair</button>
+      <button type="button" data-mode="off">Off-line quartet</button>
+      <button type="button" data-mode="zeta">Zeta’s coefficients</button>
+    </div>
+    <div class="lab">
+      <figure>
+        <table aria-label="Three-by-three matrix of second differences"><tbody id="matrix"></tbody></table>
+        <figcaption>Each diagonal is constant. The entry at positions <var>i</var>, <var>j</var> uses the difference at distance |<var>i</var>−<var>j</var>|.</figcaption>
+      </figure>
+      <div class="controls">
+        <div class="control"><label for="weight-0">Weight 0</label><input type="range" id="weight-0" min="-2" max="2" step=".25" value="1"><output for="weight-0" id="value-0">1</output></div>
+        <div class="control"><label for="weight-1">Weight 1</label><input type="range" id="weight-1" min="-2" max="2" step=".25" value="0"><output for="weight-1" id="value-1">0</output></div>
+        <div class="control"><label for="weight-2">Weight 2</label><input type="range" id="weight-2" min="-2" max="2" step=".25" value="1"><output for="weight-2" id="value-2">1</output></div>
+        <button class="reset" type="button" id="reset">Use (1, 0, 1)</button>
+      </div>
+    </div>
+    <div class="answer" id="answer" role="status" aria-atomic="true">
+      <p id="value"></p>
+      <p id="coefs"></p>
+    </div>
+    <p>A matrix is positive semidefinite when every choice of weights gives a nonnegative sum. For the quarter-turn pair the sum is 4((<var>c</var>₀−<var>c</var>₂)²+<var>c</var>₁²). For the off-line quartet, (1, 0, 1) gives −18 even though its first three coefficients are positive. Lean checks both the cosine identity behind the square and the exact negative example. <a href="../tools/li_second_difference_matrix.lean">Read the Lean check</a>.</p>
+
+    <h2>Build the matrix from the coefficients</h2>
+    <p>Set λ₀ = 0 and reflect the sequence so λ<sub>−<var>n</var></sub> = λ<sub><var>n</var></sub>. The second difference at index <var>k</var> is <var>d</var><sub><var>k</var></sub> = λ<sub><var>k</var>+1</sub>−2λ<sub><var>k</var></sub>+λ<sub><var>k</var>−1</sub>. A matrix with entries <var>T</var><sub><var>ij</var></sub> = <var>d</var><sub><var>i</var>−<var>j</var></sub> is called Toeplitz because its diagonals are constant.</p>
+
+    <details>
+      <summary>Why RH makes these matrices nonnegative</summary>
+      <p>On the critical line a pair contributes 2(1−cos(<var>n</var>θ)) to λ<sub><var>n</var></sub>. Its second difference is 4(1−cos θ)cos(<var>k</var>θ). For any finite list of weights, the quadratic form of that cosine matrix is</p>
+      <p class="formula">4(1−cos θ) · ((Σ<sub><var>i</var></sub> <var>c</var><sub><var>i</var></sub> cos(<var>i</var>θ))² + (Σ<sub><var>i</var></sub> <var>c</var><sub><var>i</var></sub> sin(<var>i</var>θ))²).</p>
+      <p>This is a nonnegative weight times a sum of two squares. The sum of the weights over all pairs equals 2λ₁, so the sums converge absolutely and each matrix remains positive semidefinite. For a related norm viewpoint on Li coefficients, see <a href="https://arxiv.org/abs/2301.05779">Suzuki’s model-space formulation</a>.</p>
+    </details>
+    <details>
+      <summary>Why matrices of every size would imply RH</summary>
+      <p>If every matrix is positive semidefinite, use a vector supported at positions 0 and <var>k</var> with weights (1, 1) or (1, −1). The two resulting inequalities give |<var>d</var><sub><var>k</var></sub>| ≤ <var>d</var>₀ = 2λ₁. Summing the second differences twice gives |λ<sub><var>n</var></sub>| ≤ λ₁<var>n</var>².</p>
+      <p>The even symmetry of λ and its generating function give log ξ(1/(1−<var>z</var>)) = log ξ(1) + Σ<sub><var>n</var>≥1</sub> (λ<sub><var>n</var></sub>/<var>n</var>)<var>z</var><sup><var>n</var></sup> near zero. The quadratic bound makes the series analytic throughout |<var>z</var>| &lt; 1. Exponentiating extends ξ(1/(1−<var>z</var>)) there as a function with no zeros. The disk corresponds to Re <var>s</var> &gt; ½, so reflection rules out nontrivial zeros to the left as well. <a href="https://www.numdam.org/article/AIF_2007__57_5_1689_0.pdf">Lagarias, equations (1.2) and (1.5)</a>.</p>
+    </details>
+    <details>
+      <summary>How the first actual matrix was checked</summary>
+      <p>The interval replay computes λ₁ through λ₂₄ from the Taylor series of log ξ(1/(1−<var>z</var>)). It factors the exact 24×24 matrix using interval arithmetic and finds 24 positive pivots. The last is about 9.32×10<sup>−80</sup>. The matrix criterion above requires every size. <a href="../tools/check_li_matrix.py">Replay the 24×24 check</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const examples = {quarter:[0,2,4,2], off:[0,4,12.5,4], zeta:[0,0.023095708966121033,0.09234573522804668,0.2076389205543248]};
+      const get = id => document.getElementById(id);
+      const weights = [0,1,2].map(i => get('weight-'+i));
+      const modes = [...document.querySelectorAll('[data-mode]')];
+      const cells = weights.map((_,i) => {
+        const row = document.createElement('tr');
+        get('matrix').append(row);
+        return weights.map((_,j) => {
+          const cell = document.createElement('td');
+          row.append(cell);
+          cell.classList.toggle('diagonal',i===j);
+          return cell;
+        });
+      });
+      const format = x => Number(x.toPrecision(8)).toString();
+      let selected = 'quarter';
+
+      function render() {
+        const lambda = examples[selected];
+        const d = [2*lambda[1],lambda[2]-2*lambda[1],lambda[3]-2*lambda[2]+lambda[1]];
+        const c = weights.map(input => Number(input.value));
+        let sum = 0;
+        for (const [i,row] of cells.entries()) {
+          get('value-'+i).textContent = c[i];
+          for (const [j,cell] of row.entries()) {
+            const entry = d[Math.abs(i-j)];
+            cell.textContent = selected === 'zeta' ? entry.toFixed(7) : format(entry);
+            cell.classList.toggle('negative',entry<0);
+            sum += c[i]*entry*c[j];
+          }
+        }
+        get('answer').dataset.sign = sum<0 ? 'negative' : 'nonnegative';
+        get('value').textContent = 'Weighted sum ' + format(sum) + '.';
+        get('coefs').textContent = 'λ₀ through λ₃ · ' + lambda.map(format).join(', ') + '.';
+      }
+      for (const button of modes) {
+        button.setAttribute('aria-pressed',String(button.dataset.mode===selected));
+        button.addEventListener('click',() => {
+          selected = button.dataset.mode;
+          for(const item of modes) item.setAttribute('aria-pressed',String(item===button));
+          render();
+        });
+      }
+      for(const input of weights) input.addEventListener('input',render);
+      get('reset').addEventListener('click',() => {
+        for (const [i,input] of weights.entries()) input.value = i===1 ? 0 : 1;
+        render();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
