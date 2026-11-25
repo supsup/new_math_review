@@ -1,0 +1,117 @@
+The zeta budget at 2 over the real half of the host
+===================================================
+
+The earlier note splits the odd-prime budget by field characters.
+At 2 the same projectors would require division by 2. For the
+modulus-one host there is a different reduction. The length at 2
+is at most the sum of two lengths over its maximal real subfield,
+with the second length taken after a quadratic coefficient twist.
+
+Why the real subfield works
+--------------------------
+
+Write R for the real 2-power cyclotomic field and K for
+R(√−q, √−d), where q and d are the distinct odd primes in the
+window. Put F = R(√qd). This is the maximal real subfield of K.
+The nonidentity element of Gal(K/F) flips both square roots.
+
+The extension K/F is unramified at all finite places. At an odd
+prime away from q and d both quadratic factors are unramified.
+At q or d the inertia in K/R flips only the corresponding root.
+It acts nontrivially on √qd, so the relative inertia in K/F is
+trivial. At 2, the congruence d ≡ 7 mod 16 gives −d ≡ 1 mod 8.
+Thus √−d is already in ℚ₂. Adjoining it to F gives K, so every
+place over 2 splits in K/F.
+
+This is the point of using F. Away from 2 the absolute inertia
+groups of the two fields are the same. Over 2 their absolute
+decomposition groups are the same. These are precisely the
+groups used in the two local conditions of the budget.
+
+Restriction and the one-dimensional defect
+------------------------------------------
+
+Fix a positive twist index j and put A = ℚ₂/ℤ₂(−j). For any
+field and coefficient module, let T be the subgroup of absolute
+continuous H¹ whose restrictions to inertia away from 2 and
+to decomposition groups over 2 are zero. Impose these conditions
+at finite places only. Over K this is the archive's Sha kernel.
+
+Let M = T(K,A), let c be complex conjugation, and put
+M⁺ = ker(1−c), M⁻ = ker(1+c). Over F use T⁺ = T(F,A) and
+T⁻ = T(F,A twisted by χ), where χ is the character of K/F.
+The twist is trivial on the absolute group of K. It changes
+invariants for the quotient group into the minus eigenspace.
+
+Write C = A fixed by the absolute group of K. It is a nonzero
+finite cyclic 2-group. The 2-torsion is fixed because the
+cyclotomic units are odd. The cyclotomic image of a number
+field has finite index in ℤ₂ˣ, and raising it to a fixed
+positive power still gives a nontrivial image. An element
+acting by a scalar different from 1 bounds the order of C.
+
+For either coefficient choice let C carry the corresponding
+action of the quadratic quotient. It acts by +1 or −1. The
+two-periodic resolution of C₂ has maps c−1 and 1+c. In either
+case H¹(C₂,C) and H²(C₂,C) have order 2. They are C[2] and
+C/2C in one order or the other.
+
+The five-term restriction sequence now gives, for either sign,
+
+    0 → H¹(C₂,C) → T± → M± → H²(C₂,C) → H²(G_F,A±),
+
+exact through H²(C₂,C). To see why the local conditions carry through,
+take a global lift of a class in M±. Each inertia group away
+from 2 and each decomposition group over 2 is already a group
+upstairs, so its restriction is zero. The same reasoning puts
+every inflated H¹(C₂,C) class in T±. The cokernel of restriction
+therefore has length at most one, and the kernel has length one.
+It follows that length(M±) ≤ length(T±). When the lengths are
+finite, the difference is either zero or one.
+
+For one sign the difference is exactly one. A real embedding
+of F gives a complex conjugation of order two in G_F lifting
+the nonidentity element of C₂. Pick the coefficient choice on
+which this conjugation acts by −1. This is A when j is odd and
+the twisted A when j is even. Restricting inflation in H² back
+to that subgroup of order two gives the map from C[2] to A[2].
+It is injective, so the last arrow in the display is injective.
+For this sign T± maps onto M± with kernel of length one.
+
+Adding the two bounds
+---------------------
+
+On M, the map 1−c has kernel M⁺ and image contained in M⁻.
+Additivity of module length in an exact sequence gives
+
+    length(M) + 1 ≤ length(M⁺) + length(M⁻) + 1
+                  ≤ length(T⁺) + length(T⁻).
+
+This inequality works even for infinite length. Summing over
+the positive twist indices j < t bounds the dyadic term of the
+archive's VVle by the sum of the two downstairs budgets, with
+the common multiplier log 2. The fields downstairs have half
+the degree. Uniform estimates for these two kernels remain
+the arithmetic input.
+
+Sources and replay
+------------------
+
+The host description is in zeta_host_field.html, with the
+odd-prime comparison in zeta_budget_odd_parts.txt. In the
+archive at 6193bb5, qzTw, Sha and shaLen are in
+Formalism/GaloisCohomology/Statement.lean. See locFam in
+ReciprocityTheory/Hypotheses/GalCoh.lean and the coefficient
+prime 2 clause of vvle_of_parts in LengthEqAddEigen.lean.
+
+For the two-periodic resolution see Sharifi, Group and Galois
+Cohomology, Proposition 1.10.1. For continuous restriction and
+the five-term sequence see §2 of Karagueuzian, Labute and Mináč,
+The Bloch–Kato conjecture and Galois theory.
+https://www.math.ucla.edu/~sharifi/notes/groupcoh.pdf
+https://www.math.mcgill.ca/labute/papers/KLM1009.pdf
+
+The restriction argument and the finite-place calculation here
+are on paper. tools/zeta_sha_dyadic_lengths.lean checks the
+involution length inequality on the archive's actual Sha module,
+at any coefficient prime and with no unit hypothesis on 2.

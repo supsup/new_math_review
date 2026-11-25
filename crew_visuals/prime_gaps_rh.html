@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prime Gaps And RH</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e;
+    --red: #ff6b81; --cell: #1c2140; --violet: #b49cff; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 14px 16px 28px; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  h2 { font-size: 18px; font-weight: normal; color: var(--ink); margin: 22px 0 6px; }
+  p, li { font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  b { color: var(--ink); font-weight: normal; } .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); } .violet { color: var(--violet); }
+  a { color: var(--teal); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  label { font-size: 14px; color: var(--dim); }
+  input { width: 14em; max-width: 100%; background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 14px monospace; }
+  button { background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px; font: 13px Georgia, serif; cursor: pointer; }
+  .chips span { display: inline-block; font: 12.5px monospace; padding: 2px 6px; margin: 2px; border-radius: 4px; background: var(--cell); color: var(--teal); cursor: pointer; }
+  .verdict { font-size: 15.5px; color: var(--accent); margin: 10px 0 4px; min-height: 22px; line-height: 1.45; overflow-wrap: anywhere; }
+  .mono { font: 13px monospace; color: var(--ink); overflow-wrap: anywhere; }
+  svg { width: 100%; height: auto; display: block; background: var(--cell); border-radius: 6px; margin-bottom: 6px; }
+  .key span { display: inline-block; margin-right: 14px; font-size: 13px; color: var(--dim); }
+  .key i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; }
+  details { margin-top: 10px; } summary { cursor: pointer; color: var(--ink); font-size: 14.5px; }
+  #check { font-size: 13px; }
+  #err { display: none; margin: 12px 0; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../round_two.html">Back to the index</a> · <a href="class_numbers_band.html">How big can a class number be?</a></p>
+  <h1>How far apart can two primes be?</h1>
+  <p>After a prime p, how long until the next one? Usually about log p steps, but sometimes much longer. If the Riemann Hypothesis holds, the wait is never longer than <b>(22/25)·√p·log p</b>, for every prime p after 3. That is the 2019 theorem of Carneiro, Milinovich and Soundararajan, sharpening Cramér's of 1920. The announced proof ends with the Riemann Hypothesis itself, so if it stands this bound is simply true. The record gaps actually found are far smaller still.</p>
+
+  <h2>1 · Every record gap up to ten billion</h2>
+  <p>A <span class="gold">gold dot</span> is a gap longer than every gap before it, 35 of them up to 10¹⁰, the last 354 after 4,302,407,359. Both scales are logarithmic.</p>
+  <svg id="plot" viewBox="0 0 860 360" role="img" aria-label="record prime gaps against three curves"></svg>
+  <div class="key"><span><i style="background:#f2c14e"></i>(22/25)·√p·log p, the bound on RH</span><span><i style="background:#ff6b81"></i>2√p + 1, the room between consecutive squares</span><span><i style="background:#b49cff"></i>(log p)², Cramér's guess for the true size</span></div>
+  <p>The same records, as a fraction of the RH bound. The closest any prime after 3 comes, among <i>all</i> primes below 10¹⁰ and not only the records, is the gap from 7 to 11, which uses <b>88.3%</b> of the bound. Later records use much less, though not steadily less: the gap of 14 after 113 uses 31.7%, more than the 21.5% of the gap of 8 after 89 before it. By the last record the share is 0.028%. (In the normalization the theorem is stated in, gap/(√p·log p), that closest case is 0.777 against the constant 22/25 = 0.88.) After 3 the gap of 2 would use 119% of the bound, which is why the theorem starts after 3.</p>
+  <svg id="ratio" viewBox="0 0 860 200" role="img" aria-label="record gaps divided by the RH bound"></svg>
+
+  <h2>2 · Find the next prime</h2>
+  <div class="row"><label for="xx">after</label><input id="xx" type="text" inputmode="numeric" value="4302407359"><button id="go">Find it</button></div>
+  <div class="row chips" id="presets"><span data-x="7">7</span><span data-x="1327">1,327</span><span data-x="4302407359">4,302,407,359</span><span data-x="10726904659">10,726,904,659</span><span data-x="1000000000000000000">10¹⁸</span></div>
+  <p class="verdict" id="v" role="status"></p>
+
+  <h2>3 · What RH buys, and what it does not</h2>
+  <ol>
+    <li><b>Cramér, 1920:</b> on the Riemann Hypothesis the gap after p is O(√p·log p), with an unspecified constant.</li>
+    <li><b>Carneiro, Milinovich and Soundararajan, 2019</b> (Theorem 5): "Assume the Riemann hypothesis. Then, for x ≥ 4, there is always a prime number in the interval [x, x + (22/25)√x log x]." In gap form, p<sub>n+1</sub> − p<sub>n</sub> ≤ (22/25)√p<sub>n</sub> log p<sub>n</sub> for every prime p<sub>n</sub> &gt; 3. Their proof covers x up to 4·10¹⁸ by the known computation of prime gaps (gaps below (log p)² there, by Oliveira e Silva, Herzog and Pardi), and the rest by the explicit formula. Asymptotically their constant is below 21/25. They improve Dudek, Grenié and Molteni's 1 + 4/log x.</li>
+    <li><b>The archive.</b> Its first final theorem is the Riemann Hypothesis itself, in the form of Lean's mathematical library (<span class="mono">riemannHypothesis : RiemannHypothesis</span> in Main.lean). So if the proof stands, the bound in item 2 holds for every prime after 3. We have not checked that part of the archive; what we compiled is the last stretch, from two stated inputs.</li>
+    <li><b>Not Legendre.</b> Legendre conjectured a prime between any two consecutive squares, an interval of length about 2√x. The RH interval, 0.88·√x·log x, is shorter only up to about x = 13; from x = 14 on it is longer, by a growing factor of log x. So this RH gap bound leaves Legendre's conjecture open. (Whether the Riemann Hypothesis implies Legendre's conjecture by some other argument is not known.)</li>
+    <li><b>Not Cramér's guess.</b> The records hug (log p)²: the last one is 0.72·(log p)². Cramér conjectured gaps of that size, and it is far beyond what any hypothesis of this kind is known to give.</li>
+  </ol>
+  <details><summary>Sources, and how this was computed</summary>
+    <p>Read: E. Carneiro, M. B. Milinovich and K. Soundararajan, "Fourier optimization and prime gaps", <a href="https://arxiv.org/abs/1708.04122">arXiv 1708.04122</a> (Comment. Math. Helv. 94 (2019)), Theorem 5, Corollary 4 and the introduction. The record gaps were compared with the OEIS entries <a href="https://oeis.org/A002386">A002386</a> (the primes) and <a href="https://oeis.org/A005250">A005250</a> (the gaps): all 35 up to 10¹⁰ agree, and the next record, 382 after 10,726,904,659, lies just past our range.</p>
+    <p>Our own computation is a segmented sieve of Eratosthenes to 10¹⁰ (<a href="../tools/prime_gap_records.c">tools/prime_gap_records.c</a>, 22 seconds); it counts 455,052,511 primes, the standard value of π(10¹⁰). <a href="../tools/check_prime_gaps_rh.py">tools/check_prime_gaps_rh.py</a> reruns it and compares with this page and with the OEIS table. The finder above uses a deterministic Miller–Rabin test (the first twelve primes as bases, exact below 3·10²³), checked on load against trial division.</p>
+  </details>
+  <p id="check"></p>
+  <div id="err"></div>
+</main>
+<script id="gaps" type="application/json">{"N":10000000000,"records":[[2,1],[3,2],[7,4],[23,6],[89,8],[113,14],[523,18],[887,20],[1129,22],[1327,34],[9551,36],[15683,44],[19609,52],[31397,72],[155921,86],[360653,96],[370261,112],[492113,114],[1349533,118],[1357201,132],[2010733,148],[4652353,154],[17051707,180],[20831323,210],[47326693,220],[122164747,222],[189695659,234],[191912783,248],[387096133,250],[436273009,282],[1294268491,288],[1453168141,292],[2300942549,320],[3842610773,336],[4302407359,354]],"primes":455052511,"max_ratio":[7,4,0.776941265]}</script>
+<script>
+// MATH-BEGIN
+const CMS = p => 22 / 25 * Math.sqrt(p) * Math.log(p), LEG = p => 2 * Math.sqrt(p) + 1, CRAMER = p => Math.log(p) ** 2;
+function modpow(b, e, m) { let r = 1n; b %= m; while (e > 0n) { if (e & 1n) r = r * b % m; b = b * b % m; e >>= 1n; } return r; }
+function isPrimeBig(n) {          // deterministic Miller-Rabin for n < 3.3e24 with the first twelve prime bases
+  if (n < 2n) return false;
+  for (const p of [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n]) { if (n === p) return true; if (n % p === 0n) return false; }
+  let d = n - 1n, s = 0; while (d % 2n === 0n) { d /= 2n; s++; }
+  outer: for (const a of [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n]) {
+    let x = modpow(a, d, n); if (x === 1n || x === n - 1n) continue;
+    for (let r = 1; r < s; r++) { x = x * x % n; if (x === n - 1n) continue outer; }
+    return false;
+  }
+  return true;
+}
+function isPrimeSmall(n) { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; }
+function recordsUpTo(N) {          // sieve, then the maximal gaps
+  const s = new Uint8Array(N + 1), out = []; let prev = 2, max = 0;
+  for (let i = 2; i * i <= N; i++) if (!s[i]) for (let j = i * i; j <= N; j += i) s[j] = 1;
+  let count = 0; for (let m = 2; m <= N; m++) if (!s[m]) { count++; if (m > 2) { const g = m - prev; if (g > max) { max = g; out.push([prev, g]); } prev = m; } }
+  return { out, count };
+}
+// MATH-END
+const $ = id => document.getElementById(id), fmt = x => BigInt(x).toLocaleString('en-US');
+const DATA = JSON.parse($('gaps').textContent);
+function axes(W, H, L, B, T, x0, x1, y0, y1, ylabels) {
+  const X = p => L + (W - L - 10) * (Math.log10(p) - x0) / (x1 - x0), Y = v => T + (H - T - B) * (y1 - Math.log10(v)) / (y1 - y0);
+  const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹⁻', sup = k => String(k).split('').map(c => c === '-' ? SUP[10] : SUP[+c]).join('');
+  let s = '';
+  for (const v of ylabels) s += '<line x1="' + L + '" x2="' + (W - 10) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="#262b52"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" fill="#9a98b4" font-size="11" text-anchor="end">' + (v >= 1 ? String(v) : v) + '</text>';
+  for (let k = Math.ceil(x0); k <= x1; k += 2) s += '<text x="' + X(10 ** k).toFixed(1) + '" y="' + (H - 8) + '" fill="#9a98b4" font-size="11" text-anchor="middle">10' + sup(k) + '</text>';
+  return { X, Y, s };
+}
+function draw() {
+  const W = 860, H = 360; const a = axes(W, H, 52, 26, 12, 0, 10, 0, 6, [1, 10, 100, 1000, 10000, 100000]);
+  let s = a.s;
+  const path = (f, lo, col) => { let d = ''; for (let i = 0; i <= 240; i++) { const p = 10 ** (Math.log10(lo) + (10 - Math.log10(lo)) * i / 240), v = f(p); if (v >= 1 && v <= 1e6) d += (d ? 'L' : 'M') + a.X(p).toFixed(1) + ' ' + a.Y(v).toFixed(1); } return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="1.7"/>'; };
+  s += path(CMS, 4, '#f2c14e') + path(LEG, 2, '#ff6b81') + path(CRAMER, 3, '#b49cff');
+  for (const [p, g] of DATA.records) s += '<circle cx="' + a.X(p).toFixed(1) + '" cy="' + a.Y(g).toFixed(1) + '" r="3" fill="#f2c14e" stroke="#0d1020"><title>gap ' + g + ' after ' + p + '</title></circle>';
+  $('plot').innerHTML = s;
+  const b = axes(W, 200, 52, 26, 10, 0, 10, -4, 0.3, [0.0001, 0.001, 0.01, 0.1, 1]);
+  let r = b.s + '<line x1="52" x2="850" y1="' + b.Y(1).toFixed(1) + '" y2="' + b.Y(1).toFixed(1) + '" stroke="#f2c14e" stroke-dasharray="5 4"/>';
+  for (const [p, g] of DATA.records) if (p > 3) r += '<circle cx="' + b.X(p).toFixed(1) + '" cy="' + b.Y(g / CMS(p)).toFixed(1) + '" r="3" fill="#4fd1c5"><title>gap ' + g + ' after ' + p + ': ' + (g / CMS(p)).toFixed(5) + ' of the bound</title></circle>';
+  $('ratio').innerHTML = r;
+}
+function look() {
+  const raw = $('xx').value.replace(/[ ,_]/g, '');
+  if (!/^[0-9]{1,19}$/.test(raw) || BigInt(raw) < 4n || BigInt(raw) > 10n ** 18n) { $('v').textContent = 'Enter a whole number from 4 to 10¹⁸.'; return; }
+  const x = BigInt(raw); let p = x; while (!isPrimeBig(p)) p -= 1n;
+  let q = x + 1n; while (!isPrimeBig(q)) q += 1n;
+  const xf = Number(x), room = CMS(xf), gap = Number(q - p), pf = Number(p);
+  $('v').textContent = 'The prime at or below ' + fmt(x) + ' is ' + fmt(p) + ', and the next prime is ' + fmt(q) + ': a gap of ' + gap + '. The RH bound after ' + fmt(p) + ' is ' + CMS(pf).toFixed(1) + ', so this gap uses ' + (100 * gap / CMS(pf)).toPrecision(3) + '% of it' + (p === 3n ? ' (the theorem starts after 3, and this is its one exception)' : '') + '; (log p)² is ' + CRAMER(pf).toFixed(1) + '. From x itself, the next prime is ' + fmt(q - x) + ' further on, within the guaranteed ' + room.toFixed(1) + '.';
+}
+function selfCheck() {
+  const fail = [];
+  const { out, count } = recordsUpTo(2000000);
+  if (count !== 148933) fail.push('pi(2,000,000) is not 148,933');
+  const emb = DATA.records.filter(r => r[0] < 2000000 - 200);
+  if (JSON.stringify(out.slice(0, emb.length)) !== JSON.stringify(emb)) fail.push('the sieve on this page does not reproduce the embedded records below 2,000,000');
+  for (let n = 0; n < 3000; n++) { const m = 4 + Math.floor(Math.random() * 3000000); if (isPrimeBig(BigInt(m)) !== isPrimeSmall(m)) { fail.push('Miller-Rabin disagrees with trial division at ' + m); break; } }
+  for (const [p, g] of DATA.records) { if (!isPrimeBig(BigInt(p)) || !isPrimeBig(BigInt(p + g))) fail.push('record ends not prime at ' + p); for (let k = 1; k < g; k += 1) if (isPrimeBig(BigInt(p + k))) { fail.push('a prime inside the record gap after ' + p); break; } }
+  let best = 0; for (const [p, g] of DATA.records) if (p > 3) best = Math.max(best, g / CMS(p));
+  const normalized = 4 / (Math.sqrt(7) * Math.log(7));
+  if (Math.abs(best - 4 / CMS(7)) > 1e-12 || Math.abs(best - 0.88294) > 1e-4) fail.push('the largest share of the bound among the records is not 0.883, at 7');
+  if (DATA.max_ratio[0] !== 7 || DATA.max_ratio[1] !== 4 || Math.abs(DATA.max_ratio[2] - normalized) > 1e-8) fail.push("the sieve's largest gap/(sqrt p log p) over all primes after 3 is not 0.7769 at 7");
+  if (!(2 / CMS(3) > 1.19 && 2 / CMS(3) < 1.20)) fail.push('the gap after 3 would not use 119% of the bound');
+  $('check').textContent = fail.length ? 'Self-check FAILED: ' + fail.join('; ') + '.' : 'Self-check on load: passed. A sieve on this page counts 148,933 primes below 2,000,000 and finds the same record gaps there as the embedded data; Miller–Rabin agrees with trial division at 3,000 random numbers; both ends of every record gap up to 10¹⁰ are prime and nothing between them is; the closest any record comes is the gap after 7, at 88.3% of the bound, matching the sieve\'s largest gap/(√p·log p) over all primes, 0.7769 at 7; and the gap after 3, at 119%, is the one exception.';
+  if (fail.length) { $('err').style.display = 'block'; $('err').textContent = fail.join('\n'); }
+}
+$('go').addEventListener('click', look); $('xx').addEventListener('keydown', e => { if (e.key === 'Enter') look(); });
+$('presets').addEventListener('click', e => { const s = e.target.closest('span'); if (s) { $('xx').value = s.dataset.x; look(); } });
+try { draw(); look(); selfCheck(); } catch (e) { $('err').style.display = 'block'; $('err').textContent = 'Error: ' + e.message; }
+</script>
+</body>
+</html>

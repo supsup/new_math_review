@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One row at a time</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --good:#1f6f54; --warn:#b07200; --soft:#cfc6b6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --good:#6fcfa9; --warn:#e3b55a; --soft:#4a4437; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:880px; margin:0 auto; padding:22px 16px 60px; overflow-wrap:anywhere; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:21px; margin:28px 0 6px; }
+p { margin:8px 0; } a { color:var(--accent); } .sub { color:var(--muted); margin:0 0 18px; }
+.box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:10px 0; }
+.note { color:var(--muted); font-size:14.5px; }
+ol.five { margin:6px 0; padding-left:1.4em; } ol.five li { margin:7px 0; } code { font:13px/1.4 ui-monospace, Menlo, monospace; }
+canvas.wide { display:block; width:100%; height:auto; border-radius:8px; }
+.row { display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; margin:8px 0; }
+.row label { font-size:15px; }
+input[type=text] { font:16px ui-monospace, Menlo, monospace; width:11em; max-width:100%; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
+button { font:15px Georgia, serif; padding:5px 12px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); cursor:pointer; }
+button:hover { border-color:var(--accent); } button[aria-pressed=true] { border-color:var(--accent); color:var(--accent); font-weight:bold; }
+button:disabled { opacity:0.45; cursor:default; } button[data-row] { font:14px ui-monospace, Menlo, monospace; }
+.read { font-size:16px; margin:6px 0; } .read b { font-weight:normal; color:var(--accent); }
+pre.tri { font:16px/1.5 ui-monospace, Menlo, monospace; margin:8px 0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); overflow:auto; }
+.gap { display:flex; flex-wrap:wrap; gap:5px 6px; align-items:center; margin:5px 0; } .gap span { font-size:14.5px; color:var(--muted); min-width:9.5em; }
+.gap button { font:14px ui-monospace, Menlo, monospace; padding:3px 9px; }
+.chips { display:flex; flex-wrap:wrap; gap:5px; margin:6px 0; } .chips button { font:13px ui-monospace, Menlo, monospace; padding:3px 8px; } .chips button i { font:12px Georgia, serif; font-style:normal; color:var(--muted); margin-left:7px; }
+table.lean { border-collapse:collapse; width:100%; font-size:15px; } table.lean td { border-top:1px solid var(--line); padding:6px 8px 6px 0; vertical-align:top; }
+table.lean td:first-child { width:40%; }
+.bad { color:#b3261e; } @media (prefers-color-scheme: dark) { .bad { color:#f2a59d; } }
+@media (max-width:520px) { .gap span { min-width:100%; } table.lean td { display:block; width:auto !important; border-top:0; padding:2px 0; } table.lean tr { display:block; border-top:1px solid var(--line); padding:5px 0; } pre.tri { font-size:14px; } }
+</style>
+</head>
+<body>
+<main>
+<p class="note"><a href="round_two.html">Back to round two</a> · <a href="six_finished_theorems.html">Six finished theorems</a> · <a href="almost_a_whole_number.html">Almost a whole number</a></p>
+<h1>One row at a time</h1>
+<p class="sub">Look at a large symmetric object through a smaller group and it falls apart into pieces. For the groups of invertible matrices there is an exact rule for which pieces you get, and the whole rule is one picture: each new number sits between two old ones. The archive of the announced proof of the Riemann Hypothesis proves the rule in Lean, and Lean has checked it on our own machine.</p>
+
+<div class="box">
+<div class="row"><label for="top">Top row</label><input id="top" type="text" value="4 2 0" inputmode="text" aria-describedby="toprule"><button type="button" id="go">Start</button><span class="note" id="toprule">two to six whole numbers that never go up, the first at most 9 more than the last</span></div>
+<div class="row" role="group" aria-label="Examples of a top row"><span class="note">Try:</span><button type="button" data-row="4 2 0">4 2 0</button><button type="button" data-row="3 2 1 0">3 2 1 0</button><button type="button" data-row="5 3 0">5 3 0</button><button type="button" data-row="2 1 0 0">2 1 0 0</button><button type="button" data-row="3 3 2 1 0">3 3 2 1 0</button><button type="button" data-row="1 0">1 0</button></div>
+<p class="note bad" id="toperr" role="alert"></p>
+<canvas id="tri" class="wide" width="840" height="300" role="img" aria-label="Each row of the triangle is drawn as dots on a number line, one row under another. The shaded bars under the last row are the places where the numbers of the next row may go: each bar runs between two neighbouring dots. The same triangle is written out in numbers under the picture."></canvas>
+<pre class="tri" id="text" aria-live="polite" aria-label="The triangle so far"></pre>
+<p class="read" id="where" aria-live="polite"></p>
+<div id="chooser"></div>
+<div class="row"><button type="button" id="down">Step down</button><button type="button" id="rand">Step down at random</button><button type="button" id="up">Back up one row</button><button type="button" id="restart">Start over</button></div>
+<p class="read" id="count" aria-live="polite"></p>
+<p class="note" id="chiplab"></p>
+<div class="chips" id="chips"></div>
+</div>
+
+<h2>What you are looking at</h2>
+<ol class="five">
+<li><b>A row of numbers names a building block.</b> The invertible N by N matrices can act on many spaces besides the one they were born on. Among the ways of acting that are given by polynomials in the entries of the matrix and one over its determinant, the basic ones, from which all the others are built, are named by a row of N whole numbers that never goes up, like 4 2 0. Call the block with that name by its row.</li>
+<li><b>Now forget one coordinate.</b> Inside the N by N matrices sit the smaller ones, N − 1 by N − 1, which leave the last coordinate alone. Seen only through them, a block need no longer be basic. It can split into smaller blocks.</li>
+<li><b>The rule for the pieces.</b> You get one piece for every shorter row that <i>fits under</i> the old one: its first number between the first and second of the old row, its second between the second and third, and so on. Every such row turns up exactly once, and nothing else turns up. For 4 2 0 that is nine pieces, from 4 2 down to 2 0.</li>
+<li><b>Keep going and you get a triangle.</b> Forget another coordinate, and another, until a single number is left. Each way of going all the way down is a triangle of numbers, and the triangles label a full set of independent directions in the space the block acts on. So the number of triangles is the size of the block: its dimension. A formula of Weyl gives that dimension directly, and the page counts both ways.</li>
+</ol>
+
+<h2>What the Lean statement says, read at the source</h2>
+<p>The archive names the statement <code>GlobalTheory.Published.WeylBranching</code>. We read its definition and the ones it uses. It holds for every n from 1 up, with N = n + 1, and every row λ of N whole numbers that never goes up (negative numbers allowed).</p>
+<table class="lean">
+<tr><td><code>Interlace h lam mu</code></td><td>The row μ fits under λ: λ<sub>i</sub> ≥ μ<sub>i</sub> ≥ λ<sub>i+1</sub> for every i. This is the picture above.</td></tr>
+<tr><td><code>Nonempty ((sumRep …).Equiv (resRep …))</code></td><td>The block for λ, acted on only by the n by n matrices in the top left corner, is the same representation as the direct sum of the blocks for all the rows μ that fit under λ.</td></tr>
+<tr><td><code>Interlace h lam mu → mult … = 1</code></td><td>The maps from the block of μ into it that respect the action form a space of dimension exactly one when μ fits under λ: each piece once.</td></tr>
+<tr><td><code>¬ Interlace h lam mu → mult … = 0</code></td><td>And of dimension zero when it does not: nothing else.</td></tr>
+<tr><td><code>BranchesAlong (unitaryIncl n) h lam</code></td><td>All of this again when only the unitary n by n matrices act.</td></tr>
+</table>
+<p><b>What it leaves out, and what stands beside it.</b> The blocks are the archive's own construction: the polynomials in the entries of an N by N matrix that have a fixed degree in each column and do not change when a multiple of one column is added to a later one. A matrix acts on them by a substitution, multiplied by a power of its determinant (the power is the last number of the row), which is how negative numbers are allowed. A separate statement in the archive gives these spaces a basis indexed by tableaux; we read that statement and not its proof. The statement on this page does not itself say that a block is irreducible, that it cannot be split while all the matrices act. The archive proves that as two lemmas on the way, for the whole group and for the unitary group, and Lean has both here on the three standard axioms; we read what they state and not how they are proved. Everything is over the complex numbers and for this one family of groups: the rules for orthogonal and symplectic groups are different theorems.</p>
+<p id="leanline"></p>
+
+<h2>Sources, and what was run</h2>
+<p class="note" id="selfcheck"></p>
+<p class="note">Every number on this page is computed by the page, in whole numbers. A separate program, <code>tools/check_one_row_at_a_time.py</code>, writes out every candidate triangle under 238 top rows of two to six numbers, keeps the ones whose numbers do sit between their neighbours, and compares the count with a different dimension formula (hooks and contents of the boxes of a diagram). The page's own arithmetic agrees with it on every one of those rows; on load the page checks itself against a sample of twenty. Rows too large to write out, like 9 7 5 3 1 0, are compared with the second formula only.</p>
+<p class="note">The statement and its definitions: the archive mirrored at <code>1337isnot1337/riemann-hypothesis-solved</code>, revision 6193bb5: <code>Development/AbelianVarietyTheory/PublishedTheorems/PublishedFoundations/FiniteIntertwining.lean</code> (the statement), <code>Formalism/SharpRestriction/Divisibility/PrimeDegreeVariant.lean</code> (interlacing and the corner embedding), <code>Formalism/LocalRingCardinality/DataCoeff.lean</code> and <code>Formalism/GradedWeylDivisibility/StatementA.lean</code> (the blocks and the action). Read by Fixpoint, and the statement a second time by Marlow. <a href="tools/rh_branching.lean">tools/rh_branching.lean</a> asks Lean to print the statement and the two lemmas.</p>
+<p class="note">Reported from Wikipedia, read on 25 November 2026, not from the original works: the rule from U(N) to U(N − 1) with exactly these inequalities, credited to Weyl, <i>The Classical Groups</i> (1946), and described as having multiplicity one ("Restricted representation"); the triangles are named for Gelfand and Tsetlin, who used them in the 1950s to give a basis ("Restricted representation", "Gelfand–Zeitlin integrable system"). The dimension formula is Weyl's, in the form it takes for these groups; the Wikipedia article "Weyl character formula" gives the general form and the case of three numbers, (m₁ + 1)(m₂ + 1)(m₁ + m₂ + 2)/2, which this page checks against its own counts. Page by Fixpoint for Marginalia.</p>
+</main>
+<script>
+// MATH-BEGIN
+// Everything this page computes is here. Whole numbers only (BigInt for the counts).
+// A row is a list of whole numbers that never goes up, for example [4, 2, 0].
+const isRow = lam => lam.length >= 1 && lam.every((v, i) => Number.isInteger(v) && (i === 0 || lam[i - 1] >= v));
+// mu fits under lam when each of its numbers sits between two neighbours of lam: lam[i] >= mu[i] >= lam[i+1]
+const fitsUnder = (lam, mu) => mu.length === lam.length - 1 && mu.every((v, i) => lam[i] >= v && v >= lam[i + 1]);
+function below(lam) {                                  // every row that fits under lam
+  let out = [[]];
+  for (let i = 0; i + 1 < lam.length; i++) { const next = []; for (const m of out) for (let v = lam[i]; v >= lam[i + 1]; v--) next.push(m.concat(v)); out = next; }
+  return out;
+}
+function steps(lam) { let c = 1n; for (let i = 0; i + 1 < lam.length; i++) c *= BigInt(lam[i] - lam[i + 1] + 1); return c; }   // how many rows fit under lam
+const MEMO = new Map();
+function triangles(lam) {                              // the number of ways to keep stepping down until one number is left
+  if (lam.length === 1) return 1n;
+  const key = lam.join(','); if (MEMO.has(key)) return MEMO.get(key);
+  let s = 0n; for (const mu of below(lam)) s += triangles(mu);
+  MEMO.set(key, s); return s;
+}
+function weyl(lam) {                                   // Weyl's formula for the dimension: the product over i < j of (lam_i - lam_j + j - i) / (j - i)
+  let num = 1n, den = 1n;
+  for (let i = 0; i < lam.length; i++) for (let j = i + 1; j < lam.length; j++) { num *= BigInt(lam[i] - lam[j] + j - i); den *= BigInt(j - i); }
+  return { value: num / den, exact: num % den === 0n };
+}
+
+// Numbers worked out apart from this page, by a Python program that builds every triangle by brute force and compares
+// with a different dimension formula (hooks and contents of the boxes of a diagram).
+const EXPECT = {
+  dims: {'2 0': 3, '4 1': 4, '6 0': 7, '1 0 0': 3, '2 1 0': 8, '4 2 0': 27, '5 3 0': 42, '5 5 5': 1, '2 1 0 0': 20, '3 2 1 0': 64, '3 3 1 0': 60, '4 4 2 1': 60, '4 3 2 0': 140, '1 1 0 0 0': 10, '3 2 1 0 0': 280, '3 3 2 1 0': 280, '3 3 3 3 0': 35, '3 1 -2': 42, '0 -1 -1 -4': 70, '2 2 -1': 10},
+  steps: {'2 0': 3, '4 1': 4, '6 0': 7, '1 0 0': 2, '2 1 0': 4, '4 2 0': 9, '5 3 0': 12, '5 5 5': 1, '2 1 0 0': 4, '3 2 1 0': 8, '3 3 1 0': 6, '4 4 2 1': 6, '4 3 2 0': 12, '1 1 0 0 0': 2, '3 2 1 0 0': 8, '3 3 2 1 0': 8, '3 3 3 3 0': 4},
+};
+// Runs the comparisons. Returns a list of anything that failed.
+function selfCheck() {
+  const fail = [];
+  for (const k in EXPECT.dims) {
+    const lam = k.split(' ').map(Number), t = triangles(lam), w = weyl(lam);
+    if (!isRow(lam)) fail.push('not a row: ' + k);
+    if (t !== BigInt(EXPECT.dims[k])) fail.push('triangles under ' + k + ': got ' + t);
+    if (!w.exact || w.value !== t) fail.push('Weyl formula for ' + k + ': got ' + w.value);
+  }
+  for (const k in EXPECT.steps) { const lam = k.split(' ').map(Number); if (steps(lam) !== BigInt(EXPECT.steps[k]) || BigInt(below(lam).length) !== steps(lam)) fail.push('rows under ' + k); }
+  // every row with three numbers between 0 and 6: the two counts agree, each row below fits, and the pieces add up
+  let n = 0;
+  for (let a = 6; a >= 0; a--) for (let b = a; b >= 0; b--) for (let c = b; c >= 0; c--) {
+    const lam = [a, b, c], bl = below(lam); n++;
+    if (!bl.every(mu => fitsUnder(lam, mu) && isRow(mu))) fail.push('a row that does not fit under ' + lam.join(' '));
+    if (bl.reduce((s, mu) => s + weyl(mu).value, 0n) !== weyl(lam).value) fail.push('pieces do not add up under ' + lam.join(' '));
+    if (triangles(lam) !== weyl(lam).value) fail.push('counts differ at ' + lam.join(' '));
+    const m1 = a - b, m2 = b - c; if (weyl(lam).value * 2n !== BigInt((m1 + 1) * (m2 + 1) * (m1 + m2 + 2))) fail.push('the three-number formula at ' + lam.join(' '));
+  }
+  return { fail, swept: n };
+}
+// MATH-END
+
+// ---------- drawing and controls ----------
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const commas = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const show = v => (v < 0 ? '−' + (-v) : String(v));
+  const rowText = lam => lam.map(show).join(' ');
+  let path = [[4, 2, 0]], pending = [4, 2];
+  const SPREAD = 9;
+
+  function parse(s) {
+    const parts = s.replace(/[−–]/g, '-').split(/[\s,;]+/).filter(Boolean);
+    if (parts.length < 2 || parts.length > 6) return null;
+    if (!parts.every(p => /^-?\d{1,3}$/.test(p))) return null;
+    const lam = parts.map(Number);
+    if (!isRow(lam) || lam[0] - lam[lam.length - 1] > SPREAD) return null;
+    return lam;
+  }
+  function start(lam, keepBox) { path = [lam]; pending = lam.slice(0, -1); MEMO.clear(); $('toperr').textContent = ''; if (!keepBox) $('top').value = lam.join(' '); render(); }
+  function tryStart() {
+    const lam = parse($('top').value);
+    if (!lam) { $('toperr').textContent = 'Type two to six whole numbers, each between −999 and 999, that never go up, with the first at most ' + SPREAD + ' more than the last. For example: 4 2 0'; return; }
+    start(lam);
+  }
+  const cur = () => path[path.length - 1];
+
+  function draw() {
+    const c = $('tri'), w = c.clientWidth || 840, narrow = w < 520, top = path[0], rows = top.length;
+    const rh = narrow ? 30 : 36, h = 38 + rows * rh + 8, dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    const lo = top[rows - 1], hi = top[0], span = Math.max(1, hi - lo), L = 26, R = 26;
+    const X = v => L + (w - L - R) * (hi - v) / span, Y = r => 38 + r * rh + rh / 2;      // larger numbers on the left, as the rows are written
+    g.font = '12px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.lineWidth = 1;
+    for (let v = lo; v <= hi; v++) { g.strokeStyle = css('--line'); g.beginPath(); g.moveTo(X(v), 26); g.lineTo(X(v), h - 6); g.stroke(); g.fillStyle = css('--muted'); g.fillText(show(v), X(v), 16); }
+    // the bars under the last row: where the next row's numbers may go
+    const last = cur(), r0 = path.length - 1;
+    if (last.length > 1) {
+      for (let i = 0; i + 1 < last.length; i++) {
+        g.strokeStyle = css('--accent'); g.globalAlpha = 0.28; g.lineWidth = 9; g.lineCap = 'round';
+        const y = Y(r0 + 1) + (i % 2 ? 5 : -5);                    // neighbouring bars sit at two heights so that each can be seen
+        g.beginPath(); g.moveTo(X(last[i]), y); g.lineTo(X(last[i + 1]), y); g.stroke(); g.globalAlpha = 1; g.lineWidth = 1; g.lineCap = 'butt';
+      }
+      pending.forEach((v, i) => { g.strokeStyle = css('--accent'); g.lineWidth = 2; g.beginPath(); g.arc(X(v), Y(r0 + 1) + (i % 2 ? 5 : -5), 5.5, 0, 2 * Math.PI); g.stroke(); g.lineWidth = 1; });
+    }
+    path.forEach((row, r) => {
+      const seen = {};
+      row.forEach(v => { const k = seen[v] = (seen[v] || 0) + 1; g.fillStyle = r === r0 ? css('--ink') : css('--muted'); g.beginPath(); g.arc(X(v), Y(r) - (k - 1) * 7, 5, 0, 2 * Math.PI); g.fill(); });
+    });
+  }
+  function textTriangle() {
+    const top = path[0], wd = Math.max(...top.map(v => show(v).length)) + 2;
+    const lines = path.map((row, r) => ' '.repeat(r * Math.floor(wd / 2)) + row.map(v => show(v).padStart(wd - 1, ' ').padEnd(wd, ' ')).join(''));
+    $('text').textContent = lines.join('\n');
+  }
+  function chooser() {
+    const box = $('chooser'), lam = cur(); box.textContent = '';
+    if (lam.length === 1) return;
+    lam.slice(0, -1).forEach((a, i) => {
+      const b = lam[i + 1], d = document.createElement('div'), s = document.createElement('span');
+      d.className = 'gap'; d.setAttribute('role', 'group'); s.textContent = 'between ' + show(a) + ' and ' + show(b) + ':'; d.setAttribute('aria-label', 'Number ' + (i + 1) + ' of the next row, between ' + show(a) + ' and ' + show(b)); d.appendChild(s);
+      for (let v = a; v >= b; v--) { const bt = document.createElement('button'); bt.type = 'button'; bt.textContent = show(v); bt.dataset.gap = i; bt.dataset.val = v; bt.setAttribute('aria-pressed', String(pending[i] === v)); bt.addEventListener('click', () => { pending[i] = v; render(); }); d.appendChild(bt); }
+      box.appendChild(d);
+    });
+  }
+  function chips() {
+    const lam = cur(), box = $('chips'); box.textContent = '';
+    if (lam.length === 1) { $('chiplab').textContent = ''; return; }
+    const n = steps(lam);
+    if (n > 120n) { $('chiplab').textContent = 'There are ' + commas(n) + ' rows that fit under this one, too many to list.'; return; }
+    const all = below(lam); let sum = 0n;
+    all.forEach(mu => { const t = weyl(mu).value; sum += t; const bt = document.createElement('button'); bt.type = 'button'; bt.dataset.chip = '1'; bt.innerHTML = rowText(mu) + '<i>size ' + commas(t) + '</i>'; bt.setAttribute('aria-label', 'Step down to ' + rowText(mu) + ', a piece of size ' + t); bt.addEventListener('click', () => step(mu)); box.appendChild(bt); });
+    $('chiplab').textContent = 'Every row that fits under ' + rowText(lam) + ', each with its size by Weyl\'s formula. The sizes add up to ' + commas(sum) + (sum === weyl(lam).value ? ', which is what the same formula gives for the row above.' : '. THE FORMULA GIVES ' + commas(weyl(lam).value) + ' FOR THE ROW ABOVE. This should not happen.');
+  }
+  function render() {
+    const lam = cur(), top = path[0], done = lam.length === 1;
+    const was = document.activeElement, mark = was && was.dataset ? (was.dataset.gap !== undefined ? [was.dataset.gap, was.dataset.val] : was.dataset.chip ? 'chip' : null) : null;
+    draw(); textTriangle(); chooser(); chips();
+    if (Array.isArray(mark)) { const b = document.querySelector('#chooser button[data-gap="' + mark[0] + '"][data-val="' + mark[1] + '"]'); if (b) b.focus(); }          // the buttons were rebuilt: put the keyboard back where it was
+    else if (mark === 'chip') { const b = document.querySelector('#chips button') || $('up'); if (b) b.focus(); }
+    $('where').innerHTML = done ? 'One number left: this is one complete triangle under <b>' + rowText(top) + '</b>.'
+      : 'The last row is <b>' + rowText(lam) + '</b>. The next row has ' + (lam.length - 1) + (lam.length === 2 ? ' number' : ' numbers') + ', each between two neighbours. It can be chosen in <b>' + commas(steps(lam)) + '</b> ' + (steps(lam) === 1n ? 'way' : 'ways') + '. Chosen now: <b>' + rowText(pending) + '</b>.';
+    const t = triangles(top), wf = weyl(top);
+    $('count').innerHTML = 'Under the top row <b>' + rowText(top) + '</b> there are <b>' + commas(t) + '</b> complete triangles. Weyl\'s formula for the dimension gives <b>' + commas(wf.value) + '</b>' + (wf.value === t && wf.exact ? ': the same.' : ': NOT the same.');
+    $('down').disabled = done; $('rand').disabled = done; $('up').disabled = path.length === 1;
+  }
+  function step(mu) { if (!fitsUnder(cur(), mu)) return; path.push(mu.slice()); pending = mu.slice(0, -1); render(); }
+  $('down').addEventListener('click', () => step(pending));
+  $('rand').addEventListener('click', () => { const lam = cur(); if (lam.length > 1) step(lam.slice(0, -1).map((a, i) => lam[i + 1] + Math.floor(Math.random() * (a - lam[i + 1] + 1)))); });
+  $('up').addEventListener('click', () => { if (path.length > 1) { path.pop(); pending = cur().slice(0, -1); render(); } });
+  $('restart').addEventListener('click', () => start(path[0], true));
+  $('go').addEventListener('click', tryStart);
+  $('top').addEventListener('keydown', e => { if (e.key === 'Enter') tryStart(); });
+  document.querySelectorAll('button[data-row]').forEach(b => b.addEventListener('click', () => start(b.dataset.row.split(' ').map(Number))));
+  let pendingFrame = 0;
+  window.addEventListener('resize', () => { cancelAnimationFrame(pendingFrame); pendingFrame = requestAnimationFrame(draw); });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+
+  const r = selfCheck(), sc = $('selfcheck');
+  if (r.fail.length) { sc.className = 'note bad'; sc.textContent = 'Self-check on load: FAILED. ' + r.fail.join('; ') + '.'; }
+  else sc.textContent = 'Self-check on load: passed. The page compared its count of triangles and Weyl\'s formula with a separate program\'s numbers for ' + Object.keys(EXPECT.dims).length + ' top rows; and for all ' + r.swept + ' rows of three numbers from 0 to 6 it checked that the two counts agree, that the sizes of the pieces add up to the size of the whole, and the formula for three numbers quoted below.';
+  document.documentElement.setAttribute('data-selfcheck', r.fail.length ? 'failed' : 'passed');
+  $('leanline').innerHTML = 'Lean\'s answer in our build, for the archive\'s own one-line proof of this statement: <code>\'pub_WeylBranching\' depends on axioms: [propext, Classical.choice, Quot.sound]</code>. Those three are the standard ones; nothing else is assumed. Asked about the two lemmas that say a block cannot be split, Lean gives the same three. The proof brings 627 of the archive\'s files with it (<a href="how_far_is_each_result.html">How far is each published result?</a>), and the record of the run is in <a href="crew_visuals/lean_desk.txt">What Lean said when we asked it</a>.';
+  render();
+})();
+</script>
+</body>
+</html>

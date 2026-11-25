@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A near-integer that survives squaring · Math Review</title>
+  <style>
+    :root { color-scheme: dark; background: #1b1821; color: #f3eef6; font: 17px/1.6 system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { max-width: 890px; margin: 0 auto; padding: 24px clamp(16px, 5vw, 48px) 64px; }
+    a { color: #d3f5b6; text-underline-offset: .2em; }
+    a:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid #ffd59a; outline-offset: 4px; }
+    nav, .small { color: #d4c8db; font-size: .88rem; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 500; line-height: 1.16; }
+    h1 { font-size: clamp(2.5rem, 7.1vw, 4.3rem); letter-spacing: -.038em; margin: 26px 0 14px; }
+    h2 { font-size: 1.72rem; margin: 34px 0 11px; }
+    p { margin: 0 0 15px; }
+    .intro { font-size: 1.13rem; max-width: 670px; }
+    .explorer { background: #26202d; border: 1px solid #5b4964; border-radius: 16px; padding: clamp(12px, 4vw, 27px); margin: 24px 0; }
+    .controls, .exact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    label { display: grid; gap: 6px; font-size: .92rem; }
+    select { font: inherit; color: inherit; min-width: 0; width: 100%; padding: 6px 8px; background: #1b1821; border: 1px solid #846d90; border-radius: 6px; }
+    .exact { margin: 18px 0; }
+    dt { font-size: .86rem; color: #d4c8db; }
+    dd { margin: 0; color: #d3f5b6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .track { border-radius: 4px; background: #151119; overflow: hidden; height: 10px; }
+    .bar { height: 100%; background: #d3f5b6; width: 0; }
+    #raw-bar { background: #f2a95f; }
+    .bar-label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; font-size: .87rem; }
+    .bar-label output { text-align: right; font-variant-numeric: tabular-nums; }
+    .comparison > div { margin-bottom: 10px; }
+    .axis { display: flex; justify-content: space-between; margin: 0 0 13px; }
+    .context { margin: 6px 0 0; overflow-wrap: anywhere; }
+    .formula { color: #ffd59a; font-family: Georgia, serif; }
+    .display { border-left: 2px solid #bd875a; padding-left: 12px; margin: 10px 0 16px; }
+    details { border: 1px solid #5b4964; border-radius: 8px; padding: 9px 12px; margin: 12px 0; }
+    summary { cursor: pointer; }
+    details[open] > summary { margin-bottom: 10px; }
+    details p:last-child { margin-bottom: 0; }
+    @media (max-width: 490px) { .exact { grid-template-columns: 1fr; gap: 10px; } }
+  </style>
+</head>
+<body>
+<main>
+  <nav aria-label="Related pages"><a href="../almost_a_whole_number.html">Almost a whole number</a></nav>
+  <h1>A near-integer that survives squaring</h1>
+  <p class="intro">The chart of near-integers has tall bars at 58 and 232. They are related. Squaring <span class="formula"><var>E</var> = e<sup>π√58</sup></span> multiplies its small error, but almost exactly by enough to shift the answer by 8,744. An integer coefficient in a modular series explains the shift.</p>
+
+  <section class="explorer" aria-label="Modular correction explorer">
+    <div class="controls">
+      <label for="n">Number under the root<select id="n"><option>22</option><option>37</option><option selected>58</option></select></label>
+      <label for="power">Power of <var>E</var><select id="power"><option value="1">First power</option><option value="2" selected>Square</option><option value="3">Cube</option></select></label>
+    </div>
+    <div aria-live="polite" aria-atomic="true">
+      <dl class="exact">
+        <div><dt>Exponential</dt><dd>e<sup id="exponent"></sup></dd></div>
+        <div><dt>Corrected integer</dt><dd id="integer"></dd></div>
+      </dl>
+      <div class="comparison" aria-label="Absolute errors on a logarithmic scale">
+        <div id="raw-row">
+          <div class="bar-label"><span>Plain power of the first integer</span><output id="raw-gap"></output></div>
+          <div class="track" aria-hidden="true"><div class="bar" id="raw-bar"></div></div>
+        </div>
+        <div>
+          <div class="bar-label"><span>After the modular correction</span><output id="gap"></output></div>
+          <div class="track" aria-hidden="true"><div class="bar" id="gap-bar"></div></div>
+        </div>
+      </div>
+      <div class="axis small" aria-hidden="true"><span>10⁻⁸</span><span>10⁻²</span><span>10⁴</span><span>10¹⁰</span><span>10¹⁶</span></div>
+      <p id="correction" class="context"></p>
+    </div>
+    <noscript><p>For the square of e<sup>π√58</sup>, subtract 8,744 from 24,591,257,752². The resulting integer is 604,729,957,825,300,084,760, about 0.00000782847 above the exponential.</p></noscript>
+  </section>
+
+  <h2>How the correction appears</h2>
+  <p>For 58, use a modular function with the expansion <span class="formula"><var>H</var>(<var>q</var>) = 1/<var>q</var> + 104 + 4,372<var>q</var> + 96,256<var>q</var>² + …</span>. At <span class="formula"><var>q</var> = 1/<var>E</var></span> its value is exactly 24,591,257,856. Subtracting 104 gives the first integer <var>M</var>.</p>
+  <p class="formula display"><var>M</var> = <var>E</var> + 4,372/<var>E</var> + 96,256/<var>E</var>² + …</p>
+  <p>When you square this, the product of <var>E</var> and 4,372/<var>E</var> appears twice. That is exactly 8,744. Subtract it and the remaining error starts at <span class="formula">192,512/<var>E</var></span>, about 0.00000782847. Since <span class="formula"><var>E</var>² = e<sup>π√232</sup></span>, this explains the 232 bar.</p>
+
+  <details>
+    <summary>Why H is an integer in these examples</summary>
+    <p>For each <var>n</var> = 22, 37, 58 the imaginary quadratic field of discriminant −4<var>n</var> has two reduced forms. One is <span class="formula">(1, 0, <var>n</var>)</span>. The other has leading coefficient 2, so its lattice has parameter <span class="formula">τ = (−<var>b</var> + i√(4<var>n</var>))/4</span>, with <var>b</var> = 0 or 2. The parameter 2τ differs from the first lattice parameter by an integer. Their <var>j</var> values are therefore the two roots of the class polynomial. Its sum and product are integers by complex multiplication. <a href="../almost_a_whole_number.html">The class polynomial and the archive’s Lean theorem</a></p>
+    <p>Put <span class="formula"><var>t</var> = (η(τ)/η(2τ))<sup>24</sup></span>, using the Dedekind eta function. The two degree-2 isogeny formulas are <span class="formula"><var>j</var>(τ) = (<var>t</var> + 256)³/<var>t</var>²</span> and <span class="formula"><var>j</var>(2τ) = (<var>t</var> + 16)³/<var>t</var></span>. With <span class="formula"><var>H</var> = <var>t</var> + 128 + 4096/<var>t</var></span>, their sum is <span class="formula"><var>H</var>² − 207<var>H</var> + 3456</span> and their product is <span class="formula">(<var>H</var> + 144)³</span>. Maier uses the coordinate <span class="formula"><var>x</var>₂ = 4096/<var>t</var></span>. <a href="https://www.ams.org/journals/tran/2007-359-08/S0002-9947-07-04128-1/S0002-9947-07-04128-1.pdf#page=23">Maier’s level-two formulas, Appendix</a></p>
+    <p>The sum relation gives <var>H</var> degree at most two over the rationals. The product relation makes <var>H</var> + 144 a cube root of an integer. Here <var>q</var> is real and <var>t</var> is real by the product <span class="formula"><var>t</var> = <var>q</var><sup>−1</sup>∏<sub><var>j</var> ≥ 1</sub>(1 + <var>q</var><sup><var>j</var></sup>)<sup>−24</sup></span>. A real cube root of an integer has degree one or three. It follows that <var>H</var> is an integer.</p>
+    <p id="field" class="context small"></p>
+  </details>
+
+  <details>
+    <summary>Extend the calculation to cubes and higher powers</summary>
+    <p>Write <span class="formula"><var>F</var> = <var>H</var> − 104</span>. The series for <span class="formula"><var>F</var>² − 8,744</span> starts with <var>q</var><sup>−2</sup>, followed only by positive powers. The series for <span class="formula"><var>F</var>³ − 13,116<var>F</var> − 288,768</span> starts with <var>q</var><sup>−3</sup>, again followed only by positive powers. For 37, <var>q</var> is negative. Multiply the first and third power formulas by −1 to approximate the positive exponential.</p>
+    <p>For any positive integer <var>k</var>, start with <var>F</var><sup><var>k</var></sup> and remove every other nonpositive term using the previously corrected powers. The coefficients are integers, so each corrected value is an integer. The approximation improves as |<var>q</var>| goes to zero for a fixed <var>k</var>. At a fixed lattice the size of the remainder depends on <var>k</var>, as the cube for 22 illustrates.</p>
+  </details>
+  <p class="small">Ramanujan recorded the first-power approximations for 22, 37 and 58. This card uses the two class-polynomial roots and the level-two series to explain the integer corrections. The companion script checks the three class polynomials, the series coefficients and all nine gaps using Arb ball arithmetic. <a href="https://ramanujan.sirinudi.org/Volumes/published/ram06.html">Ramanujan’s 1914 paper</a> · <a href="../tools/check_level_two_near_integer.py">Verification script</a></p>
+</main>
+<script type="application/json" id="examples">
+[
+  {"n": 22, "forms": [[1, 0, 22], [2, 0, 11]], "H": "2509056", "trace": "6294842640000", "norm": "15798135578688000000", "epsilon": 1, "gaps": ["0.00174257553283", "0.0767334756529", "1.48289884032"]},
+  {"n": 37, "forms": [[1, 0, 37], [2, 2, 19]], "H": "-199148544", "trace": "39660183801072000", "norm": "-7898242515936467904000000", "epsilon": -1, "gaps": ["2.19534481432e-5", "-0.000966674358575", "0.0186795116951"]},
+  {"n": 58, "forms": [[1, 0, 58], [2, 0, 29]], "H": "24591257856", "trace": "604729957849891344000", "norm": "14871070713157137145512000000000", "epsilon": 1, "gaps": ["1.77786758530e-7", "7.82847314357e-6", "0.000151273517205"]}
+]
+</script>
+<script>
+(() => {
+  const get = id => document.getElementById(id);
+  const nInput = get('n');
+  const powerInput = get('power');
+  const examples = JSON.parse(get('examples').textContent);
+  const integer = new Intl.NumberFormat('en-US');
+  const decimal = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 9 });
+  const format = number => integer.format(number).replace('-', '−');
+
+  function showDistance(output, bar, distance) {
+    const width = (Math.log10(distance) + 8) * 100 / 24;
+    get(output).value = decimal.format(distance);
+    get(bar).style.width = `${Math.min(100, Math.max(0, width))}%`;
+  }
+
+  function render() {
+    const n = Number(nInput.value);
+    const k = Number(powerInput.value);
+    const example = examples.find(row => row.n === n);
+    const H = BigInt(example.H);
+    const F = H - 104n;
+    const epsilon = BigInt(example.epsilon);
+    const M = epsilon * F;
+    const plain = M ** BigInt(k);
+    const corrected = [M, F * F - 8744n, epsilon * (F ** 3n - 13116n * F - 288768n)][k - 1];
+    const correction = plain - corrected;
+    const gap = Number(example.gaps[k - 1]);
+    const radicand = n * k * k;
+    get('exponent').textContent = `π√${radicand}`;
+    get('integer').textContent = format(corrected);
+    get('raw-row').hidden = k === 1;
+    showDistance('raw-gap', 'raw-bar', Math.abs(Number(correction) + gap));
+    showDistance('gap', 'gap-bar', Math.abs(gap));
+    const adjustment = k === 1 ? `The first integer is ${format(M)}.` : `Subtract ${format(correction)} from ${format(M)}${'²³'[k - 2]}.`;
+    const direction = gap >= 0 ? 'above' : 'below';
+    const closest = Math.abs(gap) < 0.5 ? '' : ' At this power, a different integer is closer.';
+    get('correction').textContent = `${adjustment} The corrected integer lies ${decimal.format(Math.abs(gap))} ${direction} the exponential.${closest}`;
+    const forms = example.forms.map(form => `(${form.join(', ')})`).join(' and ');
+    get('field').textContent = `For n = ${n}: forms ${forms}, sum ${format(BigInt(example.trace))}, product ${format(BigInt(example.norm))}, H = ${format(H)}.`;
+  }
+
+  nInput.addEventListener('change', render);
+  powerInput.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>

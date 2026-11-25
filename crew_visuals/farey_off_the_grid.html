@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fractions off the grid</title>
+<style>
+  :root { color-scheme: dark; --page: #101a27; --panel: #172636; --ink: #f0f5f3; --soft: #b2c6ca; --edge: #3a5260; --warm: #f2b86d; --cool: #83d7cc; background: var(--page); color: var(--ink); font: 100%/1.6 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,66rem); margin: auto; padding: clamp(1rem,5vw,4rem); }
+  a { color: var(--cool); text-underline-offset: .18em; }
+  :focus-visible { outline: .16rem solid var(--warm); outline-offset: .14rem; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { max-width: 12ch; margin: .57rem 0 .72rem; font-size: clamp(3rem,9vw,6.6rem); line-height: .95; letter-spacing: -.065em; text-wrap: balance; }
+  h2 { font-size: 1.7rem; line-height: 1.2; margin: 1.38rem 0 .48rem; }
+  p { max-width: 66ch; }
+  .intro { color: var(--soft); }
+  .explorer { margin: 1.5rem 0; padding: clamp(.75rem,2.5vw,1.35rem); background: var(--panel); border: 1px solid var(--edge); border-radius: .48rem; }
+  .inputs { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,15rem),1fr)); gap: .65rem 1.35rem; }
+  label { display: grid; gap: .24rem; }
+  label > span { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+  label output { color: var(--warm); font: 1.05rem ui-monospace,SFMono-Regular,monospace; }
+  input { width: 100%; accent-color: var(--cool); margin-inline: 0; }
+  figure { margin: .85rem 0 0; min-width: 0; }
+  figcaption { color: var(--soft); margin: .27rem 0 0; font-size: .9rem; }
+  canvas { width: 100%; display: block; border-radius: .28rem; touch-action: manipulation; }
+  .readout { min-height: 3.3rem; padding: .57rem .75rem; margin: .65rem 0; border-left: .22rem solid var(--warm); background: #101f2e; }
+  .readout p { margin: .12rem 0; overflow-wrap: anywhere; }
+  #point { font-weight: 650; }
+  #offset { color: var(--soft); }
+  dl { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,10rem),1fr)); gap: .53rem; margin: .95rem 0 0; }
+  dl div { border-top: 1px solid var(--edge); padding-top: .36rem; }
+  dt { color: var(--soft); font-size: .88rem; }
+  dd { color: var(--cool); margin: .12rem 0 0; font: 1.16rem ui-monospace,SFMono-Regular,monospace; }
+  .formula { font: 1.15rem/1.6 Georgia,serif; overflow-wrap: anywhere; }
+  details { border-top: 1px solid var(--edge); padding-top: .67rem; margin: .95rem 0 0; }
+  summary { color: var(--cool); font-weight: 630; cursor: pointer; }
+  .switches { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .64rem; }
+  #signed-explorer button { min-height: 2.6rem; padding: .3rem .61rem; color: var(--cool); background: #112230; border: 1px solid #5b7780; border-radius: .27rem; font: inherit; cursor: pointer; }
+  #signed-explorer button[aria-pressed=true] { color: #142727; background: var(--cool); border-color: var(--cool); }
+  #signed-explorer canvas { background: #10202e; }
+  #signed-explorer figcaption strong { color: var(--cool); }
+  #sine-toggle { margin-top: .39rem; }
+  #at-point { font-weight: 650; }
+</style>
+</head>
+<body>
+<main>
+  <a href="zeta_prime_windows.html">Back to the zeta prime windows</a>
+  <h1>Fractions off the grid</h1>
+  <p class="intro">List the fractions from 0 to 1 whose simplest denominator is at most <var>N</var>. Put an evenly spaced grid next to them. How far does each fraction have to move to reach its own grid point?</p>
+
+  <section class="explorer" aria-label="Farey spacing explorer">
+    <div class="inputs">
+      <label for="order"><span><span>Largest denominator <var>N</var></span><output id="order-out"></output></span>
+        <input id="order" type="range" min="2" max="120" value="12">
+      </label>
+      <label for="rank"><span>Fraction’s rank <output id="rank-out"></output></span>
+        <input id="rank" type="range" min="0" value="1">
+      </label>
+    </div>
+    <figure>
+      <canvas id="ruler" role="img" aria-label="Farey fractions aligned with equally spaced positions"></canvas>
+      <figcaption>Fractions above, even grid below. The connecting line shows the selected move.</figcaption>
+    </figure>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="point"></p>
+      <p id="offset"></p>
+    </div>
+    <figure>
+      <canvas id="moves" role="img" aria-label="Signed offsets of the fractions from their grid positions"></canvas>
+      <figcaption>Positive offsets sit above the line and negative ones below. The vertical scale adjusts with <var>N</var>. Click either chart or use the rank slider to pick a fraction.</figcaption>
+    </figure>
+    <dl>
+      <div><dt>Positive fractions, including 1</dt><dd id="count"></dd></div>
+      <div><dt>Sum of absolute offsets</dt><dd id="absolute"></dd></div>
+      <div><dt>Sum ÷ √<var>N</var></dt><dd id="scaled"></dd></div>
+    </dl>
+  </section>
+
+  <h2>Which number matters for RH?</h2>
+  <p>Take each offset’s absolute value and add them. A move left and a move right both count. The Franel–Landau criterion says that the Riemann Hypothesis is equivalent to this sum being <span class="formula">O(<var>N</var><sup>1/2 + ε</sup>)</span> for every ε &gt; 0. For every exponent just above one half there must be a fixed multiplier bounding the total for all sufficiently large <var>N</var>. The chart lets you inspect individual finite values. <a href="https://gdz.sub.uni-goettingen.de/download/pdf/PPN252457811_1924/PPN252457811_1924.pdf#page=205">Franel, 1924, pp. 198–201</a> · <a href="https://gdz.sub.uni-goettingen.de/download/pdf/PPN252457811_1924/PPN252457811_1924.pdf#page=211">Landau, 1924, p. 204, equation (8)</a>.</p>
+  <p>The criterion concerns ordinary ζ. The archive’s final <code>riemannHypothesis</code> declaration has the required statement. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Main.lean">Archive statements</a>.</p>
+  <p>Put the same fractions on a circle to see the number that Landau compared with the offsets. <a href="farey_harmonics.html">What the Farey circle adds up to</a>.</p>
+
+  <details>
+    <summary>See the exact comparison</summary>
+    <p>Write the list in increasing order as <span class="formula"><var>x</var>₀ = 0, <var>x</var>₁, …, <var>x</var>ₘ = 1</span>. Its grid points are <span class="formula">0, 1/<var>m</var>, …, <var>m</var>/<var>m</var></span>. For <var>x</var>ᵢ = <var>a</var>/<var>b</var> the offset is <span class="formula">(<var>am</var> − <var>ib</var>)/(<var>bm</var>)</span>. The endpoints have offset zero. Starting the index at 1 and using the number of points including both endpoints as the denominator changes the total absolute sum by at most one, so the growth criterion is the same.</p>
+    <p>At <var>N</var> = 4 the five interior fractions are 1/4, 1/3, 1/2, 2/3 and 3/4. Their partners are 1/6, 2/6, 3/6, 4/6 and 5/6. Only the first and last interior points move. Each moves 1/12, so the total is 1/6.</p>
+  </details>
+  <h2 id="signed-discrepancy">When Farey fractions carry signs</h2>
+  <p>The first chart tracks how far each fraction sits from its assigned grid point. Here we pick a position and count everything to its left, including a fraction exactly at that position.</p>
+  <p>Give a fraction +1, −1 or zero according to its reduced denominator modulo 5. Walk from left to right and keep a running total. At denominator 5 the final count is exactly zero, and the running total still moves up and down.</p>
+  <section id="signed-explorer" class="explorer" aria-label="Signed Farey discrepancy">
+    <div class="switches" aria-label="Denominator weights">
+      <button type="button" data-weight="one">Count every fraction</button>
+      <button type="button" data-weight="mod5">Quadratic character mod 5</button>
+    </div>
+    <div class="inputs">
+      <label for="denominator"><span><span>Largest denominator <var>N</var></span><output id="n-out"></output></span><input id="denominator" type="range" min="2" max="70" value="5"></label>
+      <label for="position"><span><span>Position <var>x</var></span><output id="x-out"></output></span><input id="position" type="range" min="0" max="100" value="28"></label>
+    </div>
+    <figure>
+      <canvas id="count-graph" role="img" aria-label="Running weighted count and its straight-line reference"></canvas>
+      <figcaption><strong>Running count.</strong> The staircase counts weighted fractions. The gold line spreads the final count evenly across the interval.</figcaption>
+    </figure>
+    <figure>
+      <canvas id="error-graph" role="img" aria-label="Centered difference between the weighted count and its reference"></canvas>
+      <figcaption><strong>Centered discrepancy.</strong> Subtract the straight line and add ½ to center the curve. Click either graph to sample it.</figcaption>
+      <button id="sine-toggle" type="button" aria-pressed="false">Show its first sine wave</button>
+    </figure>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="at-point"></p>
+      <p id="wave"></p>
+    </div>
+    <dl>
+      <div><dt>Final weighted count</dt><dd id="final-count"></dd></div>
+      <div><dt>Mean absolute discrepancy</dt><dd id="l1"></dd></div>
+      <div><dt>Root mean square discrepancy</dt><dd id="l2"></dd></div>
+    </dl>
+  </section>
+
+  <h2>The signed version of Landau’s question</h2>
+  <p>For each position <var>x</var>, write <var>C</var>(<var>x</var>) for the running count and <var>A</var> for its final value. The plotted discrepancy is <span class="formula"><var>D</var>(<var>x</var>) = <var>C</var>(<var>x</var>) − <var>Ax</var> + ½</span>. For a fixed Dirichlet character, GRH for its own <var>L</var>-function is equivalent to either the mean absolute discrepancy or its root mean square being <span class="formula">O<sub>χ,ε</sub>(<var>N</var><sup>1/2 + ε</sup>)</span> for every ε &gt; 0. The argument below adapts Franel’s floor sum to weighted denominators. <a href="https://gdz.sub.uni-goettingen.de/download/pdf/PPN252457811_1924/PPN252457811_1924.pdf#page=205">Franel’s original floor sum</a> · <a href="https://arxiv.org/pdf/2208.07596#page=13">Garg and Maji, equation (4.22)</a>.</p>
+  <details>
+    <summary>Connect the two pictures when every fraction counts</summary>
+    <p>For the <var>m</var> positive fractions <var>x</var>ᵢ in the first chart, the centered running count just before and after <var>x</var>ᵢ is <var>i</var> − <var>mx</var>ᵢ ± ½. Integrate its square between jumps using the slope −<var>m</var>. At each fraction the difference of the cubes of those two values equals 3(<var>i</var> − <var>mx</var>ᵢ)² + ¼. Adding them and dividing by 3<var>m</var> gives <span class="formula">∫<sub>0</sub><sup>1</sup> <var>D</var>(<var>x</var>)² d<var>x</var> = 1/12 + <var>m</var> ∑ᵢ (<var>x</var>ᵢ − <var>i</var>/<var>m</var>)²</span>. This relates the squared running discrepancy directly to the squared rank offsets upstairs.</p>
+  </details>
+  <details>
+    <summary>Write the count as a sum of small waves</summary>
+    <p>Start with all numerators up to <var>qx</var>. Möbius inversion removes those that share a factor with denominator <var>q</var>. Group the resulting sum by <var>j</var> = <var>q</var>/<var>d</var> to get <span class="formula"><var>C</var>(<var>x</var>) = ∑<sub><var>j</var>≤<var>N</var></sub> <var>a</var><sub><var>j</var></sub>⌊<var>jx</var>⌋</span>, with <var>a</var><sub><var>j</var></sub> = χ(<var>j</var>)<var>M</var><sub>χ</sub>(⌊<var>N</var>/<var>j</var>⌋). Their sum is 1, by multiplicativity and the sum of μ over divisors. Since <var>A</var> = ∑<var>j</var><var>a</var><sub><var>j</var></sub>, the centered discrepancy is <span class="formula">−∑<var>a</var><sub><var>j</var></sub>({<var>jx</var>} − ½)</span>. The braces keep only the fractional part.</p>
+    <p>Every wave with <var>j</var> &gt; 1 cancels against the first sine wave. The <var>j</var> = 1 term gives <span class="formula"><var>M</var><sub>χ</sub>(<var>N</var>) = 2π ∫<sub>0</sub><sup>1</sup> <var>D</var>(<var>x</var>) sin(2π<var>x</var>) d<var>x</var></span>. This bounds |<var>M</var><sub>χ</sub>(<var>N</var>)| by 2π times the mean absolute discrepancy. Partial summation then gives the zero-free half-plane, as on <a href="farey_harmonics.html">the circle page</a>.</p>
+  </details>
+  <details>
+    <summary>Bound the whole discrepancy from the Möbius bound</summary>
+    <p>The integral of the product of waves <var>j</var> and <var>k</var> is <span class="formula">gcd(<var>j</var>,<var>k</var>)²/(12<var>jk</var>)</span>. Divide out their common period. For coprime frequencies <var>a</var>, <var>b</var>, divide the interval into <var>ab</var> pieces and write <var>x</var> = (ℓ + <var>t</var>)/(<var>ab</var>). For fixed <var>t</var>, the two residues of ℓ are independent by the Chinese remainder theorem. The average product is (<var>t</var>−½)²/(<var>ab</var>), whose integral is 1/(12<var>ab</var>).</p>
+    <p>Under the relevant hypothesis, |<var>a</var><sub><var>j</var></sub>| is at most a constant times (<var>N</var>/<var>j</var>)<sup>1/2+ε</sup>. Expand the squared integral and use the product formula for the waves. On writing <var>j</var> = <var>ga</var>, <var>k</var> = <var>gb</var>, the resulting bound is a constant times <var>N</var><sup>1+2ε</sup> times the convergent sum of <var>g</var><sup>−1−2ε</sup>(<var>ab</var>)<sup>−3/2−ε</sup>. This proves the root mean square bound. The mean absolute value is at most the root mean square, which completes both directions. Absolute values give the same argument for complex characters.</p>
+    <p>The exact replay checks the floor formula against reduced fractions and integrates the squared discrepancy two ways, from its linear pieces and from the gcd formula. At <var>N</var> = 5 and χ mod 5, it gives 7/12 for the squared integral. <a href="../tools/check_farey_discrepancy.py">Exact replay</a>.</p>
+  </details>
+</main>
+
+<script>
+(() => {
+  const get = id => document.getElementById(id);
+  const order = get('order'), rank = get('rank'), ruler = get('ruler'), moves = get('moves');
+  const ink = '#b2c6ca', axis = '#3a5260', paper = '#10202e', cool = '#83d7cc', warm = '#f2b86d';
+  const fmt = new Intl.NumberFormat('en-US');
+  let points = [], offsets = [], extent = 0;
+
+  function farey(n) {
+    const result = [[0,1]];
+    let a = 0, b = 1, c = 1, d = n;
+    while (c <= d) {
+      result.push([c,d]);
+      const step = Math.floor((n+b)/d);
+      [a,b,c,d] = [c,d,step*c-a,step*d-b];
+    }
+    return result;
+  }
+
+  function gcd(a,b) {
+    while (b) [a,b] = [b,a%b];
+    return Math.abs(a);
+  }
+
+  function rebuild() {
+    const n = Number(order.value);
+    points = farey(n);
+    const m = points.length-1;
+    offsets = points.map(([a,b],i) => (a*m-i*b)/(b*m));
+    const total = offsets.reduce((sum,value) => sum+Math.abs(value),0);
+    extent = offsets.reduce((best,value) => Math.max(best,Math.abs(value)),0);
+    rank.max = String(m);
+    rank.value = '1';
+    get('order-out').value = n;
+    get('count').textContent = fmt.format(m);
+    get('absolute').textContent = total.toFixed(6);
+    get('scaled').textContent = (total/Math.sqrt(n)).toFixed(6);
+    draw();
+  }
+
+  function drawing(canvas,height) {
+    const width = canvas.clientWidth, ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width*ratio);
+    canvas.height = Math.round(height*ratio);
+    canvas.style.height = height+'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.fillStyle = paper;
+    ctx.fillRect(0,0,width,height);
+    ctx.font = '12px ui-monospace, SFMono-Regular, monospace';
+    return {ctx,left:27,right:width-26,scale:x=>27+x*(width-53)};
+  }
+
+  function line(ctx,x,y,u,v,color,weight=1) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = weight;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(u,v);
+    ctx.stroke();
+  }
+
+  function dot(ctx,x,y,r,color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  function drawRuler(index) {
+    const {ctx,left,right,scale} = drawing(ruler,124);
+    const m = points.length-1, top = 46, bottom = 87;
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'left';
+    ctx.fillText('Fraction',left,21);
+    ctx.fillText('Grid point',left,114);
+    line(ctx,left,top,right,top,axis);
+    line(ctx,left,bottom,right,bottom,axis);
+    for (let i=0;i<=m;i++) {
+      const [a,b] = points[i];
+      const x = scale(a/b), u = scale(i/m);
+      if (m<=150) line(ctx,x,top,u,bottom,'#283e4c');
+      line(ctx,x,top-5,x,top+5,cool,.65);
+      line(ctx,u,bottom-5,u,bottom+5,'#79939d',.65);
+    }
+    const [a,b] = points[index], x = scale(a/b), u = scale(index/m);
+    line(ctx,x,top,u,bottom,warm,2);
+    dot(ctx,x,top,4.3,warm);
+    dot(ctx,u,bottom,3.7,warm);
+  }
+
+  function drawMoves(index) {
+    const {ctx,left,right,scale} = drawing(moves,158);
+    const mid = 69, scaleOffset = value => mid-(extent ? value/extent : 0)*46;
+    const m = points.length-1;
+    line(ctx,left,mid,right,mid,axis);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = ink;
+    for (const [position,label] of [[0,'0'],[.25,'¼'],[.5,'½'],[.75,'¾'],[1,'1']]) {
+      const x = scale(position);
+      line(ctx,x,125,x,131,axis);
+      ctx.fillText(label,x,149);
+    }
+    for (let i=0;i<=m;i++) {
+      const [a,b] = points[i], x = scale(a/b), y = scaleOffset(offsets[i]);
+      if (m<=150) line(ctx,x,mid,x,y,offsets[i]>=0?'#4b8c87':'#8d663f');
+      dot(ctx,x,y,m>500?.85:1.45,offsets[i]>=0?cool:warm);
+    }
+    const [a,b] = points[index], x = scale(a/b), y = scaleOffset(offsets[index]);
+    line(ctx,x,mid,x,y,warm,1.7);
+    dot(ctx,x,y,4.4,warm);
+  }
+
+  function draw() {
+    const i = Number(rank.value), m = points.length-1, [a,b] = points[i];
+    const numerator = a*m-i*b, divisor = gcd(numerator,b*m), gridDivisor = gcd(i,m);
+    const grid = i/gridDivisor+'/'+m/gridDivisor;
+    const signed = numerator === 0 ? '0' : (numerator>0?'+':'−')+Math.abs(numerator/divisor)+'/'+b*m/divisor;
+    get('rank-out').value = fmt.format(i)+' / '+fmt.format(m);
+    get('point').textContent = a+'/'+b+' lines up with grid point '+grid+'.';
+    get('offset').textContent = 'Fraction minus grid point '+signed+(numerator>0?' · fraction is to the right':numerator<0?' · fraction is to the left':' · the two positions agree');
+    drawRuler(i);
+    drawMoves(i);
+  }
+
+  function selectNearest(event) {
+    const rect = event.target.getBoundingClientRect();
+    const x = Math.max(0,Math.min(1,(event.clientX-rect.left-27)/(rect.width-53)));
+    let low = 0, high = points.length-1;
+    while (low+1<high) {
+      const middle = Math.floor((low+high)/2), [a,b] = points[middle];
+      if (a/b<x) low = middle; else high = middle;
+    }
+    const distance = i => Math.abs(points[i][0]/points[i][1]-x);
+    rank.value = distance(low)<=distance(high) ? low : high;
+    draw();
+  }
+
+  order.addEventListener('input',rebuild);
+  rank.addEventListener('input',draw);
+  ruler.addEventListener('click',selectNearest);
+  moves.addEventListener('click',selectNearest);
+  let pending;
+  window.addEventListener('resize',()=>{cancelAnimationFrame(pending);pending=requestAnimationFrame(draw);});
+  rebuild();
+})();
+</script>
+<script>
+(() => {
+  const get=id=>document.getElementById(id);
+  const nInput=get('denominator'), position=get('position'), sineToggle=get('sine-toggle');
+  const countGraph=get('count-graph'), errorGraph=get('error-graph');
+  const choices=[...document.querySelectorAll('[data-weight]')];
+  const cool='#80d7ca', warm='#f2b76b', rose='#e4a2a9', edge='#405760', soft='#b4c7cb';
+  let selected='mod5', showSine=false, data;
+  const character=q=>selected==='one'?1:[0,1,-1,-1,1][q%5];
+  const mu=[0,1];
+  for(let n=2;n<=70;n++){
+    let sum=0;
+    for(let d=1;d<n;d++)if(n%d===0)sum+=mu[d];
+    mu[n]=-sum;
+  }
+  function rebuild(){
+    const n=Number(nInput.value), points=[[0,1]];
+    let a=0,b=1,c=1,d=n;
+    while(c<=d){
+      points.push([c,d]);
+      const k=Math.floor((n+b)/d);
+      [a,b,c,d]=[c,d,k*c-a,k*d-b];
+    }
+    let total=0, mertens=0;
+    for(let i=1;i<points.length;i++)total+=character(points[i][1]);
+    for(let q=1;q<=n;q++)mertens+=character(q)*mu[q];
+    let sum=0, l1=0, l2=0;
+    const pieces=[];
+    for(let i=0;i<points.length-1;i++){
+      const [a,b]=points[i], [c,d]=points[i+1], x=a/b, y=c/d;
+      if(i)sum+=character(b);
+      const u=sum-total*x+.5, v=sum-total*y+.5;
+      const left=Math.abs(u), right=Math.abs(v);
+      l1+=(y-x)*(u*v>=0?(left+right)/2:(u*u+v*v)/(2*(left+right)));
+      l2+=(y-x)*(u*u+u*v+v*v)/3;
+      pieces.push({x,y,sum,u,v});
+    }
+    data={pieces,total,mertens,l1,l2};
+    get('n-out').value=n;
+    for(const button of choices)button.setAttribute('aria-pressed',String(button.dataset.weight===selected));
+    get('final-count').textContent=String(total);
+    get('l1').textContent=l1.toFixed(6);
+    get('l2').textContent=Math.sqrt(l2).toFixed(6);
+    draw();
+  }
+  function display(canvas,min,max){
+    const width=canvas.clientWidth,height=158, ratio=devicePixelRatio||1;
+    canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
+    canvas.style.height=height+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.font='11px ui-monospace,monospace';ctx.fillStyle=soft;
+    const sx=x=>29+x*(width-55), sy=y=>115-95*(y-min)/(max-min);
+    line(ctx,sx(0),sy(0),sx(1),sy(0),edge);
+    ctx.textAlign='center';
+    for(const [x,label] of [[0,'0'],[.25,'¼'],[.5,'½'],[.75,'¾'],[1,'1']]){
+      line(ctx,sx(x),122,sx(x),128,edge);
+      ctx.fillText(label,sx(x),147);
+    }
+    return {ctx,sx,sy};
+  }
+  function line(ctx,x,y,u,v,color,size=1){
+    ctx.strokeStyle=color;ctx.lineWidth=size;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(u,v);ctx.stroke();
+  }
+  function marker(ctx,x,y){
+    ctx.fillStyle=warm;ctx.beginPath();ctx.arc(x,y,4,0,2*Math.PI);ctx.fill();
+  }
+  function pieceAt(x){
+    let left=0,right=data.pieces.length-1;
+    while(left<right){
+      const middle=Math.ceil((left+right)/2);
+      if(data.pieces[middle].x<=x)left=middle;else right=middle-1;
+    }
+    return data.pieces[left];
+  }
+  function draw(){
+    const x=Number(position.value)/100, {pieces,total,mertens}=data;
+    const piece=pieceAt(x), count=x===1?total:piece.sum, discrepancy=count-total*x+.5;
+    get('x-out').value=x.toFixed(2);
+    get('at-point').textContent='At '+x.toFixed(2)+', count '+count+' and centered discrepancy '+discrepancy.toFixed(3)+'.';
+    get('wave').textContent='First sine wave amplitude '+(mertens/Math.PI).toFixed(4)+' · twisted Möbius sum '+mertens+'.';
+    const sums=[0,total,...pieces.map(p=>p.sum)];
+    {
+      const {ctx,sx,sy}=display(countGraph,Math.min(-1,...sums),Math.max(1,...sums));
+      line(ctx,sx(0),sy(0),sx(1),sy(total),warm,1.5);
+      ctx.beginPath();ctx.strokeStyle=cool;ctx.lineWidth=1.8;
+      ctx.moveTo(sx(0),sy(0));
+      for(const piece of pieces){ctx.lineTo(sx(piece.x),sy(piece.sum));ctx.lineTo(sx(piece.y),sy(piece.sum));}
+      ctx.lineTo(sx(1),sy(total));ctx.stroke();
+      marker(ctx,sx(x),sy(count));
+    }
+    {
+      const height=Math.max(1,Math.abs(mertens/Math.PI),...pieces.flatMap(p=>[Math.abs(p.u),Math.abs(p.v)]));
+      const {ctx,sx,sy}=display(errorGraph,-height,height);
+      ctx.beginPath();ctx.strokeStyle=cool;ctx.lineWidth=1.7;
+      ctx.moveTo(sx(0),sy(.5));
+      for(const piece of pieces){ctx.lineTo(sx(piece.x),sy(piece.u));ctx.lineTo(sx(piece.y),sy(piece.v));}
+      ctx.lineTo(sx(1),sy(.5));ctx.stroke();
+      if(showSine){
+        ctx.beginPath();ctx.strokeStyle=rose;ctx.lineWidth=1.4;
+        for(let i=0;i<=180;i++){
+          const t=i/180,y=(mertens/Math.PI)*Math.sin(2*Math.PI*t);
+          if(i)ctx.lineTo(sx(t),sy(y));else ctx.moveTo(sx(t),sy(y));
+        }
+        ctx.stroke();
+      }
+      marker(ctx,sx(x),sy(discrepancy));
+    }
+  }
+  function pick(event){
+    const bounds=event.target.getBoundingClientRect();
+    position.value=Math.max(0,Math.min(100,Math.round(100*(event.clientX-bounds.left-29)/(bounds.width-55))));
+    draw();
+  }
+  for(const button of choices)button.addEventListener('click',()=>{selected=button.dataset.weight;rebuild();});
+  nInput.addEventListener('input',rebuild);
+  position.addEventListener('input',draw);
+  sineToggle.addEventListener('click',()=>{
+    showSine=!showSine;
+    sineToggle.setAttribute('aria-pressed',String(showSine));
+    sineToggle.textContent=showSine?'Hide the first sine wave':'Show its first sine wave';
+    draw();
+  });
+  countGraph.addEventListener('click',pick);
+  errorGraph.addEventListener('click',pick);
+  let pending;
+  window.addEventListener('resize',()=>{cancelAnimationFrame(pending);pending=requestAnimationFrame(draw);});
+  rebuild();
+})();
+</script>
+</body>
+</html>

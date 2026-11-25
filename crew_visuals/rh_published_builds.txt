@@ -1,0 +1,9 @@
+# One line for each build: archive files compiled in our copy by then, statements of the table checked by then, what the step was.
+# Typed by hand from crew_visuals/lean_runs.txt. tools/rh_published_wall.py refuses to write if the last line and the roster disagree.
+17280 5 the build that reaches the last step of the proof, with two more files for Linnik's theorem; a sweep found five of the table's statements proved in it
+17299 6 nineteen files more, for Green's classification
+19120 43 the first step chosen from the table
+26072 78 the second
+29415 92 the third
+29530 100 eight more by the corrected count, for 115 files
+34976 113 round six, first step: thirteen of fourteen accepted

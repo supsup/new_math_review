@@ -37,7 +37,7 @@ def archive_imports(source, entry):
     return ordered
 
 
-def mathlib_environment(project, source):
+def mathlib_environment(project, source, lean_path_file=None):
     def lake_var(name):
         return subprocess.check_output(['lake', 'env', 'printenv', name], cwd=project,
                                        text=True).strip()
@@ -46,23 +46,26 @@ def mathlib_environment(project, source):
     # used in this replay must come from the new temporary build.
     archive_roots = {path.name if path.is_dir() else path.with_suffix('.olean').name
                      for path in source.iterdir() if path.is_dir() or path.suffix == '.lean'}
+    lean_path = (lean_path_file.read_text(encoding='utf-8').strip() if lean_path_file
+                 else lake_var('LEAN_PATH'))
     libraries = []
-    for entry in lake_var('LEAN_PATH').split(os.pathsep):
+    for entry in lean_path.split(os.pathsep):
         path = (project / entry).resolve()
         if path.is_dir() and not any((path / root).exists() for root in archive_roots):
             libraries.append(str(path))
     if not any((Path(path) / 'Mathlib.olean').is_file() for path in libraries):
         raise SystemExit('No eligible compiled Mathlib found in the project’s Lean path.')
     environment = dict(os.environ)
-    environment['PATH'] = lake_var('PATH')
+    if lean_path_file is None:
+        environment['PATH'] = lake_var('PATH')
     environment.pop('LEAN_SRC_PATH', None)
     return environment, libraries
 
 
-def replay(source, project):
+def replay(source, project, fourth_powers=False, lean_path_file=None):
     entry = Path(__file__).with_name('rh_zeta_prime_bound.lean')
     modules = archive_imports(source, entry)
-    environment, libraries = mathlib_environment(project, source)
+    environment, libraries = mathlib_environment(project, source, lean_path_file)
     before = monotonic()
     with TemporaryDirectory(prefix='prime-bound-replay-') as directory:
         sources, outputs = Path(directory) / 'src', Path(directory) / 'olean'
@@ -78,7 +81,15 @@ def replay(source, project):
                            cwd=sources, env=environment, check=True)
         endpoint = sources / 'PrimeBound.lean'
         shutil.copyfile(entry, endpoint)
-        subprocess.run([*lean, str(endpoint)], cwd=sources, env=environment, check=True)
+        if fourth_powers:
+            subprocess.run([*lean, '-o', str(outputs / 'PrimeBound.olean'), str(endpoint)],
+                           cwd=sources, env=environment, check=True)
+            fourth_power_endpoint = sources / 'FourthPowerWindows.lean'
+            shutil.copyfile(entry.with_name('zeta_fourth_power_windows.lean'), fourth_power_endpoint)
+            subprocess.run([*lean, str(fourth_power_endpoint)],
+                           cwd=sources, env=environment, check=True)
+        else:
+            subprocess.run([*lean, str(endpoint)], cwd=sources, env=environment, check=True)
         size = sum(path.stat().st_size for path in outputs.rglob('*') if path.is_file())
         elapsed = monotonic() - before
         print(f'Compiled {len(modules)} archive modules from source in {elapsed:.1f} s. '
@@ -89,5 +100,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('archive_source', type=Path, help='archive src directory at 6193bb5')
     parser.add_argument('mathlib_project', type=Path, help='Lean 4.33.1 project with Mathlib built')
+    parser.add_argument('--fourth-powers', action='store_true',
+                        help='also check the reduction to fourth-power samples')
+    parser.add_argument('--lean-path-file', type=Path,
+                        help='read a saved Lean path and use lean from PATH without starting lake')
     args = parser.parse_args()
-    replay(args.archive_source.resolve(), args.mathlib_project.resolve())
+    replay(args.archive_source.resolve(), args.mathlib_project.resolve(), args.fourth_powers,
+           args.lean_path_file)

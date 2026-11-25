@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The three primes that can ramify</title>
+<style>
+  :root { color-scheme: light; --page: #eceee5; --paper: #fbf6e9; --ink: #233733; --soft: #4e615c; --edge: #c4cec1; --warm: #9b542d; --cool: #255f54; --tint: #eef2e7; background: var(--page); color: var(--ink); font: 100%/1.59 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,58rem); margin: auto; padding: clamp(1rem,5vw,3.8rem); background: var(--paper); }
+  a { color: var(--cool); text-underline-offset: .18em; overflow-wrap: anywhere; }
+  :focus-visible { outline: .16rem solid var(--warm); outline-offset: .14rem; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { max-width: 15ch; margin: .58rem 0 .68rem; font-size: clamp(2.75rem,8.7vw,5.65rem); line-height: .97; letter-spacing: -.055em; text-wrap: balance; }
+  h2 { font-size: 1.64rem; line-height: 1.2; margin: 1.35rem 0 .38rem; }
+  p { max-width: 68ch; }
+  .intro,.note { color: var(--soft); }
+  .explorer { padding: clamp(.65rem,2.5vw,1.22rem); margin: 1.3rem 0; border: 1px solid var(--edge); border-radius: .4rem; background: var(--tint); }
+  .controls { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap: .68rem 1rem; }
+  label { display: grid; gap: .26rem; }
+  label > span { display: flex; align-items: baseline; justify-content: space-between; gap: .3rem; }
+  input { width: 100%; accent-color: var(--cool); margin-inline: 0; }
+  select,button { min-height: 2.62rem; color: var(--cool); background: #fffdf5; border: 1px solid #a2b4a5; border-radius: .3rem; padding: .32rem .61rem; font: inherit; cursor: pointer; }
+  button[aria-pressed=true] { background: var(--cool); color: white; border-color: var(--cool); }
+  .selector { display: flex; flex-wrap: wrap; gap: .42rem; margin-top: .75rem; }
+  .metrics { margin: .75rem 0; display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,9rem),1fr)); gap: .38rem .76rem; }
+  .metrics div { border-top: 1px solid var(--edge); padding-top: .28rem; }
+  .metrics dt { color: var(--soft); font-size: .87rem; }
+  .metrics dd { margin: .12rem 0 0; color: var(--cool); font: 1.3rem ui-monospace,monospace; }
+  .branches { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,8rem),1fr)); gap: .44rem; }
+  .branch { display: grid; align-content: start; background: #fffcf3; border: 1px solid var(--edge); border-top: .21rem solid var(--cool); border-radius: .26rem; padding: .43rem .57rem; }
+  .branch[data-repeated=true] { border-top-color: var(--warm); }
+  .branch b { font-family: Georgia,serif; font-weight: 600; font-size: 1.1rem; }
+  .branch span { color: var(--soft); font-size: .83rem; }
+  .explanation { margin-top: .68rem; border-left: .22rem solid var(--warm); padding: .46rem .66rem; background: #f7f1e2; }
+  .explanation p { margin: .13rem 0; }
+  #identity { font-weight: 660; }
+  .formula { font: 1.14rem/1.56 Georgia,serif; overflow-wrap: anywhere; }
+  details { margin: .86rem 0 0; border-top: 1px solid var(--edge); padding-top: .6rem; }
+  summary { color: var(--cool); font-weight: 640; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <a href="rh_source_build.html">Back to where the Lean build grows</a>
+  <h1>The three primes that can ramify</h1>
+  <p class="intro">The archive’s modulus-one host field grows by doubling a real cyclotomic tower and adjoining two fixed square roots. Pick one of the three conductor primes and see how that growth changes its factorization.</p>
+  <section class="explorer" aria-label="Ramification in the modulus-one host field">
+    <div class="controls">
+      <label for="step"><span>Tower step <output id="current-step"></output></span><input id="step" type="range" min="0" max="8" value="2"></label>
+      <label for="family">Example primes <span>
+        <select id="family">
+          <option value="11,263">11 and 263</option>
+          <option value="19,1367">19 and 1,367</option>
+          <option value="43,1031">43 and 1,031</option>
+        </select>
+      </span></label>
+    </div>
+    <div class="selector" aria-label="Prime to factor">
+      <button type="button" data-kind="two">Prime 2</button>
+      <button type="button" data-kind="q">Prime <var>q</var></button>
+      <button type="button" data-kind="d">Prime <var>d</var></button>
+    </div>
+    <dl class="metrics" aria-label="The three numbers in the prime factorization">
+      <div><dt>Ramification index <var>r</var></dt><dd id="r"></dd></div>
+      <div><dt>Residue degree <var>f</var></dt><dd id="f"></dd></div>
+      <div><dt>Number of primes <var>g</var></dt><dd id="g"></dd></div>
+    </dl>
+    <div class="branches" id="branches"></div>
+    <div class="explanation" role="status" aria-atomic="true">
+      <p id="identity"></p>
+      <p id="cause"></p>
+    </div>
+  </section>
+
+  <h2>Three numbers to read a factorization</h2>
+  <p>In the host field, the ideal generated by a rational prime <var>p</var> is a product of <var>g</var> different prime ideals. Each occurs <var>r</var> times, and reducing modulo one of them gives a field with <var>p</var><sup><var>f</var></sup> elements. The product <var>rfg</var> is the degree of the host field. A prime ramifies if its multiplicity <var>r</var> is bigger than one.</p>
+  <p>The three numbers help separate the jobs. At 2, growing the tower doubles the multiplicity. At <var>q</var> once the tower grows, it doubles the size exponent of the residue field. At <var>d</var> the number of factors rises from one to two to four, then the residue degree doubles with each later step.</p>
+  <details>
+    <summary>Follow the local calculation</summary>
+    <p>Let <var>R</var> be the real subfield of ℚ(ζ<sub>2<sup><var>e</var>+2</sup></sub>) and <var>K</var> = <var>R</var>(√−<var>q</var>, √−<var>d</var>). The archive requires <var>q</var> ≡ 3 mod 8, <var>d</var> ≡ 7 mod 16, and <var>q</var> | <var>d</var> + 1. These conditions already determine all three factorizations. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ExistsPageN.lean#L19">Archive field and window conditions</a>.</p>
+    <p><strong>At 2.</strong> The real tower is totally ramified with degree 2<sup><var>e</var></sup>. For example, its generator 2 cos(2π/2<sup><var>e</var>+2</sup>) has minimal polynomial obtained by starting with <var>X</var> and repeatedly substituting <var>X</var>²−2. For positive <var>e</var> the polynomial is Eisenstein at 2. The minimal polynomial of (1+√−<var>q</var>)/2 reduces to <var>X</var>²+<var>X</var>+1, which gives residue degree 2, and the corresponding polynomial for <var>d</var> reduces to <var>X</var>(<var>X</var>+1), which splits. Thus <var>r</var> = 2<sup><var>e</var></sup>, <var>f</var> = 2 and <var>g</var> = 2.</p>
+    <p><strong>At <var>q</var>.</strong> The square root √−<var>q</var> supplies multiplicity 2 by the Eisenstein test. Because <var>q</var> | <var>d</var>+1 and the two odd primes are both 3 mod 4, quadratic reciprocity gives (<var>d</var>/<var>q</var>) = −1 and (<var>q</var>/<var>d</var>) = +1. The other square root therefore splits at <var>q</var>. The real cyclotomic residue degree is 2<sup><var>e</var></sup> because exactly 4 divides <var>q</var>+1.</p>
+    <p><strong>At <var>d</var>.</strong> The square root √−<var>d</var> supplies multiplicity 2. Here (<var>d</var>/<var>q</var>) = −1, so √−<var>q</var> supplies an unramified residue extension of degree 2. Exactly 8 divides <var>d</var>+1, giving degree 2<sup>max(0,<var>e</var>−1)</sup> from the real tower. The finite fields combine by taking the least common multiple, so the host residue degree is 2<sup>max(1,<var>e</var>−1)</sup>. <a href="https://www.maths.tcd.ie/~mascotn/teaching/2018/345/Poly.pdf">Cyclotomic and quadratic prime decomposition</a>.</p>
+    <p>For any small unramified odd prime <var>p</var> in the actual window, the extra congruence <var>d</var> ≡ −1 mod <var>p</var> already forces (<var>p</var>/<var>d</var>) = +1 by the same reciprocity calculation. The three examples above use only the pair conditions; the archive imposes further size and simultaneous congruence conditions.</p>
+  </details>
+  <p class="note">The replay checks 81 triples by factoring the three component fields’ defining polynomials over the appropriate finite fields and testing the Eisenstein factors. It uses Marlow’s modulus-one description of the host field. <a href="../tools/check_zeta_host_ramification.py">Exact local-factor replay</a> · <a href="../tools/rh_mod_one_field.lean">Lean’s modulus-one field condition</a>.</p>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id);
+  const slider=get('step'), family=get('family');
+  const buttons=[...document.querySelectorAll('[data-kind]')];
+  const format=new Intl.NumberFormat('en-US');
+  let selected='two';
+
+  function render() {
+    const e=Number(slider.value), [q,d]=family.value.split(',').map(Number);
+    const degree=2**(e+2);
+    const profiles={
+      two:{p:2,r:2**e,f:2,cause:'The real tower controls the multiplicity at 2. Only √−'+q+' enlarges its residue field.'},
+      q:{p:q,r:2,f:2**e,cause:'√−'+q+' doubles the multiplicity. The real tower supplies the residue degree.'},
+      d:{p:d,r:2,f:2**Math.max(1,e-1),cause:'√−'+d+' doubles the multiplicity. The real tower and the other square root meet in the residue field.'}
+    };
+    const {p,r,f,cause}=profiles[selected], g=degree/(r*f);
+    get('current-step').value=e;
+    for(const button of buttons) {
+      const kind=button.dataset.kind;
+      button.textContent=kind==='two'?'Prime 2':kind+' = '+format.format(profiles[kind].p);
+      button.setAttribute('aria-pressed',String(kind===selected));
+    }
+    get('r').textContent=format.format(r);
+    get('f').textContent=format.format(f);
+    get('g').textContent=format.format(g);
+    const branches=get('branches');
+    branches.replaceChildren();
+    for(let j=1;j<=g;j++){
+      const branch=document.createElement('div');
+      branch.className='branch';
+      branch.dataset.repeated=r>1;
+      const title=document.createElement('b'), multiplicity=document.createElement('span'), residue=document.createElement('span');
+      title.textContent='Prime ideal '+j;
+      multiplicity.textContent=r===1?'Occurs once':'Occurs '+format.format(r)+' times';
+      residue.append('Residue field with '+format.format(p));
+      if(f>1){
+        const exponent=document.createElement('sup');
+        exponent.textContent=f;
+        residue.append(exponent);
+      }
+      residue.append(' elements');
+      branch.append(title,multiplicity,residue);
+      branches.append(branch);
+    }
+    get('identity').textContent=format.format(r)+' × '+format.format(f)+' × '+format.format(g)+' = '+format.format(degree)+' · host field degree';
+    get('cause').textContent=selected==='two'&&e===0?'At step zero the real field is ℚ. The prime 2 is unramified here.':cause;
+  }
+
+  for(const button of buttons) button.addEventListener('click',()=>{selected=button.dataset.kind;render();});
+  slider.addEventListener('input',render);
+  family.addEventListener('change',render);
+  render();
+})();
+</script>
+</body>
+</html>

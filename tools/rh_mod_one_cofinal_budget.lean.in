@@ -1,0 +1,104 @@
+import Development.AutomorphicArithmetic.CharacterBoxes.SupplyChi
+import Development.AutomorphicArithmetic.MeanSquareBounds.pairEx
+
+/-!
+The cofinal budget wrapper. Run tools/replay_rh_mod_one_cofinal_budget.py
+to assemble this with the two small edits to the archived host construction.
+-/
+
+open Formalism.BasicNotions Formalism.MainNotions Formalism.HC GlobalTheory.EX UpperTheory.Top
+
+namespace ZetaWindowSupply
+
+/-- One compatible pair and one dyadic choice per scale suffice on each of
+arbitrarily late windows of scale 3/2. The modulus-one budget covers
+positive cohomology twist indices below the floor of x^400. -/
+def CofinalBudget : Prop :=
+  ∀ eps : ℝ, 0 < eps → eps < 1 / 52 →
+    ∃ J : ℝ, 1 ≤ J ∧ ∀ cutoff : ℝ,
+      ∃ (X W : ℝ) (q d : ℕ), 1 ≤ W ∧ cutoff ≤ W ∧ X ^ (1 / J) ≤ W ∧
+        W ^ (3 / 2 : ℝ) ≤ X ∧ PairGood 1 eps (X ^ (1 / J)) X q d ∧
+        ∀ x : ℝ, W ≤ x → x ≤ W ^ (3 / 2 : ℝ) →
+          ∃ e : ℕ, PageN eps x e ∧ VAt PChar.one eps 400 q d e x
+
+private theorem card_one : Nat.card (Subgroup.zpowers PChar.one.χ) = 1 := by
+  have hχ : PChar.one.χ = 1 := rfl
+  rw [hχ, Subgroup.zpowers_one_eq_bot]
+  simp
+
+private theorem windows_of_cofinal (h : CofinalBudget) : WindowData PChar.one := by
+  intro eps c h0 h1 hc hcmax
+  have hc1 : c = 1 := by
+    rw [card_one, Nat.cast_one] at hcmax
+    exact le_antisymm hcmax hc
+  obtain ⟨J, hJ, hAt⟩ := h eps h0 h1
+  refine ⟨J, hJ, fun cutoff => ?_⟩
+  obtain ⟨X, W, q, d, hW1, hcut, hAW, hWX, hGood, hV⟩ := hAt cutoff
+  refine ⟨W, hcut, fun x hx0 hx1 => ?_⟩
+  have hxX := hx1.trans hWX
+  have hxA := (hAW.trans hx0)
+  have hx : 0 ≤ x := by linarith
+  have hLower : x ^ (1 / J) ≤ X ^ (1 / J) :=
+    Real.rpow_le_rpow hx hxX (by positivity)
+  obtain ⟨e, hPage, hBound⟩ := hV x hx0 hx1
+  exact ⟨X ^ (1 / J), q, d, e, hLower, hxA, hGood.mono hxX,
+    by simpa [hc1] using hPage.1, by simpa [hc1] using hPage.2, hBound⟩
+
+/-- The weaker cofinal budget still constructs the required zeta hosts. -/
+theorem hosts_of_cofinal (h : CofinalBudget) : ZetaInputs.Hosts := by
+  refine supplyOfAdmOfWindows UpperTheory.Top.hostOfField PChar.one (windows_of_cofinal h) ?_
+  intro eps h0 h1
+  obtain ⟨x0, hAdm⟩ := admissibleClassesTwistedChar eps h0 h1
+  exact ⟨x0, fun s φ H0 hs hx hlo hhi _ _ => by
+    subst hs
+    exact hAdm s φ H0 rfl hx hlo hhi⟩
+
+/-- The original budget is stronger than the explicitly cofinal one. -/
+theorem cofinal_of_budget (h : VWinAt PChar.one 401) : CofinalBudget := by
+  intro eps h0 h1
+  obtain ⟨e, he⟩ := exists_pageN eps h0
+  obtain ⟨J, hJ, X0, hWindow⟩ := h eps h0 h1 e he
+  obtain ⟨Y1, hPair⟩ := QH.pairEx 1 (by omega) eps J h0 h1 hJ
+  refine ⟨J, hJ, fun cutoff => ?_⟩
+  let M := max 1 (max cutoff Y1)
+  have hM1 : 1 ≤ M := le_max_left _ _
+  have hM0 : 0 ≤ M := by linarith
+  have hJ0 : 0 < J := by linarith
+  let X := max X0 (M ^ J)
+  have hMX : M ≤ X ^ (1 / J) := calc
+    M = (M ^ J) ^ (1 / J) := by rw [one_div, Real.rpow_rpow_inv hM0 hJ0.ne']
+    _ ≤ X ^ (1 / J) :=
+      Real.rpow_le_rpow (Real.rpow_nonneg hM0 _) (le_max_right _ _) (by positivity)
+  have hX0 : 0 ≤ X := (Real.rpow_nonneg hM0 _).trans (le_max_right _ _)
+  have hY1 : Y1 ≤ X ^ (1 / J) :=
+    (le_max_right cutoff Y1).trans ((le_max_right (1 : ℝ) _).trans hMX)
+  obtain ⟨q, d, hGood⟩ := hPair _ hY1
+  have hCancel : (X ^ (1 / J)) ^ J = X := by rw [one_div, Real.rpow_inv_rpow hX0 hJ0.ne']
+  rw [hCancel] at hGood
+  obtain ⟨W, hAW, hWX, hBound⟩ := hWindow X (le_max_left _ _) q d hGood.pair
+  have hW1 := hM1.trans (hMX.trans hAW)
+  have hcut : cutoff ≤ W :=
+    (le_max_left cutoff Y1).trans ((le_max_right (1 : ℝ) _).trans (hMX.trans hAW))
+  have hW := Real.rpow_le_rpow_of_exponent_le hW1 (by norm_num : (3 / 2 : ℝ) ≤ 2)
+  refine ⟨X, W, q, d, hW1, hcut, hAW, hW.trans hWX, hGood, fun x hx0 hx1 => ?_⟩
+  have hx1' := hW1.trans hx0
+  refine ⟨e x, he x hx1', fun E _ _ hE => ?_⟩
+  apply (hBound x hx0 (hx1.trans hW) E hE).mono _ le_rfl
+  exact Nat.floor_mono (Real.rpow_le_rpow_of_exponent_le hx1' (by norm_num))
+
+theorem tied_windows_of_cofinal (hBudget : CofinalBudget) (hBundle : ZetaInputs.Bundle) :
+    ZetaInputs.TiedWindows :=
+  ZetaInputs.tied_windows_of_connected (ZetaInputs.connected_of_bundle hBundle (hosts_of_cofinal hBudget))
+
+theorem rh_of_cofinal (hBudget : CofinalBudget) (hBundle : ZetaInputs.Bundle) :
+    RiemannHypothesis :=
+  ZetaInputs.rh_of_tied_windows (tied_windows_of_cofinal hBudget hBundle)
+
+#print axioms ZetaWindowSupply.fieldChiBound
+#print axioms ZetaWindowSupply.supplyOfAdmOfWindows
+#print axioms hosts_of_cofinal
+#print axioms cofinal_of_budget
+#check @rh_of_cofinal
+#print axioms rh_of_cofinal
+
+end ZetaWindowSupply

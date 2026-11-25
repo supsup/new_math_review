@@ -1,6 +1,8 @@
-# beyond the 17,280 files we had already compiled, 1,840 more (19 for Green's classification, then 1,821) took the number of statements checked to 43, 6,952 more took it to 78, and 3,343 more to 92; counted one at a time by the first scan, as new files for each table line, those 92 would have asked for 41,242. Last, 115 files chosen by the proof's own count took it to 100.
+# beyond the 17,280 files we had already compiled, 1,840 more (19 for Green's classification, then 1,821) took the number of statements checked to 43, 6,952 more took it to 78, and 3,343 more to 92; counted one at a time by the first scan, as new files for each table line, those 92 would have asked for 41,242. Then 115 files chosen by the proof's own count took it to 100, and 5,446 more, chosen the same way, to 113.
 # Two of the names, DiscreteSeriesExists and DiscreteSeriesUpqExists, are one statement: the archive defines the first to be the second.
 AbMulNSt
+AutomorphicFormsFiniteGL
+BernsteinUnitaryProductIrreducible
 BernsteinZelevinskyFiniteness  # direct
 BhattScholzeCrystallineLattices
 BhattScholzeIntegral
@@ -21,6 +23,7 @@ CuspDecaySobolev
 CuspFormsBoundedGL
 CuspRapidDecay
 CuspidalMirabolic
+CuspidalMultiplicityOne
 DeRhamPotSemistable
 DeligneRibet
 DepthZeroJacquetInjective
@@ -50,8 +53,10 @@ GeometricLemmaFiltration
 GlobalArtinReciprocity
 GreenCuspidal
 GreenRegularCharacters
+GreenSeriesSt  # replaced
 GrothendieckRingPolynomial
 HarishChandraAnalyticity
+HarishChandraFinite
 HarishChandraModules
 HasseNormSt
 HeckeLAdicCharacter
@@ -90,14 +95,22 @@ SchurOrthogonalitySquareIntegrable
 SegmentRepresentation
 SemistableReductionSt
 SerreHolomorphicSections
+SiegelEisensteinContinuation
+SiegelKlingenDeligneRibet  # replaced
+SiegelSetUnitary
 StandardCosocleGL
 StandardFunctorsFiniteLength
 StoneVonNeumann
 StrongApproxSU
+TemperedProductOfSquareIntegrable  # replaced
 ThetaRationalInvariance
+TotallyDisjointProductIrreducible  # replaced
 UnitaryIrreducibleAdmissible
+UnlinkedProductIrreducible  # replaced
 UnramifiedDoublingGL
 WeberRayFieldSt  # direct
+WeilRepresentationExists  # direct
 WeilRepresentationUnitaryPair
+WeilThetaConvergence
 WeylBranching
 principalPolarisationOneSection

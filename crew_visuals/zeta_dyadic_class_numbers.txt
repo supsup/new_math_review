@@ -1,0 +1,206 @@
+Odd class numbers control the dyadic zeta budget
+===============================================
+
+The real-subfield reduction in zeta_budget_at_two.txt gives two
+kernels for each positive twist index. The kernel whose coefficient
+has positive complex conjugation action is determined by the signs
+of units in the real field. Its length is at most the degree.
+The other kernel can use an archived
+bound after adjoining a fourth root of unity. Together these give
+a polynomial bound for the modulus-one host's contribution at 2.
+
+Two towers with odd class number
+--------------------------------
+
+Fix distinct primes q ≡ 3 mod 8 and d ≡ 7 mod 16. Write R_m for
+the real subfield of ℚ(ζ_(2^(m+2))), and put
+
+    F_m = R_m(√qd),          F'_m = F_m(√d).
+
+The ordinary class number of ℚ(√qd) is odd by quadratic genus
+theory. Here is the role of ordinary. The narrow class group has
+2-rank one, because the two prime discriminants are −q and −d.
+The kernel to the ordinary class group has order two. A unit of
+norm −1 is impossible since −1 is a nonsquare modulo q. The
+mixed-sign generator 1+√qd gives a class in that kernel. Its
+ideal norm is qd−1, and the genus character for −q evaluates to
+((qd−1)/q) = (−1/q) = −1. The kernel thus contains a nonsquare.
+The narrow 2-primary group is cyclic, and its order-two element
+is a nonsquare only when the group has order two. The ordinary
+2-primary group is therefore trivial.
+
+There is one place over 2 in ℚ(√qd), since qd ≡ 5 mod 8. Its
+completion is the unramified quadratic extension of ℚ₂. The
+cyclotomic layers are totally ramified at 2, and each extension
+F_(m+1)/F_m is quadratic with one ramified place and both fields
+totally real. Chevalley's ambiguous class number formula makes
+the group of fixed ordinary ideal classes have odd order if the
+base class number is odd. A nontrivial finite 2-group acted on
+by an involution has a nonidentity fixed element, by counting
+orbits. The ordinary class numbers of all F_m are odd.
+
+The same argument applies to F'_m/F_m. At q or d, inertia in
+R_m(√q,√d)/R_m changes just the corresponding square root, so
+it already acts nontrivially on √qd. Thus F'_m/F_m is unramified
+at odd places. At 2, √d generates the same local extension as
+i because −d is a square in ℚ₂. Adjoining i to the local real
+cyclotomic field gives the full 2-power cyclotomic field. This
+is ramified, and the unramified quadratic factor from √qd does
+not change that. Therefore F'_m/F_m is ramified at just one place.
+As F'_m is totally real, its ordinary class number is also odd.
+In both sequences the unique dyadic place stays unique and is
+totally ramified over the corresponding place of F_e for m ≥ e.
+
+Bounding the positive-action kernel
+------------------------------------
+
+Use F = F_e and K = R_e(√−q,√−d) from the host. Let A be
+ℚ₂/ℤ₂(−j), with the additional K/F character twist when j
+is odd, so that complex conjugation acts on A by +1. Denote
+by T_pos the finite-place kernel over F. Denote by T_pos^0
+the subgroup where the class is also zero at every real place.
+
+Represent a class of T_pos^0 by a continuous cocycle f. At
+the sole dyadic decomposition group, this cocycle is a
+coboundary. Subtract the same coboundary globally, so that f
+is identically zero on that group. Away from 2 the coefficients
+are unramified. At real places their action is trivial by the
+choice of parity. The zero local classes therefore say that f
+also vanishes on those inertia and real subgroups.
+
+The image of f is finite by continuity and compactness, and
+lies in the 2^r-torsion of A for some r. In a sufficiently
+high layer L of the tower F_m for even j, or F'_m for odd j,
+the action on this torsion is trivial:
+
+    On G_(F_m), the cyclotomic character is ±1 modulo 2^(m+2).
+    An even power removes the sign.
+
+    On G_(F'_m), the character of √−d equals the character
+    of i because √d is already in F'_m. This is exactly the
+    sign of the cyclotomic character modulo 4. The extra
+    twist cancels the sign for odd j.
+
+Here G_(L) denotes the absolute Galois group of a field L.
+Take m+2 ≥ r and m ≥ e. Restricting f to G_(L) now gives a
+homomorphism. It kills all finite inertia and all real
+conjugations. By class field theory it factors through the
+ordinary class group of L. That group has odd order, so the
+2-primary homomorphism is zero. The dyadic decomposition
+group of F maps onto Gal(L/F), since there is one place over
+the unique dyadic place. These two subgroups generate G_(F).
+The normalized cocycle is consequently zero. Thus T_pos^0 = 0.
+
+The real-place localization map now embeds T_pos in a product
+of [F:ℚ] copies of H¹(C₂,A) = A[2]. Hence
+
+    length(T_pos) ≤ [F:ℚ].
+
+The exact size from signs of units
+----------------------------------
+
+In fact T_pos is naturally the dual over 𝔽₂ of the narrow class
+group modulo squares. It is the same group for all positive j.
+
+Let D₂ be the dyadic decomposition group of F. First note that
+the fixed elements of A under G_(F) and under D₂ are the same.
+For even j this follows because the cyclotomic images are the
+same. Globally the intersection of F with the full 2-power
+cyclotomic tower is R_e, since the added quadratic ramifies at
+odd primes. At the dyadic place the added quadratic is
+unramified and the cyclotomic tower is totally ramified, so the
+intersection is again the real layer. For odd j the twist is
+trivial on D₂, whose cyclotomic image contains −1. The fixed
+elements there are exactly A[2], and G_(F) fixes those as well.
+
+The bound by real localization above showed T_pos is killed by
+2. The exact sequence for multiplication by 2 on A lifts each
+class to H¹(G_(F), A[2]), a quadratic character. At odd inertia
+the action on A is trivial and multiplication by 2 on A is
+surjective, so the lift is zero there. At D₂ the restriction
+of the lift is the boundary of a fixed element of A. This
+element is fixed globally by the preceding equality. Subtract
+its global boundary to choose a lift that is zero on D₂. The
+same equality proves uniqueness: a global boundary that is zero
+on D₂ comes from twice a global fixed element and is zero.
+
+The resulting characters are unramified at finite places and
+split at the dyadic prime, with real signs allowed. That prime
+is narrowly principal. Its generator 2−ζ−ζ⁻¹ is totally
+positive, where ζ is the primitive root defining R_e. In the
+full cyclotomic field this product is (1−ζ)(1−ζ⁻¹), with
+valuation two. The extension to the full field from R_e has
+ramification index two there, so the generator has valuation
+one in R_e. This stays one in F because the added quadratic is
+unramified. Thus the split condition at 2 follows automatically
+for characters of the narrow class group.
+
+Since the ordinary class number is odd, the two-primary part
+of the narrow class group is the quotient of the sign vectors
+by the signs attained by units. Consequently
+
+    length(T_pos) = [F:ℚ] − dimension of the unit sign group over 𝔽₂.
+
+The negative-action kernel
+---------------------------
+
+By the real-subfield reduction, the negative-action kernel
+maps onto the eigenspace in K where c acts by (−1)^(j+1).
+The kernel of that map has length one. This eigenspace is
+the archive's ShaMinus at coefficient prime 2. Put E = K(i).
+Restriction in absolute H¹ sends ShaMinus for K into ShaMinus
+for E, since it preserves local zeros and commutes with complex
+conjugation. Its kernel has length at most one by
+inflation–restriction for an extension of degree at most two.
+
+E is a CM abelian field of degree at most 2[K:ℚ], embedded
+in the cyclotomic field of conductor N = 2^(e+2)qd. As E
+contains i, its 2-adic cyclotomic action is trivial modulo 4.
+This is exactly the Procyc condition at 2 in the archive's
+StickBound. Applying that estimate and the length inequality
+from the real-subfield note gives, for an absolute constant C,
+
+    log 2 · length(Sha_K(j))
+      ≤ log 2 · ([F:ℚ] + 1)
+        + 2C [E:ℚ]^2 (j+1) log^2(2jN).
+
+The length here and throughout the note is over ℤ₂. The term
+1 covers the possible kernel on restricting from K to E. The
+class-number argument and restriction steps are paper proofs.
+Lean checks the archive's estimate and its specialization from
+a primitive fourth root in tools/zeta_dyadic_stick.lean. Both
+report propext, Classical.choice and Quot.sound. The replay
+used the estimate's closure of 1,205 archive modules, with 288
+freshly built and 917 reused from matching archive sources.
+
+What this does to the window budget
+------------------------------------
+
+Summing through 1 ≤ j < t gives an upper bound of order
+[E:ℚ]^2 t^2 log^2(2tN) for the contribution at 2. The dyadic
+scale gives [E:ℚ] ≤ 16 x^(2+8ε), and the cofinal cutoff is
+t = floor(x^400). The prime-pair bounds give log N = O(x^(ε/4))
+for large x, since log(qd) is at most x^(ε/5) times a polynomial
+in log x. The polynomial exponent is at most 804 + 33ε/2,
+which is below 805 for 0 < ε < 1/52. This estimate fits inside
+half of sqrt(exp(x^ε)) eventually. An odd-prime budget with
+the other half would suffice for the full cofinal input.
+
+Sources
+-------
+
+The classical odd class number statement is the case qd of
+Gauss's genus theorem, as recorded in the introduction of
+Byeon, Real quadratic fields with odd class number divisible
+by 3, Theorem 2.1.
+https://www.math.snu.ac.kr/~dhbyeon/53_3odd_RJ.pdf
+For the ambiguous class number formula, see Theorem 1 in
+Lemmermeyer, The ambiguous class number formula revisited.
+https://arxiv.org/abs/1309.1071
+
+In the archive at 6193bb5, StickBound is in
+OddResidueBounds/ZeroMemUnrHom.lean and stickBound is proved
+in OddResidueBounds/ThmBcOfPsiBound.lean. Procyc is defined
+in GaloisLibrary/KummerTheory/Mk0IdMapCongr.lean. The host
+and cofinal-budget interfaces are described in the two notes
+zeta_host_field.html and zeta_two_input_cuts.txt.

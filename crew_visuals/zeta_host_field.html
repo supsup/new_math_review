@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Where small primes split in the zeta host field</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f5f0e4;
+      --panel: #fff9ed;
+      --ink: #27251e;
+      --muted: #5d594f;
+      --line: #bcb4a2;
+      --teal: #15594e;
+      --teal-light: #daeae1;
+      --rust: #8a421e;
+      --rust-light: #f2e3d5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #1d211e;
+        --panel: #252b26;
+        --ink: #f1e9d6;
+        --muted: #cbc3b0;
+        --line: #777a66;
+        --teal: #b3dfc8;
+        --teal-light: #26463b;
+        --rust: #f7c5a3;
+        --rust-light: #4a3329;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 1rem/1.6 system-ui, sans-serif; }
+    main { width: min(100% - 2rem, 58rem); margin: 2.5rem auto 4rem; }
+    a { color: var(--teal); text-underline-offset: .16em; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 500; line-height: 1.1; }
+    h1 { font-size: clamp(2.1rem, 5.9vw, 4.15rem); margin: .85em 0 .3em; max-width: 15ch; }
+    h2 { font-size: clamp(1.55rem, 4vw, 2.05rem); margin: 1.2em 0 .25em; }
+    p { max-width: 72ch; }
+    .intro { font-size: 1.15rem; max-width: 58ch; }
+    .controls { display: flex; flex-wrap: wrap; gap: .7rem 1.4rem; padding: 1rem 0; border-top: 1px solid var(--line); }
+    .controls label { display: grid; gap: .15rem; font-size: .91rem; font-weight: 650; }
+    select, input:not([type=range]), button {
+      color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+      border-radius: .28rem; font: inherit; padding: .32rem .55rem; min-height: 2.25rem;
+    }
+    input[type=range] { width: min(13rem, 100%); accent-color: var(--teal); }
+    input[type=number] { width: 7.3rem; }
+    button { cursor: pointer; }
+    button:hover { border-color: var(--teal); }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+    .examples { display: flex; flex-wrap: wrap; gap: .45rem; align-items: end; }
+    .error { margin: .25rem 0 1rem; color: var(--rust); }
+    .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.3rem; margin: 0; padding: .8rem 0; border-top: 1px solid var(--line); }
+    .facts div { display: flex; gap: .4rem; align-items: baseline; }
+    dt { color: var(--muted); }
+    dd { margin: 0; font-weight: 700; }
+    .diagram { background: var(--panel); border: 1px solid var(--line); border-radius: .45rem; padding: clamp(.55rem, 2.8vw, 1.2rem); }
+    .diagram p { margin: .3rem 0 .5rem; }
+    .dim { color: var(--muted); }
+    .single { width: min(100%, 16rem); margin: 0 auto; }
+    .node { display: grid; place-items: center; text-align: center; min-width: 0; min-height: 3.35rem; padding: .38rem .18rem; border-radius: .25rem; }
+    .real { border: 1px solid var(--line); }
+    .extension { background: var(--teal-light); color: var(--teal); }
+    .extension[data-different=true] { background: var(--rust-light); color: var(--rust); }
+    .stem { height: 1rem; width: 1px; margin: 0 auto; background: var(--line); }
+    .branches { display: grid; grid-template-columns: repeat(var(--branches), minmax(0, 1fr)); gap: .3rem; }
+    .extension .field { overflow-wrap: anywhere; }
+    .field { font: 1.03rem/1.2 Georgia, serif; white-space: nowrap; }
+    .field sub { font-size: .76em; }
+    .count { margin: .5rem 0 0; font-size: .88rem; }
+    .summary { font-size: 1.1rem; font-weight: 660; }
+    .count, .summary, .math { font-variant-numeric: tabular-nums; }
+    .math { overflow-wrap: anywhere; }
+    details { margin: 1rem 0; border-top: 1px solid var(--line); padding-top: .65rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    @media (max-width: 35rem) {
+      main { margin-top: 1.4rem; }
+      .branches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls { gap: .75rem; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <a href="lighter_zeta_route.txt">Back to the lighter zeta route</a>
+  <h1>Where small primes split in the zeta host field</h1>
+  <p class="intro">The archive’s ζ argument builds a number field from a real cyclotomic tower and two square roots.
+    Raise the tower by one step. For a fixed small unramified prime, the residue degree doubles while the number of primes above it stays fixed.</p>
+
+  <div class="controls">
+    <label for="height"><span>Tower step <i>e</i> <output id="step">2</output></span>
+      <input id="height" type="range" min="0" max="8" value="2">
+    </label>
+    <label for="pair">Primes <i>q</i> and <i>d</i>
+      <select id="pair">
+        <option value="11,263">11 and 263</option>
+        <option value="19,1367">19 and 1,367</option>
+        <option value="43,1031">43 and 1,031</option>
+      </select>
+    </label>
+    <label for="prime">Prime <i>p</i>
+      <input id="prime" type="number" min="3" max="99991" step="2" value="5" aria-describedby="error">
+    </label>
+    <div class="examples">
+      <button type="button" data-prime="5">Try 5</button>
+      <button type="button" data-prime="17">Try 17</button>
+    </div>
+  </div>
+  <p class="error" id="error" role="alert" hidden></p>
+  <section id="result" aria-label="Prime decomposition">
+    <dl class="facts">
+      <div><dt>Tower modulus</dt><dd id="modulus"></dd></div>
+      <div><dt>Sign at <i>q</i></dt><dd id="sign-q"></dd></div>
+      <div><dt>Sign at <i>d</i></dt><dd id="sign-d"></dd></div>
+    </dl>
+    <div class="diagram">
+      <p><strong>Real cyclotomic field <i>R</i></strong> <span class="dim" id="base-degree"></span></p>
+      <p class="count" id="base-count"></p>
+      <div class="single">
+        <div class="node real" id="base-field"></div>
+      </div>
+      <div class="stem" aria-hidden="true"></div>
+      <div class="branches" id="branches" aria-label="Primes in K above one prime of R"></div>
+      <p><strong>Host field <i>K</i></strong> <span class="dim" id="host-degree"></span></p>
+      <p class="count" id="host-count"></p>
+    </div>
+    <p class="summary" id="summary" role="status" aria-atomic="true"></p>
+    <p id="next"></p>
+  </section>
+
+  <h2>Why a bigger field can keep the same residue degree</h2>
+  <p>Put <i>M</i> = 2<sup><i>e</i>+2</sup>. The real field <i>R</i> is the part of ℚ(ζ<sub><i>M</i></sub>) fixed by complex conjugation.
+    The archive’s three conditions select <i>K</i> = <i>R</i>(√−<i>q</i>, √−<i>d</i>).
+    The two square roots make <i>K</i> four times the degree of <i>R</i>.</p>
+  <p>For an unramified <i>p</i>, Frobenius acts by the <i>p</i>th power on roots of unity and by two signs on the square roots.
+    The residue degree in <i>R</i> is the first positive <i>f</i> with <i>p</i><sup><i>f</i></sup> ≡ ±1 mod <i>M</i>. This <i>f</i> is a power of two.
+    If <i>f</i> is even, its power also clears both signs. Each prime of <i>R</i> over <i>p</i> then has four primes of <i>K</i> above it, with the same residue field size.
+    When <i>f</i> = 1, a negative sign can instead double the residue degree.</p>
+
+  <details>
+    <summary>Read the exact count</summary>
+    <p>Let <i>v</i> be the larger of the powers of two dividing <i>p</i>−1 and <i>p</i>+1, measured as exponents.
+      Replace <i>p</i> by −<i>p</i> if needed so it is 1 modulo 4. Each squaring then adds exactly one to the valuation of the difference from 1,
+      because the sum with 1 has valuation one. This gives <i>f</i> = 2<sup>max(0,<i>e</i>+2−<i>v</i>)</sup>.</p>
+    <p>If <i>p</i>+1 &lt; <i>M</i>, then <i>v</i> &lt; <i>e</i>+2, and the two signs clear at that <i>f</i>. There are exactly <i>M</i>/<i>f</i> = 2<sup><i>v</i></sup>
+      primes of <i>K</i> over <i>p</i>. Raising <i>e</i> doubles <i>M</i> and <i>f</i> together.</p>
+  </details>
+
+  <details>
+    <summary>Read the three conditions from the proof</summary>
+    <p>For modulus one, the archive’s <code>IsChiField</code> requires a cyclotomic embedding with a fixed subgroup given by
+      <i>a</i> ≡ ±1 mod <i>M</i>, (<i>a</i>/<i>q</i>) = 1, and (<i>a</i>/<i>d</i>) = 1. The <i>q</i> and <i>d</i> here are distinct primes that are 3 modulo 4.
+      A quadratic Gauss sum identifies each Legendre-symbol kernel with the automorphisms fixing √−<i>q</i> or √−<i>d</i>.
+      By the Chinese remainder theorem the three conditions apply independently. This gives Galois group
+      C<sub>2<sup><i>e</i></sup></sub> × C<sub>2</sub> × C<sub>2</sub> and determines the field up to ℚ-isomorphism, even if the embedding uses a larger cyclotomic field.
+      <a href="../tools/rh_mod_one_field.lean">Lean’s modulus-one simplification</a> ·
+      <a href="https://www.maths.tcd.ie/~mascotn/teaching/2018/345/Poly.pdf">Cyclotomic Frobenius and quadratic fields</a>.</p>
+    <p>The archived windows use odd primes <i>p</i> ≤ <i>Y</i><sup>ε/5</sup>. At large <i>Y</i> the lower bounds on log <i>q</i> and log <i>d</i> put them above this range,
+      and the dyadic condition at <i>x</i> ≥ <i>Y</i> gives <i>M</i> &gt; <i>Y</i><sup>ε/5</sup>+1. So the fixed count applies to those small odd primes.
+      The displayed <i>q,d</i> choices illustrate the field calculation with small integers. The proof’s size conditions are in
+      <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ExistsPageN.lean">the archived window statement</a>.</p>
+  </details>
+
+  <details>
+    <summary>Read the discriminant</summary>
+    <p id="discriminant" class="math"></p>
+    <p>There are 2<sup><i>k</i>−3</sup> even characters of exact conductor 2<sup><i>k</i></sup> for each 3 ≤ <i>k</i> ≤ <i>e</i>+2.
+      Each has four choices of quadratic character across <i>q</i> and <i>d</i>. Half the characters include each odd prime.
+      Multiplying the conductors gives the displayed discriminant. <a href="https://doi.org/10.1007/978-1-4612-1934-7">Washington, <cite>Introduction to Cyclotomic Fields</cite>, Theorem 3.11</a>.</p>
+  </details>
+  <p>The replay enumerates the conductors in the displayed range and independently factors polynomials for the host fields modulo small primes.
+    It uses the reductions that stay squarefree, where the polynomial factors give the field’s prime factors.
+    <a href="../tools/check_zeta_host_field.py">Replay with exact arithmetic</a>.</p>
+</main>
+<script>
+(() => {
+  const get = id => document.getElementById(id);
+  const height = get('height');
+  const pair = get('pair');
+  const prime = get('prime');
+  const fmt = new Intl.NumberFormat('en-US');
+  const powerMod = (a, n, m) => {
+    let power = a % m, result = 1;
+    while (n > 0) {
+      if (n % 2) result = result * power % m;
+      power = power * power % m;
+      n = Math.floor(n / 2);
+    }
+    return result;
+  };
+  function isOddPrime(n) {
+    if (!Number.isSafeInteger(n) || n < 3 || n > 99991 || n % 2 === 0) return false;
+    for (let divisor = 3; divisor * divisor <= n; divisor += 2) {
+      if (n % divisor === 0) return false;
+    }
+    return true;
+  }
+  function valuation(n) {
+    let exponent = 0;
+    while (n % 2 === 0) {
+      n /= 2;
+      exponent++;
+    }
+    return exponent;
+  }
+  function residueDegree(e, v, signsClear) {
+    const base = 2 ** Math.max(0, e + 2 - v);
+    const host = base === 1 && !signsClear ? 2 : base;
+    return {base, host};
+  }
+  function field(p, f) {
+    const label = document.createElement('span');
+    label.className = 'field';
+    label.setAttribute('role', 'math');
+    label.setAttribute('aria-label', f === 1 ? 'Finite field of size ' + p :
+      'Finite field of size ' + p + ' to the power ' + f);
+    const indices = document.createElement('sub');
+    indices.append(p);
+    if (f !== 1) {
+      const exponent = document.createElement('sup');
+      exponent.textContent = f;
+      indices.append(exponent);
+    }
+    label.append('𝔽', indices);
+    return label;
+  }
+  const sign = (p, q) => powerMod(p, (q - 1) / 2, q) === 1 ? 1 : -1;
+  const displaySign = value => value === 1 ? '+1' : '−1';
+  const count = (n, singular, plural) => fmt.format(n) + ' ' + (n === 1 ? singular : plural);
+  function render() {
+    const e = Number(height.value);
+    const [q, d] = pair.value.split(',').map(Number);
+    const p = Number(prime.value);
+    const M = 2 ** (e + 2);
+    get('step').textContent = String(e);
+    get('discriminant').textContent = 'For this field the absolute discriminant is 2^' +
+      ((e + 1) * M - 4) + ' × (' + q + ' × ' + d + ')^' + M / 2 + '.';
+    const error = !isOddPrime(p) ? 'Enter an odd prime from 3 to 99,991.'
+      : p === q || p === d ? 'That prime ramifies here. Choose a different odd prime.' : '';
+    get('error').hidden = error === '';
+    get('error').textContent = error;
+    get('result').hidden = error !== '';
+    prime.setAttribute('aria-invalid', String(error !== ''));
+    if (error) return;
+    const v = Math.max(valuation(p - 1), valuation(p + 1));
+    const qSign = sign(p, q), dSign = sign(p, d);
+    const signsClear = qSign === 1 && dSign === 1;
+    const {base, host} = residueDegree(e, v, signsClear);
+    const relativeCount = 4 * base / host;
+    get('modulus').textContent = fmt.format(M);
+    get('sign-q').textContent = displaySign(qSign);
+    get('sign-d').textContent = displaySign(dSign);
+    get('base-degree').textContent = '· degree ' + fmt.format(M / 4);
+    get('host-degree').textContent = '· degree ' + fmt.format(M);
+    get('base-count').textContent = count(M / (4 * base), 'prime', 'primes') + ' over ' + p +
+      ', each of residue degree ' + base + '. One is shown.';
+    get('host-count').textContent = count(M / host, 'prime', 'primes') + ' over ' + p +
+      ', each of residue degree ' + host + '.';
+    get('base-field').replaceChildren(field(p, base));
+    const branches = get('branches');
+    branches.style.setProperty('--branches', relativeCount);
+    const nodes = Array.from({length: relativeCount}, () => {
+      const node = document.createElement('div');
+      node.className = 'node extension';
+      node.dataset.different = host !== base;
+      node.append(field(p, host));
+      return node;
+    });
+    branches.replaceChildren(...nodes);
+    get('summary').textContent = relativeCount === 4
+      ? 'Each prime of R splits into four primes of K with the same residue degree.'
+      : 'Each prime of R splits into two primes of K and the residue degree doubles.';
+    if (v < e + 2) {
+      get('next').textContent = 'Raise e again and the count stays at ' + fmt.format(2 ** v) +
+        '. The residue degree doubles from ' + host + ' to ' + (2 * host) + '.';
+    } else {
+      const next = residueDegree(e + 1, v, signsClear).host;
+      get('next').textContent = 'At e = ' + (e + 1) + ' the host field has ' + count(2 * M / next, 'prime', 'primes') +
+        ' over ' + p + ', each of residue degree ' + next + '.';
+    }
+  }
+  height.addEventListener('input', render);
+  pair.addEventListener('change', render);
+  prime.addEventListener('input', render);
+  for (const button of document.querySelectorAll('[data-prime]')) {
+    button.addEventListener('click', () => {
+      prime.value = button.dataset.prime;
+      render();
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

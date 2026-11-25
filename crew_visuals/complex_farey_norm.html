@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When complex Farey arrows give an integer determinant</title>
+<style>
+  :root { color-scheme: dark; --page: #151b29; --panel: #1b2638; --ink: #eff3f4; --soft: #bdc9d3; --edge: #48596d; --cool: #92d4cd; --warm: #f1be7f; background: var(--page); color: var(--ink); font: 100%/1.56 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,65rem); margin: auto; padding: clamp(1rem,5vw,4rem); }
+  a { color: var(--cool); text-underline-offset: .18em; }
+  :focus-visible { outline: .15rem solid var(--warm); outline-offset: .14rem; }
+  p { max-width: 66ch; margin: .54rem 0; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { font-size: clamp(2.75rem,8.3vw,5.9rem); line-height: .98; letter-spacing: -.057em; max-width: 15ch; text-wrap: balance; margin: .63rem 0 .81rem; }
+  h2 { font-size: 1.72rem; line-height: 1.17; margin: 1.36rem 0 .48rem; }
+  .muted,.caption { color: var(--soft); }
+  .explorer { margin: 1.27rem 0; padding: clamp(.74rem,2.6vw,1.28rem); border: 1px solid var(--edge); border-radius: .42rem; background: var(--panel); }
+  .settings,.study { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,14rem),1fr)); gap: .5rem 1rem; }
+  .study { align-items: start; margin: .75rem 0 0; gap: .79rem 1.28rem; }
+  label { display: grid; gap: .19rem; min-width: 0; }
+  label span { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem; }
+  input { width: 100%; margin-inline: 0; accent-color: var(--cool); }
+  output { color: var(--warm); font-variant-numeric: tabular-nums; }
+  figure { margin: 0; min-width: 0; }
+  canvas { width: 100%; display: block; background: #131f30; border-radius: .25rem; }
+  .caption { margin: .31rem 0 0; font-size: .89rem; }
+  dl { margin: 0 0 .55rem; display: grid; gap: .46rem; }
+  dl div { border-top: 1px solid var(--edge); padding: .32rem 0; }
+  dt { font-size: .9rem; color: var(--soft); }
+  dd { margin: .12rem 0 0; font: 1.46rem ui-monospace,monospace; color: var(--cool); overflow-wrap: anywhere; }
+  .matrix { width: max-content; max-width: 100%; display: grid; grid-template-columns: auto auto; gap: .3rem .85rem; padding: .27rem .61rem; font: 1.12rem ui-monospace,monospace; border-inline: .12rem solid var(--warm); border-radius: .15rem; }
+  .matrix span { text-align: right; }
+  details { border-top: 1px solid var(--edge); padding-top: .62rem; margin-top: .81rem; }
+  summary { color: var(--cool); font-weight: 620; cursor: pointer; }
+  .formula { font: 1.12rem/1.55 Georgia,serif; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+  <a href="farey_harmonics.html">Back to the Farey circle</a>
+  <h1>When complex Farey arrows give an integer determinant</h1>
+  <p class="muted">Weight the fractions by 1, −1, <var>i</var>, −<var>i</var> or zero. The sum lands on a point <var>a</var> + <var>bi</var> with integer coordinates. A matrix with twice as many rows has determinant <var>a</var>² + <var>b</var>², the squared length of that arrow.</p>
+  <section class="explorer" aria-label="Quartic-character Farey sums">
+    <div class="settings">
+      <label for="order"><span>Largest denominator <var>N</var><output id="n-value"></output></span><input id="order" type="range" min="2" max="42" value="7"></label>
+      <label for="harmonic"><span>Turns around the circle <var>k</var><output id="k-value"></output></span><input id="harmonic" type="range" min="1" max="24" value="1"></label>
+    </div>
+    <div class="study">
+      <figure>
+        <canvas id="plane" role="img" aria-label="Complex sum and its conjugate"></canvas>
+        <figcaption class="caption">The faint path adds contributions in denominator order. The gold arrow is the final sum. Its reflection has the same length.</figcaption>
+      </figure>
+      <div aria-live="polite" aria-atomic="true">
+        <dl>
+          <div><dt>Complex Farey sum</dt><dd id="sum"></dd></div>
+          <div><dt id="norm-label">Integer block determinant</dt><dd id="norm"></dd></div>
+          <div><dt>Same determinant using only zeros and ones</dt><dd id="binary-size"></dd></div>
+        </dl>
+        <div class="matrix" id="block" role="img" aria-label="Real matrix for multiplication by the sum">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <p class="caption">This 2 × 2 matrix multiplies by the final sum. Its determinant is the same squared length.</p>
+      </div>
+    </div>
+  </section>
+
+  <h2>Rotate by a quarter turn</h2>
+  <p>Choose the character mod 5 with χ(2) = <var>i</var>. On remainders 1, 2, 3, 4, 0 it has values 1, <var>i</var>, −<var>i</var>, −1, 0. The fractions with any fixed denominator give an integer Ramanujan sum before this weight is applied. Multiplication by <var>i</var> turns that integer contribution through 90 degrees. So the cumulative sum follows horizontal and vertical steps on the integer grid. <a href="farey_harmonics.html">The real-weight explorer and Ramanujan sum</a>.</p>
+  <p>With <var>N</var> = 7 and one turn, the sum is 2 − <var>i</var>. Its conjugate is 2 + <var>i</var> and their product is 5. In this example the larger integer board has 14 rows.</p>
+
+  <details>
+    <summary>Why the large integer board gives the same result</summary>
+    <p>Build the weighted divisibility matrix from the circle page, using this χ. After the first column, position (<var>i</var>,<var>j</var>) is χ(<var>j</var>/<var>i</var>) when <var>i</var> divides <var>j</var>. The first column at row <var>i</var> sums <var>d</var>χ(<var>d</var>) over divisors <var>d</var> of <var>k</var> with <var>di</var> ≤ <var>N</var>. The same row operation gives the complex Farey sum as the determinant.</p>
+    <p>Replace each entry <var>u</var> + <var>vi</var> by the block with rows (<var>u</var>, −<var>v</var>) and (<var>v</var>, <var>u</var>). All these blocks act by <var>u</var> + <var>vi</var> on the vector (1, −<var>i</var>) and by <var>u</var> − <var>vi</var> on (1, <var>i</var>). Use this basis in every coordinate. The large board separates into the old board and its conjugate, so the determinant is (a + bi)(a − bi) = a² + b². <a href="../tools/check_complex_farey_norm.py">Exact circle sums and integer determinants</a>.</p>
+  </details>
+  <details>
+    <summary>Use only zeros and ones in the large board</summary>
+    <p>Give each index a unit label by applying χ after stripping off every factor of 5. Multiply row <var>i</var> by its label and column <var>i</var> by the inverse. The determinant stays the same. In columns after the first, each nonzero entry has a quotient coprime to 5, and its two labels cancel its character value. Thus every one of those Gaussian entries is 0 or 1.</p>
+    <p>Expanding the Gaussian entries to blocks leaves two integer columns to encode. Apply the signed powers-of-two construction to each with its own helper rows and columns. The extra size depends only on the largest coordinate in these two columns. For any fixed harmonic that coordinate is bounded by the sum of the divisors of <var>k</var>, independently of <var>N</var>. With <var>N</var> = 7 and <var>k</var> = 1, four helper rows suffice. The resulting 18 × 18 board still has determinant 5. <a href="farey_harmonics.html#binary">The signed powers-of-two construction</a>.</p>
+  </details>
+  <details>
+    <summary>What the growth bound would say</summary>
+    <p>The square root of the integer determinant is exactly the magnitude of the twisted harmonic. For any fixed turn count <var>k</var>, the fixed-character GRH growth criterion on the circle page can therefore be written as an integer determinant bound <span class="formula">O<sub>χ,k,ε</sub>(<var>N</var><sup>1+ε</sup>)</span> for every ε &gt; 0. The finite identities above use no hypothesis on zeros. <a href="https://arxiv.org/pdf/2208.07596#page=13">Garg and Maji, equation (4.22)</a> · <a href="farey_harmonics.html">Fixed-harmonic argument</a>.</p>
+  </details>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id), order=get('order'), harmonic=get('harmonic'), plane=get('plane');
+  const chars=[[0,0],[1,0],[0,1],[0,-1],[-1,0]];
+  const mu=[0,1];
+  for(let q=2;q<=42;q++){
+    let total=0;
+    for(let d=1;d<q;d++)if(q%d===0)total+=mu[d];
+    mu[q]=-total;
+  }
+  function packet(q,k){
+    let total=0;
+    for(let d=1;d<=q;d++)if(q%d===0&&k%d===0)total+=d*mu[q/d];
+    return total;
+  }
+  const num=value=>String(value).replace('-','−');
+  function complex(a,b){
+    if(!b)return num(a);
+    const imag=Math.abs(b)===1?'i':Math.abs(b)+'i';
+    if(!a)return (b<0?'−':'')+imag;
+    return num(a)+(b<0?' − ':' + ')+imag;
+  }
+  function binaryOrder(n,k){
+    let largest=1;
+    for(let q=1;q<=n;q++){
+      let a=0,b=0;
+      for(let d=1;d*q<=n;d++)if(k%d===0){
+        const [u,v]=chars[d%5];
+        a+=d*u;b+=d*v;
+      }
+      largest=Math.max(largest,Math.abs(a),Math.abs(b));
+    }
+    const bits=Math.floor(Math.log2(largest))+1;
+    return 2*n+2*(bits===1?2:2*bits+1);
+  }
+  function draw(path){
+    const w=plane.clientWidth,h=244,r=devicePixelRatio||1;
+    plane.width=Math.round(w*r);plane.height=Math.round(h*r);plane.style.height=h+'px';
+    const ctx=plane.getContext('2d');
+    ctx.setTransform(r,0,0,r,0,0);
+    const extent=Math.max(2,...path.flat().map(Math.abs));
+    const radius=Math.min(w,h)/2-23;
+    const x=a=>w/2+a*radius/extent, y=b=>h/2-b*radius/extent;
+    function line(a,b,c,d,ink,width=1){
+      ctx.strokeStyle=ink;ctx.lineWidth=width;ctx.beginPath();
+      ctx.moveTo(x(a),y(b));ctx.lineTo(x(c),y(d));ctx.stroke();
+    }
+    const grid=Math.max(1,Math.ceil(extent/5));
+    for(let v=-Math.floor(extent/grid)*grid;v<=extent;v+=grid){
+      const ink=v===0?'#688196':'#344659';
+      line(v,-extent,v,extent,ink);line(-extent,v,extent,v,ink);
+    }
+    ctx.fillStyle='#bdc9d3';ctx.font='11px ui-monospace,monospace';
+    ctx.fillText('Re',x(extent)+4,y(0)+4);ctx.fillText('Im',x(0)+4,y(extent)-6);
+    ctx.strokeStyle='#718f9a';ctx.lineWidth=1.6;ctx.beginPath();
+    for(const [j,[a,b]] of path.entries()){
+      if(j)ctx.lineTo(x(a),y(b));else ctx.moveTo(x(a),y(b));
+    }
+    ctx.stroke();
+    for(const [a,b] of path){
+      ctx.fillStyle='#718f9a';ctx.beginPath();ctx.arc(x(a),y(b),2.4,0,2*Math.PI);ctx.fill();
+    }
+    const [a,b]=path.at(-1);
+    function arrow(u,v,color,dashed){
+      const dx=x(u)-x(0),dy=y(v)-y(0);
+      ctx.setLineDash(dashed?[4,3]:[]);
+      line(0,0,u,v,color,2.3);
+      ctx.setLineDash([]);
+      const len=Math.hypot(dx,dy);
+      ctx.fillStyle=color;ctx.beginPath();
+      if(len<6)ctx.arc(x(u),y(v),3.6,0,2*Math.PI);
+      else{
+        const p=dx/len,q=dy/len;
+        ctx.moveTo(x(u),y(v));ctx.lineTo(x(u)-8*p+4*q,y(v)-8*q-4*p);
+        ctx.lineTo(x(u)-8*p-4*q,y(v)-8*q+4*p);ctx.closePath();
+      }
+      ctx.fill();
+    }
+    if(b)arrow(a,-b,'#92d4cd',true);
+    arrow(a,b,'#f1be7f',false);
+  }
+  function render(){
+    const n=Number(order.value), k=Number(harmonic.value);
+    let a=0,b=0;
+    const path=[[a,b]];
+    for(let q=1;q<=n;q++){
+      const p=packet(q,k), [u,v]=chars[q%5];
+      a+=p*u;b+=p*v;path.push([a,b]);
+    }
+    get('n-value').value=n;get('k-value').value=k;
+    get('sum').textContent=complex(a,b);
+    get('norm-label').textContent=(2*n)+' × '+(2*n)+' integer determinant';
+    get('norm').textContent=num(a*a+b*b);
+    const binary=binaryOrder(n,k);
+    get('binary-size').textContent=binary+' × '+binary;
+    const block=get('block');
+    for(const [j,v] of [a,-b,b,a].entries())block.children[j].textContent=num(v);
+    block.setAttribute('aria-label','Multiplication block with rows '+num(a)+', '+num(-b)+' and '+num(b)+', '+num(a));
+    plane.setAttribute('aria-label','Complex sum '+complex(a,b)+' and reflected point '+complex(a,-b));
+    draw(path);
+  }
+  for(const input of [order,harmonic])input.addEventListener('input',render);
+  let pending;
+  window.addEventListener('resize',()=>{cancelAnimationFrame(pending);pending=requestAnimationFrame(render);});
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+Two inputs for the modulus-one route
+====================================
+
+The archive's short endgame takes Green's classification, a
+cohomology budget, and a bundle of facts about its families.
+Green's theorem and the bridge to the form the route uses
+have now been compiled from the archive. The other two inputs meet
+at the construction of a family for ζ.
+
+    Cohomology budget        → hosts for the modulus-one character
+    Hosts + family bundle   → a connected family with tied windows
+    Tied windows            → an upper bound for the corrected prime sum
+    Prime-sum upper bound   → the Riemann Hypothesis
+
+The host step
+-------------
+
+At each scale, the budget controls a weighted sum of module lengths
+in Galois cohomology. Write j for the twist index and ℓ for the
+coefficient prime. The length is taken for the kernel of a map from
+global H¹ to the product of local H¹ groups at places over ℓ. The
+coefficients are ℚ_ℓ/ℤ_ℓ with the inverse cyclotomic character to
+power j. The budget makes each length finite for 0 < j < t and
+bounds the sum of log ℓ times these lengths over every finite set
+of primes ℓ. At scale x the bound is sqrt(exp(x^ε)).
+
+VWinAt PChar.one 401 supplies that budget for the modulus-one
+character, up to the index t = floor(x^401). It gives a window for
+every sufficiently large anchor and every admissible prime pair at
+that anchor, for any dyadic schedule satisfying PageN. The host proof
+first makes the data it needs from these windows. At each scale it
+consumes a WinDatum containing the prime pair, the dyadic scale and
+the budget. The host theorem carries the budget into the family as
+part of GChi PChar.one.
+
+The family step
+---------------
+
+The HypsAlt bundle is a family class together with choices and
+conditions on its rows, columns, local and global comparisons, and
+other data. Its producer, together with Green, supplies the general
+TopG comparison. The ζ route uses that comparison at scale 3/2 and
+only with GChi PChar.one. That instance takes the hosts and returns
+a connected family for each sufficiently small ε, with the tied
+estimates on its windows.
+
+tools/rh_mod_one_input_cuts.lean checks each arrow through the tied
+windows and the resulting two-input implication. The third and
+fourth arrows in the diagram are also exposed separately in the
+lighter route, which has a 31-file analytic finish.
+
+A cofinal budget is enough
+-------------------------
+
+For each 0 < ε < 1/52, fix an exponent J ≥ 1. For every cutoff,
+choose a window [W, W^(3/2)] starting at or beyond the cutoff, and a
+scale X with Y = X^(1/J) ≤ W and W^(3/2) ≤ X. Choose one pair
+of primes q,d with PairGood 1 ε Y X q d. PairGood includes the
+prime size and splitting conditions, estimates for the induced
+characters from three nontrivial quadratic combinations, and
+zero-free boxes for the real twists.
+
+For each x in that selected window, choose an integer e so that
+x^(2+8ε) ≤ 2^e ≤ 2x^(2+8ε), and supply the cohomology bound at
+t = floor(x^400) for each field with the specified cyclotomic
+kernel for that e,q,d. The choice of e can be made within the
+window. The pair q,d serves every x in it.
+
+The archive's field construction takes an order multiplier c
+between 1 and the number of powers of the character. The trivial
+character has one power, so c = 1. The dyadic comparison therefore
+holds at x itself. The host's existing rank estimate uses x^400.
+The larger exponent 401 in the general route absorbs the scale
+change by a constant when c can exceed one.
+
+The three comparisons Y ≤ x, x ≤ X, and x^(1/J) ≤ Y then give
+exactly the WinDatum consumed by the host proof. The old budget
+implies the new one by choosing a single good pair at a late
+anchor, using the first part of its square window, and restricting
+the twist index from floor(x^401) to floor(x^400). The cofinal
+budget still has to be proved, and the family bundle remains a
+separate hypothesis.
+
+Replay and sources
+------------------
+
+The replay retains the archive's field and host proof bodies. It
+keeps the upper bound on c that the field proof already had, and
+replaces the call to winPairs in the host proof with its exact
+window-data interface. It assembles and checks a temporary Lean
+file from two pinned archive source files and the local wrappers.
+
+    python3 -B tools/replay_rh_mod_one_cofinal_budget.py ARCHIVE_SRC COMPILED_ARCHIVE_PROJECT
+
+Use the archive at 6193bb5, Lean 4.33.1 and Mathlib 0df444a. The
+replay checks the old-to-new budget implication and the RH
+implication from the cofinal budget and the same bundle. Lean
+reports propext, Classical.choice and Quot.sound.
+
+The source names are VWinAt and VVle in ExistsPageN.lean,
+WinDatum in TwistForm.lean, PairGood in PairGood.lean, the field
+construction in FieldChi.lean, and the host construction in
+supplyOfAdmOf.lean. The family comparison is in TopShape.lean
+and ZeroFreeAllOfTopG.lean. See also lighter_zeta_route.txt and
+zeta_host_field.html in this directory.

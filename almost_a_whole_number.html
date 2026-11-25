@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almost a whole number</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --good:#1f6f54; --warn:#b07200; --soft:#cfc6b6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --good:#6fcfa9; --warn:#e3b55a; --soft:#4a4437; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:880px; margin:0 auto; padding:22px 16px 60px; overflow-wrap:anywhere; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:21px; margin:28px 0 6px; }
+p { margin:8px 0; } a { color:var(--accent); } .sub { color:var(--muted); margin:0 0 18px; }
+.box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:10px 0; }
+.note { color:var(--muted); font-size:14.5px; }
+ol.five { margin:6px 0; padding-left:1.4em; } ol.five li { margin:7px 0; } code { font:13px/1.4 ui-monospace, Menlo, monospace; }
+canvas { display:block; border-radius:8px; } canvas.wide { width:100%; height:auto; }
+.row { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:8px 0; }
+.row label { font-size:15px; }
+input[type=number], select { font:16px Georgia, serif; max-width:100%; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
+input[type=number] { width:6em; }
+button { font:15px Georgia, serif; padding:5px 12px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); cursor:pointer; }
+button:hover { border-color:var(--accent); } button[aria-pressed=true] { border-color:var(--accent); color:var(--accent); }
+.hero { font:26px/1.3 ui-monospace, Menlo, monospace; margin:4px 0 10px; }
+.hero .run { color:var(--accent); font-weight:bold; } .hero .rest { color:var(--muted); }
+.herolab { color:var(--muted); font-size:15px; margin:0; }
+.sum { margin:8px 0 2px; border-top:1px solid var(--line); }
+.sum div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0 12px; padding:3px 0; border-bottom:1px solid var(--line); }
+.sum span { font-size:15px; } .sum b { font:12.5px/1.6 ui-monospace, Menlo, monospace; font-weight:normal; white-space:pre; margin-left:auto; }
+.sum div.total b { color:var(--accent); }
+.read { font-size:16px; margin:6px 0; } .read b { font-weight:normal; color:var(--accent); }
+.shapes { display:flex; flex-wrap:wrap; gap:10px; margin:8px 0; }
+.shapes figure { margin:0; width:132px; } .shapes canvas { width:132px; height:132px; border:1px solid var(--line); background:var(--bg); }
+.shapes figcaption { font:11.5px/1.35 ui-monospace, Menlo, monospace; color:var(--muted); margin-top:3px; }
+.poly { font:13px/1.5 ui-monospace, Menlo, monospace; margin:6px 0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); max-height:14em; overflow:auto; }
+.key span { display:inline-block; margin:4px 16px 0 0; font-size:14px; color:var(--muted); }
+.key i { display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; }
+table.lean { border-collapse:collapse; width:100%; font-size:15px; } table.lean td { border-top:1px solid var(--line); padding:6px 8px 6px 0; vertical-align:top; }
+table.lean td:first-child { width:42%; }
+.bad { color:#b3261e; } @media (prefers-color-scheme: dark) { .bad { color:#f2a59d; } }
+@media (max-width:520px) { .hero { font-size:19px; } .shapes figure { width:118px; } .shapes canvas { width:118px; height:118px; } .sum b { font-size:11px; } table.lean td { display:block; width:auto !important; border-top:0; padding:2px 0; } table.lean tr { display:block; border-top:1px solid var(--line); padding:5px 0; } }
+</style>
+</head>
+<body>
+<main>
+<p class="note"><a href="round_two.html">Back to round two</a> · <a href="six_finished_theorems.html">Six finished theorems</a> · <a href="how_far_is_each_result.html">How far is each published result?</a></p>
+<h1>Almost a whole number</h1>
+<p class="sub">Raise e to the power π√163 and you miss a whole number by less than a trillionth. It is not luck. A theorem about number systems says why, and the archive of the announced proof of the Riemann Hypothesis proves that theorem in Lean. It is one of the results from that archive that Lean has checked on our own machine.</p>
+
+<div class="box">
+<p class="herolab" id="herolab"></p>
+<div class="hero" id="hero" aria-live="polite"></div>
+<div class="row" role="group" aria-label="Choose the number under the square root">
+<span class="note">Try another:</span>
+<button type="button" data-n="163">163</button><button type="button" data-n="67">67</button><button type="button" data-n="43">43</button><button type="button" data-n="19">19</button><button type="button" data-n="11">11</button><button type="button" data-n="7">7</button>
+</div>
+<div class="sum" id="sum"></div>
+<p class="note" id="heronote"></p>
+</div>
+
+<h2>What you are looking at</h2>
+<ol class="five">
+<li><b>A grid has a shape, and one function turns the shape into a number.</b> Pick a point τ in the upper half of the plane and mark every point m + nτ, for whole numbers m and n. That is a grid of parallelograms. Two grids have the same shape if one is the other turned and resized. A classical function, called j, gives every shape one number: the same number for the same shape, different numbers for different shapes.</li>
+<li><b>For a tall, thin grid, j is nearly a power of e.</b> Write q for e<sup>2πiτ</sup>. Then j = 1/q + <span id="c0">744</span> + <span id="c1">196884</span> q + <span id="c2">21493760</span> q² + … with whole numbers all the way. When τ is high up, q is tiny, and everything after the 744 hardly counts.</li>
+<li><b>Some grids come from number systems.</b> The numbers a + b(1 + √−163)/2, with a and b whole, can be added and multiplied and stay in the family. Drawn in the plane they are a grid, with τ = (1 + √−163)/2. For that τ, q is −e<sup>−π√163</sup>, so 1/q is the number at the top of this page with a minus sign.</li>
+<li><b>The theorem: for such a grid, j is tied to the number system.</b> Look for the smallest equation that j satisfies, with coefficients taken from the number system. Its degree is the <i>class number</i>: the count of different shapes among the system's own sub-grids (its ideals). For √−163 that count is one. Degree one means j is itself a number of the system. The grid is its own mirror image, so j is real, and a real number of this system is a fraction. A separate theorem of the archive says j has no denominator. So j is a whole number: it is −640320³.</li>
+<li><b>Put the two together.</b> e<sup>π√163</sup> = −j + 744 − (a tail that starts 196884 ÷ e<sup>π√163</sup>) ≈ 640320³ + 744 − 0.00000000000075.</li>
+</ol>
+<p class="note">So the surprise has two parts. The theorem, with those two further steps, makes j a whole number for 7, 11, 19, 43, 67 and 163 alike. Closeness also needs the tail to be small, and the tail shrinks as the number grows: for 7 it is about 47, for 19 about a fifth, for 163 less than a trillionth.</p>
+
+<h2>It is not luck</h2>
+<p>For every n from 1 to 250, how many decimal places of e<sup>π√n</sup> agree with a whole number. If the digits after the point were random, the best of 250 tries would agree to two or three places.</p>
+<div class="box">
+<canvas id="near" class="wide" width="840" height="380" role="img" aria-label="One bar for each n from 1 to 250: the number of decimal places to which e to the pi root n agrees with a whole number. The bar for 163 is far above all the others, at twelve places. The same numbers can be read one at a time with the box under the picture."></canvas>
+<p class="key"><span><i style="background:var(--accent)"></i>class number one, with the grid of step 3: 3, 7, 11, 19, 43, 67, 163</span><span><i style="background:var(--soft)"></i>every other n</span><span><i style="border-top:2px dashed var(--muted); height:0; width:18px; vertical-align:middle"></i>about what luck would give</span></p>
+<div class="row"><label for="n">n =</label><input id="n" type="number" min="1" max="250" value="58" inputmode="numeric"><span class="note">or click a bar</span></div>
+<p class="read" id="nread" aria-live="polite"></p>
+</div>
+<p class="note">Some grey bars are tall too: 58, 232, 37. The theorem on this page does not explain them. A cousin of j does, and Marlow's page <a href="crew_visuals/level_two_near_integer.html">A near-integer that survives squaring</a> shows how. (1 and 2 also give number systems of class number one, but their grids have another shape, so their bars are grey.)</p>
+
+<h2>Every such number system, not only the lucky ones</h2>
+<p>The theorem is not only about class number one. Take any number system made with the square root of a negative number. It has finitely many grid shapes, one for each class of ideals; take j of each. The theorem says those numbers are one another's conjugates: they are exactly the roots of one equation whose degree is the class number, with coefficients in the number system, and no smaller equation has any of them as a root. The separate integrality theorem says the coefficients have no denominators, and because the mirror image of each shape is again one of the shapes, the coefficients are real. So they are ordinary whole numbers. Choose a system and watch them appear.</p>
+<div class="box">
+<div class="row"><label for="disc">Discriminant</label><select id="disc"></select><button type="button" id="prev" aria-label="Previous discriminant">◀</button><button type="button" id="next" aria-label="Next discriminant">▶</button></div>
+<p class="read" id="fread" aria-live="polite"></p>
+<div class="shapes" id="shapes"></div>
+<p class="note">Each picture is one grid shape, resized so that every cell has the same area. Under it: the numbers a and b that give τ = (−b + √D) / 2a, and j of that shape.</p>
+<p class="read" id="polylab"></p>
+<div class="poly" id="poly" tabindex="0" aria-label="The equation whose roots are the j of the shapes"></div>
+<p class="note" id="polynote"></p>
+</div>
+
+<h2>What the Lean statement says, read at the source</h2>
+<p>The archive names the statement <code>GlobalTheory.Published.HilbertClassFieldJ</code>. We read its definition and the definitions it uses. It is about any number system K of the kind above (a number field of degree two with no real embedding, placed inside the complex numbers) and the grid made by its whole numbers.</p>
+<table class="lean">
+<tr><td><code>IsHilbertClassField K⟮j⟯</code></td><td>Adjoining j to K gives the largest extension of K that is abelian and unramified at every prime: the Hilbert class field. The file defines that by its two properties, so nothing is hidden in the name.</td></tr>
+<tr><td><code>finrank K K⟮j⟯ = classNumber K</code></td><td>The degree of j over K is the class number. This is the clause the picture above shows.</td></tr>
+<tr><td><code>j(L) = j(L′) ↔ mk 𝔞 = mk 𝔟</code></td><td>Two ideals give the same j exactly when they are in the same class: same shape, same number, and not otherwise.</td></tr>
+<tr><td><code>(idealInvariants K).ncard = classNumber K</code></td><td>So the number of different j values is the class number.</td></tr>
+<tr><td><code>Set.range (fun g ↦ g j) = idealInvariants K</code></td><td>The numbers that the symmetries of K(j) over K send j to are exactly those j values: they are one another's conjugates.</td></tr>
+</table>
+<p><b>What it leaves out.</b> It does not say j is a whole number, or even that it has no denominator. The second of these the archive proves separately, as a theorem of its own outside its table of published results: <code>GlobalTheory.T.isIntegral_j_of_nonreal_multiplier</code> says that if multiplying by some number that is not real carries a grid into itself, then j of that grid is an algebraic integer. (A second form, <code>GlobalTheory.CMCurves.isIntegral_latticeJ</code>, says the same for a grid carried into itself by the whole numbers of a number system; it is the one our own Lean file uses.) Nor does the statement say which number systems have class number one. That list (ending at 163) is a famous theorem of the last century and is not claimed here; for 163 itself the class number is a short count, which this page does: one shape. And nothing in the statement mentions e<sup>π√163</sup>: the series in step 2 is classical analysis, and the page computes its first coefficients itself.</p>
+<p id="leanline"></p>
+
+<h2>Sources, and what was run</h2>
+<p class="note" id="selfcheck"></p>
+<p class="note">Every number on this page is computed by the page, in whole-number arithmetic carried to 220 decimal places: e<sup>π√n</sup>, the shapes of each number system, j of each shape from the two classical series E₄ and E₆, and the equation. A separate program, <code>tools/check_almost_a_whole_number.py</code> (Python, a different formula for j through theta constants, π from Machin's formula), computed the same things, and the two agree on all 77 number systems with discriminant down to −250 and on all 250 values of e<sup>π√n</sup>. The first comparison caught a loss of precision in this page at class numbers 14 and 15, since repaired.</p>
+<p class="note">The statement and its definitions: the archive mirrored at <code>1337isnot1337/riemann-hypothesis-solved</code>, revision 6193bb5, files <code>Development/AbelianVarietyTheory/PublishedTheorems/Divisors₂/ExistsEqOfNatCastMulMem.lean</code> (the statement) and <code>…/PublishedFoundations/ComplexMultiplicationJPremises.lean</code> (Hilbert class field, ideal lattice, and the companion statement <code>ComplexMultiplicationJSt</code>, which adds that the class group acts on the j values by the Artin map). Read by Fixpoint.</p>
+<p class="note">Reported from Wikipedia, read on 25 November 2026, not from the original papers: that Hermite noticed the number in 1859 ("Heegner number"); that the class-number-one list is 1, 2, 3, 7, 11, 19, 43, 67, 163, proved by Heegner (1952) and then by Baker and Stark in the 1960s ("Heegner number", "Class number problem"); that the classical theorem is Theorem II.4.1 of Silverman's <i>Advanced Topics in the Arithmetic of Elliptic Curves</i> ("Hilbert class field"). The coefficients 744, 196884, 21493760 agree with the article "j-invariant". Page by Fixpoint for Marginalia.</p>
+</main>
+<script>
+// MATH-BEGIN
+// Everything this page computes is here. No library, and no rounding by the machine: every number x is kept as the whole
+// number x times 10^DIG (a BigInt), so sums and products are exact up to the last of DIG decimal places.
+const DIG = 220, ONE = 10n ** BigInt(DIG);
+const PI = BigInt('31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461');      // pi times 10^220, checked below against a separate program
+const LIMIT = 250;                 // fields with discriminant down to -LIMIT; numbers e^(pi sqrt n) for n up to LIMIT
+const fx = n => BigInt(n) * ONE;
+const mul = (a, b) => a * b / ONE, div = (a, b) => a * ONE / b;
+function isqrt(n) { if (n < 2n) return n; let x = 1n << BigInt((n.toString(2).length + 1) >> 1); for (;;) { const y = (x + n / x) >> 1n; if (y >= x) return x; x = y; } }
+const sqrtOf = n => isqrt(BigInt(n) * ONE * ONE);                 // the square root of a whole number
+const HALVINGS = 24n;
+function expFix(x) {                                             // e^x: halve x 24 times, sum the series, square 24 times
+  const y = x / (1n << HALVINGS); let s = ONE, t = ONE;
+  for (let k = 1n; t !== 0n; k++) { t = mul(t, y) / k; s += t; }
+  for (let i = 0n; i < HALVINGS; i++) s = mul(s, s);
+  return s;
+}
+// complex numbers are pairs [real part, imaginary part]
+const cadd = (a, b) => [a[0] + b[0], a[1] + b[1]], csub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const cmul = (a, b) => [mul(a[0], b[0]) - mul(a[1], b[1]), mul(a[0], b[1]) + mul(a[1], b[0])];
+const cscale = (a, k) => [a[0] * BigInt(k), a[1] * BigInt(k)];
+function cdiv(a, b) { const d = mul(b[0], b[0]) + mul(b[1], b[1]); return [div(mul(a[0], b[0]) + mul(a[1], b[1]), d), div(mul(a[1], b[0]) - mul(a[0], b[1]), d)]; }
+function turn(t) {                                               // cos t + i sin t, the same way: halve, series, square
+  const y = t / (1n << HALVINGS); let s = [ONE, 0n], u = [ONE, 0n];
+  for (let k = 1n; u[0] !== 0n || u[1] !== 0n; k++) { u = [-mul(u[1], y) / k, mul(u[0], y) / k]; s = cadd(s, u); }
+  for (let i = 0n; i < HALVINGS; i++) s = cmul(s, s);
+  return s;
+}
+function sigma(n, k) { let s = 0n; for (let d = 1; d <= n; d++) if (n % d === 0) s += BigInt(d) ** BigInt(k); return s; }
+// The lattice shapes of a field. A reduced form (a, b, c) with b*b - 4*a*c = D stands for the shape with corners 1 and
+// tau = (-b + sqrt(D)) / (2a); there is one for each ideal class of the field with discriminant D.
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = a % b; a = b; b = t; } return a; }
+function forms(D) {
+  const out = [];
+  for (let a = 1; 3 * a * a <= -D; a++) for (let b = -a + 1; b <= a; b++) {
+    if (((b * b - D) % (4 * a)) !== 0) continue;
+    const c = (b * b - D) / (4 * a);
+    if (c < a || (c === a && b < 0)) continue;
+    if (gcd(gcd(a, b), c) !== 1) continue;
+    out.push([a, b, c]);
+  }
+  return out;
+}
+function squarefree(n) { for (let i = 2; i * i <= n; i++) if (n % (i * i) === 0) return false; return true; }
+function isFieldDiscriminant(D) {                                // D < 0
+  const m = ((D % 4) + 4) % 4;
+  if (m === 1) return squarefree(-D);
+  if (m === 0) { const k = D / 4, r = ((k % 4) + 4) % 4; return (r === 2 || r === 3) && squarefree(-k); }
+  return false;
+}
+// j of the shape with corners 1 and tau = (-b + sqrt(D)) / (2a), from the two classical series in q = e^(2 pi i tau):
+// E4 = 1 + 240 sum sigma3(n) q^n, E6 = 1 - 504 sum sigma5(n) q^n, j = 1728 E4^3 / (E4^3 - E6^2).
+function qOf(D, a, b) {
+  const size = expFix(-mul(PI, sqrtOf(-D)) / BigInt(a));        // |q| = e^(-pi sqrt|D| / a)
+  const dir = turn(-PI * BigInt(b) / BigInt(a));               // its direction: the angle -pi b / a
+  return [mul(size, dir[0]), mul(size, dir[1])];
+}
+function jOf(D, a, b) {
+  const q = qOf(D, a, b); let e4 = [ONE, 0n], e6 = [ONE, 0n], p = q;
+  for (let n = 1; (p[0] !== 0n || p[1] !== 0n) && n < 2000; n++) {
+    const s3 = sigma(n, 3), s5 = sigma(n, 5);
+    e4 = cadd(e4, [p[0] * 240n * s3, p[1] * 240n * s3]); e6 = csub(e6, [p[0] * 504n * s5, p[1] * 504n * s5]);
+    p = cmul(p, q);
+  }
+  const c = cmul(cmul(e4, e4), e4), d = csub(c, cmul(e6, e6));
+  return cdiv(cscale(c, 1728), d);
+}
+const roundFix = x => { const h = ONE / 2n; return x >= 0n ? (x + h) / ONE : -((-x + h) / ONE); };   // nearest whole number
+const absB = x => x < 0n ? -x : x;
+// For one field: its shapes, their j, and the polynomial whose roots are those j (highest power first).
+function field(D) {
+  const fs = forms(D), js = fs.map(f => jOf(D, f[0], f[1]));
+  let coef = [[ONE, 0n]];
+  for (const j of js) { const next = coef.map(c => c).concat([[0n, 0n]]); for (let i = 0; i < coef.length; i++) next[i + 1] = csub(next[i + 1], cmul(coef[i], j)); coef = next; }
+  const whole = coef.map(c => roundFix(c[0]));
+  let off = 0n; coef.forEach((c, i) => { const d = absB(c[0] - whole[i] * ONE), e = absB(c[1]); if (d > off) off = d; if (e > off) off = e; });
+  return { D, forms: fs, js, whole, off };                       // off: the farthest any coefficient is from a whole number
+}
+// e^(pi sqrt n), and how far it is from the nearest whole number
+function near(n) { const v = expFix(mul(PI, sqrtOf(n))), w = roundFix(v); return { v, w, dist: absB(v - w * ONE) }; }
+function icbrt(n) { if (n < 2n) return n; let x = 1n << BigInt(Math.ceil(n.toString(2).length / 3) + 1); for (;;) { const y = (2n * x + n / (x * x)) / 3n; if (y >= x) return x; x = y; } }
+
+// Numbers worked out apart from this page, by a Python program that takes a different route to j (the three theta
+// constants, in Python's decimal arithmetic) and computes pi by Machin's formula in whole numbers.
+const EXPECT = {
+  pi: '31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461',
+  classNumbers: {'-3': 1, '-4': 1, '-7': 1, '-8': 1, '-11': 1, '-15': 2, '-19': 1, '-20': 2, '-23': 3, '-24': 2, '-31': 3, '-35': 2, '-39': 4, '-40': 2, '-43': 1, '-47': 5, '-51': 2, '-52': 2, '-55': 4, '-56': 4, '-59': 3, '-67': 1, '-68': 4, '-71': 7, '-79': 5, '-83': 3, '-84': 4, '-87': 6, '-88': 2, '-91': 2, '-95': 8, '-103': 5, '-104': 6, '-107': 3, '-111': 8, '-115': 2, '-116': 6, '-119': 10, '-120': 4, '-123': 2, '-127': 5, '-131': 5, '-132': 4, '-136': 4, '-139': 3, '-143': 10, '-148': 2, '-151': 7, '-152': 6, '-155': 4, '-159': 10, '-163': 1, '-164': 8, '-167': 11, '-168': 4, '-179': 5, '-183': 8, '-184': 4, '-187': 2, '-191': 13, '-195': 4, '-199': 9, '-203': 4, '-211': 3, '-212': 6, '-215': 14, '-219': 4, '-223': 7, '-227': 5, '-228': 4, '-231': 12, '-232': 2, '-235': 2, '-239': 15, '-244': 6, '-247': 6, '-248': 8},
+  polys: {
+    '-3': ['1', '0'],
+    '-4': ['1', '-1728'],
+    '-7': ['1', '3375'],
+    '-8': ['1', '-8000'],
+    '-11': ['1', '32768'],
+    '-19': ['1', '884736'],
+    '-43': ['1', '884736000'],
+    '-67': ['1', '147197952000'],
+    '-163': ['1', '262537412640768000'],
+    '-15': ['1', '191025', '-121287375'],
+    '-20': ['1', '-1264000', '-681472000'],
+    '-23': ['1', '3491750', '-5151296875', '12771880859375'],
+    '-47': ['1', '2257834125', '-9987963828125', '5115161850595703125', '-14982472850828613281250', '16042929600623870849609375'],
+    '-71': ['1', '313645809715', '-3091990138604570', '98394038810047812049302', '-823534263439730779968091389', '5138800366453976780323726329446', '-425319473946139603274605151187659', '737707086760731113357714241006081263'],
+    '-239': ['1', '1238073883315407514496', '-13666850068795802991492370368', '1532827087345492867204119093852378082438678', '-16918290867054590371279243347863233076912830800656', '181721330191211254702985841157524557972842205740584445069', '-53402042304078887007585772925287830545907353075301922255822235', '7812948654819296135589446079820190138351182297783287462126807084194', '-213242735312342090716157115838233952503532476492926509784331970735677434', '2345429910309004121222696836646913020268276389308953560399316037687685228093', '-3810541708818932268937818042616997315880367489562442234228253037628692447242929', '-17149947441960712280092489124465992101403607262591607787910136971714285286547327394', '6777279017108616482947859571620293678609069493537534791893310613536520130766425993446', '208933803735777172616099243225384508569454797521044528682952239050793396911848873404608651', '-323628361549512079174002784188728374161166898133764200695741531312961505222798905042238214', '843729436361519079684848812880135988137701277041482416947907638671428789917777110886130507231'],
+  },
+  closest: [[163, '262537412640768743', '7.499274E-13'], [58, '24591257751', '1.777868E-7'], [67, '147197952743', '1.337546E-6'], [232, '604729957825300084759', '7.828473E-6'], [37, '199148647', '2.195345E-5'], [43, '884736743', '2.225340E-4'], [25, '6635623', '6.588658E-4'], [74, '545518122089', '8.253211E-4']],
+  floors: {1: '23', 2: '85', 58: '24591257751', 100: '44031505860632', 163: '262537412640768743', 250: '3738387527602371728719'}
+};
+function sci(x) {                                                // a fixed-point number as d.dddddde-k, six places, rounded down
+  if (x === 0n) return '0'; const s = x.toString(), k = s.length - 1 - DIG; return s[0] + '.' + s.slice(1, 7).padEnd(6, '0') + 'E' + (k < 0 ? '-' : '+') + Math.abs(k);
+}
+// Runs the comparisons. Returns a list of anything that failed.
+function selfCheck() {
+  const fail = [];
+  if (PI.toString() !== EXPECT.pi) fail.push('pi differs from the separate program\'s');
+  let fields = 0;
+  for (let D = -3; D >= -LIMIT; D--) {
+    if (!isFieldDiscriminant(D)) continue; fields++;
+    const h = forms(D).length;
+    if (EXPECT.classNumbers[D] !== h) fail.push('class number of ' + D + ': got ' + h);
+  }
+  if (fields !== Object.keys(EXPECT.classNumbers).length) fail.push('number of fields: got ' + fields);
+  for (const D in EXPECT.polys) {
+    const f = field(Number(D)), got = f.whole.map(String).join(' '), want = EXPECT.polys[D].join(' ');
+    if (got !== want) fail.push('polynomial of ' + D + ': got ' + got);
+    if (f.off * (10n ** 40n) > ONE) fail.push('polynomial of ' + D + ': a coefficient is not within 10^-40 of a whole number');
+  }
+  const all = []; for (let n = 1; n <= LIMIT; n++) all.push([n, near(n)]);
+  all.sort((x, y) => (x[1].dist < y[1].dist ? -1 : x[1].dist > y[1].dist ? 1 : 0));
+  EXPECT.closest.forEach((e, i) => {
+    const g = all[i], fl = (g[1].v / ONE).toString(), sc = sci(g[1].dist), want = e[2];
+    const close = Math.abs(Number(sc.replace('E', 'e')) / Number(want.replace('E', 'e')) - 1) < 2e-6;
+    if (g[0] !== e[0] || fl !== e[1] || !close) fail.push('closest number ' + (i + 1) + ': got n = ' + g[0] + ', ' + fl + ', ' + sc);
+  });
+  for (const n in EXPECT.floors) if ((near(Number(n)).v / ONE).toString() !== EXPECT.floors[n]) fail.push('whole part of e^(pi sqrt ' + n + ')');
+  return fail;
+}
+// MATH-END
+
+// ---------- drawing and controls ----------
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const commas = s => s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  // a fixed-point number as text with a given number of decimal places (cut, not rounded)
+  function dec(x, places) {
+    const neg = x < 0n; if (neg) x = -x;
+    const ip = (x / ONE).toString(), fp = (x % ONE).toString().padStart(DIG, '0').slice(0, places);
+    return (neg ? '−' : '') + ip + (places ? '.' + fp : '');
+  }
+  const places = dist => dist === 0n ? DIG : Math.max(0, DIG - dist.toString().length);       // zeros after the point in the distance
+  const digitsAgree = dist => dist === 0n ? DIG : -(dist.toString().length - 1 - DIG) - Math.log10(Number(dist.toString().slice(0, 15)) / 1e14);
+  const ONES = [3, 7, 11, 19, 43, 67, 163];                           // class number one, with tau = (1 + sqrt(-n)) / 2
+
+  // ---- the number at the top
+  let heroN = 163;
+  function drawHero() {
+    const g = near(heroN), s = dec(g.v, 24), dot = s.indexOf('.'), ip = s.slice(0, dot), fp = s.slice(dot + 1);
+    let run = 0; while (run < fp.length && fp[run] === fp[0] && (fp[0] === '9' || fp[0] === '0')) run++;
+    $('herolab').innerHTML = 'e<sup>π√' + heroN + '</sup> =';
+    $('hero').innerHTML = commas(ip) + '.' + (run >= 2 ? '<span class="run">' + fp.slice(0, run) + '</span><span class="rest">' + fp.slice(run) + '…</span>' : '<span class="rest">' + fp + '…</span>');
+    document.querySelectorAll('button[data-n]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.n) === heroN)));
+    const f = field(-heroN), j = -f.whole[1], m = -j, c = icbrt(m), cube = c * c * c === m;
+    const tail = fx(m + 744n) - g.v, W = 15;
+    const pad = t => t.padStart(19, ' ') + ' '.repeat(W), num = x => { const t = dec(x, W - 1), d = t.indexOf('.'); return t.slice(0, d).padStart(19, ' ') + t.slice(d); };
+    $('sum').innerHTML =
+      '<div><span>−j, a whole number' + (cube ? ': ' + commas(c.toString()) + '³' : '') + '</span><b>' + pad(m.toString()) + '</b></div>' +
+      '<div><span>plus 744</span><b>' + pad('744') + '</b></div>' +
+      '<div><span>minus the tail, 196884 q + …</span><b>' + num(tail) + '</b></div>' +
+      '<div class="total"><span>is e<sup>π√' + heroN + '</sup></span><b>' + num(g.v) + '</b></div>';
+    const z = places(g.dist), nearer = g.v > g.w * ONE ? 'just above' : 'just below';
+    $('heronote').textContent = heroN === 163 ? 'Twelve nines in a row. The whole number it just misses is 640,320³ + 744.'
+      : z >= 2 ? 'It sits ' + nearer + ' a whole number, agreeing to ' + z + ' decimal places.'
+      : 'Here j is still a whole number, but the tail is not small, so the power of e is nowhere near one.';
+  }
+  document.querySelectorAll('button[data-n]').forEach(b => b.addEventListener('click', () => { heroN = Number(b.dataset.n); drawHero(); }));
+
+  // ---- the chart of closeness
+  const NEAR = []; for (let n = 1; n <= LIMIT; n++) NEAR.push(near(n));
+  let chosen = 58, geom = null;
+  function fit(c, aspectWide, aspectNarrow) {
+    const w = c.clientWidth || 840, narrow = w < 520, h = Math.round(w * (narrow ? aspectNarrow : aspectWide)), dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    return { g, w, h, narrow };
+  }
+  function drawNear() {
+    const { g, w, h, narrow } = fit($('near'), 0.45, 0.8);
+    const L = 34, R = 8, T = 14, B = 26, top = 13, X = n => L + (w - L - R) * (n - 0.5) / LIMIT, Y = v => h - B - (h - T - B) * v / top, bw = Math.max(1, (w - L - R) / LIMIT - 0.6);
+    geom = { L, R, w };
+    g.font = '11px ui-monospace, Menlo, monospace'; g.lineWidth = 1;
+    for (let v = 0; v <= 12; v += 2) { g.strokeStyle = css('--line'); g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(w - R, Y(v)); g.stroke(); g.fillStyle = css('--muted'); g.textAlign = 'right'; g.fillText(String(v), L - 6, Y(v) + 4); }
+    for (let n = 50; n <= LIMIT; n += 50) { g.textAlign = n === LIMIT ? 'right' : 'center'; g.fillText(String(n), n === LIMIT ? w - R : X(n), h - 8); }
+    g.textAlign = 'left'; g.fillText(narrow ? 'places' : 'decimal places that agree', L + 4, T + 2);
+    const luck = Math.log10(2 * (LIMIT + 1));                       // the best of 250 random tries is about 1/(2*251) from a whole number
+    g.setLineDash([5, 4]); g.strokeStyle = css('--muted'); g.beginPath(); g.moveTo(L, Y(luck)); g.lineTo(w - R, Y(luck)); g.stroke(); g.setLineDash([]);
+    for (let n = 1; n <= LIMIT; n++) {
+      const v = Math.min(top, digitsAgree(NEAR[n - 1].dist));
+      g.fillStyle = ONES.includes(n) ? css('--accent') : css('--soft');
+      g.fillRect(X(n) - bw / 2, Y(v), bw, Y(0) - Y(v));
+      if (n === chosen) { g.strokeStyle = css('--ink'); g.lineWidth = 1.5; g.strokeRect(X(n) - bw / 2 - 1.5, Y(v) - 1.5, bw + 3, Y(0) - Y(v) + 1.5); g.lineWidth = 1; }
+    }
+    g.fillStyle = css('--ink'); g.textAlign = 'center';
+    for (let n = 1; n <= LIMIT; n++) { const v = digitsAgree(NEAR[n - 1].dist); if (v >= (narrow ? 6.5 : 3.6) || n === chosen) g.fillText(String(n), Math.min(w - R - 12, Math.max(L + 10, X(n))), Y(Math.min(top, v)) - 5); }
+  }
+  function readN() {
+    const g = NEAR[chosen - 1], v = digitsAgree(g.dist), z = places(g.dist);
+    $('nread').innerHTML = 'e<sup>π√' + chosen + '</sup> = <b>' + commas(dec(g.v, 0)) + dec(g.v, Math.max(8, z + 6)).slice(dec(g.v, 0).length) + '…</b>, which agrees with a whole number to ' + z + (z === 1 ? ' decimal place' : ' decimal places') + (ONES.includes(chosen) ? '. Class number one.' : '.');
+  }
+  function setN(n) { n = Math.round(Number(n)); if (!(n >= 1 && n <= LIMIT)) return; chosen = n; if (Number($('n').value) !== n) $('n').value = n; drawNear(); readN(); }
+  $('n').addEventListener('input', e => setN(e.target.value));
+  $('near').addEventListener('click', e => { const b = e.target.getBoundingClientRect(), G = geom; if (!G) return; setN(Math.min(LIMIT, Math.max(1, Math.ceil((e.clientX - b.left - G.L) / (b.width - G.L - G.R) * LIMIT)))); });
+
+  // ---- one number system: shapes, their j, the equation
+  const DISCS = []; for (let D = -3; D >= -LIMIT; D--) if (isFieldDiscriminant(D)) DISCS.push(D);
+  const sel = $('disc');
+  DISCS.forEach(D => { const o = document.createElement('option'); o.value = D; o.textContent = '−' + (-D) + '   (class number ' + forms(D).length + ')'; sel.appendChild(o); });
+  function sciC(x) {                                               // a short reading of a fixed-point number
+    const a = absB(x); if (a === 0n) return '0';
+    const s = a.toString(), k = s.length - 1 - DIG, sign = x < 0n ? '−' : '';
+    if (k < 9 && k >= -3) return sign + commas(dec(a, 0)) + dec(a, 2).slice(dec(a, 0).length);
+    return sign + s[0] + '.' + s.slice(1, 4) + '×10^' + (k < 0 ? '−' + (-k) : k);
+  }
+  function drawShape(c, D, a, b) {
+    const dpr = window.devicePixelRatio || 1, S = c.clientWidth || 132; c.width = S * dpr; c.height = S * dpr;
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, S, S);
+    const tx = -b / (2 * a), ty = Math.sqrt(-D) / (2 * a), u = 21 / Math.sqrt(ty);        // every cell gets the area of a 21 by 21 pixel square
+    const P = (m, n) => [S / 2 + u * (m + n * tx), S / 2 - u * n * ty];
+    g.beginPath(); [[0, 0], [1, 0], [1, 1], [0, 1]].forEach((p, i) => { const q = P(p[0], p[1]); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); g.closePath();
+    g.fillStyle = css('--accent'); g.globalAlpha = 0.22; g.fill(); g.globalAlpha = 1; g.strokeStyle = css('--accent'); g.lineWidth = 1.2; g.stroke();
+    g.fillStyle = css('--ink');
+    const N = Math.ceil(S / (u * ty)) + 1, M = Math.ceil(S / u) + N + 2;
+    for (let n = -N; n <= N; n++) for (let m = -M; m <= M; m++) { const q = P(m, n); if (q[0] < -2 || q[0] > S + 2 || q[1] < -2 || q[1] > S + 2) continue; g.beginPath(); g.arc(q[0], q[1], 1.6, 0, 2 * Math.PI); g.fill(); }
+    g.fillStyle = css('--accent'); const o = P(0, 0); g.beginPath(); g.arc(o[0], o[1], 2.6, 0, 2 * Math.PI); g.fill();
+  }
+  const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  let current = null;
+  function drawField() {
+    const D = Number(sel.value), f = field(D), h = f.forms.length; current = f;
+    $('fread').innerHTML = 'Discriminant −' + (-D) + ': the numbers built with √−' + (D % 4 === 0 ? -D / 4 : -D) + '. Class number <b>' + h + '</b>: ' + (h === 1 ? 'one grid shape.' : h + ' grid shapes.');
+    const box = $('shapes'); box.textContent = '';
+    f.forms.forEach((fm, i) => {
+      const fig = document.createElement('figure'), c = document.createElement('canvas'), cap = document.createElement('figcaption'), j = f.js[i];
+      c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'The grid with a = ' + fm[0] + ' and b = ' + fm[1]);
+      cap.innerHTML = 'a = ' + fm[0] + ', b = ' + fm[1] + '<br>j ≈ ' + sciC(j[0]) + (absB(j[1]) * (10n ** 30n) > ONE ? (j[1] < 0n ? ' − ' : ' + ') + sciC(absB(j[1])) + ' i' : '');
+      fig.appendChild(c); fig.appendChild(cap); box.appendChild(fig); drawShape(c, D, fm[0], fm[1]);
+    });
+    const term = (c, k) => { const a = absB(c), p = h - k; return (a === 1n && p > 0 ? '' : commas(a.toString()) + (p > 0 ? ' ' : '')) + (p > 1 ? 'x' + String(p).replace(/\d/g, d => SUP[d]) : p === 1 ? 'x' : ''); };
+    let eq = term(f.whole[0], 0);
+    for (let k = 1; k <= h; k++) { const c = f.whole[k]; if (c === 0n) continue; eq += (c < 0n ? ' − ' : ' + ') + term(c, k); }
+    $('polylab').innerHTML = h === 1 ? 'Degree one, so the equation just names j:' : 'The equation of degree ' + h + ' whose roots are those ' + h + ' numbers:';
+    $('poly').textContent = eq + ' = 0';
+    const far = f.off === 0n ? DIG : DIG - f.off.toString().length;
+    let extra = '';
+    if (h === 1) { const j = -f.whole[1], m = absB(j), c = icbrt(m); extra = ' Here j = ' + (j < 0n ? '−' : '') + commas(m.toString()) + (c * c * c === m && m > 1n ? ' = ' + (j < 0n ? '−' : '') + commas(c.toString()) + '³' : '') + '.'; }
+    $('polynote').innerHTML = 'Each coefficient was computed as a number with ' + DIG + ' decimal places, with no rounding to whole numbers along the way. The farthest any of them lands from a whole number is less than 10<sup>−' + far + '</sup>.' + extra;
+  }
+  sel.addEventListener('change', drawField);
+  const step = d => { const i = Math.min(DISCS.length - 1, Math.max(0, sel.selectedIndex + d)); sel.selectedIndex = i; drawField(); };
+  $('prev').addEventListener('click', () => step(-1)); $('next').addEventListener('click', () => step(1));
+
+  // ---- the series in step 2, computed here: j = E4^3 / Delta as power series with whole coefficients
+  function seriesJ(K) {
+    const N = K + 2, e4 = [1n], e6 = [1n]; for (let n = 1; n <= N; n++) { e4.push(240n * sigma(n, 3)); e6.push(-504n * sigma(n, 5)); }
+    const pm = (a, b) => { const r = new Array(N + 1).fill(0n); for (let i = 0; i <= N; i++) for (let k = 0; i + k <= N; k++) r[i + k] += a[i] * b[k]; return r; };
+    const c = pm(pm(e4, e4), e4), s = pm(e6, e6), d = c.map((v, i) => (v - s[i]) / 1728n);     // d = q - 24 q^2 + ...
+    const out = [];                                              // solve c = j * d with j = sum out[i] q^(i-1)
+    for (let i = 0; i <= K; i++) { let v = c[i]; for (let k = 0; k < i; k++) v -= out[k] * d[i - k + 1]; out.push(v / d[1]); }
+    return out;
+  }
+  const SER = seriesJ(3);
+  $('c0').textContent = SER[1].toString(); $('c1').textContent = SER[2].toString(); $('c2').textContent = SER[3].toString();
+
+  let pending = 0;
+  function redrawAll() { drawNear(); if (current) drawField(); }
+  window.addEventListener('resize', () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(redrawAll); });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
+
+  const fail = selfCheck();
+  if (SER.join(' ') !== '1 744 196884 21493760') fail.push('the series of j: got ' + SER.join(' '));
+  const sc = $('selfcheck');
+  if (fail.length) { sc.className = 'note bad'; sc.textContent = 'Self-check on load: FAILED. ' + fail.join('; ') + '.'; }
+  else sc.textContent = 'Self-check on load: passed. The page compared its own results with a separate program\'s: the digits of π, the class number of all ' + DISCS.length + ' number systems, the equation for ' + Object.keys(EXPECT.polys).length + ' of them (class numbers 1, 2, 3, 5, 7 and 15), the ' + EXPECT.closest.length + ' closest calls among e^(π√n), and the first four coefficients of the series.';
+  document.documentElement.setAttribute('data-selfcheck', fail.length ? 'failed' : 'passed');
+  $('leanline').innerHTML = 'Lean\'s answer in our build, for the archive\'s own one-line proof of this statement: <code>\'pub_HilbertClassFieldJ\' depends on axioms: [propext, Classical.choice, Quot.sound]</code>. Those three are the standard ones; nothing else is assumed. Asked the same question about the integrality theorem, in both its forms, Lean gives the same three. And a short file of our own, <a href="tools/rh_j_whole.lean">tools/rh_j_whole.lean</a>, puts the statement and the second form together: Lean accepts that when the class number is one, j of the grid is one of the number system\'s own whole numbers. (That it is then an ordinary whole number needs j to be real, which this page says in words and did not put through Lean.) The proof brings 1,121 of the archive\'s files with it (<a href="how_far_is_each_result.html">How far is each published result?</a>), and the record of the run is in <a href="crew_visuals/lean_desk.txt">What Lean said when we asked it</a>.';
+  sel.value = '-23'; drawHero(); setN(58); drawField();
+})();
+</script>
+</body>
+</html>

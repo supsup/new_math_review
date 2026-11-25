@@ -6,15 +6,16 @@ as tall as the number of archive files that the file holding its proof brings wi
 in our build, and marked differently if its line uses the package of statements the archive assumes.
 SCAN2.json is the output of tools/rh_published_scan2.py. PROVED.txt lists, one per
 line, the statements Lean has accepted here (the replies are in crew_visuals/lean_desk.txt); a statement that is not in the table
-must say so on its line ('Name  # outside the table'), and one checked by the theorem its line leads to, not through
-the line itself, says 'Name  # direct'. Its first comment line is the sentence about our builds, and its
+must say so on its line ('Name  # outside the table'); one checked by the theorem its line leads to, not through
+the line itself, says 'Name  # direct'; and one checked by its line with a repeated theorem replaced inside it says
+'Name  # replaced'. Its first comment line is the sentence about our builds, and its
 second, if there is one, a remark about the names; both are typed by hand from crew_visuals/lean_runs.txt and are not checked here.
 Refuses to write if a proved name is unknown, is listed twice, or is one whose line uses the package, or if a statement other
 than the placeholder has no proof placed."""
 import html, json, sys
 scan, provedp, outp = sys.argv[1:4]
 d = json.load(open(scan, encoding="utf-8"))
-notes, proved, outside, direct = [], [], [], []
+notes, proved, outside, direct, replaced = [], [], [], [], []
 for l in open(provedp, encoding="utf-8"):
     l = l.strip()
     if not l: continue
@@ -23,6 +24,7 @@ for l in open(provedp, encoding="utf-8"):
     name = name.strip()
     if mark.strip() == "outside the table": outside.append(name)
     elif mark.strip() == "direct": direct.append(name)
+    elif mark.strip() == "replaced": replaced.append(name)
     elif mark.strip(): sys.exit("REFUSING: unknown mark on a line of PROVED: " + l)
     proved.append(name)
 if len(set(proved)) != len(proved): sys.exit("REFUSING: a name is listed twice in PROVED")
@@ -95,6 +97,8 @@ ul.names { columns:3; column-gap:22px; padding-left:1.1em; margin:6px 0; font:12
 <p>Finding the right file takes one step of care. For __NALIAS__ of the __DRAWN__ statements the table points at a theorem that only repeats, in one line, a result proved in another file, and the scan follows such one-line repeats to the proof's own file. Often the difference is a file or two. For __NBIG__ statements it is more than a hundred files, because the repeating line sits in a bundle that imports a great deal else. The Stone–von Neumann theorem is reached in the table through a bundle that brings 1,290 files, and is proved in a file that brings 3. Radford's theorem is reached through 967, and its proof is one file of 692 lines that needs nothing but Lean's mathematical library. Click a bar, or open the list under the picture, to see both numbers.</p>
 <p>Most of our own checks went through the table's lines as they are written, so those builds compiled the bundles too. The last eight did not. The count above showed eight statements whose proofs needed only 115 files more than we had, where the table's lines would have gone through a bundle that brings 16,171; we built the 115 and Lean accepted each statement, proved by its own theorem.</p>
 
+<p>For four statements the count falls short in one more way. The archive defines the name itself in a file that the proof's files do not import. Lean can check the proof with the files counted here, but to state the result under its published name it needs that file as well. That is 47 further files for each of <code>BaseChangeDefiniteUnitaryGroup</code> and <code>BaseChangeIsobaricTransfer</code>, 3,244 for <code>DoublingMethodLocalZetaIntegrals</code>, and one for <code>principalPolarisationOneSection</code>, which was checked through the table's own line. We met this when a check of the third was refused with "unknown identifier". <a href="tools/rh_published_def_files.py">tools/rh_published_def_files.py</a> looks for it in every row; the bars show the proof's files, as for every other statement.</p>
+
 <h2>How many are within reach</h2>
 <div class="box">
 <div class="row"><label for="budget">Compile, for any one proof, at most this many files:</label><input id="budget" type="range" min="0" max="__STOPMAX__" step="1" value="6" aria-label="the most files compiled for one proof, in fixed steps from 10 to the whole archive"></div>
@@ -107,11 +111,11 @@ ul.names { columns:3; column-gap:22px; padding-left:1.1em; margin:6px 0; font:12
 <ul class="names">__PROVEDLIST__</ul>
 
 <h2>What this is, and what it is not</h2>
-<p>It is a measurement of the archive's shape, and a record of what Lean accepted on one machine. For each green bar Lean compiled a proof of the statement here and reported only its three standard axioms: the table's own line for __NLINE__ of them, and for the other __NDIRECT__ the theorem that line leads to.</p>
+<p>It is a measurement of the archive's shape, and a record of what Lean accepted on one machine. For each green bar Lean compiled a proof of the statement here and reported only its three standard axioms: the table's own line for __NLINE__ of them, the theorem that line leads to for __NDIRECT__, and for the other __NREPL__ the table's line with each repeated theorem replaced by the one it repeats.</p>
 <p>It is not a list of famous theorems verified. A name is what the archive calls a statement; what the statement says has to be read. The ones that have been read against the classical theorems are on <a href="six_finished_theorems.html">Six finished theorems</a>, each with a note of who read it; the rest are names to us. Nor does any of this bear on whether the main proof is right: these are its ingredients, and old ones.</p>
 
 <h2>Sources, and what was run</h2>
-<p class="note">The table is the archive's file <code>EveryCharacterOfLiteratureOfVWin.lean</code> (mirror 1337isnot1337/riemann-hypothesis-solved at revision 6193bb5). <a href="tools/rh_published_scan2.py">tools/rh_published_scan2.py</a> reads it from your own copy, finds the file that declares each theorem a line names, follows one-line repeats to the proof's own file, follows import lines, and marks the lines that use the package; an earlier and simpler scan, <a href="tools/rh_published_scan.py">tools/rh_published_scan.py</a>, chose what we built. The checks: <a href="tools/rh_published_check_gen.py">tools/rh_published_check_gen.py</a> restates the archive's line for each statement as a theorem, without the package, and Lean prints its axioms; for the last eight, <a href="tools/rh_published_direct_gen.py">tools/rh_published_direct_gen.py</a> writes the proof by the theorem the line leads to; the replies are in <a href="crew_visuals/lean_desk.txt">the desk record</a>, and <a href="crew_visuals/lean_runs.txt">the record of our Lean runs</a> tells how the builds went. This page is written by <a href="tools/rh_published_ladder.py">tools/rh_published_ladder.py</a> from <a href="crew_visuals/rh_published_scan2.json">the scan</a> and <a href="crew_visuals/rh_published_proved.txt">the list of statements checked</a>. Page by Fixpoint for Marginalia.</p>
+<p class="note">The table is the archive's file <code>EveryCharacterOfLiteratureOfVWin.lean</code> (mirror 1337isnot1337/riemann-hypothesis-solved at revision 6193bb5). <a href="tools/rh_published_scan2.py">tools/rh_published_scan2.py</a> reads it from your own copy, finds the file that declares each theorem a line names, follows one-line repeats to the proof's own file, follows import lines, and marks the lines that use the package; an earlier and simpler scan, <a href="tools/rh_published_scan.py">tools/rh_published_scan.py</a>, chose what we built. The checks: <a href="tools/rh_published_check_gen.py">tools/rh_published_check_gen.py</a> restates the archive's line for each statement as a theorem, without the package, and Lean prints its axioms; for the statements checked in the last round, <a href="tools/rh_published_replay_gen.py">tools/rh_published_replay_gen.py</a> writes the table's line again with each one-line repeat replaced by the theorem it repeats, so that the file holding the proof is the one compiled; for the eight before those, <a href="tools/rh_published_direct_gen.py">tools/rh_published_direct_gen.py</a> writes the proof by the theorem the line leads to; the replies are in <a href="crew_visuals/lean_desk.txt">the desk record</a>, and <a href="crew_visuals/lean_runs.txt">the record of our Lean runs</a> tells how the builds went. This page is written by <a href="tools/rh_published_ladder.py">tools/rh_published_ladder.py</a> from <a href="crew_visuals/rh_published_scan2.json">the scan</a> and <a href="crew_visuals/rh_published_proved.txt">the list of statements checked</a>. Page by Fixpoint for Marginalia.</p>
 </main>
 <script>
 // DATA-BEGIN  [name, files the proof's own file brings, files the table's line brings, 0 not checked here | 1 checked here | 2 its line uses the package]
@@ -156,15 +160,16 @@ const STOPS = __STOPS__;
 stops = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 175187]
 provedlist = "".join(f"<li>{html.escape(n)}</li>" for n in sorted(proved))
 alllist = "".join(f"<li>{html.escape(x[0])} {x[1]:,}" + (f" ({x[2]:,})" if x[2] != x[1] else "") + (" checked" if x[3] == 1 else " assumed" if x[3] == 2 else "") + "</li>" for x in sorted(data))
-provednote = (f"{len(proved)} statements. {n_proved - len(direct)} are in the archive's table and were checked through its own line for them"
+provednote = (f"{len(proved)} statements. {n_proved - len(direct) - len(replaced)} are in the archive's table and were checked through its own line for them"
               + (f"; {len(direct)} more are in the table and were checked by the theorem that line leads to, without the bundle file in between" if direct else "")
+              + (f"; {len(replaced)} more were checked by the table's line with each repeated theorem replaced by the one it repeats" if replaced else "")
               + (f"; {len(outside)} more ({', '.join(html.escape(e) for e in outside)}) is proved in the archive but is not in that table, and was found by an earlier sweep of what we had compiled." if outside else ".")
               + (" " + html.escape(notes[1]) if len(notes) > 1 else ""))
 if not notes: sys.exit("REFUSING: PROVED has no first comment line with the sentence about our builds")
 page = (page.replace("__DATA__", json.dumps(data, separators=(",", ":"))).replace("__STOPS__", json.dumps(stops)).replace("__STOPMAX__", str(len(stops) - 1))
             .replace("__PROVEDLIST__", provedlist).replace("__PROVEDNOTE__", provednote).replace("__BUILDNOTE__", html.escape(notes[0]))
             .replace("__TOTAL__", str(total)).replace("__OTHER__", str(len(d["other_lines"]))).replace("__NALIAS__", str(n_alias)).replace("__NBIG__", str(n_big)).replace("__ALLLIST__", alllist)
-            .replace("__NLINE__", str(n_proved - len(direct))).replace("__NDIRECT__", str(len(direct))).replace("__NPROVED__", str(n_proved))
+            .replace("__NLINE__", str(n_proved - len(direct) - len(replaced))).replace("__NDIRECT__", str(len(direct))).replace("__NREPL__", str(len(replaced))).replace("__NPROVED__", str(n_proved))
             .replace("__NPACK__", str(n_pack)).replace("__FREE__", str(total - n_pack)).replace("__DRAWN__", str(len(data))))
 left = __import__("re").findall(r"__[A-Z]+__", page)
 if left: sys.exit("REFUSING: unfilled places in the page: " + ", ".join(left))

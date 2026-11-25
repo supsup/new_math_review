@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the Farey circle adds up to</title>
+<style>
+  :root { color-scheme: dark; --page: #101a27; --panel: #172636; --ink: #eff5f3; --soft: #b3c7cc; --edge: #3c535e; --warm: #f3b86c; --cool: #86d9cd; --rose: #e3a7a0; background: var(--page); color: var(--ink); font: 100%/1.58 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,68rem); margin: auto; padding: clamp(1rem,5vw,4rem); }
+  a { color: var(--cool); text-underline-offset: .18em; overflow-wrap: anywhere; }
+  :focus-visible { outline: .16rem solid var(--warm); outline-offset: .14rem; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { max-width: 16ch; font-size: clamp(2.85rem,8.6vw,6.25rem); line-height: .96; letter-spacing: -.06em; margin: .6rem 0 .72rem; text-wrap: balance; }
+  h2 { font-size: 1.65rem; line-height: 1.22; margin: 1.35rem 0 .44rem; }
+  p { max-width: 68ch; }
+  .intro,.note { color: var(--soft); }
+  .explorer { margin: 1.45rem 0; padding: clamp(.7rem,2.3vw,1.3rem); background: var(--panel); border: 1px solid var(--edge); border-radius: .45rem; }
+  .switches { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .78rem; }
+  button { min-height: 2.65rem; color: var(--cool); background: #13212f; border: 1px solid #55737f; border-radius: .28rem; padding: .32rem .65rem; font: inherit; cursor: pointer; }
+  button[aria-pressed=true] { background: var(--cool); color: #142a2f; border-color: var(--cool); }
+  .inputs,.panels { display: grid; align-items: start; gap: .7rem 1rem; grid-template-columns: repeat(auto-fit,minmax(min(100%,14rem),1fr)); }
+  .panels { grid-template-columns: repeat(auto-fit,minmax(min(100%,20rem),1fr)); margin-top: .75rem; }
+  label { display: grid; gap: .2rem; }
+  label > span { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .4rem; }
+  output { color: var(--warm); font: 1.02rem ui-monospace,monospace; }
+  input { width: 100%; accent-color: var(--cool); margin-inline: 0; }
+  figure { margin: 0; min-width: 0; }
+  figcaption { color: var(--soft); margin-top: .35rem; font-size: .89rem; }
+  .stage { position: relative; padding: .3rem; background: #10202e; border-radius: .32rem; }
+  canvas { width: 100%; height: auto; aspect-ratio: 1; max-height: 26rem; display: block; }
+  .matrix-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .5rem; }
+  .readout { margin: .66rem 0 0; padding: .51rem .67rem; border-left: .22rem solid var(--warm); background: #101f2e; }
+  .readout p { margin: .14rem 0; overflow-wrap: anywhere; }
+  #equal { font-size: 1.12rem; font-weight: 675; }
+  #terms { color: var(--soft); }
+  .formula { font: 1.15rem/1.52 Georgia,serif; overflow-wrap: anywhere; }
+  details { border-top: 1px solid var(--edge); padding-top: .65rem; margin: .9rem 0 0; }
+  summary { color: var(--cool); font-weight: 630; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <a href="farey_off_the_grid.html">Back to fractions off the grid</a>
+  <h1>What the Farey circle adds up to</h1>
+  <p class="intro">Turn a fraction into an arrow around the unit circle. Add the arrows for every reduced denominator up to <var>N</var>. Their ends look complicated, yet the horizontal sum is exactly an integer. A divisibility matrix gives the same number through its determinant.</p>
+  <section class="explorer" aria-label="Farey harmonic and determinant explorer">
+    <div class="switches" aria-label="Denominator weights">
+      <button type="button" data-weight="plain">Every fraction counts</button>
+      <button type="button" data-weight="mod5">Quadratic character mod 5</button>
+    </div>
+    <div class="inputs">
+      <label for="n"><span><span>Largest denominator <var>N</var></span><output id="show-n"></output></span><input id="n" type="range" min="2" max="42" value="15"></label>
+      <label for="k"><span><span>Turns around the circle <var>k</var></span><output id="show-k"></output></span><input id="k" type="range" min="1" max="24" value="1"></label>
+      <label for="q"><span><span>Highlight denominator <var>q</var></span><output id="show-q"></output></span><input id="q" type="range" min="1" max="15" value="7"></label>
+    </div>
+    <div class="panels">
+      <figure>
+        <div class="stage"><canvas id="circle" role="img" aria-label="Weighted Farey arrows on the circle"></canvas></div>
+        <figcaption id="packet"></figcaption>
+      </figure>
+      <figure>
+        <div class="stage"><canvas id="matrix" role="img" aria-label="Integer divisibility matrix"></canvas></div>
+        <figcaption id="matrix-note"></figcaption>
+        <div class="matrix-actions" role="group" aria-label="Matrix view">
+          <button type="button" id="combine" aria-pressed="false">Combine the rows</button>
+          <button type="button" id="binary" aria-pressed="false">Use only 0 and 1</button>
+        </div>
+      </figure>
+    </div>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="equal"></p>
+      <p id="terms"></p>
+    </div>
+  </section>
+
+  <h2>Start with the first turn</h2>
+  <p>To draw the arrow for <var>a</var>/<var>q</var>, make <var>k</var> × <var>a</var>/<var>q</var> turns. Conjugate arrows cancel vertically. When <var>k</var> = 1, all the arrows with denominator <var>q</var> sum to the Möbius number μ(<var>q</var>). That number is zero if <var>q</var> has a repeated prime factor, and otherwise it is +1 or −1 according to whether the number of prime factors is even or odd. The entire circle sum is their running total <var>M</var>(<var>N</var>), the same first harmonic Landau singled out in 1924. <a href="https://gdz.sub.uni-goettingen.de/download/pdf/PPN252457811_1924/PPN252457811_1924.pdf#page=209">Landau, 1924, p. 202</a>.</p>
+  <p>In the mod-five view every denominator <var>q</var> gets the weight χ(<var>q</var>). The weight is +1 at remainders 1 and 4, −1 at 2 and 3, and zero at 0. A −1 reverses the arrow. A zero removes it. The first harmonic now sums μ(<var>q</var>)χ(<var>q</var>), giving the twisted Mertens function <var>M</var><sub>χ</sub>(<var>N</var>).</p>
+  <p>Try <var>N</var> = 15 and <var>k</var> = 13 with every fraction counted. All the arrows from denominator 13 line up. Since 13 is prime, the total is <var>M</var>(15) + 13 = 12. Lower <var>N</var> to 12 and that entire contribution disappears. This is why the growth statement below fixes the harmonic.</p>
+
+  <details>
+    <summary>Why more turns still give an integer</summary>
+    <p>Among all <var>q</var> roots on the circle, the sum after <var>k</var> turns is <var>q</var> if <var>q</var> divides <var>k</var>, and zero otherwise. Split those roots by their reduced denominators and invert the divisor sum. The contribution from denominator <var>q</var> is the Ramanujan sum <span class="formula">∑<sub><var>d</var> | gcd(<var>q</var>,<var>k</var>)</sub> <var>d</var> μ(<var>q</var>/<var>d</var>)</span>. Regrouping over all <var>q</var> up to <var>N</var> gives the exact circle sum <span class="formula">∑<sub><var>d</var> | <var>k</var>, <var>d</var> ≤ <var>N</var></sub> <var>d</var>χ(<var>d</var>) <var>M</var><sub>χ</sub>(⌊<var>N</var>/<var>d</var>⌋)</span>. In the first view, take χ identically 1. <a href="https://ramanujan.sirinudi.org/Volumes/published/ram21.pdf">Ramanujan, 1918, §1</a>.</p>
+  </details>
+  <details>
+    <summary>Why the determinant is the same integer</summary>
+    <p>At row <var>i</var> and column <var>j</var> after the first column, write χ(<var>j</var>/<var>i</var>) when <var>i</var> divides <var>j</var> and zero otherwise. In the first column write the sum of <var>d</var>χ(<var>d</var>) over the divisors <var>d</var> of <var>k</var> with <var>di</var> ≤ <var>N</var>. With one turn and weights 1, the first column is all ones and this is the Redheffer matrix.</p>
+    <p>Combine the rows with coefficients μ(<var>i</var>)χ(<var>i</var>) and put the result in the first row. Its original coefficient is one, so the determinant stays the same. Every column <var>j</var> &gt; 1 cancels because each term factors as χ(<var>j</var>) times μ(<var>i</var>) and the Möbius numbers of the divisors of <var>j</var> sum to zero. The remaining minor is triangular with diagonal ones. Its determinant is one, leaving only the upper-left number, exactly the circle sum above.</p>
+    <p>Lean verifies the row argument for any completely multiplicative integer weight with χ(1) = 1 and any first column. An independent replay checks every displayed denominator and harmonic by reducing polynomials at primitive roots and computing determinants with exact elimination. <a href="https://personal.science.psu.edu/rcv4/personal/Publications/REDCONF.pdf">Vaughan, Redheffer row operation</a> · <a href="../tools/redheffer_determinant.lean">Lean proof</a> · <a href="../tools/check_farey_harmonics.py">Exact replay</a>.</p>
+  </details>
+  <details>
+    <summary id="binary-proof">How a larger board uses only 0 and 1</summary>
+    <p>Use the 0 and 1 button on the matrix above. The new block at the bottom right supplies signed powers of two. A row that needs +5 in the first column can select −1 and −4. Eliminating the block subtracts their sum and restores +5. The determinant stays the same.</p>
+    <p>First give row and column <var>i</var> the same sign, χ of <var>i</var> with all factors of 5 removed. Multiplying by those signs leaves the determinant unchanged. When <var>i</var> divides <var>j</var> and <var>j</var>/<var>i</var> is coprime to 5, its old sign is the ratio of the two labels, so the new entry is 1. A quotient divisible by 5 already has entry zero. In the unweighted view all label signs are +1.</p>
+    <p>Leave the first column of the old board empty. The new triangular block <var>T</var> has diagonal ones and only connects to earlier rows. The one at the first helper row of the first column makes the top helper value +1 in the solution of <var>Th</var> = (1, 0, …, 0). Each other helper value is the negative of the sum of the earlier values its row selects. From +1 make −1, then another +1. Use both +1s to make −2, then flip it to +2. The positive values so far sum to 4, so the next pair is −4 and +4. Continue to the largest bit needed.</p>
+    <p>For each old row, select the signed powers of two that sum to the negative of its required first entry. The elimination subtracts that sum from the first entry and leaves every other old entry alone. Since <var>T</var> has determinant 1, the full 0 and 1 board has the original determinant. The exact replay checks both boards for every setting in the explorer. <a href="../tools/check_farey_harmonics.py">Exact replay</a>.</p>
+  </details>
+  <details>
+    <summary>What the Riemann hypotheses say about the integers</summary>
+    <p>For each fixed character, Dirichlet GRH bounds the twisted first harmonic by <span class="formula">O<sub>χ,ε</sub>(<var>N</var><sup>1/2 + ε</sup>)</span> for every ε &gt; 0. The bound also implies the relevant zero-free half-plane because <span class="formula">1/<var>L</var>(<var>s</var>,χ) = <var>s</var>∫<sub>1</sub><sup>∞</sup><var>M</var><sub>χ</sub>(<var>x</var>)<var>x</var><sup>−<var>s</var>−1</sup> d<var>x</var></span> continues there. The sum over divisors shows the same exponent for every fixed harmonic <var>k</var>. The untwisted case uses ordinary RH. The mod-five case uses the archive’s Dirichlet statement for the quadratic character. The finite identities hold unconditionally. <a href="https://arxiv.org/abs/1111.3305">Halupczok and Suger, partial Möbius sums under GRH</a> · <a href="https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026/build/paper2.tex">OpenAI, <cite>The Quasi-Riemann Hypothesis</cite>, Möbius-sum reduction</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Main.lean">Archive statements</a>.</p>
+    <p>Marlow noticed the converse works at any one fixed <var>k</var>. The Dirichlet series of the contributions as denominators enter has the form <span class="formula"><var>S</var>(<var>s</var>)/<var>L</var>(<var>s</var>,χ), where <var>S</var>(<var>s</var>) = ∑<sub><var>d</var> | <var>k</var></sub> χ(<var>d</var>)<var>d</var><sup>1−<var>s</var></sup></span>. For a prime power <var>p</var><sup><var>a</var></sup> in <var>k</var>, the corresponding factor of <var>S</var> is 1 + <var>u</var> + … + <var>u</var><sup><var>a</var></sup>, with <var>u</var> = χ(<var>p</var>)<var>p</var><sup>1−<var>s</var></sup>. All its roots have |<var>u</var>| = 1, so any zeros of <var>S</var> lie on Re <var>s</var> = 1. In the open strip 1/2 &lt; Re <var>s</var> &lt; 1, the numerator cannot cancel a zero of <var>L</var>. Thus the same growth bound at any single fixed harmonic implies zero-freeness in that strip and, by the functional equation, the corresponding hypothesis.</p>
+  </details>
+</main>
+<script>
+(() => {
+  const get = id => document.getElementById(id);
+  const nInput=get('n'), kInput=get('k'), qInput=get('q'), combine=get('combine');
+  const circle=get('circle'), matrix=get('matrix'), binary=get('binary');
+  const weights=[...document.querySelectorAll('[data-weight]')];
+  const labels=new Intl.NumberFormat('en-US');
+  let mode='plain', matrixMode='original';
+
+  function gcd(a,b) {
+    while(b) [a,b]=[b,a%b];
+    return a;
+  }
+  function divisors(n,cap=n) {
+    const result=[];
+    for(let d=1;d<=cap;d++) if(n%d===0) result.push(d);
+    return result;
+  }
+  const mu=[0,1];
+  for(let q=2;q<=42;q++) mu[q]=-divisors(q,q-1).reduce((sum,d)=>sum+mu[d],0);
+  const character=q=>mode==='plain'?1:[0,1,-1,-1,1][q%5];
+  const ramanujan=(q,k)=>divisors(gcd(q,k)).reduce((sum,d)=>sum+d*mu[q/d],0);
+  const units=Array.from({length:43},(_,q)=>Array.from({length:q},(_,i)=>i+1).filter(a=>gcd(a,q)===1));
+  const minusFormat=n=>n===0?'0':labels.format(n).replace('-','−');
+
+  function drawing(canvas) {
+    const {width,height}=canvas.getBoundingClientRect(), scale=devicePixelRatio||1;
+    canvas.width=Math.round(width*scale); canvas.height=Math.round(height*scale);
+    const ctx=canvas.getContext('2d');
+    ctx.setTransform(scale,0,0,scale,0,0);
+    return {ctx,width,height};
+  }
+  function line(ctx,x,y,u,v,ink,size=1) {
+    ctx.strokeStyle=ink;ctx.lineWidth=size;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(u,v);ctx.stroke();
+  }
+  function dot(ctx,x,y,r,ink) {
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill();
+  }
+  function drawCircle(n,k,selected,countWeighted,answer) {
+    const {ctx,width,height}=drawing(circle);
+    const x=width/2, y=height/2, radius=Math.min(width,height)/2-29;
+    line(ctx,x-radius-10,y,x+radius+10,y,'#3c535e');
+    line(ctx,x,y-radius-10,x,y+radius+10,'#3c535e');
+    ctx.strokeStyle='#4a6875';ctx.beginPath();ctx.arc(x,y,radius,0,2*Math.PI);ctx.stroke();
+    for(let q=1;q<=n;q++) {
+      const weight=character(q);
+      if(!weight) continue;
+      for(const a of units[q]) {
+        const angle=2*Math.PI*((k*a)%q)/q;
+        const u=x+weight*radius*Math.cos(angle), v=y-weight*radius*Math.sin(angle);
+        if(q===selected) line(ctx,x,y,u,v,'#b08455',1.1);
+        dot(ctx,u,v,q===selected?4:2.3,q===selected?'#f3b86c':weight>0?'#86d9cd':'#e3a7a0');
+      }
+    }
+    const endpoint=x+radius*answer/countWeighted;
+    line(ctx,x,y,endpoint,y,'#f1f6f3',3);
+    dot(ctx,endpoint,y,4,'#f1f6f3');
+    ctx.font='12px ui-monospace,monospace';ctx.textAlign='center';ctx.fillStyle='#b3c7cc';
+    ctx.fillText('Sum shown at 1/'+countWeighted+' scale',x,height-7);
+  }
+  function binaryExpansion(first) {
+    const altered=first.map((value,i)=>{
+      let part=i+1;
+      while(part%5===0)part/=5;
+      return character(part)*value;
+    });
+    const width=Math.floor(Math.log2(Math.max(1,...altered.map(Math.abs))))+1;
+    const helpers=[{value:1,earlier:[]},{value:-1,earlier:[0]}];
+    if(width>1){
+      const positives=[0,2];
+      helpers.push({value:1,earlier:[1]});
+      for(let bit=1;bit<width;bit++){
+        const power=2**bit, negative=helpers.length;
+        helpers.push({value:-power,earlier:[...positives]},{value:power,earlier:[negative]});
+        positives.push(negative+1);
+      }
+    }
+    const index=new Map();
+    for(const [i,{value}] of helpers.entries())if(!index.has(value))index.set(value,i);
+    const choices=altered.map(value=>{
+      const used=[];
+      for(let bit=0;bit<width;bit++){
+        const power=2**bit;
+        if(Math.abs(value)&power)used.push(index.get(-Math.sign(value)*power));
+      }
+      return used;
+    });
+    return {altered,helpers,choices};
+  }
+  function drawMatrix(n,first,answer,selected,expansion) {
+    const {ctx,width,height}=drawing(matrix), edge=15;
+    const order=n+(expansion?.helpers.length||0);
+    const size=Math.min(width,height)-2*edge, cell=size/order, left=(width-size)/2, top=(height-size)/2;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=Math.min(14,cell*.58)+'px ui-monospace,monospace';
+    for(let i=1;i<=order;i++) for(let j=1;j<=order;j++) {
+      let a, color;
+      if(expansion){
+        if(i<=n&&j<=n) {
+          a=Number(j>1&&j%i===0&&character(j/i)!==0);
+          color=a?'#2d6a63':'#1e3240';
+        }else if(i>n&&j>n){
+          a=Number(i===j||expansion.helpers[i-n-1].earlier.includes(j-n-1));
+          color=a?'#754d57':'#302932';
+        }else{
+          a=Number(i<=n?expansion.choices[i-1].includes(j-n-1):i===n+1&&j===1);
+          color=a?'#9c6b37':'#393130';
+        }
+      }else{
+        a=j===1?first[i-1]:j%i===0?character(j/i):0;
+        if(matrixMode==='combined'&&i===1)a=j===1?answer:0;
+        color=j===1?(a?'#77512c':'#3b332c'):a<0?'#754d57':a>0?'#2d6a63':'#1e3240';
+        if(matrixMode==='combined'&&i===1&&j===1)color='#9c6b37';
+      }
+      const x=left+(j-1)*cell, y=top+(i-1)*cell;
+      ctx.fillStyle=color;
+      ctx.fillRect(x,y,Math.max(cell-.5,1),Math.max(cell-.5,1));
+      if(cell>=13&&(a||order<=12)) {ctx.fillStyle='#f1f4f0';ctx.fillText(minusFormat(a),x+(cell-.5)/2,y+(cell-.5)/2);}
+    }
+    ctx.strokeStyle='#f3b86c';ctx.lineWidth=1;
+    ctx.strokeRect(left-.5,top+(selected-1)*cell-.5,size+1,cell+1);
+  }
+
+  function render() {
+    const n=Number(nInput.value),k=Number(kInput.value);
+    qInput.max=n;
+    const q=Math.min(n,Number(qInput.value)), weight=character(q);
+    qInput.value=q;
+    const prefix=[0];
+    for(let i=1;i<=n;i++) prefix.push(prefix.at(-1)+mu[i]*character(i));
+    const relevant=divisors(k,Math.min(k,n));
+    const summands=relevant.map(d=>d*character(d)*prefix[Math.floor(n/d)]);
+    const answer=summands.reduce((sum,a)=>sum+a,0);
+    const first=Array.from({length:n},(_,i)=>relevant.reduce((sum,d)=>sum+(d*(i+1)<=n?d*character(d):0),0));
+    const expansion=matrixMode==='binary'?binaryExpansion(first):null;
+    const countWeighted=units.slice(1,n+1).reduce((sum,packet,i)=>sum+packet.length*Math.abs(character(i+1)),0);
+    for(const [id,value] of [['show-n',n],['show-k',k],['show-q',q]])get(id).value=value;
+    for(const button of weights) button.setAttribute('aria-pressed',String(button.dataset.weight===mode));
+    combine.setAttribute('aria-pressed',String(matrixMode==='combined'));
+    combine.textContent=matrixMode==='combined'?'Show the original rows':'Combine the rows';
+    binary.setAttribute('aria-pressed',String(Boolean(expansion)));
+    matrix.setAttribute('aria-label',expansion?'Expanded matrix with only zeros and ones':'Integer divisibility matrix');
+    get('packet').textContent='Denominator '+q+(weight?' contributes '+minusFormat(weight*ramanujan(q,k))+' along the horizontal axis.':' has weight zero, so it contributes no arrows.');
+    if(expansion){
+      const chosen=expansion.choices[q-1].map(i=>minusFormat(expansion.helpers[i].value));
+      get('matrix-note').textContent='Added '+expansion.helpers.length+' rows and columns. The gold links on row '+q+
+        ' select '+(chosen.length?chosen.join(', '):'no values')+'. Subtract their sum to get '+minusFormat(expansion.altered[q-1])+'.';
+    }else{
+      get('matrix-note').textContent=matrixMode==='combined'?'The new top row is ('+minusFormat(answer)+', 0, …, 0). The remaining minor has determinant 1.':'The gold column changes with the harmonic. The outlined row '+q+' begins with '+minusFormat(first[q-1])+'.';
+    }
+    get('equal').textContent='Circle sum = determinant = '+minusFormat(answer);
+    get('equal').dataset.value=answer;
+    get('terms').textContent='Terms by divisor · '+relevant.map((d,i)=>d+' → '+minusFormat(summands[i])).join(' · ');
+    drawCircle(n,k,q,countWeighted,answer);
+    drawMatrix(n,first,answer,q,expansion);
+  }
+  for(const button of weights) button.addEventListener('click',()=>{mode=button.dataset.weight;render();});
+  for(const control of [nInput,kInput,qInput]) control.addEventListener('input',render);
+  combine.addEventListener('click',()=>{matrixMode=matrixMode==='combined'?'original':'combined';render();});
+  binary.addEventListener('click',()=>{matrixMode=matrixMode==='binary'?'original':'binary';render();});
+  let pending;
+  window.addEventListener('resize',()=>{cancelAnimationFrame(pending);pending=requestAnimationFrame(render);});
+  render();
+})();
+</script>
+</body>
+</html>

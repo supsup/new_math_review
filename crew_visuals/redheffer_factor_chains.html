@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the Farey determinant counts factor chains</title>
+<style>
+  :root { color-scheme: dark; --page: #111b27; --panel: #172735; --ink: #f2f5f0; --soft: #b9c9cb; --edge: #42606c; --warm: #edb57b; --cool: #89d9ca; background: var(--page); color: var(--ink); font: 100%/1.56 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { margin: auto; width: min(100%,64rem); padding: clamp(1rem,5vw,4rem); }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { font-size: clamp(2.8rem,9vw,6.25rem); max-width: 16ch; line-height: .96; letter-spacing: -.06em; text-wrap: balance; margin: .65rem 0 .85rem; }
+  h2 { font-size: 1.72rem; line-height: 1.15; margin: 1.35rem 0 .54rem; }
+  p { max-width: 66ch; margin: .52rem 0; }
+  a { color: var(--cool); text-underline-offset: .18em; }
+  :focus-visible { outline: .16rem solid var(--warm); outline-offset: .14rem; }
+  .muted,.row-label { color: var(--soft); }
+  .explorer { margin: 1.25rem 0; padding: clamp(.73rem,2.5vw,1.35rem); background: var(--panel); border: 1px solid var(--edge); border-radius: .4rem; }
+  .settings { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap: .54rem 1rem; }
+  label { display: grid; gap: .19rem; min-width: 0; }
+  label span { display: flex; justify-content: space-between; gap: .4rem; }
+  output { color: var(--warm); font-variant-numeric: tabular-nums; }
+  input { width: 100%; margin-inline: 0; accent-color: var(--cool); }
+  select,button { font: inherit; min-height: 2.58rem; color: var(--ink); background: #11222e; border: 1px solid #5e7980; border-radius: .25rem; padding: .27rem .47rem; cursor: pointer; }
+  button[aria-pressed=true] { color: #152c2b; background: var(--cool); border-color: var(--cool); }
+  .view { margin-top: .84rem; display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,17rem),1fr)); gap: .75rem 1.1rem; }
+  .view section { min-width: 0; }
+  h3 { font-size: 1rem; margin: .34rem 0 .3rem; }
+  .bars { display: grid; gap: .3rem; }
+  .row { display: grid; grid-template-columns: 4.2rem minmax(0,1fr) 3.1rem; gap: .35rem; align-items: center; font-variant-numeric: tabular-nums; font-size: .86rem; }
+  .row-label { white-space: nowrap; }
+  .bar { position: relative; height: .76rem; background: #101d28; border-radius: .18rem; }
+  .bar::before { content: ""; position: absolute; top: 0; bottom: 0; width: 1px; left: calc(50% - .5px); background: #6f8489; }
+  .bar i { position: absolute; top: .07rem; height: .62rem; background: var(--cool); border-radius: .08rem; }
+  .negative .bar i { background: var(--warm); }
+  .row output { text-align: right; }
+  .choice { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .factor-chain { min-height: 2.25rem; padding: .35rem .49rem; border-left: .21rem solid var(--warm); background: #10202c; overflow-wrap: anywhere; }
+  #total { font-size: 1.1rem; font-weight: 650; }
+  details { border-top: 1px solid var(--edge); margin-top: .7rem; padding-top: .58rem; }
+  summary { color: var(--cool); cursor: pointer; font-weight: 620; }
+</style>
+</head>
+<body>
+<main>
+  <a href="farey_harmonics.html">Back to the Farey circle</a>
+  <h1>How the Farey determinant counts factor chains</h1>
+  <p class="muted">The same 0–1 matrix gives two very different answers. Its permanent counts every ordered factorization. Its determinant subtracts the factorizations with an odd number of factors. At order 12 the count is 28 and the signed sum is −2.</p>
+  <div class="explorer" aria-label="Factor chains in a Redheffer matrix">
+    <div class="settings">
+      <label for="order"><span>Matrix order <var>N</var><output id="n-value"></output></span><input id="order" type="range" min="2" max="60" value="12"></label>
+      <label for="end"><span>Factorizations of <var>q</var><output id="q-value"></output></span><input id="end" type="range" min="1" max="12" value="12"></label>
+      <label for="weight">Weight per factor <var>t</var><select id="weight">
+        <option value="-2">−2</option><option value="-1" selected>−1 · determinant</option><option value="0">0</option><option value="1">+1 · permanent</option><option value="2">+2</option>
+      </select></label>
+    </div>
+    <div class="view">
+      <section aria-label="Contribution over all products">
+        <h3>All products up to <var>N</var></h3>
+        <div class="bars" id="bars"></div>
+        <p id="total" aria-live="polite"></p>
+      </section>
+      <section aria-label="Factorizations and their corresponding cycle">
+        <h3 id="factor-heading"></h3>
+        <div class="choice" id="factors"></div>
+        <p class="factor-chain" id="chain" aria-live="polite"></p>
+        <p class="muted">Choose a factorization to see the cycle obtained by multiplying one factor at a time and returning to 1.</p>
+      </section>
+    </div>
+  </div>
+  <h2>Why all the cycles go through 1</h2>
+  <p>In a Redheffer matrix, row <var>i</var> has a 1 in column <var>j</var> whenever <var>i</var> divides <var>j</var>. Every row also has a 1 in column 1. An arrow along a strict divisibility step always increases the number. To close a nontrivial cycle, the final arrow must go back to 1. So a cycle cover consists of at most one cycle with several vertices, and loops on everything else. <a href="https://arxiv.org/abs/math/0408263">Wilf, Theorem 1</a> · <a href="characteristic_two_cycle_covers.html">Cycle-cover explorer</a>.</p>
+  <p>Factor 12 as 2 × 2 × 3 and the cycle is 1 → 2 → 4 → 12 → 1. It has four vertices and takes three swaps, so it contributes −1 to the determinant. The factors 3 × 4 and 4 × 3 give different cycles. The factorization of 1 uses no factors and gives the cover of all loops.</p>
+  <p>The sum over factorizations of a fixed <var>q</var>, alternating by length, is its Möbius number. For <var>q</var> = 12 the three groups contribute −1 + 4 − 3 = 0. The first Farey harmonic sums these same Möbius numbers. <a href="farey_harmonics.html">Farey circle and determinant</a>.</p>
+
+  <details>
+    <summary>Change the signs, change the zeta function expression</summary>
+    <p>Give a factorization with <var>r</var> factors the weight <var>t</var><sup><var>r</var></sup>. For fixed <var>r</var>, the Dirichlet series of its counts is (ζ(<var>s</var>) − 1)<sup><var>r</var></sup>. Each factor can be any integer at least two. Sum the geometric series with the weight <var>t</var><sup><var>r</var></sup> to get 1 / (1 − <var>t</var>(ζ(<var>s</var>) − 1)), for Re <var>s</var> sufficiently large. At <var>t</var> = −1 this is 1/ζ(<var>s</var>). At <var>t</var> = +1 it is 1/(2 − ζ(<var>s</var>)). <a href="https://lims.ac.uk/documents/paper-properties-of-the-recursive-divisor-function-and-the-number-of-ordered-factorisations.pdf">Ordered factorizations, Table 1</a>.</p>
+  </details>
+  <details>
+    <summary>Follow the same chains for any fixed Farey harmonic</summary>
+    <p>Use the weighted Farey board from the circle page. A chain ending at <var>q</var> accumulates χ(<var>q</var>) from its divisibility edges. Its return to 1 multiplies that by the first-column entry <var>g</var><sub><var>q</var></sub> = ∑<sub><var>d</var> | <var>k</var>, <var>dq</var> ≤ <var>N</var></sub> <var>d</var>χ(<var>d</var>). To weight the chain by <var>t</var><sup><var>r</var></sup> in a determinant, multiply each strict divisibility entry by −<var>t</var>. The <var>r</var> determinant swaps cancel the <var>r</var> new minus signs.</p>
+    <p>For the successive increments as <var>N</var> grows, the fixed harmonic multiplies the Dirichlet series by ∑<sub><var>d</var> | <var>k</var></sub> χ(<var>d</var>)<var>d</var><sup>1−<var>s</var></sup>: a chain ending at <var>q</var> gains the <var>d</var> summand at <var>N</var> = <var>dq</var>. The denominator becomes 1 − <var>t</var>(<var>L</var>(<var>s</var>,χ) − 1), since the character weights in each chain multiply. The replay checks ordinary and weighted determinants at five values of <var>t</var>. <a href="../tools/check_redheffer_factor_chains.py">Exact replay</a>.</p>
+  </details>
+  <details id="alternating-special">
+    <summary>Why the alternating choice is special</summary>
+    <p>For ordinary ζ and any fixed harmonic, every weight <var>t</var> except 0 and −1 rules out a power-saving bound O(<var>N</var><sup>β</sup>) with β &lt; 1. Marlow noticed the obstruction. The denominator vanishes wherever ζ(<var>s</var>) takes the nonzero value 1 + 1/<var>t</var>. Voronin’s theorem gives such points in every vertical substrip of 1/2 &lt; Re <var>s</var> &lt; 1. The harmonic numerator’s prime-power factors can vanish only on Re <var>s</var> = 1, so each point in the open strip gives a pole.</p>
+    <p>To obtain the point, approximate a small affine function that takes 1 + 1/<var>t</var> at the center of a disc inside the chosen substrip. The affine function stays away from zero on Voronin’s larger disc. Rouché’s theorem then gives the same number of crossings of 1 + 1/<var>t</var> inside the small disc. If the sums had the proposed bound, partial summation would make their Dirichlet series holomorphic on Re <var>s</var> &gt; β, contradicting such a pole. The case <var>t</var> = 0 leaves just the bounded contribution of the empty factorization for fixed <var>k</var>. The case <var>t</var> = −1 recovers the fixed-harmonic RH criterion. <a href="https://www.mathnet.ru/php/archive.phtml?wshow=paper&jrnid=im&paperid=2037&option_lang=eng">Voronin’s universality theorem</a> · <a href="farey_harmonics.html">The harmonic numerator and RH criterion</a>.</p>
+  </details>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id), order=get('order'), end=get('end'), weight=get('weight');
+  const lists=[[],[[]]];
+  for(let q=2;q<=60;q++){
+    lists[q]=[];
+    for(let d=2;d<=q;d++){
+      if(q%d===0)for(const tail of lists[q/d])lists[q].push([d,...tail]);
+    }
+  }
+  const fmt=value=>String(value).replace('-','−');
+  let selected=0;
+
+  function showChain(factors,t) {
+    const chain=[1];
+    for(const factor of factors)chain.push(chain.at(-1)*factor);
+    if(factors.length)chain.push(1);
+    get('chain').textContent=(factors.length?chain.join(' → '):'1 ↻')+' · contribution '+fmt(t**factors.length);
+  }
+
+  function render() {
+    const n=Number(order.value), t=Number(weight.value);
+    end.max=n;
+    const q=Math.min(n,Number(end.value));
+    end.value=q;
+    const totals=Array(Math.floor(Math.log2(n))+1).fill(0);
+    for(let product=1;product<=n;product++){
+      for(const factors of lists[product])totals[factors.length]++;
+    }
+    const values=totals.map((count,r)=>count*t**r);
+    const max=Math.max(1,...values.map(Math.abs));
+    const rows=values.map((value,r)=>{
+      const amount=50*Math.abs(value)/max, left=value<0?50-amount:50;
+      return '<div class="row'+(value<0?' negative':'')+'"><span class="row-label">'+r+
+        (r===1?' factor':' factors')+'</span><div class="bar" aria-hidden="true"><i style="left:'+left+
+        '%;width:'+amount+'%"></i></div><output>'+fmt(value)+'</output></div>';
+    });
+    get('bars').innerHTML=rows.join('');
+    get('total').textContent=(t===-1?'Determinant':t===1?'Permanent':'Weighted sum')+' = '+fmt(values.reduce((a,b)=>a+b,0));
+    get('n-value').value=n;
+    get('q-value').value=q;
+    const factors=lists[q];
+    selected=Math.min(selected,factors.length-1);
+    get('factor-heading').textContent=factors.length+' '+(factors.length===1?'factorization':'factorizations')+' of '+q;
+    const container=get('factors');
+    container.replaceChildren();
+    for(const [i,list] of factors.entries()){
+      const button=document.createElement('button');
+      button.type='button';
+      button.textContent=list.length?list.join(' × '):'Empty';
+      button.setAttribute('aria-pressed',String(selected===i));
+      button.addEventListener('click',()=>{
+        selected=i;
+        for(const [j,child] of Array.from(container.children).entries()){
+          child.setAttribute('aria-pressed',String(i===j));
+        }
+        showChain(list,t);
+      });
+      container.append(button);
+    }
+    showChain(factors[selected],t);
+  }
+
+  for(const control of [order,end,weight])control.addEventListener('input',()=>{
+    if(control!==weight)selected=0;
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

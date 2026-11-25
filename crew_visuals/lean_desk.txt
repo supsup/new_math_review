@@ -1144,5 +1144,99 @@ fun E [Field E] [NumberField E] =>
 'GlobalTheory.globalArtinReciprocity_holds' depends on axioms: [propext, Classical.choice, Quot.sound]
 'artin_map_onto_continuous_open' depends on axioms: [propext, Classical.choice, Quot.sound]
 
+THE J-FUNCTION AND THE HILBERT CLASS FIELD, WITH ONE CONSEQUENCE OF OUR OWN. tools/rh_j_whole.lean, run in the compiled project (11 seconds, no error), printed:
+
+CompanionTheory.Hypotheses₂.hilbertClassFieldJ : HilbertClassFieldJ
+def GlobalTheory.Published.HilbertClassFieldJ : Prop :=
+∀ (K : Type) [inst : Field K] [inst_1 : NumberField K] [IsTotallyComplex K] [inst_3 : Algebra K ℂ],
+  Module.finrank ℚ K = 2 →
+    ∀ (L₀ : PeriodPair),
+      IsIdealLattice 1 L₀ →
+        IsHilbertClassField K⟮(latticeCurve L₀).j⟯ ∧
+          Module.finrank K ↥K⟮(latticeCurve L₀).j⟯ = classNumber K ∧
+            (∀ (𝔞 𝔟 : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (L L' : PeriodPair),
+                IsIdealLattice 𝔞 L →
+                  IsIdealLattice 𝔟 L' →
+                    ((latticeCurve L).j = (latticeCurve L').j ↔ (ClassGroup.mk K) 𝔞 = (ClassGroup.mk K) 𝔟)) ∧
+              (idealInvariants K).ncard = classNumber K ∧
+                (Set.range fun g => ↑(g (IntermediateField.AdjoinSimple.gen K (latticeCurve L₀).j))) = idealInvariants K
+def GlobalTheory.Published.IsHilbertClassField : {K : Type} →
+  [inst : Field K] → [inst_1 : Algebra K ℂ] → IntermediateField K ℂ → Prop :=
+fun {K} [Field K] [Algebra K ℂ] H =>
+  IsUnramifiedAbelian H ∧ ∀ (M : IntermediateField K ℂ), IsUnramifiedAbelian M → M ≤ H
+def GlobalTheory.Published.IsUnramifiedAbelian : {K : Type} →
+  [inst : Field K] → [inst_1 : Algebra K ℂ] → IntermediateField K ℂ → Prop :=
+fun {K} [Field K] [Algebra K ℂ] M =>
+  FiniteDimensional K ↥M ∧
+    IsAbelianGalois K ↥M ∧ ∀ (P : Ideal (𝓞 ↥M)) [inst_2 : P.IsPrime], P ≠ ⊥ → Algebra.IsUnramifiedAt (𝓞 K) P
+def GlobalTheory.Published.IsIdealLattice : {K : Type} →
+  [inst : Field K] → [inst_1 : NumberField K] → [Algebra K ℂ] → (FractionalIdeal (𝓞 K)⁰ K)ˣ → PeriodPair → Prop :=
+fun {K} [Field K] [NumberField K] [Algebra K ℂ] 𝔞 L => ↑L.lattice = ⇑(algebraMap K ℂ) '' ↑↑𝔞
+def GlobalTheory.Published.idealInvariants : (K : Type) → [inst : Field K] → [NumberField K] → [Algebra K ℂ] → Set ℂ :=
+fun K [Field K] [NumberField K] [Algebra K ℂ] => {x | ∃ 𝔟 L, IsIdealLattice 𝔟 L ∧ (latticeCurve L).j = x}
+T.isIntegral_j_of_nonreal_multiplier : ∀ (L : PeriodPair) (β : ℂ),
+  Formalism.L2.Th1.F.MulStable L β → β.im ≠ 0 → IsIntegral ℤ (latticeCurve L).j
+@CMCurves.isIntegral_latticeJ : ∀ {K : Type} [inst : Field K] [inst_1 : NumberField K],
+  Module.finrank ℚ K = 2 →
+    ∀ (σ : K →+* ℂ) (L : PeriodPair),
+      (∀ (a : 𝓞 K), ∀ z ∈ L.lattice, σ ↑a * z ∈ L.lattice) → IsIntegral ℤ (CMCurves.latticeJ L)
+latticeCurve_j_eq : ∀ (L : PeriodPair), (latticeCurve L).j = 1728 * L.g₂ ^ 3 / (L.g₂ ^ 3 - 27 * L.g₃ ^ 2)
+'GlobalTheory.CompanionTheory.Hypotheses₂.hilbertClassFieldJ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GlobalTheory.T.isIntegral_j_of_nonreal_multiplier' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GlobalTheory.CMCurves.isIntegral_latticeJ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'j_integral_of_ideal_lattice' depends on axioms: [propext, Classical.choice, Quot.sound]
+'j_whole_of_class_number_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+THE BRANCHING RULE, AND TWO LEMMAS BESIDE IT. tools/rh_branching.lean, run in the compiled project (no error), printed:
+
+GlobalTheory.Published.weylBranching_holds : GlobalTheory.Published.WeylBranching
+def GlobalTheory.Published.WeylBranching : Prop :=
+∀ (n N : ℕ) (h : n + 1 = N),
+  1 ≤ n →
+    ∀ (lam : Formalism.BasicNotions.DomWeight N),
+      GlobalTheory.Branching.BranchesAlong (MonoidHom.id (GL (Fin n) ℂ)) h lam ∧
+        GlobalTheory.Branching.BranchesAlong (GlobalTheory.Branching.unitaryIncl n) h lam
+def GlobalTheory.Branching.BranchesAlong : {H : Type} →
+  [inst : Group H] → {n N : ℕ} → (H →* GL (Fin n) ℂ) → n + 1 = N → Formalism.BasicNotions.DomWeight N → Prop :=
+fun {H} [Group H] {n N} ι h lam =>
+  Nonempty ((GlobalTheory.Branching.sumRep ι h lam).Equiv (GlobalTheory.Branching.resRep ι h lam)) ∧
+    ∀ (mu : Formalism.BasicNotions.DomWeight n),
+      (Formalism.MainNotions.PrimeDegreeVariant.Interlace h lam mu → GlobalTheory.Branching.mult ι h lam mu = 1) ∧
+        (¬Formalism.MainNotions.PrimeDegreeVariant.Interlace h lam mu → GlobalTheory.Branching.mult ι h lam mu = 0)
+def Formalism.MainNotions.PrimeDegreeVariant.Interlace : {n N : ℕ} →
+  n + 1 = N → Formalism.BasicNotions.DomWeight N → Formalism.BasicNotions.DomWeight n → Prop :=
+fun {n N} h lam sg => ∀ (i : Fin n), sg.w i ≤ lam.w ⟨↑i, ⋯⟩ ∧ lam.w ⟨↑i + 1, ⋯⟩ ≤ sg.w i
+def GlobalTheory.Branching.mult : {H : Type} →
+  [inst : Group H] →
+    {n N : ℕ} →
+      (H →* GL (Fin n) ℂ) → n + 1 = N → Formalism.BasicNotions.DomWeight N → Formalism.BasicNotions.DomWeight n → ℕ :=
+fun {H} [Group H] {n N} ι h lam mu =>
+  Module.finrank ℂ ((GlobalTheory.Branching.smallRep ι mu).IntertwiningMap (GlobalTheory.Branching.resRep ι h lam))
+GlobalTheory.Branching.isIrreducible_smallRep_id : ∀ (n : ℕ) (mu : Formalism.BasicNotions.DomWeight n),
+  (GlobalTheory.Branching.smallRep (MonoidHom.id (GL (Fin n) ℂ)) mu).IsIrreducible
+GlobalTheory.Branching.isIrreducible_smallRep_unitary : ∀ (n : ℕ) (mu : Formalism.BasicNotions.DomWeight n),
+  (GlobalTheory.Branching.smallRep (GlobalTheory.Branching.unitaryIncl n) mu).IsIrreducible
+'GlobalTheory.Published.weylBranching_holds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GlobalTheory.Branching.isIrreducible_smallRep_id' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GlobalTheory.Branching.isIrreducible_smallRep_unitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+
+ROUND SIX, 13 MORE PUBLISHED STATEMENTS. The check files written by tools/rh_published_replay_gen.py, one for each step of the build, run in the compiled project (one check refused, as lean_runs.txt explains), printed:
+'direct_TemperedProductOfSquareIntegrable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_TotallyDisjointProductIrreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_UnlinkedProductIrreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_AutomorphicFormsFiniteGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspidalMultiplicityOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HarishChandraFinite' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BernsteinUnitaryProductIrreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_WeilRepresentationExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_GreenSeriesSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_SiegelKlingenDeligneRibet' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SiegelEisensteinContinuation' depends on axioms: [propext, Classical.choice, Quot.sound]
+published_check_r6t1.lean:75:47: error(lean.unknownIdentifier): Unknown identifier `GlobalTheory.Published.DoublingMethodLocalZetaIntegrals`
+'pub_DoublingMethodLocalZetaIntegrals' does not depend on any axioms
+'pub_SiegelSetUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_WeilThetaConvergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+
 
 Asked by Lattice (chat 34789, 34832, 34909, 34913), Confluence (34782, 34912), Marlow (34910) and Fixpoint. Run by Fixpoint, 25 November 2026.

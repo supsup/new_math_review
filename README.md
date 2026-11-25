@@ -141,7 +141,27 @@ Round two pages (each checks its own numbers before it draws, and loads nothing 
   archive's files are reached when the row points to a proof, whether Lean has checked it here, and whether its line leans on an assumed statement.
   Written by `tools/rh_published_ladder.py` from `crew_visuals/rh_published_scan2.json` (made by `tools/rh_published_scan2.py`)
   and `crew_visuals/rh_published_proved.txt`. `tools/rh_published_direct_gen.py` writes the check that proves a statement by the
-  theorem its line leads to. `tools/rh_artin.lean` replays the archive's proof of Artin reciprocity.
+  theorem its line leads to, and `tools/rh_published_replay_gen.py` the general one: the table's own line, with any call to another line
+  of the table written out and each theorem that only repeats another replaced by the one it repeats. `tools/rh_published_def_files.py` finds the few statements whose name
+  the archive defines in a file their proof does not import. `tools/rh_artin.lean` replays the archive's proof of Artin reciprocity.
+- `what_the_proof_borrows.html` (Fixpoint): the same 155 statements as a wall of tiles (checked here; checked and read; not yet;
+  leaning on an assumed statement) and a staircase of how many were checked after each build. Written by
+  `tools/rh_published_wall.py` from the scan, the roster, `crew_visuals/rh_published_builds.txt` and the cards page; it refuses to
+  write if the staircase and the roster disagree.
+- `almost_a_whole_number.html` (Fixpoint): why e^(pi sqrt 163) misses a whole number by less than a trillionth. The archive's
+  statement `HilbertClassFieldJ` (the j of a number system's grid has degree equal to its class number), read at the source, with
+  the twelve nines, a chart of e^(pi sqrt n) for n to 250, and the equation of the j values for each of 77 number systems, all
+  computed by the page to 220 decimal places. Checked against `tools/check_almost_a_whole_number.py`, a separate program.
+  `tools/rh_j_whole.lean` prints the statement and proves, from it and the archive's integrality theorem, that for class number
+  one j is one of the field's own whole numbers.
+- `one_row_at_a_time.html` (Fixpoint): the classical branching rule from the N by N matrices to the smaller ones, the archive's
+  statement `WeylBranching`, read at the source: step down one row of numbers at a time, each new number between two old ones, and
+  count the triangles against Weyl's dimension formula. Checked against `tools/check_one_row_at_a_time.py`, a separate program.
+  `tools/rh_branching.lean` prints the statement and the archive's two lemmas that its modules are irreducible.
+- `clock_and_shift.html` (Fixpoint): the finite model of the Stone-von Neumann theorem, which the archive proves over p-adic fields
+  (`StoneVonNeumann`): a shift and a clock on a ring of p dots whose two orders differ by one fixed turn, any string of moves reduced
+  to one of p^3, and the count of squares that leaves no room for another representation. Checked against
+  `tools/check_clock_and_shift.py`, a separate program that multiplies the real matrices.
 - `a_sign_at_every_prime.html` (Fixpoint, after Lattice's `crew_visuals/quadratic_norm_signs.html`): two of those six on whole numbers
   you choose: the sign at every prime, the product law, and a solution when every sign is +1. Checked against
   `tools/check_sign_at_every_prime.py`, a separate search-only program.

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How much of the archive do the literature proofs reach?</title>
+<style>
+  :root { color-scheme: dark; --page: #101a27; --panel: #172637; --ink: #edf3f2; --soft: #b4c6cd; --edge: #405768; --shared: #86d8ca; --outside: #ebb672; background: var(--page); color: var(--ink); font: 100%/1.55 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,65rem); margin: auto; padding: clamp(1rem,5vw,4rem); }
+  a { color: var(--shared); text-underline-offset: .18em; }
+  :focus-visible { outline: .16rem solid var(--outside); outline-offset: .16rem; }
+  h1,h2,h3 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { font-size: clamp(2.7rem,8vw,5.6rem); max-width: 16ch; text-wrap: balance; line-height: .98; letter-spacing: -.06em; margin: .66rem 0 .85rem; }
+  h2 { font-size: 1.75rem; line-height: 1.16; margin: 1.4rem 0 .55rem; }
+  h3 { font-size: 1.23rem; margin: 0; }
+  p { max-width: 66ch; margin: .55rem 0; }
+  code { overflow-wrap: anywhere; }
+  .intro,.caption { color: var(--soft); }
+  .explorer { margin: 1.3rem 0; padding: clamp(.75rem,2.4vw,1.3rem); background: var(--panel); border: 1px solid var(--edge); border-radius: .48rem; }
+  .tools,.legend { display: flex; flex-wrap: wrap; gap: .52rem .94rem; align-items: center; }
+  .tools { justify-content: space-between; }
+  .units { display: flex; flex-wrap: wrap; gap: .42rem; }
+  button { color: var(--ink); background: #122230; border: 1px solid #617984; border-radius: .27rem; padding: .38rem .62rem; font: inherit; min-height: 2.5rem; cursor: pointer; }
+  button[aria-pressed=true] { color: #173737; background: var(--shared); border-color: var(--shared); }
+  .legend { margin: .74rem 0 .85rem; color: var(--soft); font-size: .9rem; }
+  .legend span { display: inline-flex; gap: .34rem; align-items: center; }
+  .key { display: inline-block; width: .72rem; height: .72rem; border-radius: .12rem; flex: none; }
+  .shared { background: var(--shared); }
+  .outside { background: var(--outside); }
+  .route { padding: .67rem 0; border-top: 1px solid var(--edge); }
+  .heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .22rem .75rem; }
+  .heading strong,.totals strong { font-variant-numeric: tabular-nums; }
+  .bar { margin: .34rem 0 .24rem; height: .8rem; background: #101c29; overflow: hidden; display: flex; border-radius: .17rem; }
+  .bar i { display: block; height: 100%; }
+  .totals { display: flex; flex-wrap: wrap; gap: .15rem .85rem; font-size: .9rem; color: var(--soft); }
+  .totals .a strong { color: var(--shared); }
+  .totals .b strong { color: var(--outside); }
+  .compare { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap: .65rem; margin: .74rem 0 1rem; }
+  .compare div { border-top: 1px solid var(--edge); padding-top: .42rem; }
+  dt { color: var(--soft); }
+  dd { margin: .23rem 0 0; color: var(--shared); font: 1.32rem ui-monospace,monospace; }
+  .trace { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13.5rem),1fr)); gap: .58rem; margin: .68rem 0; }
+  .trace article { padding: .56rem .68rem; background: var(--panel); border: 1px solid var(--edge); border-radius: .28rem; }
+  .trace p { margin: .24rem 0; }
+  details { border-top: 1px solid var(--edge); padding-top: .65rem; margin: .85rem 0; }
+  summary { color: var(--shared); cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <a href="rh_source_build.html">Back to where the Lean build grows</a>
+  <h1>How much of the archive do the literature proofs reach?</h1>
+  <p class="intro">Start with the proofs behind 152 rows of the archive’s literature table. Follow their Lean imports and count each source file once. Compare those files with the imports needed by four places in the archive.</p>
+
+  <div class="explorer" aria-label="Overlap of archive source imports">
+    <div class="tools">
+      <div class="units" role="group" aria-label="Count by">
+        <button type="button" data-unit="files" aria-pressed="true">Lean files</button>
+        <button type="button" data-unit="lines" aria-pressed="false">Source lines</button>
+      </div>
+      <span id="scale" class="caption"></span>
+    </div>
+    <div class="legend"><span><i class="key shared"></i>Shared with the literature proofs</span> <span><i class="key outside"></i>Other imports of this entry</span></div>
+    <div id="routes" aria-live="polite"></div>
+    <p class="caption">Every bar uses the same scale, set by the imports of <code>Main.lean</code>. Each bar includes its own entry files.</p>
+  </div>
+
+  <h2>Why the whole table barely changes</h2>
+  <p>A row can point to a wrapper that imports many results. Following the theorem into its proof can shrink that row’s imports by thousands. Pooling every row changes the answer much less, because other rows still reach nearly all of the files.</p>
+  <dl class="compare">
+    <div><dt>With table wrappers</dt><dd id="wrapped"></dd></div>
+    <div><dt>Following the proofs</dt><dd id="followed"></dd></div>
+    <div><dt>Drop in the union</dt><dd id="drop"></dd></div>
+  </dl>
+  <p>The budget producer’s imports contain all but four of the 72,696 files reached from the literature proofs. The family bundle reaches a smaller portion of that set. Import paths tell you what the modules load. A declaration’s proof term tells you which results that proof uses.</p>
+
+  <details>
+    <summary>Where these counts start</summary>
+    <p>The 155 named literature rows include a <code>True</code> placeholder and two Hecke rows that take the archive’s package of assumed statements as input. The bars use the other 152 rows. The roots for each row are the files of the named results after following their wrappers. Mathlib and Lean’s standard libraries are excluded. Source lines count physical lines, including comments and blanks.</p>
+    <p>The conditional route starts from <code>CritLine</code>, <code>TopPlug</code> and both the statement and compiled proof of Green’s classification. The remaining inputs start from <code>VwinOfRow</code> for the cohomology budget and <code>SiegelEisensteinSecondTermHypotheses</code> for the family bundle. The full entry starts from <code>Main.lean</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/tree/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src">Pinned archive source</a>.</p>
+    <p>The local checker takes the archive’s <code>extracted/lean/src</code> and the repository’s <code>crew_visuals/rh_published_scan2.json</code>. It walks the import headers from each group of roots and counts the actual sets. <a href="../tools/rh_literature_boundary.py">Import overlap replay</a>.</p>
+  </details>
+
+  <h2>Now follow the compiled declarations</h2>
+  <p>Begin at the conditional RH declaration and follow the names in its type and proof, then follow what those names use. At a compiled literature theorem, try leaving its proof closed while still reading its type. In this build, the conditional route stops at two such theorems, Green’s classification and Hasse’s norm theorem for quadratic extensions. The smaller Green bridge stops at Green’s classification.</p>
+  <div class="trace" aria-label="Full counts and counts with selected proof bodies closed">
+    <article><h3>Conditional RH</h3><p>97,299 → 96,325 declarations</p><p>5,868 → 5,623 modules</p></article>
+    <article><h3>Green bridge</h3><p>2,449 → 90 declarations</p><p>280 → 10 modules</p></article>
+  </div>
+  <p>Each declaration and each defining module counts once. Closing one proof removes only the declarations reached solely through that proof. The bridge shrinks sharply on its own, while the conditional route retains most of its trace.</p>
+  <details>
+    <summary>Which theorems can be left closed?</summary>
+    <p>The compiled four-root build contains nine eligible theorem constants. Their literal types are constants directly under <code>GlobalTheory.Published</code>, and Lean reports only standard axioms. The trace still visits their statement types, follows used definitions, and retains the ownership of constructors and recursors. Its totals include archive declarations and defining modules. <a href="../tools/rh_literature_declarations.lean">Compiled declaration replay</a>.</p>
+  </details>
+</main>
+<script>
+(() => {
+  const data = {
+    table: {"files":72713,"lines":8364652}, followed: {"files":72696,"lines":8364225},
+    removed: {"files":17,"lines":427}, added: {"files":0,"lines":0},
+    routes: {
+      conditional: {"within":{"files":15521,"lines":2799835},"outside":{"files":1776,"lines":196892}},
+      budget: {"within":{"files":72692,"lines":8364125},"outside":{"files":84912,"lines":7723199}},
+      family: {"within":{"files":50399,"lines":6783095},"outside":{"files":61986,"lines":5598503}},
+      main: {"within":{"files":72696,"lines":8364225},"outside":{"files":102491,"lines":9009990}}
+    }
+  };
+  const entries = {
+    conditional: 'Conditional two-input route',
+    budget: 'Cohomology budget producer',
+    family: 'Family bundle producer',
+    main: 'Full archive entry'
+  };
+  const get = id => document.getElementById(id);
+  const choices = [...document.querySelectorAll('[data-unit]')];
+  const format = new Intl.NumberFormat('en-US');
+  const fmt = n => format.format(n);
+
+  function render(unit) {
+    const main = data.routes.main;
+    const max = main.within[unit] + main.outside[unit];
+    const label = unit === 'files' ? 'Lean files' : 'source lines';
+    get('scale').textContent = fmt(max) + ' ' + label + ' at full width';
+    get('wrapped').textContent = fmt(data.table[unit]);
+    get('followed').textContent = fmt(data.followed[unit]);
+    get('drop').textContent = fmt(data.removed[unit] - data.added[unit]);
+    get('routes').innerHTML = Object.entries(entries).map(([key, title]) => {
+      const row = data.routes[key];
+      const a = row.within[unit], b = row.outside[unit], total = a + b;
+      const share = (100 * a / total).toFixed(1);
+      return '<article class="route" id="route-'+key+'"><div class="heading"><h3>'+title+
+        '</h3><strong>'+fmt(total)+' '+label+'</strong></div>'+
+        '<div class="bar" aria-hidden="true"><i class="shared" style="width:'+(100*a/max)+
+        '%"></i><i class="outside" style="width:'+(100*b/max)+'%"></i></div>'+
+        '<div class="totals"><span class="a"><strong>'+fmt(a)+'</strong> shared ('+share+
+        '%)</span> <span class="b"><strong>'+fmt(b)+'</strong> other</span></div></article>';
+    }).join('');
+    for (const button of choices) button.setAttribute('aria-pressed',String(button.dataset.unit === unit));
+  }
+  for (const button of choices) button.addEventListener('click',() => render(button.dataset.unit));
+  render('files');
+})();
+</script>
+</body>
+</html>

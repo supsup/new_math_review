@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class Numbers Band</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e;
+    --red: #ff6b81; --cell: #1c2140; --violet: #b49cff; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 14px 16px 28px; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  h2 { font-size: 18px; font-weight: normal; color: var(--ink); margin: 22px 0 6px; }
+  p, li { font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  b { color: var(--ink); font-weight: normal; } .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); } .violet { color: var(--violet); }
+  a { color: var(--teal); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  label { font-size: 14px; color: var(--dim); }
+  input { width: 9.5em; max-width: 100%; background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 14px monospace; }
+  button { background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px; font: 13px Georgia, serif; cursor: pointer; }
+  .chips span { display: inline-block; font: 12.5px monospace; padding: 2px 6px; margin: 2px; border-radius: 4px; background: var(--cell); color: var(--teal); cursor: pointer; }
+  .verdict { font-size: 15.5px; color: var(--accent); margin: 10px 0 4px; min-height: 22px; line-height: 1.45; }
+  .mono { font: 13px monospace; color: var(--ink); overflow-wrap: anywhere; }
+  svg { width: 100%; height: auto; display: block; background: var(--cell); border-radius: 6px; }
+  .key span { display: inline-block; margin-right: 14px; font-size: 13px; color: var(--dim); }
+  .key i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; }
+  details { margin-top: 10px; } summary { cursor: pointer; color: var(--ink); font-size: 14.5px; }
+  table.t { border-collapse: collapse; margin: 6px 0; font: 13px monospace; }
+  table.t td, table.t th { border: 1px solid var(--line); padding: 3px 7px; text-align: right; color: var(--ink); font-weight: normal; }
+  table.t th { color: var(--dim); }
+  .scroll { overflow-x: auto; max-width: 100%; }
+  #check { font-size: 13px; }
+  #err { display: none; margin: 12px 0; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../round_two.html">Back to the index</a> · <a href="euler_convenient_numbers.html">Euler's convenient numbers</a></p>
+  <h1>How big can a class number be?</h1>
+  <p>For each imaginary quadratic field there is a whole number, its <b>class number</b> h, that measures how far its arithmetic is from having unique factorization. Dirichlet found that h is tied to a value of an L-function: for the field of discriminant −d (with d &gt; 4), <b>h = √d · L(1, χ) / π</b>, where χ is the field's character. So the size of h is a question about the size of L(1, χ). If a generalized Riemann hypothesis holds, Littlewood showed in 1928 that L(1, χ) stays in a narrow band around 1, growing or shrinking no faster than log log d. The announced proof of the Riemann Hypothesis ends with that hypothesis.</p>
+
+  <h2>1 · Every field up to four million</h2>
+  <p>Each <span class="teal">teal bar</span> spans the smallest and largest L(1, χ) among the fundamental discriminants in a narrow range of d; the <span class="gold">gold dots</span> are the record holders, each larger (or smaller) than every L(1, χ) before it. There are 1,215,854 fields here, every fundamental discriminant down to −4,000,000. The horizontal scale is log d, running on to 10¹² to show where the proven curves begin.</p>
+  <svg id="plot" viewBox="0 0 860 380" role="img" aria-label="L(1, chi) against d with Littlewood's band"></svg>
+  <div class="key"><span><i style="background:#ff6b81"></i>Littlewood's band, (2 + o(1))·e^γ·log log d and its lower twin</span><span><i style="background:#b49cff"></i>where the extremes are expected to lie</span><span><i style="background:#f2c14e"></i>explicit bounds, valid from 10¹⁰</span></div>
+  <p>Read the curves with care. Littlewood's two curves carry an o(1): they say what happens as d grows without end, and at these sizes they are shapes, not fences. The smallest value found, 0.1988 at d = 991,027, is even below the conjectured eventual floor at that size, 0.257; it is above Littlewood's lower shape, 0.176. The largest, 6.350 at d = 2,155,919, is near the conjectured eventual ceiling, 6.53, and far below Littlewood's 9.55, which carries the factor of 2 still at issue. Only the gold curves, from 10¹⁰ on, are honest inequalities, and they are conditional.</p>
+
+  <h2>2 · Look up a field</h2>
+  <div class="row"><label for="dd">d</label><input id="dd" type="number" value="2155919" min="3" max="20000000"><button id="go">Count the classes</button></div>
+  <div class="row chips" id="presets"><span data-d="163">163</span><span data-d="23">23</span><span data-d="5711">5,711</span><span data-d="991027">991,027</span><span data-d="2155919">2,155,919</span><span data-d="12">12</span></div>
+  <p class="verdict" id="v" role="status"></p>
+
+  <h2>3 · The same primes twice</h2>
+  <p>The fields with the largest L(1, χ) are, again and again, the primes p that make you wait longest for a number that is not a square modulo p (the second wait on <a href="../how_long_to_wait.html">How long must you wait?</a>). Of the 13 primes below four million that set a record for that wait, <b>11</b> also set a record here: 3, 7, 23, 71, 311, 479, 1559, 5711, 18191, 31391 and 366791. The reason is reciprocity. For a prime p ≡ 3 mod 4 and an odd prime q, the field's character at q is (−p/q) = (q/p): +1 exactly when q is a square modulo p. And 2 is a square modulo p exactly when p ≡ 7 mod 8, which is when the character at 2 is +1 too. So every prime before the first non-square gets the value +1, and those primes alone push L(1, χ) up by about e^γ times the logarithm of the wait. The two exceptions have honest reasons: 3,818,929 is 1 mod 4, so its field has discriminant −4·3,818,929, outside this range; and 10,559 waits long but is beaten by a smaller field. The record before it is already held by d = 10,391, with L(1, χ) = 4.7153 against 10,559's 4.6777. Through the prime 19 the Euler product of 10,559 is ahead, 5.847 to 5.262; but its character is −1 at all six primes from 23 to 43, and by 43 the order has flipped, 4.874 to 5.515. (Exact labels from Marlow's replay.)</p>
+
+  <h2>4 · What is proved, and on what hypothesis</h2>
+  <ol>
+    <li><b>Littlewood, 1928,</b> as Granville and Soundararajan state it: on the generalized Riemann hypothesis, (½ + o(1))·ζ(2)/(e^γ log log d) ≤ L(1, χ_d) ≤ (2 + o(1))·e^γ log log d, for the real primitive character χ_d of a fundamental discriminant d. Still on that hypothesis, both sides are attained to within a factor of 2 infinitely often; "only a factor of 2 remains at issue". The lower attainment was later proved without any hypothesis by Chowla.</li>
+    <li><b>Explicit form:</b> Lamzouri, Li and Soundararajan (Theorem 1.5) prove, on the same hypothesis, for every primitive character χ to a modulus q ≥ 10¹⁰: |L(1, χ)| ≤ 2e^γ(log log q − log 2 + ½ + 1/log log q), and 1/|L(1, χ)| ≤ (12e^γ/π²)(log log q − log 2 + ½ + 1/log log q + 14 log log q / log q). Their Corollary 1.3 turns this into bounds for h(−q). These are the gold curves.</li>
+    <li><b>The archive.</b> The hypothesis these use is that L(s, χ) has no zero with Re s &gt; ½. The announced proof's last file states exactly that for every Dirichlet character (the statement <span class="mono">DirichletLNonvanishingRightOfHalf</span>, its theorem <span class="mono">LFunction_ne_zero_of_half_lt_re</span>). So if that proof stands, the gold curves are theorems for every field with d ≥ 10¹⁰. We have not checked that part of the archive; what we compiled is the last stretch, from two stated inputs.</li>
+    <li><b>Our data</b> is an exact count, not an estimate: every reduced form a·x² + b·xy + c·y² with b² − 4ac = −d, for every d up to 4,000,000, in one sweep; at a fundamental discriminant every form is primitive, so the count is h. Checked independently against Dirichlet's sum h = Σ χ(a) / (2 − χ(2)) over 0 &lt; a &lt; d/2 at 1,566 discriminants including both record holders, with no difference; and the discriminants with h = 1 come out as exactly the nine of Heegner, Baker and Stark.</li>
+  </ol>
+  <details><summary>Sources, and what we read</summary>
+    <p>Read: A. Granville and K. Soundararajan, "The distribution of values of L(1, χ_d)", <a href="https://arxiv.org/abs/math/0206031">arXiv math/0206031</a>, Introduction, equation (1.1) and the paragraph after it, for Littlewood's bounds, the factor of 2 and the conjectured extremes e^γ(log log d + log log log d) and ζ(2)/(e^γ(log log d + log log log d)) of Montgomery and Vaughan. Y. Lamzouri, X. Li and K. Soundararajan, "Conditional bounds for the least quadratic non-residue and related problems", <a href="https://arxiv.org/abs/1309.3595">arXiv 1309.3595</a>, Theorem 1.5 and Corollary 1.3. Not read: Littlewood's 1928 paper itself; his bounds are taken from the Granville–Soundararajan statement.</p>
+    <p>The replay: <a href="../tools/class_number_sweep.c">tools/class_number_sweep.c</a> writes the data embedded in this page; <a href="../tools/check_class_numbers_band.py">tools/check_class_numbers_band.py</a> rebuilds it, compares it with the page byte for byte, and checks a random sample against Dirichlet's sum.</p>
+  </details>
+  <p id="check"></p>
+  <div id="err"></div>
+</main>
+<script id="band" type="application/json">{"D":4000000,"records":[["max",3,1],["min",3,1],["max",4,1],["max",7,1],["max",15,2],["max",23,3],["max",39,4],["min",43,1],["max",47,5],["min",67,1],["max",71,7],["max",119,10],["min",163,1],["max",191,13],["max",215,14],["max",239,15],["max",311,19],["max",479,25],["max",671,30],["max",959,36],["max",1151,41],["max",1319,45],["max",1511,49],["max",1559,51],["max",2351,63],["max",2999,73],["max",3071,76],["max",5711,109],["max",6551,117],["max",8399,134],["max",10391,153],["max",13439,174],["max",13991,178],["max",14951,185],["max",15791,195],["max",18191,213],["max",31391,289],["max",38639,325],["max",45239,352],["max",63839,423],["min",85507,22],["max",88919,505],["max",95471,533],["min",111763,24],["max",118271,606],["min",166147,29],["max",201431,808],["min",222643,33],["max",331679,1048],["max",366791,1121],["min",462883,46],["max",514751,1347],["max",628319,1495],["max",701399,1581],["max",819719,1725],["max",890951,1818],["min",958483,66],["min",991027,63],["max",1238639,2150],["max",1339439,2262],["max",2155919,2968]],"fundamental":1215854,"bins":[[3,1,3,1,1],[4,1,4,1,1],[7,1,7,1,1],[8,1,8,1,1],[11,1,11,1,1],[15,2,15,2,1],[19,1,20,2,2],[23,3,23,3,1],[24,2,24,2,1],[31,3,31,3,1],[35,2,35,2,1],[40,2,39,4,2],[43,1,47,5,2],[52,2,55,4,4],[59,3,59,3,1],[67,1,71,7,3],[88,2,87,6,5],[91,2,95,8,2],[115,2,111,8,6],[123,2,119,10,7],[148,2,143,10,6],[163,1,167,11,7],[187,2,191,13,8],[235,2,239,15,10],[267,2,263,13,13],[307,3,311,19,15],[379,3,359,19,14],[427,2,431,21,20],[499,3,479,25,18],[547,3,551,26,26],[643,3,671,30,29],[795,4,719,31,34],[907,3,839,33,41],[1027,4,959,36,43],[1227,4,1151,41,48],[1411,4,1319,45,60],[1555,4,1559,51,71],[1867,5,1679,52,81],[2203,5,2159,60,92],[2347,5,2351,63,105],[2683,5,2831,68,122],[3427,6,3071,76,148],[3763,6,3671,81,167],[4603,7,4199,88,193],[5107,7,4679,91,226],[5923,7,5711,109,256],[6307,8,6551,117,297],[7723,9,7391,120,349],[9067,9,8399,134,404],[10627,9,10391,153,467],[12643,12,12239,161,538],[13843,10,14951,185,621],[15667,11,15791,195,728],[17803,12,18191,213,835],[20563,13,21479,228,976],[26203,15,23999,242,1126],[30067,14,27431,259,1306],[34483,15,31391,289,1502],[41827,18,38639,325,1749],[48427,18,45239,352,2024],[54763,20,53231,375,2344],[58507,20,63839,423,2728],[69763,25,68591,434,3142],[85507,22,79439,468,3636],[90787,23,95471,533,4219],[111763,24,104711,555,4893],[126043,28,118271,606,5664],[136843,32,147671,667,6555],[166147,29,175031,726,7605],[191563,33,201431,808,8796],[222643,33,239279,880,10179],[253507,39,250631,892,11806],[289963,38,312311,1001,13673],[375523,47,366791,1121,15839],[431803,51,426191,1184,18340],[462883,46,493919,1299,21248],[546067,51,514751,1347,24589],[615883,57,628319,1495,28494],[729787,63,701399,1581,33014],[827227,63,890951,1818,38237],[991027,63,960671,1868,44276],[1190347,77,1139519,2027,51294],[1333963,79,1339439,2262,59395],[1446547,82,1506599,2354,68792],[1842523,97,1908191,2690,79695],[1949803,98,2155919,2968,92312],[2383747,98,2336879,3036,106920],[2804587,112,2954591,3464,123808],[3060787,118,3190151,3593,143418],[3513427,131,3842999,3881,166124]],"class_number_one":[3,4,7,8,11,19,43,67,163]}</script>
+<script>
+// MATH-BEGIN
+const G = 0.5772156649015329, EG = Math.exp(G), Z2 = Math.PI * Math.PI / 6;
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = a % b; a = b; b = t; } return a; }
+function squarefree(m) { for (let p = 2; p * p <= m; p++) if (m % (p * p) === 0) return false; return true; }
+function fundamental(d) { if (d % 4 === 3) return squarefree(d); if (d % 4 === 0) { const m = d / 4; return (m % 4 === 1 || m % 4 === 2) && squarefree(m); } return false; }
+function classNumber(d) {   // primitive reduced forms (a, b, c), b^2 - 4ac = -d, |b| <= a <= c, b >= 0 if |b| = a or a = c
+  let h = 0;
+  for (let a = 1; 3 * a * a <= d; a++)
+    for (let b = -a + 1; b <= a; b++) {
+      if ((b * b + d) % (4 * a)) continue;
+      const c = (b * b + d) / (4 * a); if (c < a || (b < 0 && a === c) || gcd(gcd(a, b), c) !== 1) continue;
+      h++;
+    }
+  return h;
+}
+const Lof = (d, h) => 2 * Math.PI * h / ((d === 3 ? 6 : d === 4 ? 4 : 2) * Math.sqrt(d));
+function jacobi(a, n) { a %= n; let r = 1; while (a) { while (a % 2 === 0) { a /= 2; if (n % 8 === 3 || n % 8 === 5) r = -r; } [a, n] = [n, a]; if (a % 4 === 3 && n % 4 === 3) r = -r; a %= n; } return n === 1 ? r : 0; }
+function kron(D, a) { let r = 1; while (a % 2 === 0) { a /= 2; if (D % 2 === 0) return 0; r *= ((D % 8 + 8) % 8 === 1 || (D % 8 + 8) % 8 === 7) ? 1 : -1; } return a > 1 ? r * jacobi(((D % a) + a) % a, a) : r; }
+function hDirichlet(d) { let s = 0; for (let a = 1; 2 * a < d; a++) s += kron(-d, a); return s / (2 - kron(-d, 2)); }   // d > 4, -d fundamental
+const l2 = d => Math.log(Math.log(d));
+const curves = {
+  litUp: d => 2 * EG * l2(d), litLo: d => Z2 / (2 * EG * l2(d)),
+  expUp: d => EG * (l2(d) + Math.log(l2(d))), expLo: d => Z2 / (EG * (l2(d) + Math.log(l2(d)))),
+  llsUp: q => 2 * EG * (l2(q) - Math.log(2) + 0.5 + 1 / l2(q)),
+  llsLo: q => 1 / ((12 * EG / (Math.PI * Math.PI)) * (l2(q) - Math.log(2) + 0.5 + 1 / l2(q) + 14 * l2(q) / Math.log(q))),
+};
+// MATH-END
+const $ = id => document.getElementById(id), fmt = x => Number(x).toLocaleString('en-US');
+const BAND = JSON.parse($('band').textContent);
+function draw() {
+  const W = 860, H = 380, L = 46, R = 10, T = 12, B = 30, x0 = Math.log10(3), x1 = 12, y0 = Math.log10(0.07), y1 = Math.log10(14);
+  const X = d => L + (W - L - R) * (Math.log10(d) - x0) / (x1 - x0), Y = v => T + (H - T - B) * (y1 - Math.log10(v)) / (y1 - y0);
+  let s = '';
+  for (const v of [0.1, 0.2, 0.5, 1, 2, 5, 10]) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="#262b52"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" fill="#9a98b4" font-size="11" text-anchor="end">' + v + '</text>';
+  const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹', sup = k => String(k).split('').map(c => SUP[+c]).join('');
+  for (const k of [1, 2, 4, 6, 8, 10, 12]) s += '<line x1="' + X(10 ** k).toFixed(1) + '" x2="' + X(10 ** k).toFixed(1) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#262b52"/><text x="' + X(10 ** k).toFixed(1) + '" y="' + (H - 10) + '" fill="#9a98b4" font-size="11" text-anchor="middle">10' + sup(k) + '</text>';
+  const path = (f, a, b, col, dash) => { let p = ''; for (let i = 0; i <= 240; i++) { const d = 10 ** (Math.log10(a) + (Math.log10(b) - Math.log10(a)) * i / 240), v = f(d); if (v > 0.06 && v < 15) p += (p ? 'L' : 'M') + X(d).toFixed(1) + ' ' + Y(v).toFixed(1); } return '<path d="' + p + '" fill="none" stroke="' + col + '" stroke-width="1.6"' + (dash ? ' stroke-dasharray="5 4"' : '') + '/>'; };
+  s += path(curves.litUp, 30, 1e12, '#ff6b81', true) + path(curves.litLo, 30, 1e12, '#ff6b81', true);
+  s += path(curves.expUp, 30, 1e12, '#b49cff', true) + path(curves.expLo, 30, 1e12, '#b49cff', true);
+  s += path(curves.llsUp, 1e10, 1e12, '#f2c14e', false) + path(curves.llsLo, 1e10, 1e12, '#f2c14e', false);
+  s += '<line x1="' + X(1e10) + '" x2="' + X(1e10) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#f2c14e" stroke-dasharray="2 4"/>';
+  for (const [dl, hl, dh, hh] of BAND.bins) s += '<line x1="' + X(dl).toFixed(1) + '" x2="' + X(dh).toFixed(1) + '" y1="' + Y(Lof(dl, hl)).toFixed(1) + '" y2="' + Y(Lof(dh, hh)).toFixed(1) + '" stroke="#4fd1c5" stroke-width="3" stroke-linecap="round"/>';
+  for (const [t, d, h] of BAND.records) s += '<circle cx="' + X(d).toFixed(1) + '" cy="' + Y(Lof(d, h)).toFixed(1) + '" r="2.6" fill="#f2c14e"><title>' + (t === 'max' ? 'new largest' : 'new smallest') + ': d = ' + d + ', h = ' + h + ', L = ' + Lof(d, h).toFixed(4) + '</title></circle>';
+  $('plot').innerHTML = s;
+}
+function look() {
+  const d = Math.floor(Number($('dd').value));
+  if (!(d >= 3 && d <= 20000000)) { $('v').textContent = 'Choose d from 3 to 20,000,000.'; return; }
+  if (!fundamental(d)) { let e = d; while (!fundamental(e)) e++; $('v').textContent = '−' + fmt(d) + ' is not a fundamental discriminant (one of a field\'s own). The next one is −' + fmt(e) + '.'; return; }
+  const h = classNumber(d), Lv = Lof(d, h);
+  let where = '';
+  if (d > 30) where = ' At this size Littlewood\'s shapes are ' + curves.litLo(d).toFixed(3) + ' and ' + curves.litUp(d).toFixed(2) + ', and the expected extremes ' + curves.expLo(d).toFixed(3) + ' and ' + curves.expUp(d).toFixed(2) + '.';
+  $('v').textContent = 'The field of discriminant −' + fmt(d) + ' has class number h = ' + fmt(h) + ', so L(1, χ) = ' + Lv.toFixed(6) + '.' + where;
+}
+function selfCheck() {
+  const fail = [];
+  for (const [t, d, h] of BAND.records.filter(r => r[1] < 60000)) if (classNumber(d) !== h) fail.push('h(−' + d + ') recount');
+  for (const [t, d, h] of BAND.records.slice(-3)) if (classNumber(d) !== h) fail.push('h(−' + d + ') recount');
+  const sample = [23, 47, 71, 119, 163, 311, 479, 1559, 5711, 10391, 18191, 31391];
+  for (const d of sample) { const a = classNumber(d), b = hDirichlet(d); if (a !== b) fail.push('Dirichlet sum differs at ' + d); }
+  const one = []; for (let d = 3; d <= 20000; d++) if (fundamental(d) && classNumber(d) === 1) one.push(d);
+  if (one.join() !== '3,4,7,8,11,19,43,67,163' || BAND.class_number_one.join() !== one.join()) fail.push('the class-number-one list');
+  let mx = -1, mn = 1e9, ok = true; for (const [t, d, h] of BAND.records) { const v = Lof(d, h); if (t === 'max') { if (!(v > mx)) ok = false; mx = v; } else { if (!(v < mn)) ok = false; mn = v; } }
+  if (!ok) fail.push('records are not monotone');
+  if (BAND.fundamental !== 1215854) fail.push('field count');
+  $('check').textContent = fail.length ? 'Self-check FAILED: ' + fail.join('; ') + '.' : 'Self-check on load: passed. The page recounted the class numbers of the record holders below 60,000 and of the last three, all agreeing with the sweep; Dirichlet\'s sum agrees with the form count at twelve fields; the fields with h = 1 below 20,000 are exactly Heegner\'s nine; and the records are monotone.';
+  if (fail.length) { $('err').style.display = 'block'; $('err').textContent = fail.join('\n'); }
+}
+$('go').addEventListener('click', look); $('dd').addEventListener('keydown', e => { if (e.key === 'Enter') look(); });
+$('presets').addEventListener('click', e => { const s = e.target.closest('span'); if (s) { $('dd').value = s.dataset.d; look(); } });
+try { draw(); look(); selfCheck(); } catch (e) { $('err').style.display = 'block'; $('err').textContent = 'Error: ' + e.message; }
+</script>
+</body>
+</html>

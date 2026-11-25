@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Artin Map</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e;
+    --red: #ff6b81; --cell: #1c2140; --violet: #b49cff; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 14px 16px 28px; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  h2 { font-size: 18px; font-weight: normal; color: var(--ink); margin: 22px 0 6px; }
+  p, li { font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  b { color: var(--ink); font-weight: normal; } .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); } .violet { color: var(--violet); }
+  a { color: var(--teal); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  label { font-size: 14px; color: var(--dim); }
+  input[type=text] { width: 7em; max-width: 100%; background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 14px monospace; }
+  button { background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 7px 11px; font: 13px Georgia, serif; cursor: pointer; }
+  .chips span { display: inline-block; font: 12.5px monospace; padding: 2px 6px; margin: 2px; border-radius: 4px; background: var(--cell); color: var(--teal); cursor: pointer; }
+  .verdict { font-size: 15px; color: var(--accent); margin: 10px 0 4px; min-height: 22px; line-height: 1.5; overflow-wrap: anywhere; }
+  .mono { font: 13px monospace; color: var(--ink); overflow-wrap: anywhere; }
+  svg { width: 100%; height: auto; display: block; background: var(--cell); border-radius: 6px; margin-bottom: 6px; }
+  #circle { max-width: 520px; margin: 0 auto 6px; }
+  .key span { display: inline-block; margin-right: 14px; font-size: 13px; color: var(--dim); }
+  .key i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; }
+  details { margin-top: 10px; } summary { cursor: pointer; color: var(--ink); font-size: 14.5px; }
+  #check { font-size: 13px; }
+  #err { display: none; margin: 12px 0; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../round_two.html">Back to the index</a> · <a href="../six_finished_theorems.html">Six finished theorems</a> (the cards on Artin reciprocity and Chebotarev)</p>
+  <h1>Where a prime sends the roots of unity</h1>
+  <p>The n-th roots of unity are the n points ζ, ζ², …, ζⁿ = 1 spaced evenly round a circle, with ζ = e<sup>2πi/n</sup>. The ones that are not roots of unity of any smaller order are the ζ<sup>a</sup> with a sharing no factor with n; there are φ(n) of them. The field they make, ℚ(ζ), has exactly φ(n) symmetries: for each such a, the symmetry σ<sub>a</sub> sends ζ to ζ<sup>a</sup>. Composing two of them multiplies the exponents mod n, so the symmetries form the group of units mod n.</p>
+  <p><b>Artin reciprocity, for this one field</b>, says which symmetry belongs to a prime p that does not divide n: its Frobenius is <b>σ<sub>p</sub>, "raise to the p-th power"</b>. Everything about how p behaves in ℚ(ζ) follows from the residue of p mod n. In particular, p breaks up into φ(n)/f primes, each of degree f, where f is the order of p mod n. The archive proves Artin reciprocity for every number field (card 12); this page is the case where everything can be computed by hand.</p>
+
+  <h2>1 · Choose n and p</h2>
+  <div class="row"><label for="nn">n =</label><input id="nn" type="text" inputmode="numeric" value="12"><label for="pp">p =</label><input id="pp" type="text" inputmode="numeric" value="5"><button id="go">Show it</button></div>
+  <div class="row chips" id="presets"><span data-n="12" data-p="13">12, 13</span><span data-n="12" data-p="5">12, 5</span><span data-n="7" data-p="2">7, 2</span><span data-n="5" data-p="2">5, 2</span><span data-n="31" data-p="2">31, 2</span><span data-n="100" data-p="7">100, 7</span><span data-n="113" data-p="3">113, 3</span><span data-n="12" data-p="3">12, 3 (ramified)</span><span data-n="27" data-p="3">27, 3 (totally)</span></div>
+  <div class="row"><label><input id="inv" type="checkbox"> draw the card's normalization (the inverse; section 3)</label></div>
+  <svg id="circle" viewBox="0 0 400 400" role="img" aria-label="the primitive n-th roots of unity on a circle, with arrows showing where Frobenius sends each one"></svg>
+  <div class="key" style="text-align:center"><span>each colour is one cycle of the arrows</span></div>
+  <p class="verdict" id="v" role="status"></p>
+  <p class="mono" id="fac"></p>
+
+  <h2>2 · Every prime gets a symmetry, and every symmetry gets its share</h2>
+  <p>Drop each prime below a million into its class mod n. Chebotarev's theorem, which for this field is Dirichlet's theorem on primes in progressions, says each of the φ(n) classes gets the same share in the long run. The archive's Chebotarev card proves the existence form: for any symmetry, a prime outside any finite list with that Frobenius. The bars show how far each class is from an even share. The <span class="gold">gold</span> bar is the class of 1, the primes that split completely. The <span class="teal">teal</span> bar is the class of your p.</p>
+  <svg id="bars" viewBox="0 0 860 260" role="img" aria-label="for each class mod n, the count of primes below a million minus an even share"></svg>
+  <p id="barnote"></p>
+
+  <h2>3 · "The inverse of a Frobenius element"</h2>
+  <p>The card states reciprocity with ideles, and in the archive's normalization a number divisible by the prime exactly once goes to <b>the inverse</b> of a Frobenius element. For ℚ(ζ), the idele that is p at the place p and 1 everywhere else goes to σ<sub>p</sub><sup>−1</sup> = σ<sub>p′</sub>, where p′ is the inverse of p mod n. That is, ζ goes to ζ<sup>p′</sup>, not to ζ<sup>p</sup>. The classical statement, with ideals, sends p to σ<sub>p</sub> itself. The two maps differ only by inverting every symmetry, a choice of convention, and nothing on this page depends on it. p and p′ have the same order mod n, so the cycles in the picture have the same lengths and p splits the same way. Tick the box above to see the arrows reversed.</p>
+  <p>The other two clauses of the card can also be seen here. If p divides n, write n = p<sup>k</sup>m with m not divisible by p. The units of the p-adic coordinate fill the inertia group, the symmetries σ<sub>a</sub> with a ≡ 1 mod m, and there are φ(p<sup>k</sup>) of them. That number is the e in the factorization: Φ<sub>n</sub> ≡ Φ<sub>m</sub><sup>e</sup> mod p, each prime above p appearing e times. And the whole p-adic coordinate fills the decomposition group, the symmetries σ<sub>a</sub> with a a power of p mod m, of size e·f. Try n = 12, p = 3 and n = 27, p = 3.</p>
+  <details><summary>Sources, and how this was computed</summary>
+    <p>The statement is the archive's, as on card 12 of <a href="../six_finished_theorems.html">Six finished theorems</a>, and <a href="../tools/rh_artin.lean">tools/rh_artin.lean</a> prints it. The cyclotomic case is classical: Dedekind and Kummer give the factorization of p in ℤ[ζ] from the factorization of the cyclotomic polynomial Φ<sub>n</sub> mod p.</p>
+    <p>The page computes Φ<sub>n</sub> by dividing xⁿ − 1 by Φ<sub>d</sub> for the proper divisors d of n. It factors Φ<sub>n</sub> mod p by distinct-degree factorization (gcd with x<sup>p<sup>d</sup></sup> − x), using exact integers throughout. The prime counts come from a sieve to 10⁶ in the browser. <a href="../tools/check_artin_map.py">tools/check_artin_map.py</a> runs this page's own arithmetic in node over a grid of n and p. It compares the factor counts with an independent count by Berlekamp's method: the number of irreducible factors is the dimension of the space of polynomials that the p-th power map fixes modulo Φ<sub>n</sub>, found by Gaussian elimination mod p. It also recounts the primes quoted in the self-check.</p>
+  </details>
+  <p id="check"></p>
+  <div id="err"></div>
+</main>
+<script>
+// MATH-BEGIN
+function gcdInt(a, b) { while (b) { const t = a % b; a = b; b = t; } return a; }
+function phi(n) { let r = n, m = n; for (let p = 2; p * p <= m; p++) if (m % p === 0) { while (m % p === 0) m /= p; r -= r / p; } if (m > 1) r -= r / m; return r; }
+function order(a, n) { let x = a % n, k = 1; while (x !== 1) { x = x * a % n; k++; if (k > n) return -1; } return k; }
+function isPrime(n) { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; }
+function modpow(b, e, m) { let r = 1n, x = BigInt(b) % BigInt(m), M = BigInt(m), E = BigInt(e); while (E > 0n) { if (E & 1n) r = r * x % M; x = x * x % M; E >>= 1n; } return Number(r); }
+function trim(a) { while (a.length && a[a.length - 1] === 0) a.pop(); return a; }
+const CYC = new Map();
+function cyclotomic(n) {           // integer coefficients, constant term first; exact division of x^n - 1
+  if (CYC.has(n)) return CYC.get(n);
+  let num = new Array(n + 1).fill(0); num[0] = -1; num[n] = 1;
+  for (let d = 1; d < n; d++) if (n % d === 0) {
+    const b = cyclotomic(d), q = new Array(num.length - b.length + 1).fill(0), r = num.slice();
+    for (let i = r.length - 1; i >= b.length - 1; i--) { const c = r[i]; q[i - b.length + 1] = c; for (let j = 0; j < b.length; j++) r[i - b.length + 1 + j] -= c * b[j]; }
+    if (r.some(c => c !== 0)) throw new Error('cyclotomic division left a remainder at n = ' + n);
+    num = q;
+  }
+  CYC.set(n, num); return num;
+}
+const md = (c, p) => ((c % p) + p) % p;
+function mulp(a, b, p) { if (!a.length || !b.length) return []; const r = new Array(a.length + b.length - 1).fill(0); for (let i = 0; i < a.length; i++) if (a[i]) for (let j = 0; j < b.length; j++) r[i + j] = (r[i + j] + a[i] * b[j]) % p; return trim(r); }
+function remp(a, b, p) { a = a.slice(); const ib = modpow(b[b.length - 1], p - 2, p); while (a.length >= b.length) { const c = a[a.length - 1] * ib % p, s = a.length - b.length; for (let i = 0; i < b.length; i++) a[s + i] = md(a[s + i] - c * b[i] % p, p); trim(a); } return a; }
+function divp(a, b, p) { a = a.slice(); const ib = modpow(b[b.length - 1], p - 2, p), q = new Array(Math.max(a.length - b.length + 1, 0)).fill(0); while (a.length >= b.length) { const c = a[a.length - 1] * ib % p, s = a.length - b.length; q[s] = c; for (let i = 0; i < b.length; i++) a[s + i] = md(a[s + i] - c * b[i] % p, p); trim(a); } if (a.length) throw new Error('inexact division mod ' + p); return trim(q); }
+function monic(a, p) { const ib = modpow(a[a.length - 1], p - 2, p); return a.map(c => c * ib % p); }
+function gcdp(a, b, p) { a = trim(a.slice()); b = trim(b.slice()); while (b.length) { const r = remp(a, b, p); a = b; b = r; } return monic(a, p); }
+function powp(a, e, f, p) { let r = [1], x = remp(a, f, p); while (e > 0) { if (e % 2) r = remp(mulp(r, x, p), f, p); x = remp(mulp(x, x, p), f, p); e = Math.floor(e / 2); } return r; }
+function ddf(f, p) {               // degrees of the irreducible factors of a squarefree monic f mod p
+  const D = f.length - 1, out = []; if (D < 1) return out;
+  const X = powp([0, 1], p, f, p), Q = [[1]];        // Q[i] = x^(i p) mod f
+  for (let i = 1; i < D; i++) Q.push(remp(mulp(Q[i - 1], X, p), f, p));
+  let g = f.slice(), h = [0, 1], d = 0;
+  while (g.length - 1 >= 2 * (d + 1)) {
+    d++; const nh = new Array(D).fill(0);           // h <- h^p mod f, by the Frobenius matrix
+    h.forEach((c, i) => { if (c) Q[i].forEach((q, j) => { nh[j] = (nh[j] + c * q) % p; }); }); h = trim(nh);
+    const t = h.slice(); while (t.length < 2) t.push(0); t[1] = md(t[1] - 1, p); trim(t);
+    const c = gcdp(g, t, p);
+    if (c.length > 1) { for (let k = 0; k < (c.length - 1) / d; k++) out.push(d); g = divp(g, c, p); }
+  }
+  if (g.length > 1) out.push(g.length - 1);
+  return out.sort((u, v) => u - v);
+}
+function powpoly(a, e, p) { let r = [1]; for (let i = 0; i < e; i++) r = mulp(r, a, p); return r; }
+function splitting(n, p) {         // {e, f, g, degrees, congruent}
+  let k = 0, m = n; while (m % p === 0) { m /= p; k++; }
+  const e = k ? phi(p ** k) : 1, fm = cyclotomic(m).map(c => md(c, p));
+  const degs = ddf(trim(fm.slice()), p);
+  let congruent = true;
+  if (k) { const lhs = trim(cyclotomic(n).map(c => md(c, p))), rhs = powpoly(trim(fm.slice()), e, p); congruent = JSON.stringify(lhs) === JSON.stringify(rhs); }
+  return { k, m, e, degs, congruent, f: m === 1 ? 1 : order(p % m, m), g: degs.length };
+}
+function sieve(N) { const s = new Uint8Array(N + 1), out = []; for (let i = 2; i <= N; i++) if (!s[i]) { out.push(i); for (let j = i * i; j <= N; j += i) s[j] = 1; } return out; }
+// MATH-END
+const $ = id => document.getElementById(id);
+const PRIMES = sieve(1000000);
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹', sup = k => String(k).split('').map(c => SUP[+c]).join(''), sub = k => String(k).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c]).join('');
+const COLORS = ['#f2c14e', '#4fd1c5', '#b49cff', '#ff6b81', '#7fd17f', '#f29e4e', '#6fa8ff', '#e07bd0'];
+function drawCircle(n, p, inverse) {
+  const units = []; for (let a = 1; a <= n; a++) if (gcdInt(a, n) === 1) units.push(a);
+  const mult = inverse ? modpow(p, phi(n) - 1, n) : p % n;
+  const cyc = new Map(); let ci = 0;
+  for (const a of units) if (!cyc.has(a)) { let x = a; do { cyc.set(x, ci); x = x * mult % n; } while (x !== a); ci++; }
+  const R = 160, C = 200, pos = a => [C + R * Math.cos(2 * Math.PI * a / n - Math.PI / 2), C + R * Math.sin(2 * Math.PI * a / n - Math.PI / 2)];
+  let s = '<circle cx="200" cy="200" r="160" fill="none" stroke="#262b52"/>';
+  s += '<defs>' + COLORS.map((c, i) => '<marker id="m' + i + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="' + c + '"/></marker>').join('') + '</defs>';
+  for (const a of units) {
+    const b = a * mult % n, col = COLORS[cyc.get(a) % COLORS.length], [x1, y1] = pos(a), [x2, y2] = pos(b);
+    if (a === b) { s += '<circle cx="' + x1.toFixed(1) + '" cy="' + y1.toFixed(1) + '" r="9" fill="none" stroke="' + col + '" stroke-width="1.4"/>'; continue; }
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, qx = C + (mx - C) * 0.55, qy = C + (my - C) * 0.55;
+    const L = Math.hypot(x2 - qx, y2 - qy), ex = x2 - (x2 - qx) / L * 6, ey = y2 - (y2 - qy) / L * 6;
+    s += '<path d="M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'Q' + qx.toFixed(1) + ' ' + qy.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1) + '" fill="none" stroke="' + col + '" stroke-width="1.3" stroke-opacity="0.85" marker-end="url(#m' + (cyc.get(a) % COLORS.length) + ')"/>';
+  }
+  for (const a of units) { const [x, y] = pos(a), col = COLORS[cyc.get(a) % COLORS.length]; s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (units.length > 60 ? 2.2 : 3.6) + '" fill="' + col + '"><title>ζ' + sup(a) + ' goes to ζ' + sup(a * mult % n) + '</title></circle>'; if (units.length <= 40) { const [tx, ty] = [C + (R + 17) * Math.cos(2 * Math.PI * a / n - Math.PI / 2), C + (R + 17) * Math.sin(2 * Math.PI * a / n - Math.PI / 2)]; s += '<text x="' + tx.toFixed(1) + '" y="' + (ty + 4).toFixed(1) + '" fill="#9a98b4" font-size="11" text-anchor="middle">' + a + '</text>'; } }
+  $('circle').innerHTML = s;
+  return { cycles: ci, mult };
+}
+function drawBars(n, p) {
+  const counts = new Map(); let total = 0;
+  for (const q of PRIMES) if (n % q !== 0) { const r = q % n; counts.set(r, (counts.get(r) || 0) + 1); total++; }
+  const units = []; for (let a = 1; a <= n; a++) if (gcdInt(a, n) === 1) units.push(a);
+  const mean = total / units.length, dev = units.map(a => (counts.get(a) || 0) - mean), M = Math.max(1, ...dev.map(Math.abs));
+  const W = 860, H = 260, L = 52, T = 14, B = 26, mid = T + (H - T - B) / 2, sc = (H - T - B) / 2 / M, bw = (W - L - 12) / units.length;
+  let s = '<line x1="' + L + '" x2="' + (W - 12) + '" y1="' + mid + '" y2="' + mid + '" stroke="#9a98b4"/>';
+  s += '<text x="' + (L - 6) + '" y="' + (T + 10) + '" fill="#9a98b4" font-size="11" text-anchor="end">+' + Math.round(M) + '</text><text x="' + (L - 6) + '" y="' + (H - B) + '" fill="#9a98b4" font-size="11" text-anchor="end">−' + Math.round(M) + '</text><text x="' + (L - 6) + '" y="' + (mid + 4) + '" fill="#9a98b4" font-size="11" text-anchor="end">0</text>';
+  units.forEach((a, i) => { const d = dev[i], h = Math.abs(d) * sc, col = a === 1 ? '#f2c14e' : (n % p !== 0 && a === p % n) ? '#4fd1c5' : '#b49cff';
+    s += '<rect x="' + (L + i * bw + bw * 0.12).toFixed(1) + '" y="' + (d >= 0 ? mid - h : mid).toFixed(1) + '" width="' + Math.max(bw * 0.76, 0.8).toFixed(1) + '" height="' + Math.max(h, 0.5).toFixed(1) + '" fill="' + col + '"><title>class ' + a + ': ' + (counts.get(a) || 0).toLocaleString('en-US') + ' primes, ' + (d >= 0 ? '+' : '') + d.toFixed(1) + ' against an even share</title></rect>';
+    if (units.length <= 24) s += '<text x="' + (L + (i + 0.5) * bw).toFixed(1) + '" y="' + (H - 8) + '" fill="#9a98b4" font-size="11" text-anchor="middle">' + a + '</text>'; });
+  $('bars').innerHTML = s;
+  const worst = Math.max(...dev.map(Math.abs));
+  $('barnote').textContent = 'Mod ' + n + ': ' + total.toLocaleString('en-US') + ' primes below 10⁶ that do not divide ' + n + ', an even share of ' + mean.toFixed(1) + ' for each of the ' + units.length + ' classes. The class of 1 has ' + (counts.get(1) || 0).toLocaleString('en-US') + '. The largest departure from an even share is ' + worst.toFixed(1) + ', or ' + (100 * worst / mean).toFixed(2) + '%.';
+}
+function show() {
+  const rn = $('nn').value.replace(/[ ,_]/g, ''), rp = $('pp').value.replace(/[ ,_]/g, '');
+  if (!/^[0-9]{1,3}$/.test(rn) || +rn < 3 || +rn > 200) { $('v').textContent = 'Choose n from 3 to 200.'; $('fac').textContent = ''; return; }
+  if (!/^[0-9]{1,7}$/.test(rp) || +rp < 2 || +rp > 1000000) { $('v').textContent = 'Choose a prime p from 2 to 1,000,000.'; $('fac').textContent = ''; return; }
+  const n = +rn, p = +rp;
+  if (!isPrime(p)) { $('v').textContent = p.toLocaleString('en-US') + ' is not prime; Frobenius belongs to primes. Try ' + (PRIMES.find(q => q > p) || 999983).toLocaleString('en-US') + '.'; $('fac').textContent = ''; return; }
+  const inverse = $('inv').checked, sp = splitting(n, p), F = phi(n);
+  drawBars(n, p);
+  if (sp.k === 0) {
+    const r = p % n, pi = modpow(p, F - 1, n), circ = drawCircle(n, p, inverse);
+    let t = p.toLocaleString('en-US') + ' ≡ ' + r + ' mod ' + n + ', so its Frobenius is σ' + sub(r) + ': ζ ↦ ζ' + sup(r) + (inverse ? ' (drawn as its inverse σ' + sub(pi) + ', the card\'s normalization)' : '') + '. ';
+    t += r === 1 ? 'That is the identity, so ' + p + ' splits completely: into ' + F + ' primes of degree 1. ' : 'Its order mod ' + n + ' is f = ' + sp.f + ', so the arrows form ' + plural(circ.cycles, 'cycle') + ' of length ' + sp.f + ', and ' + p.toLocaleString('en-US') + ' should split into φ(' + n + ')/f = ' + F + '/' + sp.f + ' = ' + (F / sp.f) + (F / sp.f === 1 ? ' prime of degree ' + sp.f + ' (it stays prime: inert). ' : ' primes of degree ' + sp.f + '. ');
+    const ok = sp.degs.length === F / sp.f && sp.degs.every(d => d === sp.f);
+    t += ok ? 'Exact check: Φ' + sub(n) + ' mod ' + p + ' factors into exactly that.' : 'EXACT CHECK FAILED: the factor degrees are ' + sp.degs.join(', ') + '.';
+    $('v').textContent = t;
+    $('fac').textContent = 'Φ' + sub(n) + ' mod ' + p + ': degree ' + F + ' = ' + (F / sp.f) + ' × ' + sp.f + '; the irreducible factors found have degrees ' + summarize(sp.degs) + '.';
+  } else {
+    drawCircle(n, 1, false);
+    let t = p + ' divides ' + n + ' = ' + p + sup(sp.k) + (sp.m > 1 ? '·' + sp.m : '') + ', so ' + p + ' ramifies. ';
+    t += (sp.m === 1 ? 'Inertia is all ' + sp.e + ' symmetries' : 'Inertia is the ' + sp.e + ' symmetries ζ ↦ ζᵃ with a ≡ 1 mod ' + sp.m) + ', so e = φ(' + p + sup(sp.k) + ') = ' + sp.e + '. ';
+    t += sp.m === 1 ? 'Here m = 1, so ' + p + ' is totally ramified: one prime, raised to the power ' + sp.e + '. ' : 'Mod ' + sp.m + ' the order of ' + p + ' is f = ' + sp.f + ', so ' + p + ' becomes ' + plural(phi(sp.m) / sp.f, 'prime') + ' of degree ' + sp.f + ', each to the power ' + sp.e + '. ';
+    t += sp.congruent ? 'Exact check: Φ' + sub(n) + ' ≡ Φ' + sub(sp.m) + sup(sp.e) + ' mod ' + p + ', and Φ' + sub(sp.m) + ' factors into ' + summarize(sp.degs) + '.' : 'EXACT CHECK FAILED: Φ' + sub(n) + ' is not Φ' + sub(sp.m) + sup(sp.e) + ' mod ' + p + '.';
+    $('v').textContent = t;
+    $('fac').textContent = 'The circle shows no Frobenius for a ramified prime; every root is drawn fixed.';
+  }
+}
+function plural(k, w) { return k + ' ' + w + (k === 1 ? '' : 's'); }
+function summarize(d) { const c = new Map(); for (const x of d) c.set(x, (c.get(x) || 0) + 1); return [...c].map(([deg, k]) => k + ' of degree ' + deg).join(', '); }
+function selfCheck() {
+  const fail = [];
+  if (PRIMES.length !== 78498) fail.push('the sieve does not count 78,498 primes below 10^6');
+  for (let n = 1; n <= 60; n++) { let prod = [1]; for (let d = 1; d <= n; d++) if (n % d === 0) { const c = cyclotomic(d), r = new Array(prod.length + c.length - 1).fill(0); prod.forEach((u, i) => c.forEach((v, j) => { r[i + j] += u * v; })); prod = r; } const want = new Array(n + 1).fill(0); want[0] = -1; want[n] = 1; if (JSON.stringify(prod) !== JSON.stringify(want) || cyclotomic(n).length - 1 !== phi(n)) { fail.push('the product of the cyclotomic polynomials for n = ' + n + ' is not x^n - 1'); break; } }
+  let cases = 0, ram = 0;
+  for (let n = 3; n <= 40; n++) for (const p of PRIMES.slice(0, 25)) {
+    const sp = splitting(n, p); cases++;
+    if (sp.k === 0) { const f = order(p % n, n); if (sp.degs.length !== phi(n) / f || sp.degs.some(d => d !== f)) fail.push('n = ' + n + ', p = ' + p + ': factor degrees ' + sp.degs.join(',') + ' against order ' + f); }
+    else { ram++; if (!sp.congruent) fail.push('n = ' + n + ', p = ' + p + ': Phi_n is not Phi_m^e mod p'); if (sp.m > 1 && (sp.degs.length !== phi(sp.m) / sp.f || sp.degs.some(d => d !== sp.f))) fail.push('n = ' + n + ', p = ' + p + ': ramified factor degrees'); }
+  }
+  const big = splitting(113, 3); if (big.degs.length !== 1 || big.degs[0] !== 112) fail.push('Phi_113 mod 3 is not irreducible of degree 112');
+  const c4 = [0, 0]; for (const q of PRIMES) if (q > 2) c4[q % 4 === 1 ? 0 : 1]++; if (c4[0] !== 39175 || c4[1] !== 39322) fail.push('the counts mod 4 are not 39,175 and 39,322');
+  $('check').textContent = fail.length ? 'Self-check FAILED: ' + fail.join('; ') + '.' : 'Self-check on load: passed. The sieve counts 78,498 primes below 10⁶; the cyclotomic polynomials multiply back to xⁿ − 1 for every n to 60; for all ' + cases + ' pairs with 3 ≤ n ≤ 40 and p among the first 25 primes, the exact factorization of Φₙ mod p has the shape the order of p predicts, and in the ' + ram + ' ramified pairs Φₙ ≡ Φₘᵉ mod p; Φ₁₁₃ stays irreducible mod 3; and the primes below 10⁶ split 39,175 to 39,322 between the classes 1 and 3 mod 4.';
+  if (fail.length) { $('err').style.display = 'block'; $('err').textContent = fail.join('\n'); }
+}
+$('go').addEventListener('click', show); for (const id of ['nn', 'pp']) $(id).addEventListener('keydown', e => { if (e.key === 'Enter') show(); });
+$('inv').addEventListener('change', show);
+$('presets').addEventListener('click', e => { const s = e.target.closest('span'); if (s) { $('nn').value = s.dataset.n; $('pp').value = s.dataset.p; show(); } });
+try { show(); selfCheck(); } catch (e) { $('err').style.display = 'block'; $('err').textContent = 'Error: ' + e.message; }
+</script>
+</body>
+</html>

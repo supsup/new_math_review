@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When a character changes the host field</title>
+<style>
+  :root { color-scheme: light; --page: #e8eee6; --paper: #faf5e8; --ink: #233733; --soft: #4f635d; --edge: #c5cfc2; --warm: #99522c; --cool: #245e53; --tint: #ecf1e8; background: var(--page); color: var(--ink); font: 100%/1.58 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,60rem); margin: auto; padding: clamp(1rem,5vw,3.9rem); background: var(--paper); }
+  a { color: var(--cool); text-underline-offset: .18em; overflow-wrap: anywhere; }
+  :focus-visible { outline: .16rem solid var(--warm); outline-offset: .14rem; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { max-width: 16ch; margin: .57rem 0 .7rem; font-size: clamp(2.75rem,8.2vw,5.8rem); line-height: .96; letter-spacing: -.052em; text-wrap: balance; }
+  h2 { font-size: 1.64rem; line-height: 1.22; margin: 1.32rem 0 .44rem; }
+  p { max-width: 68ch; }
+  .intro,.note { color: var(--soft); }
+  .explorer { padding: clamp(.66rem,2.5vw,1.25rem); margin: 1.3rem 0; border: 1px solid var(--edge); border-radius: .42rem; background: var(--tint); }
+  .controls { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13.4rem),1fr)); align-items: start; gap: .63rem .9rem; }
+  label { display: flex; flex-direction: column; gap: .24rem; min-width: 0; }
+  label span { display: flex; justify-content: space-between; gap: .35rem; }
+  select,button { min-height: 2.63rem; min-width: 0; width: 100%; color: var(--cool); background: #fffdf5; border: 1px solid #a2b6a6; border-radius: .28rem; padding: .3rem .51rem; font: inherit; }
+  button,select { cursor: pointer; }
+  input { accent-color: var(--cool); width: 100%; margin-inline: 0; }
+  output { color: var(--warm); font: 1.07rem ui-monospace,monospace; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,9rem),1fr)); gap: .43rem .72rem; margin: .88rem 0 .72rem; }
+  .metrics div { border-top: 1px solid var(--edge); padding-top: .28rem; }
+  .metrics dt { color: var(--soft); font-size: .86rem; }
+  .metrics dd { margin: .11rem 0 0; color: var(--cool); font: 1.26rem ui-monospace,monospace; }
+  .readout { margin: .55rem 0 .7rem; padding: .47rem .65rem; border-left: .22rem solid var(--warm); background: #f8f0de; }
+  .readout p { margin: .1rem 0; }
+  #stable { font-weight: 660; }
+  .tower { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); gap: .36rem; }
+  .tower button { display: grid; gap: .19rem; text-align: center; min-height: 4.3rem; line-height: 1.3; }
+  .tower button[aria-pressed=true] { color: #fff; background: var(--cool); }
+  .tower .number { font-weight: 670; font-size: 1.12rem; }
+  .caption { margin: .35rem 0 0; color: var(--soft); font-size: .88rem; }
+  .formula { font: 1.15rem/1.54 Georgia,serif; overflow-wrap: anywhere; }
+  details { margin: .9rem 0 0; border-top: 1px solid var(--edge); padding-top: .58rem; }
+  summary { color: var(--cool); font-weight: 640; cursor: pointer; }
+  @media(max-width:39rem) { .tower { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+</style>
+</head>
+<body>
+<main>
+  <a href="zeta_host_ramification.html">Back to the three conductor primes</a>
+  <h1>When a character changes the host field</h1>
+  <p class="intro">The archive uses a different host field for a general Dirichlet character. Some characters leave the field the same. Others enlarge it, but that can mean either more primes above <var>p</var> or a bigger residue field. Try the cubic character with 3 and 13.</p>
+  <section class="explorer" aria-label="Host field for a Dirichlet character">
+    <div class="controls">
+      <label for="character">Character ψ
+        <select id="character">
+          <option value="one">Modulus one</option>
+          <option value="quadratic5">Quadratic mod 5</option>
+          <option value="quartic5">Quartic mod 5</option>
+          <option value="cubic7" selected>Cubic mod 7</option>
+          <option value="odd4">Odd quadratic mod 4</option>
+          <option value="even8">Even quadratic mod 8</option>
+          <option value="product28">Odd mod 4 × cubic mod 7</option>
+        </select>
+      </label>
+      <label for="prime">Unramified prime <var>p</var>
+        <select id="prime"></select>
+      </label>
+      <label for="step"><span><span>Tower step <var>e</var></span><output id="e-out"></output></span>
+        <input id="step" type="range" min="1" max="8" value="2">
+      </label>
+    </div>
+    <dl class="metrics">
+      <div><dt>Field enlargement</dt><dd id="relative"></dd></div>
+      <div><dt>Order of ψ(<var>p</var>)</dt><dd id="order"></dd></div>
+      <div><dt>Residue degree</dt><dd id="residue"></dd></div>
+      <div><dt>Prime ideals above <var>p</var></dt><dd id="count"></dd></div>
+    </dl>
+    <div class="readout" role="status" aria-atomic="true">
+      <p id="stable"></p>
+      <p id="reason"></p>
+    </div>
+    <div class="tower" id="tower" aria-label="Prime counts by tower step"></div>
+    <p class="caption">Each tile shows the number of primes above <var>p</var> at that step. Tap a tile to select it. The two fixed conductor primes are 11 and 263.</p>
+  </section>
+
+  <h2>Two different orders matter</h2>
+  <p>The character adds a cyclic quotient of the cyclotomic Galois group. Its size on the part that still fixes the old host field gives the degree of the enlargement. Its order on the one element corresponding to <var>p</var> gives the extra residue-field condition at that prime.</p>
+  <p>For the cubic character modulo 7, the field is three times as large. At 3, the character value has order three, so that factor of three goes into the residue degree. At 13, its value is one, so the factor of three goes into the number of primes instead. In both examples the real tower has the same local degree at each step.</p>
+  <p>The even quadratic character modulo 8 gives a different example. Its quadratic field is already in the real tower, so there is no enlargement. The odd quadratic character modulo 4 adds i and doubles the field.</p>
+
+  <details>
+    <summary>Where the enlargement formula comes from</summary>
+    <p>Write the conductor of ψ as 2<sup><var>a</var></sup><var>m</var>, where <var>m</var> is odd. By the Chinese remainder theorem, ψ splits into ψ₂ and ψ<sub><var>m</var></sub>. Assume that 2<sup><var>a</var></sup> divides the tower modulus and that <var>m</var> is coprime to the two odd conductor primes. Automorphisms fixing the modulus-one host field have dyadic coordinate ±1 and arbitrary coordinate modulo <var>m</var>, independently of the two quadratic tests. Adding ψ = 1 therefore cuts that group by a factor <span class="formula"><var>h</var> = lcm(ord ψ₂(−1), |im ψ<sub><var>m</var></sub>|)</span>. This is the enlargement in the chart. For a fixed character, those divisibility and coprimality conditions hold in sufficiently large windows. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5ef61846c045c70c51ee05824f910d50cc/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ExistsPageN.lean#L19">Archive’s <code>IsChiField</code></a>.</p>
+  </details>
+  <details>
+    <summary>Why the count settles down</summary>
+    <p>At an unramified prime, Frobenius acts by raising roots of unity to the <var>p</var>th power. On the host field it returns to the identity once all four conditions are met. Thus the residue degree is the least common multiple of the real-tower degree, the order of ψ(<var>p</var>), and the two quadratic sign orders. The last two are at most two. <a href="https://www.maths.tcd.ie/~mascotn/teaching/2018/345/Poly.pdf#page=78">Cyclotomic Frobenius</a>.</p>
+    <p>Let <var>v</var> be the larger of the two valuations of <var>p</var>−1 and <var>p</var>+1 at 2. For large <var>e</var>, the real-tower degree is 2<sup><var>e</var>+2−<var>v</var></sup>. It eventually absorbs the power of two in every other order. If <var>t</var> is the odd part of the order of ψ(<var>p</var>), the residue degree is then 2<sup><var>e</var>+2−<var>v</var></sup><var>t</var>. Divide the field degree 2<sup><var>e</var>+2</sup><var>h</var> by that degree to get exactly <span class="formula">2<sup><var>v</var></sup><var>h</var>/<var>t</var></span> primes. The replay enumerates actual finite Galois quotient images and checks their element orders. <a href="../tools/check_zeta_host_characters.py">Exact quotient replay</a>.</p>
+  </details>
+  <p class="note">The quadratic character modulo 5 also appears in the Farey experiment, where it weights fractions by their denominators. <a href="farey_harmonics.html">What the Farey circle adds up to</a>.</p>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id);
+  const character=get('character'), prime=get('prime'), step=get('step'), tower=get('tower');
+  const format=new Intl.NumberFormat('en-US');
+  const q=11,d=263,primes=[3,5,7,13,17,19,31,41,73,97];
+  const unit=[0], mod4=[null,0,null,1], mod8=[null,0,null,1,null,1,null,0];
+  const quad5=[null,0,1,1,0], quartic5=[null,0,1,3,2], cubic7=[null,0,2,1,1,2,0];
+  const profiles={
+    one:{left:unit,leftOrder:1,right:unit,rightOrder:1},
+    quadratic5:{left:unit,leftOrder:1,right:quad5,rightOrder:2},
+    quartic5:{left:unit,leftOrder:1,right:quartic5,rightOrder:4},
+    cubic7:{left:unit,leftOrder:1,right:cubic7,rightOrder:3},
+    odd4:{left:mod4,leftOrder:2,right:unit,rightOrder:1},
+    even8:{left:mod8,leftOrder:2,right:unit,rightOrder:1},
+    product28:{left:mod4,leftOrder:2,right:cubic7,rightOrder:3}
+  };
+  function gcd(a,b){while(b)[a,b]=[b,a%b];return a;}
+  function lcm(a,b){return a*b/gcd(a,b);}
+  function v2(n){let v=0;while(n%2===0){n/=2;v++;}return v;}
+  function squareAt(p,r){for(let i=1;i<r;i++)if(i*i%r===p%r)return true;return false;}
+
+  function rebuildPrimes(preferred=Number(prime.value)) {
+    const {right}=profiles[character.value];
+    prime.replaceChildren();
+    for(const p of primes){
+      if(right[p%right.length]===null)continue;
+      const option=document.createElement('option');
+      option.textContent=p;
+      option.value=p;
+      prime.append(option);
+    }
+    prime.value=[...prime.options].some(o=>Number(o.value)===preferred)?preferred:13;
+    render();
+  }
+
+  function resultAt(p,e,profile){
+    const {left,leftOrder,right,rightOrder}=profile;
+    const roots=lcm(leftOrder,rightOrder);
+    const exponent=(roots/leftOrder)*left[p%left.length]+(roots/rightOrder)*right[p%right.length];
+    const order=roots/gcd(roots,exponent);
+    const relative=lcm(left.at(-1)===0?1:2,rightOrder);
+    const v=Math.max(v2(p-1),v2(p+1)), towerDegree=2**Math.max(0,e+2-v);
+    const signOrder=squareAt(p,q)&&squareAt(p,d)?1:2;
+    const residue=lcm(lcm(towerDegree,order),signOrder);
+    const count=2**(e+2)*relative/residue;
+    const oddPart=order/2**v2(order), stableCount=2**v*relative/oddPart;
+    const stableAt=Math.max(1,v-2+Math.max(v2(signOrder),v2(order)));
+    return {order,relative,residue,count,towerDegree,oddPart,stableCount,stableAt};
+  }
+
+  function render(){
+    const p=Number(prime.value),e=Number(step.value),profile=profiles[character.value];
+    const r=resultAt(p,e,profile);
+    get('e-out').value=e;
+    for(const key of ['relative','order','residue','count']) get(key).textContent=format.format(r[key]);
+    get('stable').textContent='From step '+r.stableAt+', the count stays at '+format.format(r.stableCount)+'.';
+    get('reason').textContent='The real tower contributes residue degree '+format.format(r.towerDegree)+
+      '. Once it absorbs the powers of two, the character still contributes its odd factor '+r.oddPart+'.';
+    for(const button of tower.children){
+      const t=Number(button.dataset.step), value=resultAt(p,t,profile).count;
+      button.querySelector('.number').textContent=format.format(value);
+      button.setAttribute('aria-pressed',String(t===e));
+      button.setAttribute('aria-label','Step '+t+', '+format.format(value)+' prime ideals');
+    }
+  }
+
+  for(let e=1;e<=8;e++){
+    const button=document.createElement('button');
+    button.type='button';
+    button.dataset.step=e;
+    const title=document.createElement('span'),number=document.createElement('span');
+    title.textContent='Step '+e;
+    number.className='number';
+    button.append(title,number);
+    button.addEventListener('click',()=>{step.value=e;render();});
+    tower.append(button);
+  }
+  character.addEventListener('change',()=>rebuildPrimes());
+  prime.addEventListener('change',render);
+  step.addEventListener('input',render);
+  rebuildPrimes(3);
+})();
+</script>
+</body>
+</html>

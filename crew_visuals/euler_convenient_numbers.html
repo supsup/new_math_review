@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Euler's Convenient Numbers</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e;
+    --red: #ff6b81; --cell: #1c2140; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 14px 16px 28px; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  h2 { font-size: 18px; font-weight: normal; color: var(--ink); margin: 22px 0 6px; }
+  p, li { font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  b { color: var(--ink); font-weight: normal; } .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  a { color: var(--teal); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  label { font-size: 14px; color: var(--dim); }
+  input { width: 9.5em; max-width: 100%; background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 8px; font: 14px monospace; }
+  button { background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 11px; font: 13px Georgia, serif; cursor: pointer; }
+  .verdict { font-size: 15.5px; color: var(--accent); margin: 10px 0 4px; min-height: 22px; line-height: 1.45; }
+  .mono { font: 13px monospace; color: var(--ink); overflow-wrap: anywhere; }
+  table.t { border-collapse: collapse; margin: 6px 0; font: 13px monospace; }
+  table.t td, table.t th { border: 1px solid var(--line); padding: 3px 7px; text-align: left; color: var(--ink); font-weight: normal; }
+  table.t th { color: var(--dim); }
+  .scroll { overflow-x: auto; max-width: 100%; }
+  .chips span { display: inline-block; font: 12.5px monospace; padding: 2px 6px; margin: 2px; border-radius: 4px; background: var(--cell); color: var(--teal); cursor: pointer; }
+  svg { width: 100%; height: auto; display: block; background: var(--cell); border-radius: 6px; }
+  details { margin-top: 10px; } summary { cursor: pointer; color: var(--ink); font-size: 14.5px; }
+  ol li { margin: 4px 0; }
+  #check { font-size: 13px; }
+  #err { display: none; margin: 12px 0; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../round_two.html">Back to the index</a></p>
+  <h1>Euler's sixty-five convenient numbers</h1>
+  <p>In 1778 Euler found a way to prove that a large number is prime by writing it as <b>x² + n·y²</b>. It works only for certain n, which he called <i>numeri idonei</i>, convenient numbers. He found 65 of them, the largest being 1848, and none beyond. Whether there are more has been open ever since. In 1973 Weinberger showed that there are at most two more, and none at all if certain L-functions have no zero just to the left of 1. The announced proof of the Riemann Hypothesis ends with a statement that contains this. So if that proof stands, Euler's list is complete.</p>
+
+  <h2>1 · Euler's test</h2>
+  <p>Take a convenient n and an odd m with no factor in common with n. List the ways to write m = x² + n·y² with x, y ≥ 0. If there is exactly one, and in it x and y have no common factor, then m is prime. For other n the same test can be fooled.</p>
+  <div class="row">
+    <label for="n1">n</label><input id="n1" type="number" value="1848" min="1" max="100000">
+    <label for="m1">m</label><input id="m1" type="number" value="18518809" min="1" max="1000000000000">
+    <button id="run1">Test</button>
+  </div>
+  <div class="row chips" id="presets1">
+    <span data-n="1848" data-m="18518809">Euler's 18,518,809</span>
+    <span data-n="1848" data-m="1849">n = 1848, m = 1849</span>
+    <span data-n="5" data-m="10069">n = 5, m = 10,069</span>
+    <span data-n="11" data-m="15">n = 11, m = 15</span>
+    <span data-n="14" data-m="">n = 14: find a fooling m</span>
+  </div>
+  <p class="verdict" id="v1" role="status"></p>
+  <div class="scroll"><div class="mono" id="reps1"></div></div>
+
+  <h2>2 · Why some n are convenient</h2>
+  <p>Gauss explained Euler's numbers. The expressions a·x² + 2b·xy + c·y² with ac − b² = n fall into <b>classes</b> (two are in the same class when a change of variables turns one into the other), and the classes fall into <b>genera</b>, according to the signs of a few simple characters on the numbers they take. Each class has one <i>reduced</i> member, with 2|b| ≤ a ≤ c. A number n is convenient exactly when every genus holds a single class. Then a prime is pinned to x² + n·y² by its genus alone, which is what makes Euler's test sound.</p>
+  <div class="row">
+    <label for="n2">n</label><input id="n2" type="number" value="1848" min="1" max="20000">
+    <button id="run2">Show the classes</button>
+  </div>
+  <div class="row chips" id="presets2">
+    <span data-n="1848">1848</span><span data-n="1365">1365</span><span data-n="60">60</span><span data-n="11">11</span><span data-n="14">14</span><span data-n="1849">1849</span>
+  </div>
+  <p class="verdict" id="v2" role="status"></p>
+  <div class="scroll" id="forms2"></div>
+
+  <h2>3 · Every n at once</h2>
+  <p>For each n the dot shows the number of classes divided by the number of genera. It is 1, on the bottom line, exactly at the convenient numbers.</p>
+  <div class="row"><label for="nmax">up to</label><input id="nmax" type="number" value="2000" min="20" max="4000"><button id="run3">Draw</button></div>
+  <svg id="plot" viewBox="0 0 860 260" role="img" aria-label="classes per genus against n"></svg>
+  <p class="mono" id="list3"></p>
+
+  <h2>4 · Is the list complete?</h2>
+  <ol>
+    <li><b>Euler, 1778, by hand:</b> exactly 65 convenient numbers below 10,000, the largest 1848.</li>
+    <li><b>Chowla, 1934:</b> only finitely many in all.</li>
+    <li><b>Weinberger, 1973</b> (his Theorem 1, p. 119): at most one imaginary quadratic field with discriminant below −5460 has a class group of exponent exactly 2, that is, one in which every element squares to the identity but not every element is the identity. (Exponent 1, class number one, was already settled: those are the nine fields of Heegner, Baker and Stark.) Exponent at most 2 is the same as one class per genus. He rules that one field out too, provided that no L(s, χ₋d) has a zero on the short real interval 1 − 1/(4 log d) ≤ s &lt; 1, for every d from about 2·10¹¹ on; machine computations by Lehmer and Swift cover the smaller d. Kani turns this into a count (Corollary 23): <b>at most 67</b> convenient numbers, and <b>exactly 65</b> under the hypothesis. The often repeated "at most one more" is an old slip; it is at most two (Kani, Remark 24(a)).</li>
+    <li><b>Which hypothesis.</b> Weinberger needs only that the quadratic L-functions have no real zero just to the left of 1. That is weaker than the generalized Riemann hypothesis, which is how Kani's restatement puts it. The announced proof's last file states the full hypothesis for <i>every</i> Dirichlet L-function (the statement <span class="mono">DirichletLNonvanishingRightOfHalf</span>, the archive's theorem <span class="mono">LFunction_ne_zero_of_half_lt_re</span>), which contains Weinberger's. So the list is complete <i>if that proof stands</i>. We have not checked that part of the archive: what we compiled is the last stretch, from two stated inputs.</li>
+    <li><b>Our search:</b> no convenient number between 1849 and 5,000,000, by two independent methods (below). It matters for a second route. Under the full hypothesis, a bound of Louboutin (quoted by Kani, Remark 24(b)) gives more than one class per genus for every fundamental discriminant of size at least 2·10⁷. Why 5,000,000 is enough: by Kani's Corollary 14, a convenient n above 288 is either squarefree with n ≡ 1 or 2 mod 4, or four times such a squarefree convenient number m with m ≡ 2 mod 4. Either way the squarefree number m (n itself, or n/4) has fundamental discriminant exactly −4m, and has one class per genus. So Louboutin's bound forces 4m &lt; 2·10⁷, that is m &lt; 5,000,000, where the search finds only Euler's numbers; and n = 4m is then at most 4·1848, inside Euler's own range. So that route needs no other machine computation. Weinberger's own route needs only the weaker hypothesis, but also Lehmer's and Swift's computations up to about 2·10¹¹, which we have not redone.</li>
+  </ol>
+  <details><summary>Sources, and what we did and did not read</summary>
+    <p>Read: E. Kani, "Idoneal numbers and some generalizations", Ann. Sci. Math. Québec 35 (2011), 197–227 (<a href="http://www.labmath.uqam.ca/~annales/volumes/35-2/PDF/197-227.pdf">PDF</a>): the definition after Cox p. 65, Theorem 1, Proposition 17, Theorem 22, Corollary 23 and Remark 24. Read by Marlow: P. J. Weinberger, "Exponents of the class groups of complex quadratic fields", Acta Arith. 22 (1973), 117–124 (<a href="https://doi.org/10.4064/aa-22-2-117-124">doi</a>), Theorem 1 on p. 119 with the character χ₋d defined on p. 117, from an indexed copy of the publisher's PDF (our own download of that PDF was refused). Louboutin's bound is quoted from Kani's Remark 24(b), not from Louboutin.</p>
+    <p>The archive's statement, read at the source (Statements.lean, revision 6193bb5): for every modulus N, every Dirichlet character χ mod N and every s with Re s &gt; ½, L(s, χ) ≠ 0, except at the pole s = 1 of the trivial character.</p>
+    <p>The two methods. <b>Grube's criterion</b> (Kani, Proposition 17(a)): n is convenient exactly when no reduced form a·x² + 2b·xy + c·y² with ac − b² = n has 0 &lt; 2b &lt; a &lt; c, since such a form and its mirror image are two different classes, each the other's inverse. <b>Genus count</b>: count the classes, h(−4n), directly, and compare with the number of genera, 2^(μ−1), where μ depends only on the odd primes dividing n and on n mod 8 (Cox, Proposition 3.11). The two share no code. The replay <a href="../tools/check_euler_convenient.py">tools/check_euler_convenient.py</a> runs both, and <a href="../tools/idoneal_search.c">tools/idoneal_search.c</a> runs the first to 5,000,000.</p>
+  </details>
+  <p id="check"></p>
+  <div id="err"></div>
+</main>
+<script>
+// MATH-BEGIN
+const EULER65 = [1,2,3,4,5,6,7,8,9,10,12,13,15,16,18,21,22,24,25,28,30,33,37,40,42,45,48,57,58,60,70,72,78,85,88,93,102,105,112,
+  120,130,133,165,168,177,190,210,232,240,253,273,280,312,330,345,357,385,408,462,520,760,840,1320,1365,1848];
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = a % b; a = b; b = t; } return a; }
+function isPrime(m) { if (m < 2) return false; if (m % 2 === 0) return m === 2; for (let d = 3; d * d <= m; d += 2) if (m % d === 0) return false; return true; }
+function smallestFactor(m) { if (m % 2 === 0) return 2; for (let d = 3; d * d <= m; d += 2) if (m % d === 0) return d; return m; }
+// Grube's criterion: convenient iff no primitive reduced (a, 2b, c), ac - b^2 = n, with 0 < 2b < a < c.
+function convenient(n) {
+  for (let a = 3; 3 * a * a <= 4 * n; a++)
+    for (let b = 1; 2 * b < a; b++) {
+      const m = n + b * b; if (m % a) continue;
+      const c = m / a; if (c > a && gcd(gcd(a, 2 * b), c) === 1) return false;
+    }
+  return true;
+}
+// All primitive reduced forms (a, B, c) of discriminant -4n: B even, B^2 - 4ac = -4n, |B| <= a <= c, B >= 0 if |B| = a or a = c.
+function reducedForms(n) {
+  const out = [];
+  for (let a = 1; 3 * a * a <= 4 * n; a++)
+    for (let B = (a % 2 ? -a + 1 : -a); B <= a; B += 2) {
+      const num = B * B + 4 * n; if (num % (4 * a)) continue;
+      const c = num / (4 * a); if (c < a) continue;
+      if (B < 0 && (-B === a || a === c)) continue;
+      if (gcd(gcd(a, B), c) !== 1) continue;
+      out.push([a, B, c]);
+    }
+  return out;
+}
+function oddPrimes(n) { const ps = []; let m = n; while (m % 2 === 0) m /= 2; for (let p = 3; p * p <= m; p += 2) if (m % p === 0) { ps.push(p); while (m % p === 0) m /= p; } if (m > 1) ps.push(m); return ps; }
+function genera(n) { const r = oddPrimes(n).length; const mu = n % 4 === 3 ? r : (n % 4 === 1 || n % 4 === 2) ? r + 1 : n % 8 === 4 ? r + 1 : r + 2; return 2 ** (mu - 1); }
+function legendre(a, p) { let r = 1, e = (p - 1) / 2, x = ((a % p) + p) % p, acc = 1; while (e) { if (e & 1) acc = acc * x % p; x = x * x % p; e >>= 1; } return acc === 1 ? 1 : -1; }
+// Assigned characters for D = -4n (Cox, Theorem 3.15), evaluated on a number m prime to 4n.
+function characterNames(n) {
+  const names = oddPrimes(n).map(p => '(·/' + p + ')');
+  if (n % 4 === 1 || n % 8 === 4) names.push('δ'); else if (n % 8 === 2) names.push('δε'); else if (n % 8 === 6) names.push('ε'); else if (n % 8 === 0) names.push('δ', 'ε');
+  return names;
+}
+function characters(n, m) {
+  const v = oddPrimes(n).map(p => legendre(m, p));
+  const d = (m % 4 === 1) ? 1 : -1, e = (m % 8 === 1 || m % 8 === 7) ? 1 : -1;
+  if (n % 4 === 1 || n % 8 === 4) v.push(d); else if (n % 8 === 2) v.push(d * e); else if (n % 8 === 6) v.push(e); else if (n % 8 === 0) v.push(d, e);
+  return v;
+}
+function representedPrimeTo(f, n) {   // a value of the form prime to 4n (exists for a primitive form)
+  const [a, B, c] = f;
+  for (let s = 1; s < 400; s++) for (let x = -s; x <= s; x++) for (const y of [s - Math.abs(x), -(s - Math.abs(x))]) {
+    const v = a * x * x + B * x * y + c * y * y; if (v > 0 && gcd(v, 4 * n) === 1) return v;
+  }
+  return null;
+}
+function reps(n, m) {   // all x, y >= 0 with x^2 + n y^2 = m
+  const out = [];
+  for (let y = 0; n * y * y <= m; y++) { const r = m - n * y * y, x = Math.round(Math.sqrt(r)); for (const z of [x - 1, x, x + 1]) if (z >= 0 && z * z === r) { out.push([z, y]); break; } }
+  return out;
+}
+function foolingM(n, limit) {   // smallest odd composite m prime to n with a unique, proper representation
+  for (let m = 9; m <= limit; m += 2) {
+    if (gcd(m, n) !== 1 || isPrime(m)) continue;
+    const r = reps(n, m); if (r.length === 1 && gcd(r[0][0], r[0][1]) === 1) return m;
+  }
+  return null;
+}
+// MATH-END
+const $ = id => document.getElementById(id);
+const fmt = x => Number(x).toLocaleString('en-US');
+function run1() {
+  const n = Math.floor(Number($('n1').value)), m0 = $('m1').value.trim();
+  if (!(n >= 1 && n <= 100000)) { $('v1').textContent = 'Choose n from 1 to 100,000.'; $('reps1').textContent = ''; return; }
+  const conv = convenient(n);
+  let m = m0 === '' ? null : Math.floor(Number(m0));
+  if (m === null) {
+    if (conv) { $('v1').textContent = fmt(n) + ' is convenient: there is no m that fools the test. Enter an m to try one.'; $('reps1').textContent = ''; return; }
+    m = foolingM(n, 2000000); $('m1').value = m === null ? '' : m;
+    if (m === null) { $('v1').textContent = 'No fooling m below 2,000,000 was found for n = ' + fmt(n) + '.'; $('reps1').textContent = ''; return; }
+  }
+  if (!(m >= 1 && m <= 1e12)) { $('v1').textContent = 'Choose m from 1 to 10¹².'; $('reps1').textContent = ''; return; }
+  const r = reps(n, m);
+  $('reps1').innerHTML = r.length ? r.map(([x, y]) => fmt(m) + ' = ' + fmt(x) + '² + ' + fmt(n) + '·' + fmt(y) + '²' + (gcd(x, y) === 1 ? '' : '  (x, y share a factor)')).join('<br>') : 'No way to write ' + fmt(m) + ' as x² + ' + fmt(n) + '·y².';
+  const prime = isPrime(m), check = prime ? 'Trial division agrees: ' + fmt(m) + ' is prime.' : 'Trial division: ' + fmt(m) + ' = ' + fmt(smallestFactor(m)) + ' × ' + fmt(m / smallestFactor(m)) + '.';
+  const tag = fmt(n) + (conv ? ' is one of the 65 convenient numbers.' : ' is not a convenient number.');
+  if (m % 2 === 0 || gcd(m, n) !== 1) { $('v1').textContent = tag + ' The test needs m odd and with no factor in common with n. ' + check; return; }
+  if (r.length === 1 && gcd(r[0][0], r[0][1]) === 1) {
+    $('v1').textContent = conv ? tag + ' One representation, with x and y sharing no factor, so Euler\'s test says prime. ' + check
+                               : tag + ' One representation, with x and y sharing no factor, and yet ' + (prime ? 'm happens to be prime here. ' : 'm is composite: the test is fooled. ') + check;
+  } else if (r.length === 0) { $('v1').textContent = tag + ' m is not of the form x² + ' + fmt(n) + '·y², so the test says nothing. ' + check; }
+  else { $('v1').textContent = tag + ' ' + (r.length === 1 ? 'The one representation has x and y sharing a factor' : 'There are ' + r.length + ' representations') + ', so the test does not apply. ' + check; }
+}
+function run2() {
+  const n = Math.floor(Number($('n2').value));
+  if (!(n >= 1 && n <= 20000)) { $('v2').textContent = 'Choose n from 1 to 20,000.'; $('forms2').innerHTML = ''; return; }
+  const fs = reducedForms(n), names = characterNames(n), groups = new Map();
+  for (const f of fs) { const v = representedPrimeTo(f, n), key = v === null ? '?' : characters(n, v).map(s => s > 0 ? '+' : '−').join(' '); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(f); }
+  const g = genera(n), conv = [...groups.values()].every(l => l.length === 1);
+  $('v2').textContent = fmt(n) + ': ' + fs.length + (fs.length === 1 ? ' class in ' : ' classes in ') + g + (g === 1 ? ' genus' : ' genera') + ' (' + groups.size + ' seen). ' + (conv ? 'One class in every genus, so ' + fmt(n) + ' is convenient.' : 'Some genus holds more than one class, so ' + fmt(n) + ' is not convenient.');
+  const show = f => { const [a, B, c] = f; return a + 'x² ' + (B < 0 ? '− ' : '+ ') + Math.abs(B) + 'xy + ' + c + 'y²'; };
+  let html = '<table class="t"><tr><th>genus: ' + (names.length ? names.join(', ') : '(one genus)') + '</th><th>classes (reduced forms)</th></tr>';
+  for (const [key, list] of [...groups.entries()].sort()) html += '<tr><td>' + key + '</td><td' + (list.length > 1 ? ' class="red"' : '') + '>' + list.map(show).join('<br>') + '</td></tr>';
+  $('forms2').innerHTML = html + '</table>';
+}
+function run3() {
+  const N = Math.floor(Number($('nmax').value)); if (!(N >= 20 && N <= 4000)) return;
+  const W = 860, H = 260, L = 40, Bm = 26, pts = []; let maxr = 1;
+  for (let n = 1; n <= N; n++) { const r = reducedForms(n).length / genera(n); pts.push([n, r]); if (r > maxr) maxr = r; }
+  const X = n => L + (W - L - 10) * (n - 1) / (N - 1), Y = r => H - Bm - (H - Bm - 12) * Math.log(r) / Math.log(maxr);
+  let s = '<line x1="' + L + '" y1="' + Y(1) + '" x2="' + (W - 10) + '" y2="' + Y(1) + '" stroke="#39406e"/>';
+  for (const [n, r] of pts) s += '<circle cx="' + X(n).toFixed(1) + '" cy="' + Y(r).toFixed(1) + '" r="' + (r === 1 ? 2.6 : 1.1) + '" fill="' + (r === 1 ? '#f2c14e' : '#4fd1c5') + '"><title>n = ' + n + ': ' + r + ' classes per genus</title></circle>';
+  s += '<text x="' + L + '" y="' + (H - 6) + '" fill="#9a98b4" font-size="12">1</text><text x="' + (W - 60) + '" y="' + (H - 6) + '" fill="#9a98b4" font-size="12">' + N + '</text>';
+  s += '<text x="4" y="' + (Y(1) + 4) + '" fill="#f2c14e" font-size="12">1</text><text x="4" y="16" fill="#9a98b4" font-size="12">' + maxr + '</text>';
+  $('plot').innerHTML = s;
+  const ones = pts.filter(p => p[1] === 1).map(p => p[0]);
+  $('list3').textContent = ones.length + ' convenient numbers up to ' + fmt(N) + (ones.length ? ': ' + ones.join(', ') : '') + '. Vertical scale: logarithmic.';
+}
+function selfCheck() {
+  const fail = [], byGrube = [], byGenus = [];
+  for (let n = 1; n <= 10000; n++) { if (convenient(n)) byGrube.push(n); }
+  for (let n = 1; n <= 3000; n++) { const h = reducedForms(n).length, g = genera(n); if (h % g) fail.push('h(-4n) is not a multiple of the genus count at n = ' + n); if (h === g) byGenus.push(n); }
+  if (byGrube.join() !== EULER65.join()) fail.push("Grube's criterion does not give Euler's 65 below 10,000");
+  if (byGenus.join() !== EULER65.filter(n => n <= 3000).join()) fail.push('the genus count does not give the same list below 3,000');
+  if (!isPrime(18518809) || reps(1848, 18518809).length !== 1) fail.push("Euler's example 18,518,809 = 197² + 1848·100² does not check");
+  const fooled = foolingM(11, 1000); if (fooled !== 15) fail.push('the fooling example for n = 11 is not 15');
+  for (const n of [1848, 1365, 60, 11, 14]) { const fs = reducedForms(n), keys = new Set(); for (const f of fs) { const v = representedPrimeTo(f, n); if (v === null) fail.push('no value prime to 4n for a form of ' + n); else keys.add(characters(n, v).join()); }
+    if (keys.size !== genera(n)) fail.push('the characters do not separate ' + genera(n) + ' genera at n = ' + n); }
+  $('check').textContent = fail.length ? 'Self-check FAILED: ' + fail.join('; ') + '.' : "Self-check on load: passed. Grube's criterion gives exactly Euler's 65 below 10,000; counting classes and genera independently gives the same list below 3,000, and h is always a multiple of the genus count; the assigned characters separate all the genera for five sample n; Euler's 18,518,809 and the fooling 15 for n = 11 both check.";
+  if (fail.length) { $('err').style.display = 'block'; $('err').textContent = fail.join('\n'); }
+}
+for (const [box, f] of [['presets1', s => { $('n1').value = s.dataset.n; $('m1').value = s.dataset.m; run1(); }], ['presets2', s => { $('n2').value = s.dataset.n; run2(); }]])
+  $(box).addEventListener('click', e => { const s = e.target.closest('span'); if (s) f(s); });
+$('run1').addEventListener('click', run1); $('run2').addEventListener('click', run2); $('run3').addEventListener('click', run3);
+for (const [id, f] of [['n1', run1], ['m1', run1], ['n2', run2], ['nmax', run3]]) $(id).addEventListener('keydown', e => { if (e.key === 'Enter') f(); });
+try { run1(); run2(); run3(); selfCheck(); } catch (e) { $('err').style.display = 'block'; $('err').textContent = 'Error: ' + e.message; }
+</script>
+</body>
+</html>

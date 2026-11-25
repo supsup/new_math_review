@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a polynomial stores a program’s answers</title>
+<style>
+  :root { color-scheme: dark; --page: #111a29; --panel: #1a273a; --ink: #eff4f5; --soft: #bdcad8; --edge: #496077; --cool: #83d7ce; --warm: #f0bf7c; background: var(--page); color: var(--ink); font: 100%/1.55 system-ui,sans-serif; }
+  *,*::before,*::after { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100%,65rem); margin: auto; padding: clamp(1rem,5vw,4rem); }
+  a { color: var(--cool); text-underline-offset: .18em; }
+  :focus-visible { outline: .15rem solid var(--warm); outline-offset: .16rem; }
+  h1,h2 { font-family: Georgia,serif; font-weight: 400; }
+  h1 { max-width: 15ch; font-size: clamp(2.75rem,8.25vw,5.95rem); line-height: .97; letter-spacing: -.057em; margin: .61rem 0 .82rem; text-wrap: balance; }
+  h2 { font-size: 1.7rem; line-height: 1.16; margin: 1.39rem 0 .48rem; }
+  p { max-width: 66ch; margin: .55rem 0; }
+  .muted,.readouts dt { color: var(--soft); }
+  .explorer { margin: 1.25rem 0; padding: clamp(.72rem,2.55vw,1.3rem); background: var(--panel); border: 1px solid var(--edge); border-radius: .44rem; }
+  .toolbar,.selectors { display: flex; flex-wrap: wrap; align-items: end; gap: .44rem .65rem; }
+  .toolbar { justify-content: space-between; margin-bottom: .67rem; }
+  label { display: flex; align-items: center; gap: .41rem; }
+  button,select { min-height: 2.48rem; padding: .3rem .52rem; font: inherit; border: 1px solid #607a89; border-radius: .26rem; color: var(--ink); background: #12202e; cursor: pointer; }
+  button[aria-pressed=true] { color: #192f30; background: var(--cool); border-color: var(--cool); }
+  #bits button { min-width: 2.56rem; font-family: ui-monospace,monospace; }
+  #assignment { font-size: .92rem; overflow-wrap: anywhere; }
+  .words { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,5rem),1fr)); gap: .31rem; margin: .65rem 0 .84rem; }
+  .words button { display: flex; justify-content: space-between; align-items: center; gap: .36rem; padding: .28rem .42rem; font: .88rem ui-monospace,monospace; }
+  .words button[data-live=false] { color: #aebec9; background: #182434; border-color: #40566b; }
+  .words button[aria-pressed=true] { background: var(--cool); color: #192f30; }
+  .words b { font-size: 1.03rem; }
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,8rem),1fr)); gap: .52rem; margin: .62rem 0 0; }
+  .readouts div { border-top: 1px solid var(--edge); padding-top: .32rem; min-width: 0; }
+  .readouts dt { font-size: .86rem; }
+  dd { margin: .13rem 0 0; color: var(--warm); font: 1.35rem ui-monospace,monospace; }
+  .diagram { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,14rem),1fr)); gap: .65rem; margin: .75rem 0; }
+  .diagram article { padding: .58rem .69rem; background: var(--panel); border-top: .17rem solid var(--cool); }
+  .diagram h3 { margin: 0; font: 1.17rem Georgia,serif; }
+  .diagram p { font-size: .94rem; margin: .43rem 0 .19rem; }
+  details { border-top: 1px solid var(--edge); margin: .83rem 0 0; padding-top: .63rem; }
+  summary { color: var(--cool); font-weight: 620; cursor: pointer; }
+  .formula { font: 1.11rem/1.54 Georgia,serif; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+  <a href="characteristic_two_cycle_covers.html">Back to the cycle-cover card</a>
+  <h1>How a polynomial stores a program’s answers</h1>
+  <p class="muted">Give each possible input word its own term. Put the answer for that input in the term’s coefficient. A row of zeroes and ones can then select any one answer. Both VP versus VNP papers use polynomials of this form in their proofs.</p>
+
+  <section class="explorer" aria-label="Read a program coefficient by choosing the input word">
+    <div class="toolbar">
+      <label for="width">Word length <select id="width"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+      <button id="all" type="button" aria-pressed="false">Allow both bits everywhere</button>
+    </div>
+    <div class="selectors" id="bits" role="group" aria-label="Toggle the bits in the selected word"></div>
+    <p id="assignment" class="muted"></p>
+    <div class="words" id="words" role="group" aria-label="Words and coefficients"></div>
+    <dl class="readouts" aria-live="polite">
+      <div><dt>Input word</dt><dd id="word"></dd></div>
+      <div><dt>Terms that survive</dt><dd id="live"></dd></div>
+      <div><dt>Polynomial value</dt><dd id="value"></dd></div>
+    </dl>
+  </section>
+
+  <h2>Use one pair of variables for each bit</h2>
+  <p>The word 1011 has term <span class="formula"><var>x</var>₁,₁ <var>x</var>₂,₀ <var>x</var>₃,₁ <var>x</var>₄,₁</span>. Put a 1 in the chosen slot at each position and a 0 in the other slot. The chosen product becomes 1. Every other word disagrees at some position and picks up a 0.</p>
+  <p>The toy program chooses an even number of positions whose bits are 1. For 1011 it can choose none, or choose one of the three pairs. The coefficient is 4. At each input bit, the program can keep its parity. At a 1 it can also switch parity. The coefficient counts the paths ending in the even state.</p>
+
+  <details>
+    <summary>Many coefficients can still come from a small circuit</summary>
+    <p>Keep two running polynomials, one for even parity and one for odd. Start with 1 and 0. At each position, multiply both states by <var>x</var><sub><var>i</var>,0</sub> + <var>x</var><sub><var>i</var>,1</sub> to account for keeping parity, and add <var>x</var><sub><var>i</var>,1</sub> times the opposite state to account for switching. This uses a fixed number of gates per bit. The final even polynomial still has exponentially many coefficients. <a href="../tools/check_program_coefficient.py">Exact path-count replay</a>.</p>
+  </details>
+
+  <h2>Where this idea enters the two proofs</h2>
+  <p>The OpenAI paper uses a universal machine, with a program encoded in a prefix of the word. Its coefficient counts accepting paths within a time limit. The Anthropic paper uses weighted runs of a universal automaton. The same pattern of one variable per position and symbol lets a setting of zeroes and ones read one coefficient. <a href="https://github.com/openai/math/blob/f5702854040e97fa7675c21ba37a9608f5f92dd3/preprints/VP-and-VNP-are-different-November-23-2026/build/Paper.tex#L57">OpenAI, the family in §1</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/paper.pdf#page=6">Anthropic, equation (2.2)</a>.</p>
+  <p>Both proofs ask what happens when tensor networks can send bits using less wire than a straight geometric comparison suggests. A wire here is a shared index, and the price measures how expensive it is to coordinate tables of values.</p>
+  <div class="diagram">
+    <article><h3>A geometric lower bound</h3><p>OpenAI’s route without strict shortening uses low-rank pieces across balanced cuts. Pieces that save enough rank would also save wire. Anthropic’s flat case uses Euclidean prices to turn a balanced decomposition of a complete-graph wire polynomial into a gate lower bound.</p></article>
+    <article><h3>A program that replays a circuit</h3><p>In OpenAI’s shortening case and Anthropic’s contracting case, savings make it possible to simulate a hypothetical small circuit inside the universal computation. The proof arranges a program that changes the value the circuit would give to that program’s own coefficient.</p></article>
+  </div>
+  <p>This last step needs the circuit replay to fit the available time or wire budget. The papers build that economy using the internal low-degree computations of the circuit. The geometric alternatives and the replay are the substantive lower-bound work. <a href="https://github.com/openai/math/blob/f5702854040e97fa7675c21ba37a9608f5f92dd3/preprints/VP-and-VNP-are-different-November-23-2026/build/Paper.tex#L158">OpenAI, Strategy</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/paper.pdf#page=10">Anthropic, the circuit replay and self-input in §2.4</a>.</p>
+</main>
+<script>
+(() => {
+  const get=id=>document.getElementById(id);
+  const width=get('width'), bits=get('bits'), words=get('words'), all=get('all');
+  let selected='1011', allowAll=false;
+  let bitButtons=[], tiles=[];
+  function count(word){
+    let even=1,odd=0;
+    for(const bit of word)if(bit==='1')even=odd=even+odd;
+    return even;
+  }
+  function reset(){
+    const n=Number(width.value);
+    selected=selected.slice(0,n).padEnd(n,'0');
+    bits.replaceChildren();
+    words.replaceChildren();
+    bitButtons=Array.from({length:n},(_,i)=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.addEventListener('click',()=>{
+        const flipped=selected[i]==='0'?'1':'0';
+        selected=selected.slice(0,i)+flipped+selected.slice(i+1);
+        allowAll=false;
+        render();
+      });
+      bits.append(button);
+      return button;
+    });
+    tiles=Array.from({length:2**n},(_,i)=>{
+      const word=i.toString(2).padStart(n,'0'), coefficient=count(word);
+      const button=document.createElement('button'), label=document.createElement('span'), value=document.createElement('b');
+      button.type='button';
+      button.setAttribute('aria-label','Word '+word+', coefficient '+coefficient);
+      label.textContent=word;value.textContent=coefficient;
+      button.append(label,value);
+      button.addEventListener('click',()=>{selected=word;allowAll=false;render();});
+      words.append(button);
+      return {word,coefficient,button};
+    });
+    render();
+  }
+  function render(){
+    all.setAttribute('aria-pressed',String(allowAll));
+    all.textContent=allowAll?'Select just one word':'Allow both bits everywhere';
+    get('word').textContent=allowAll?'Any word':selected;
+    let total=0,live=0;
+    for(const {word,coefficient,button} of tiles){
+      const active=word===selected&&!allowAll, survives=allowAll||active;
+      button.setAttribute('aria-pressed',String(active));
+      button.dataset.live=String(survives);
+      if(survives){total+=coefficient;live++;}
+    }
+    get('assignment').textContent='Variable pairs (0 slot, 1 slot) · '+[...selected].map(b=>
+      allowAll?'(1, 1)':b==='0'?'(1, 0)':'(0, 1)').join('  ');
+    get('value').textContent=total;
+    get('live').textContent=live;
+    for(const [i,button] of bitButtons.entries()){
+      button.textContent=selected[i];
+      button.setAttribute('aria-label','Bit '+(i+1)+' is '+selected[i]+'; toggle it');
+    }
+  }
+  width.addEventListener('change',reset);
+  all.addEventListener('click',()=>{allowAll=!allowAll;render();});
+  reset();
+})();
+</script>
+</body>
+</html>

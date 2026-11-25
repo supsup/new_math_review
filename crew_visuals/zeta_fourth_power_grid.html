@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why fourth powers are enough · Math Review</title>
+  <style>
+    :root { color-scheme: dark; background: #101a23; color: #e9edf0; font: 17px/1.6 system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 940px; padding: 26px clamp(16px, 4vw, 46px) 64px; }
+    a { color: #9de8cb; text-underline-offset: .2em; }
+    a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid #ffc787; outline-offset: 4px; }
+    nav { font-size: .87rem; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 500; line-height: 1.15; }
+    h1 { font-size: clamp(2.5rem, 7vw, 4.6rem); margin: 30px 0 14px; letter-spacing: -.035em; }
+    h2 { font-size: 1.7rem; margin: 34px 0 12px; }
+    p { margin: 0 0 15px; }
+    .intro { max-width: 660px; font-size: 1.12rem; }
+    .explorer { background: #172630; border: 1px solid #375462; border-radius: 16px; padding: clamp(12px, 3.5vw, 26px); margin: 24px 0; }
+    .controls, dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; }
+    label { display: grid; align-content: start; gap: 6px; min-width: 0; font-size: .93rem; }
+    select { font: inherit; color: inherit; background: #101a23; border: 1px solid #617783; border-radius: 6px; padding: 6px 8px; }
+    input { width: 100%; margin: 9px 0 0; accent-color: #9de8cb; }
+    output, dd { font-variant-numeric: tabular-nums; }
+    figure { margin: 20px 0 14px; }
+    canvas { display: block; width: 100%; height: 244px; border-radius: 8px; background: #101a23; }
+    figcaption, dt { color: #c2d0d6; font-size: .87rem; }
+    figcaption { margin-top: 8px; }
+    dd { margin: 0; color: #9de8cb; overflow-wrap: anywhere; }
+    .trend { margin: 12px 0 0; }
+    .formula { font-family: Georgia, serif; color: #ffcf9d; }
+    .display { margin: 10px 0 16px; padding-left: 14px; border-left: 2px solid #ae815c; }
+    details { margin: 12px 0; padding: 9px 12px; border: 1px solid #375462; border-radius: 8px; }
+    details[open] > summary { margin-bottom: 10px; }
+    summary { cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 480px) { .controls, dl { grid-template-columns: 1fr; gap: 12px; } }
+  </style>
+</head>
+<body>
+<main>
+  <nav aria-label="Related pages"><a href="zeta_prime_windows.html">The prime-sum window</a></nav>
+  <h1>Why fourth powers are enough</h1>
+  <p class="intro">The prime-window criterion asks for a bound at every real point in a long interval. If you can bound the smoothed prime sum at the fourth powers around that interval, convexity fills in the gaps at a cost of order √<var>x</var>.</p>
+
+  <section class="explorer" aria-label="Power grid interpolation">
+    <div class="controls">
+      <label for="power">Sample spacing
+        <select id="power">
+          <option value="2">Squares</option>
+          <option value="3">Cubes</option>
+          <option value="4" selected>Fourth powers</option>
+          <option value="5">Fifth powers</option>
+          <option value="6">Sixth powers</option>
+        </select>
+      </label>
+      <label for="sample"><span>Sample index <var>m</var> = <output id="sample-out" for="sample">64</output></span>
+        <input id="sample" type="range" min="0" max="12" value="6">
+      </label>
+    </div>
+    <figure>
+      <canvas id="gap" role="img" aria-label="Maximum interpolation error between two samples, measured in units of square root x"></canvas>
+      <figcaption>The green curve shows the ceiling on the error from convexity alone, in units of √<var>x</var>. Read from the left sample to the right sample.</figcaption>
+    </figure>
+    <div aria-live="polite" aria-atomic="true">
+      <dl>
+        <div><dt>Consecutive samples</dt><dd id="endpoints"></dd></div>
+        <div><dt>Error ceiling at the midpoint, divided by √<var>x</var></dt><dd id="midpoint"></dd></div>
+      </dl>
+      <p id="trend" class="trend"></p>
+    </div>
+    <noscript><p>The chart needs JavaScript. The bounds and example below can be read without it.</p></noscript>
+  </section>
+
+  <h2>What happens between samples</h2>
+  <p>Each prime power <var>n</var> contributes a nonnegative multiple of <span class="formula">max(<var>x</var>/<var>n</var> − 1, 0)</span>. Its contribution starts at zero and then rises along a straight line. Add those contributions and the linear correction to see that <span class="formula"><var>G</var>(<var>x</var>) + <var>x</var> log <var>x</var></span> is convex. A convex curve lies below the chord joining any two of its points.</p>
+  <p>Suppose the two samples <var>a</var> and <var>b</var> satisfy <span class="formula"><var>G</var>(<var>a</var>) ≤ <var>a</var><sup>η</sup></span> and <span class="formula"><var>G</var>(<var>b</var>) ≤ <var>b</var><sup>η</sup></span>, with 0 ≤ η ≤ 1. The chord for <var>x</var><sup>η</sup> lies below the curve. This leaves only the difference between the chord for <var>x</var> log <var>x</var> and its curve. Its second derivative is 1/<var>x</var>, at most 1/<var>a</var> throughout the interval. Thus</p>
+  <p class="formula display"><var>G</var>(<var>x</var>) ≤ <var>x</var><sup>η</sup> + (<var>b</var> − <var>a</var>)²/(8<var>a</var>).</p>
+  <details>
+    <summary>Derive the factor of 1/8</summary>
+    <p>The function <span class="formula"><var>x</var>²/(2<var>a</var>) − <var>x</var> log <var>x</var></span> is convex because its second derivative is <span class="formula">1/<var>a</var> − 1/<var>x</var> ≥ 0</span>. That bounds the chord error of <var>x</var> log <var>x</var> by the chord error of the quadratic. At <span class="formula"><var>x</var> = (1 − <var>t</var>)<var>a</var> + <var>tb</var></span>, this is <span class="formula">(<var>b</var> − <var>a</var>)²<var>t</var>(1 − <var>t</var>)/(2<var>a</var>)</span>. Since <span class="formula"><var>t</var>(1 − <var>t</var>) ≤ 1/4</span>, the displayed bound follows.</p>
+  </details>
+
+  <h2>Why the exponent is four</h2>
+  <p>For <span class="formula"><var>a</var> = <var>m</var>⁴</span> and <span class="formula"><var>b</var> = (<var>m</var> + 1)⁴</span>, the gap is at most 15<var>m</var>³ for <var>m</var> ≥ 1. Squaring the gap and dividing by <var>a</var> leaves a multiple of <var>m</var>², which is √<var>a</var>. In fact the bound above is at most 29√<var>x</var>.</p>
+  <p>Switch to fifth powers and move the slider right. The midpoint ceiling grows in units of √<var>x</var>. For a grid of integer <var>r</var>-th powers, its scale is <span class="formula"><var>x</var><sup>1 − 2/<var>r</var></sup></span>. The exponent is 1/2 at <var>r</var> = 4 and 3/5 at <var>r</var> = 5.</p>
+  <details>
+    <summary>Why convexity alone cannot improve that scale</summary>
+    <p>Join the sample values of <var>x</var> log <var>x</var> by line segments, then subtract <var>x</var> log <var>x</var>. The resulting example is zero at every sample and reproduces the green curve between samples. Its log-corrected function is convex because the chord slopes increase. At a midpoint the error is between <span class="formula">(<var>b</var> − <var>a</var>)²/(8<var>b</var>)</span> and <span class="formula">(<var>b</var> − <var>a</var>)²/(8<var>a</var>)</span>, by the lower and upper bounds on the second derivative. This example uses only the convexity information. The actual prime sum has additional arithmetic structure.</p>
+  </details>
+
+  <h2>The fourth-power criterion</h2>
+  <p>For each η strictly between 1/2 and 1, find arbitrarily large positive integers <var>N</var> for which <span class="formula"><var>G</var>(<var>m</var>⁴) ≤ (<var>m</var>⁴)<sup>η</sup></span> holds at the samples <var>m</var> = <var>N</var> through ⌊<var>N</var><sup>3/2</sup>⌋ + 1. The final sample reaches past the end of <span class="formula">[<var>N</var>⁴, <var>N</var>⁶]</span>.</p>
+  <p>To get the continuous criterion at an exponent θ &gt; 1/2, choose η strictly between 1/2 and θ. For large <var>x</var>, <span class="formula"><var>x</var><sup>η</sup> + 29√<var>x</var> ≤ <var>x</var><sup>θ</sup></span>. The retained Lean prime-window theorem then gives the Riemann hypothesis from these cofinal sample bounds. The classical estimate in the other direction gives the sample bounds under RH. The work left is to establish the bounds on arbitrarily late sample windows. <a href="lighter_zeta_route.txt">The corrected sum and analytic finish</a> · <a href="https://www.ams.org/mcom/1976-30-134/S0025-5718-1976-0457374-X/S0025-5718-1976-0457374-X.pdf">Schoenfeld, Theorem 10</a></p>
+  <details>
+    <summary>Replay the Lean reduction</summary>
+    <p>Lean proves convexity for the exact archived sum, the interpolation bound, and the implication from fourth-power windows to RH. The replay uses the same 31 archive modules as the continuous prime-window proof. The toy sharpness example and the classical converse are paper arguments. <a href="../tools/zeta_fourth_power_windows.lean">Lean source</a> · <a href="../tools/replay_rh_prime_bound.py">Replay script</a></p>
+    <p><code>python3 -B tools/replay_rh_prime_bound.py ARCHIVE_SRC MATHLIB_PROJECT --fourth-powers</code></p>
+  </details>
+  <details id="signed-prime-sums">
+    <summary>What if the prime weights have signs?</summary>
+    <p>The archive also uses a weighted sum of corrected prime sums for a fixed family of Dirichlet characters. Some hinges can point down. A hinge at <var>n</var> acts like a line on each side of <var>n</var>, so only hinges with <var>a</var> &lt; <var>n</var> &lt; <var>b</var> affect the error between samples.</p>
+    <p>For a single unit-weight hinge, at <span class="formula"><var>x</var> = (1 − <var>t</var>)<var>a</var> + <var>tb</var></span>, the chord gap is <span class="formula">min(<var>t</var>(<var>b</var> − <var>n</var>), (1 − <var>t</var>)(<var>n</var> − <var>a</var>))/<var>n</var></span>. It is at most <span class="formula">(<var>b</var> − <var>a</var>)/(4<var>a</var>)</span>. The absolute weight here is at most <span class="formula">log <var>b</var></span> times the sum of the fixed family weights. There are at most <span class="formula"><var>b</var> − <var>a</var></span> integer locations between consecutive fourth powers. This gives a total hinge error of order √<var>x</var> log <var>x</var>. The coefficient of the <var>x</var> log <var>x</var> correction is the sum of the fixed weights on the trivial characters. That correction costs order √<var>x</var>, and linear corrections have zero chord error.</p>
+    <p>The same exponent margin absorbs √<var>x</var> log <var>x</var>. On paper this extends the sufficient fourth-power criterion to a fixed archive family. The combined upper bound on cofinal sample windows supplies the continuous bound for <code>zeroFree_of_rpow_window</code>, which yields zero freedom to the right of 1/2 for every member. <a href="lighter_zeta_route.txt">Archive criterion and source location</a></p>
+  </details>
+</main>
+<script>
+(() => {
+  const power = document.querySelector('#power');
+  const sample = document.querySelector('#sample');
+  const canvas = document.querySelector('#gap');
+  const ctx = canvas.getContext('2d');
+  const integer = new Intl.NumberFormat('en-US');
+  const decimal = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 5 });
+
+  // Remove the linear part of (1+z) log(1+z) before taking chord differences.
+  function logBend(z) {
+    if (z >= 0.02) return (1 + z) * Math.log1p(z) - z;
+    let total = 0;
+    let term = z * z;
+    for (let n = 2; n <= 10; n += 1) {
+      total += term / (n * (n - 1));
+      term *= -z;
+    }
+    return total;
+  }
+
+  function draw(gap, left, right) {
+    if (!ctx) return;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (width === 0 || height === 0) return;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    ctx.scale(ratio, ratio);
+
+    const plot = { left: 62, right: width - 33, top: 28, bottom: height - 36 };
+    const steps = 120;
+    const points = Array.from({ length: steps + 1 }, (_, i) => gap(i / steps));
+    const max = 1.15 * Math.max(...points);
+    const y = value => plot.bottom - value / max * (plot.bottom - plot.top);
+    const x = t => plot.left + t * (plot.right - plot.left);
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = '#c2d0d6';
+    ctx.fillText('ceiling ÷ √x', 12, 18);
+    for (const level of [0, max / 2, max]) {
+      const py = y(level);
+      ctx.strokeStyle = '#375462';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(plot.left, py);
+      ctx.lineTo(plot.right, py);
+      ctx.stroke();
+      ctx.textAlign = 'right';
+      const label = level > 0 && level < 0.01 ? level.toExponential(1) : decimal.format(level);
+      ctx.fillText(label, plot.left - 5, py + 4);
+    }
+    ctx.textAlign = 'center';
+    ctx.fillText(left, x(0), height - 13);
+    ctx.fillText('midpoint', x(0.5), height - 13);
+    ctx.fillText(right, x(1), height - 13);
+    ctx.beginPath();
+    points.forEach((value, i) => {
+      const px = x(i / steps);
+      if (i === 0) ctx.moveTo(px, y(value));
+      else ctx.lineTo(px, y(value));
+    });
+    ctx.lineTo(x(1), plot.bottom);
+    ctx.lineTo(x(0), plot.bottom);
+    ctx.closePath();
+    ctx.fillStyle = '#9de8cb26';
+    ctx.fill();
+    ctx.strokeStyle = '#9de8cb';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x(0.5), y(gap(0.5)), 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffc787';
+    ctx.fill();
+  }
+
+  function render() {
+    const r = Number(power.value);
+    const m = 2 ** Number(sample.value);
+    const a = BigInt(m) ** BigInt(r);
+    const b = BigInt(m + 1) ** BigInt(r);
+    const delta = Math.expm1(r * Math.log1p(1 / m));
+    const bend = logBend(delta);
+    const scale = Math.sqrt(Number(a));
+    const gap = t => scale * (t * bend - logBend(t * delta)) / Math.sqrt(1 + t * delta);
+    const midpoint = gap(0.5);
+    document.querySelector('#sample-out').value = integer.format(m);
+    sample.setAttribute('aria-valuetext', String(m));
+    document.querySelector('#endpoints').textContent = `${integer.format(a)} to ${integer.format(b)}`;
+    document.querySelector('#midpoint').textContent = decimal.format(midpoint);
+    let trend = 'At large sample indices this ratio tends to 2.';
+    if (r < 4) trend = 'At large sample indices this ratio tends to zero.';
+    if (r > 4) trend = 'At large sample indices this ratio grows without bound.';
+    document.querySelector('#trend').textContent = trend;
+    canvas.setAttribute('aria-label', `Maximum interpolation error in units of square root x. Zero at both endpoints and ${decimal.format(midpoint)} at the midpoint.`);
+    draw(gap, `m${'²³⁴⁵⁶'[r - 2]}`, `(m + 1)${'²³⁴⁵⁶'[r - 2]}`);
+  }
+
+  power.addEventListener('change', render);
+  sample.addEventListener('input', render);
+  if ('ResizeObserver' in window) new ResizeObserver(render).observe(canvas);
+  else window.addEventListener('resize', render);
+  render();
+})();
+</script>
+</body>
+</html>
