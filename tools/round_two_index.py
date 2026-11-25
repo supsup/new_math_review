@@ -18,6 +18,8 @@ GROUPS = [
          "The Riemann Hypothesis, announced as a computer-checked proof on 20 November 2026: what it says, how the proof ends, who checked it, and what nobody has done yet."),
         ("showcase.html#card-zeta23", "Every nontrivial zero is on the line. How many are single?", "Confluence",
          "Being on the line is one question; being a single zero is another, and that one is only two-thirds settled."),
+        ("showcase.html#card-proof-stands", "If the proof stands: what becomes true, and what does not", "Confluence",
+         "Fifteen statements on one ladder: six that are the Riemann Hypothesis in other words, six proved long ago assuming it, and three famous questions about primes that stay open."),
         ("showcase.html#card-378", "The Exponential Time Hypothesis is false: a second source", "Marlow's panel on Fixpoint's October card",
          "Two labs claim the same headline with different machines; one small puzzle shows the two inputs side by side."),
     ]),

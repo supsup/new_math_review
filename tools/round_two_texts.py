@@ -365,6 +365,113 @@ Sources: {src}
 """
 
 
+# ---------- the card 'If the proof stands' (Confluence) ----------
+PROOF_STANDS_NEED = ["The picture (lead with it)", "Verdict line", "In one sentence", "Step by step", "How sure is each part?"]
+PROOF_STANDS_EXPERT = "For the expert"     # its heading continues ': each rung, its hypothesis, and where it is read'
+PROOF_STANDS_ALT = ("A ladder of fifteen statements: six green rungs that are the Riemann Hypothesis in other words, "
+                    "six blue and violet rungs proved long ago assuming it or its Dirichlet form, and three dashed red rungs that stay open")
+
+
+def proof_stands_parts(root):
+    """Title, sections, caption and the expert table of crew_visuals/proof_stands_card.md (Confluence's words, unchanged)."""
+    text = open(os.path.join(root, "crew_visuals", "proof_stands_card.md"), encoding="utf-8").read()
+    sec = sections(md_blocks(text))
+    title = sec["#title"][0][2].replace("Card draft (Confluence): ", "")
+    for n in PROOF_STANDS_NEED:
+        if n not in sec or not sec[n]:
+            sys.exit("REFUSING to write: the proof-stands card text has no section '" + n + "'")
+    expert = [k for k in sec if k.startswith(PROOF_STANDS_EXPERT)]
+    if len(expert) != 1:
+        sys.exit("REFUSING to write: the proof-stands card text should have one 'For the expert' section")
+    caps = [b[1] for b in sec["The picture (lead with it)"] if b[0] == "p" and b[1].startswith("Caption: ")]
+    if len(caps) != 1:
+        sys.exit("REFUSING to write: the proof-stands card text should have one 'Caption:' paragraph")
+    # the table is split on ' | ' from the raw lines, because one cell holds |pi(x) - li(x)| and its bars
+    # would split the generic parser's row; every row must come out with exactly the header's four cells
+    rows = []
+    for ln in text.split("\n"):
+        st = ln.strip()
+        if st.startswith("| ") and st.endswith(" |") and not re.fullmatch(r"\|(\s*:?-{3,}:?\s*\|)+", st):
+            cells = [c.strip() for c in st[2:-2].split(" | ")]
+            if len(cells) != 4:
+                sys.exit("REFUSING to write: a proof-stands table row does not have four cells: " + st[:80])
+            rows.append(cells)
+    if len(rows) != 16:
+        sys.exit(f"REFUSING to write: the proof-stands table should have a header and 15 rungs, found {len(rows)} rows")
+    return title, sec, caps[0][len("Caption: "):], ("table", rows)
+
+
+def proof_stands_page_link(cell, root):
+    """The last column names a page and its source; link the page when it is one of ours and exists."""
+    m = re.match(r"((?:crew_visuals/)?[a-z0-9_]+\.html)(.*)", cell)
+    if m:
+        if not os.path.exists(os.path.join(root, m.group(1))):
+            sys.exit("REFUSING to write: a proof-stands rung names a page that is not in the tree: " + m.group(1))
+        return f'<a href="{m.group(1)}">{m.group(1)}</a>{html.escape(m.group(2), quote=False)}'
+    if cell == "card zeta23":
+        return '<a href="#card-zeta23">card zeta23</a>'
+    return html.escape(cell, quote=False)
+
+
+def card_proof_stands(root):
+    title, sec, cap, table = proof_stands_parts(root)
+    head, rows = table[1][0], table[1][1:]
+    tab = ('  <div class="tablewrap"><table class="claims"><thead><tr>' + "".join(f"<th>{html.escape(c, quote=False)}</th>" for c in head) + "</tr></thead><tbody>"
+           + "".join("<tr>" + "".join(f"<td>{html.escape(c, quote=False)}</td>" for c in r[:3]) + f"<td>{proof_stands_page_link(r[3], root)}</td></tr>" for r in rows)
+           + "</tbody></table></div>")
+    return f"""<article class="card" id="card-proof-stands">
+  <header><span class="fam">consequences · from our pages</span><span class="fam by">card by Confluence</span><h2>{html.escape(title)}</h2></header>
+  <p class="verdict">{html.escape(sec["Verdict line"][0][1], quote=False)}</p>
+  <figure class="cardfig" id="art-proof_stands_ladder">
+    <a class="zoom" href="#big-art-proof_stands_ladder" title="click to enlarge"><picture><source media="(max-width: 600px)" srcset="art/proof_stands_ladder_narrow.svg"><img src="art/proof_stands_ladder.svg" alt="{PROOF_STANDS_ALT}"></picture></a>
+    <figcaption>{inline(cap)}</figcaption>
+  </figure>
+  <p class="claim"><b>In one sentence.</b> {inline(sec["In one sentence"][0][1])}</p>
+  <p class="claim"><b>Step by step.</b></p>
+{blocks_html(sec["Step by step"])}
+  <p class="claim"><b>How sure is each part?</b></p>
+{blocks_html(sec["How sure is each part?"])}
+  <details class="witness"><summary><b>For the expert: each rung, its hypothesis, and where it is read</b></summary>
+{tab}
+  </details>
+  <div class="levels"><div class="tag">from the crew's reviews</div><p>Marlow read a first draft, and all six of his points are in. Lattice read the card at its final commit. Fixpoint re-ran the ladder tool against the published pages and got both pictures byte for byte.</p></div>
+  <p class="sources"><span class="tag">sources</span> each rung's page, linked in the table · <a href="crew_visuals/proof_stands_card.md">the card text</a> · <a href="tools/proof_stands_ladder.py">the ladder tool</a>, which refuses to draw if a page no longer says what its rung repeats</p>
+</article>"""
+
+
+def md_proof_stands(root):
+    title, sec, cap, table = proof_stands_parts(root)
+    head, rows = table[1][0], table[1][1:]
+    esc = lambda c: c.replace("|", "\\|")
+    tab = "\n".join(["| " + " | ".join(head) + " |", "|" + "---|" * len(head)] + ["| " + " | ".join(esc(c) for c in r) + " |" for r in rows])
+    return f"""## {title}
+
+**{sec["Verdict line"][0][1]}**
+
+*Consequences, from our pages · card by Confluence*
+
+<img src="art/proof_stands_ladder.svg" alt="{PROOF_STANDS_ALT}" width="100%">
+
+{cap}
+
+**In one sentence.** {sec["In one sentence"][0][1]}
+
+**Step by step.**
+
+{blocks_md(sec["Step by step"])}
+
+**How sure is each part?**
+
+{blocks_md(sec["How sure is each part?"])}
+
+**For the expert: each rung, its hypothesis, and where it is read.**
+
+{tab}
+
+Sources: each rung's page, named in the table · [the card text](crew_visuals/proof_stands_card.md) · [the ladder tool](tools/proof_stands_ladder.py)
+"""
+
+
 # ---------- the second-source panel on card 378 (Marlow) ----------
 def eth_panel(root):
     text = open(os.path.join(root, "crew_visuals", "eth_two_encodings.md"), encoding="utf-8").read()

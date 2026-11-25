@@ -455,6 +455,7 @@ def main():
     page = page.replace('<p class="status">' + html.escape(S_OLD), '<p class="status">' + html.escape(S_NEW), 1)
     page = put_block(page, "<!-- card-zeta23:begin -->", "<!-- card-zeta23:end -->", T.card_zeta(ROOT), r"<!-- card-379:end -->\n", "after")
     page = put_block(page, "<!-- card-rh:begin -->", "<!-- card-rh:end -->", T.card_rh(ROOT), r"<!-- card-zeta23:end -->\n", "after")
+    page = put_block(page, "<!-- card-proof-stands:begin -->", "<!-- card-proof-stands:end -->", T.card_proof_stands(ROOT), r"<!-- card-rh:end -->\n", "after")
     page = put_block(page, "<!-- card-074-note:begin -->", "<!-- card-074-note:end -->", f'  <p class="claim">{note_074}</p>',
                      r'  <p class="sources"><span class="tag">in the original repository</span> <a href="https://github\.com/openai/math/tree/main/preprints/Every-four-dimensional-Kakeya', "before")
     page = put_in_card(page, "<!-- card-003-note:begin -->", "<!-- card-003-note:end -->", f'  <p class="claim">{html.escape(T.NOTE_003)} <a href="#card-rh">The Riemann Hypothesis card</a>.</p>',
@@ -462,7 +463,8 @@ def main():
     overlays = "".join(f'<a class="lightbox" id="big-art-{n}" href="#art-{n}" aria-label="close"><img src="art/{n}.svg" alt="{html.escape(alt)}"></a>\n'
                        for n, alt in (("perm_det_six_terms", "The six products of a 3 by 3 grid"), ("vp_exponent_floor", "Each bound for the permanent written as m to a power"),
                                       ("zeta_wave", "The zeta function along the critical line drawn as a wave"), ("zeta_strip", "Where the zeros are, and how much of the count is single"),
-                                      ("rh_half_strip", "A zero at one quarter would have a mirror image at three quarters")))
+                                      ("rh_half_strip", "A zero at one quarter would have a mirror image at three quarters"),
+                                      ("proof_stands_ladder", T.PROOF_STANDS_ALT)))
     page = put_block(page, "<!-- round-two-overlays:begin -->", "<!-- round-two-overlays:end -->", overlays, r'<a class="lightbox" id="big-', "before")
     open(hp, "w", encoding="utf-8").write(page)
 
@@ -475,6 +477,7 @@ def main():
     md = put_block(md, "<!-- card-378-panel:begin -->", "<!-- card-378-panel:end -->", T.panel_378_md(ROOT), r"<!-- card-379:begin -->", "before")
     md = put_block(md, "<!-- card-zeta23:begin -->", "<!-- card-zeta23:end -->", T.md_zeta(ROOT), r"<!-- card-379:end -->\n", "after")
     md = put_block(md, "<!-- card-rh:begin -->", "<!-- card-rh:end -->", T.md_rh(ROOT), r"<!-- card-zeta23:end -->\n", "after")
+    md = put_block(md, "<!-- card-proof-stands:begin -->", "<!-- card-proof-stands:end -->", T.md_proof_stands(ROOT), r"<!-- card-rh:end -->\n", "after")
     md = put_block(md, "<!-- card-074-note:begin -->", "<!-- card-074-note:end -->", f"{T.NOTE_074} [Family 079's scope note]({T.URL_079}).\n",
                    r"In the original repository: \[Every four dimensional Kakeya", "before")
     md = put_in_card(md, "<!-- card-003-note:begin -->", "<!-- card-003-note:end -->", f"{T.NOTE_003} See the card 'Where are the zeros of the zeta function?' below.\n",
@@ -482,7 +485,7 @@ def main():
     open(mp, "w", encoding="utf-8").write(md)
 
     subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "showcase_nav.py"), hp], check=True)
-    print("cards written: 379, zeta23, RH; panel on 378; note on 074; formulas:", ", ".join(names.values()))
+    print("cards written: 379, zeta23, RH, proof stands; panel on 378; note on 074; formulas:", ", ".join(names.values()))
     print("milestones (log10 m): Anthropic m^3 %.2f, m^10 %.2f; OpenAI m^3 %.1f, m^10 %.0f" % (facts["ant3"], facts["ant10"], facts["oai3"], facts["oai10"]))
 
 
