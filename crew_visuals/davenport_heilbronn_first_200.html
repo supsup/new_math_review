@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Count the first 200 heights</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf7ef;
+      --ink: #293644;
+      --muted: #556170;
+      --blue: #275d87;
+      --copper: #955238;
+      --edge: #c7ced7;
+      background: #e5ebf0;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 58rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .16em; }
+    h1 { font: clamp(2.6rem, 8vw, 4.55rem)/1.04 Georgia, serif; letter-spacing: -.044em; margin: .55rem 0 .7rem; }
+    p { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; align-items: end; margin: .9rem 0 .75rem; }
+    label { display: grid; gap: .23rem; font-weight: 650; font-size: .9rem; }
+    select { min-height: 2.7rem; border: 1px solid var(--edge); border-radius: .32rem; background: #eff2f5; font: inherit; color: var(--ink); padding: .28rem .52rem; }
+    .mirror-toggle { display: flex; gap: .35rem; min-height: 2.7rem; align-items: center; }
+    input[type="checkbox"] { accent-color: var(--blue); }
+    :focus-visible { outline: .17rem solid var(--copper); outline-offset: .15rem; }
+    .readouts { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: .95rem; align-items: start; }
+    figure { margin: 0; }
+    canvas { display: block; width: 100%; height: 14rem; border-radius: .4rem; background: #eef2f5; }
+    figcaption { margin-top: .45rem; font-size: .88rem; }
+    dl { padding: .75rem .9rem .45rem; border: 1px solid var(--edge); border-radius: .4rem; margin: 0; }
+    dt { font-size: .84rem; color: var(--muted); }
+    dd { font: 1.45rem/1.18 Georgia, serif; margin: .15rem 0 .58rem; font-variant-numeric: tabular-nums; }
+    details { padding-top: .65rem; margin-top: .9rem; border-top: 1px solid var(--edge); }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 40rem) { .readouts { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="spira_four_pairs.html">Back to the four-pair portrait</a>
+    <h1>Count the first 200 heights</h1>
+    <p class="intro">The completed Davenport–Heilbronn function has 130 zeros from height 0 to 200. Exactly 122 are on the center line. The other eight are Spira’s four reflected pairs. The reflection lets us count the entire rectangle by walking only its right-hand boundary.</p>
+    <div class="controls">
+      <label for="band">Height range
+        <select id="band"><option value="0">0–76</option><option value="1" selected>76–177</option><option value="2">177–200</option></select>
+      </label>
+      <label class="mirror-toggle"><input id="mirror" type="checkbox" checked> Show the reflected half</label>
+    </div>
+    <div class="readouts">
+      <figure>
+        <canvas id="contour" role="img" aria-label="The right-hand contour rises, with its reflected and reversed counterpart on the left"></canvas>
+        <figcaption>Walk the blue path from the bottom of the center line to the top. The copper path comes back by reflection.</figcaption>
+      </figure>
+      <dl>
+        <dt>Turns in the function’s values along the right half</dt><dd id="right-turns"></dd>
+        <dt>Zeros inside the full rectangle</dt><dd id="total"></dd>
+        <dt>Distinct sign brackets on the line</dt><dd id="line"></dd>
+        <dt>Off-line zeros in certified disks</dt><dd id="off"></dd>
+      </dl>
+    </div>
+    <p>Reflecting a point across the center line conjugates the completed function’s value. Conjugation reverses its argument. We also walk the reflected path in the opposite direction. Those two reversals give the same turn as on the right. The total winding is twice the right-hand turn.</p>
+    <details>
+      <summary>How to account for every zero</summary>
+      <p>At each piece of the right boundary, interval arithmetic encloses the function’s values in a rectangle that misses zero. That lets us take the small, continuous change of argument there. Summing gives the full count by the argument principle and reflection. A Dirichlet-series bound excludes zeros at real part at least 4, and reflection covers real part at most −3. <a href="mirror_mix_all_angles.html">The far-edge bound</a></p>
+      <p>On the center line the completed function is real. Each bracket with a sign change gives at least one zero. Small disks separately give one zero near each of Spira’s four values and one near each reflection. The sign brackets and disks already give as many zeros as the contour reports, so they account for all 130 with multiplicity. <a href="certify_a_zeta_cousin_zero.html">Check a small disk</a> · <a href="https://doi.org/10.1090/S0025-5718-1994-1254148-8">Spira’s paper</a></p>
+    </details>
+    <details>
+      <summary>What happens below the first contour</summary>
+      <p>The first contour starts at height 0.1. The ordinary Dirichlet series has repeating coefficients 1, κ, −κ, −1, 0, with 0 &lt; κ &lt; ⅓. Their partial sum <var>A</var>(<var>u</var>) stays between 0 and 1 + κ, and equals 1 on 1 ≤ <var>u</var> &lt; 2. Partial summation rewrites the series divided by <var>s</var> as ∫<sub>0</sub><sup>∞</sup> <var>A</var>(e<sup><var>v</var></sup>) e<sup>−<var>sv</var></sup> d<var>v</var>.</p>
+      <p>For real part between ½ and 4, its real part at height zero is at least ∫<sub>0</sub><sup>log 2</sup> e<sup>−4<var>v</var></sup> d<var>v</var> = 15/64. At height ≤ 0.1, the inequality 1 − cos <var>y</var> ≤ <var>y</var>²/2 makes the loss at most (4/3)(0.1²/2)·16 = 8/75. The real part stays positive. With the far-edge estimate and reflection this clears the whole band from 0 to 0.1. <a href="../tools/check_davenport_heilbronn_first_200.py">Replay the complete count</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const bands = [[.1,76,38,0], [76,177,66,8], [177,200,18,0]];
+      const band = byId('band'), mirror = byId('mirror'), canvas = byId('contour');
+      const ctx = canvas.getContext('2d');
+
+      function draw(low, high) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const x = w / 2, left = 40, right = w - 40, top = 38, bottom = h - 42;
+        ctx.strokeStyle = '#a9b3c0';
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();
+        ctx.moveTo(x,top-12);
+        ctx.lineTo(x,bottom+9);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        function side(vertices, color) {
+          ctx.strokeStyle = color;
+          ctx.fillStyle = color;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          vertices.forEach(([px,py],i) => i ? ctx.lineTo(px,py) : ctx.moveTo(px,py));
+          ctx.stroke();
+          for (const [i, [ax,ay]] of vertices.slice(0,-1).entries()) {
+            const [bx,by] = vertices[i+1], angle = Math.atan2(by-ay,bx-ax), px = (ax+bx)/2, py = (ay+by)/2;
+            ctx.beginPath();
+            ctx.moveTo(px,py);
+            for (const d of [-.45,.45]) ctx.lineTo(px-11*Math.cos(angle+d),py-11*Math.sin(angle+d));
+            ctx.fill();
+          }
+        }
+
+        side([[x,bottom],[right,bottom],[right,top],[x,top]],'#275d87');
+        if (mirror.checked) side([[x,top],[left,top],[left,bottom],[x,bottom]],'#955238');
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#556170';
+        for (const [px,label] of [[left,'−3'],[x,'½'],[right,'4']]) ctx.fillText(label,px,bottom+25);
+        ctx.fillText('height ' + high,x,top-16);
+        ctx.fillText('height ' + low,x+55,bottom-10);
+      }
+
+      function update() {
+        const [low,high,onLine,offLine] = bands[Number(band.value)];
+        const total = onLine + offLine;
+        byId('right-turns').textContent = total/2;
+        byId('total').textContent = total;
+        byId('line').textContent = onLine;
+        byId('off').textContent = offLine;
+        draw(low,high);
+      }
+
+      band.addEventListener('change',update);
+      mirror.addEventListener('change',update);
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

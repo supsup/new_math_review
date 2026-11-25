@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Three to zero</title>
+<style>
+  :root {
+    --paper: #fffaf0;
+    --ink: #251c2d;
+    --faint: #5f5065;
+    --line: #cbbac6;
+    --orchid: #622951;
+    --lavender: #f2e3ef;
+    --mint: #d2ecca;
+    --green: #215545;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font: 16px/1.55 system-ui, sans-serif;
+    background: #f5efe5;
+    color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 62rem); margin: auto; padding-block: 2.6rem; }
+  h1, h2, p { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: normal; letter-spacing: -.035em; line-height: 1.12; }
+  h1 { font-size: clamp(2.8rem, 8vw, 5.4rem); }
+  h2 { font-size: clamp(1.6rem, 5vw, 2.3rem); }
+  p { max-width: 47rem; }
+  .intro, .guide { margin-top: .65rem; color: var(--faint); }
+  section { margin-top: 1.5rem; padding: clamp(1rem, 3vw, 1.5rem); background: var(--paper); border: 1px solid var(--line); border-radius: .75rem; }
+  label, .secondary { display: block; color: var(--faint); font-size: .875rem; }
+  .controls { margin-top: 1rem; }
+  .control-row, .beads { display: flex; flex-wrap: wrap; gap: .5rem; align-items: stretch; }
+  .control-row { margin-block: .35rem 1rem; }
+  input, button { font: inherit; color: inherit; border: 1px solid var(--line); border-radius: .45rem; background: var(--paper); }
+  input { min-width: 0; flex: 1 1 16rem; padding: .5rem .65rem; font-family: var(--mono); }
+  button { padding: .45rem .75rem; cursor: pointer; }
+  button:disabled { color: var(--faint); opacity: .65; cursor: default; }
+  button:not(:disabled):hover { border-color: var(--orchid); }
+  :focus-visible { outline: 2px solid var(--orchid); outline-offset: 2px; }
+  .primary { background: var(--orchid); color: var(--paper); border-color: var(--orchid); }
+  .bead { min-width: 3.2rem; display: grid; justify-items: center; padding: .22rem .5rem .4rem; }
+  .bead span:first-child { color: var(--faint); font-size: .72rem; }
+  .bead span:last-child { font: 1.25rem var(--mono); }
+  .bead[aria-pressed="true"] { background: var(--lavender); border-color: var(--orchid); }
+  .readout { margin-top: 1rem; display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1rem; }
+  #sum { min-width: 14ch; color: var(--orchid); font: 1rem var(--mono); }
+  #sum[data-zero="true"] { color: var(--green); }
+  #model-count { margin-top: .65rem; color: var(--faint); }
+  #error { margin-top: .5rem; color: var(--orchid); }
+  #encodings { display: grid; gap: .8rem; margin-top: 1rem; }
+  .encoding { display: grid; grid-template-columns: minmax(8rem, .9fr) 1fr 1fr; align-items: end; gap: .45rem 1rem; }
+  .encoding h3 { font: 600 .95rem/1.35 system-ui, sans-serif; margin: 0; }
+  .encoding h3 span { display: block; font-weight: 400; }
+  .bar-label { display: block; font: .8rem var(--mono); margin-bottom: .23rem; }
+  meter { display: block; width: 100%; height: .65rem; accent-color: var(--orchid); }
+  meter::-webkit-meter-bar { background: var(--lavender); border: 0; }
+  meter::-webkit-meter-optimum-value { background: var(--orchid); }
+  .shared meter { accent-color: var(--green); }
+  .shared meter::-webkit-meter-optimum-value { background: var(--green); }
+  #comparison { margin-top: 1rem; padding: .65rem .75rem; border-radius: .4rem; background: var(--mint); color: var(--green); }
+  details { margin-top: 1rem; }
+  summary { cursor: pointer; }
+  details p { margin-top: .5rem; color: var(--faint); }
+  @media (max-width: 34rem) {
+    main { padding-block: 1.6rem; }
+    .encoding { grid-template-columns: 1fr 1fr; }
+    .encoding h3 { grid-column: span 2; }
+    .encoding h3 span { display: inline; margin-left: .35rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Three to zero</h1>
+    <p class="intro">Pick three positions whose values add to zero. Then see how the same puzzle fits into three Boolean formulas, with a different cost in each.</p>
+  </header>
+  <section aria-labelledby="array-title">
+    <h2 id="array-title">Make a triple</h2>
+    <form id="array-form" class="controls">
+      <label for="values">Array of 3 to 12 integers from −99 to 99</label>
+      <div class="control-row">
+        <input id="values" value="-2, 0, 0, 1, 1, 2" spellcheck="false" autocomplete="off">
+        <button class="primary" type="submit">Test array</button>
+      </div>
+      <p id="error" role="alert" hidden></p>
+    </form>
+    <div class="beads" id="beads" aria-label="Array positions"></div>
+    <div class="readout">
+      <p id="sum" role="status"></p>
+      <button id="next-solution" type="button">Next zero sum</button>
+    </div>
+    <p id="model-count" role="status"></p>
+  </section>
+  <section aria-labelledby="encoding-title">
+    <h2 id="encoding-title">Encode the same puzzle</h2>
+    <p class="guide">Width is the number of terms in the longest rule. In 3-SAT, the problem behind these ETH results, each rule has at most three terms. Try six zeros to see when sharing a check costs more.</p>
+    <div id="encodings"></div>
+    <p id="comparison" hidden></p>
+    <details>
+      <summary>When does sharing pay off?</summary>
+      <p id="break-even"></p>
+      <p>For each selected position, a separate check pays for reducing the width of every value-bit rule. A shared lookup pays once for each group of index bits it tests. The shared cost stays fixed when values need more bits.</p>
+    </details>
+    <details>
+      <summary>How the counts are checked</summary>
+      <p>Each formula chooses three array positions in increasing order and adds the values in signed binary. A position uniquely determines its value. Every added variable is pinned down by the inputs to a Boolean gate.</p>
+      <p>The page evaluates all combinations of index bits in each formula, including unused index codes. It propagates the clauses and checks that each surviving triple has exactly one full assignment. Then it compares the triples against direct enumeration.</p>
+      <p>The three encodings were built for this page. They connect the integer 3SUM problem of <a href="https://arxiv.org/abs/2610.06783">Alman and Vassilevska Williams</a> with the counting-SAT statements from <a href="https://github.com/openai/math/blob/f57028540/lean/docs/378.md">OpenAI</a> and <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/eth/MainResults.lean">Anthropic</a>.</p>
+    </details>
+  </section>
+</main>
+<script>
+"use strict";
+
+const scenarios = [
+  { key: "wide", name: "Long rules" },
+  { key: "separate", name: "Short rules, separate checks" },
+  { key: "shared", name: "Short rules, shared checks" }
+];
+const bit = (value, position) => Boolean((value >> position) & 1);
+const either = (left, right) => left || right;
+const both = (left, right) => left && right;
+const xor = (left, right) => left !== right;
+
+class Formula {
+  constructor() {
+    this.variables = 0;
+    this.clauses = [];
+  }
+
+  variable() { return ++this.variables; }
+
+  gate(left, right, operation) {
+    const output = this.variable();
+    for (const a of [false, true]) {
+      for (const b of [false, true]) {
+        this.clauses.push([a ? -left : left, b ? -right : right, operation(a, b) ? output : -output]);
+      }
+    }
+    return output;
+  }
+
+  restrictWidth() {
+    const narrow = new Formula();
+    narrow.variables = this.variables;
+    for (const clause of this.clauses) {
+      if (clause.length <= 3) {
+        narrow.clauses.push(clause);
+        continue;
+      }
+      let merged = clause[0];
+      for (const literal of clause.slice(1, -2)) merged = narrow.gate(merged, literal, either);
+      narrow.clauses.push([merged, ...clause.slice(-2)]);
+    }
+    return narrow;
+  }
+}
+
+function encodingDimensions(values) {
+  const indexWidth = Math.ceil(Math.log2(values.length));
+  const largestSum = 3 * Math.max(...values.map(Math.abs));
+  const sumWidth = largestSum === 0 ? 1 : Math.floor(Math.log2(largestSum)) + 2;
+  return { indexWidth, sumWidth, codeLimit: 1 << indexWidth };
+}
+
+function smaller(formula, left, right, zero) {
+  let less = zero;
+  left.forEach((a, index) => {
+    const b = right[index];
+    const same = formula.gate(a, b, (x, y) => x === y);
+    const startsSmaller = formula.gate(-a, b, both);
+    less = formula.gate(startsSmaller, formula.gate(same, less, both), either);
+  });
+  return less;
+}
+
+function add(formula, left, right, zero) {
+  let carry = zero;
+  return left.map((a, index) => {
+    const b = right[index];
+    const different = formula.gate(a, b, xor);
+    const digit = formula.gate(different, carry, xor);
+    carry = formula.gate(formula.gate(a, b, both), formula.gate(different, carry, both), either);
+    return digit;
+  });
+}
+
+function matchIndex(formula, literals, prefixes) {
+  let matched = literals[0];
+  for (let length = 2; length <= literals.length; length++) {
+    const key = literals.slice(0, length).join(",");
+    if (!prefixes.has(key)) prefixes.set(key, formula.gate(matched, literals[length - 1], both));
+    matched = prefixes.get(key);
+  }
+  return matched;
+}
+
+function encode(values, shareLookups) {
+  const { indexWidth, sumWidth, codeLimit } = encodingDimensions(values);
+  const formula = new Formula();
+  const allocate = length => Array.from({ length }, () => formula.variable());
+  const indices = [allocate(indexWidth), allocate(indexWidth), allocate(indexWidth)];
+  const words = [allocate(sumWidth), allocate(sumWidth), allocate(sumWidth)];
+  const zero = formula.variable();
+  formula.clauses.push([-zero]);
+
+  const indexConditions = indices.map((indexBits, position) => {
+    const prefixes = new Map();
+    return Array.from({ length: codeLimit }, (_, code) => {
+      const literals = indexBits.map((variable, offset) => bit(code, offset) ? variable : -variable);
+      const guard = shareLookups && indexWidth > 2
+        ? [-matchIndex(formula, literals, prefixes)]
+        : literals.map(literal => -literal);
+      if (code >= values.length) formula.clauses.push(guard);
+      else {
+        words[position].forEach((variable, offset) => {
+          formula.clauses.push([...guard, bit(values[code], offset) ? variable : -variable]);
+        });
+      }
+      return literals;
+    });
+  });
+  formula.clauses.push([smaller(formula, indices[0], indices[1], zero)]);
+  formula.clauses.push([smaller(formula, indices[1], indices[2], zero)]);
+  const total = add(formula, add(formula, words[0], words[1], zero), words[2], zero);
+  for (const digit of total) formula.clauses.push([-digit]);
+  return { formula, indexConditions };
+}
+
+function enumerateFormula(formula, indexConditions) {
+  const { variables, clauses } = formula;
+  const occurrences = Array.from({ length: 2 * variables + 1 }, () => []);
+  const lengths = Uint8Array.from(clauses, clause => clause.length);
+  const units = [];
+  clauses.forEach((clause, index) => {
+    if (clause.length === 1) units.push(clause[0]);
+    for (const literal of clause) occurrences[literal + variables].push(index);
+  });
+
+  function extendsToModel(left, middle, right) {
+    const pending = [...units, ...left, ...middle, ...right];
+    const remaining = lengths.slice();
+    const assigned = new Int8Array(variables + 1);
+    const status = literal => assigned[Math.abs(literal)] * Math.sign(literal);
+    let assignedCount = 0;
+    for (let cursor = 0; cursor < pending.length; cursor++) {
+      const literal = pending[cursor];
+      const previous = status(literal);
+      if (previous < 0) return false;
+      if (previous > 0) continue;
+      assigned[Math.abs(literal)] = Math.sign(literal);
+      assignedCount++;
+      for (const at of occurrences[variables - literal]) {
+        remaining[at]--;
+        if (remaining[at] === 0) return false;
+        if (remaining[at] === 1) pending.push(clauses[at].find(item => status(item) >= 0));
+      }
+    }
+    if (assignedCount !== variables) throw new Error("A surviving triple left a Boolean variable free.");
+    return true;
+  }
+
+  const found = [];
+  for (const [i, left] of indexConditions[0].entries()) {
+    for (const [j, middle] of indexConditions[1].entries()) {
+      for (const [k, right] of indexConditions[2].entries()) {
+        if (extendsToModel(left, middle, right)) found.push([i, j, k]);
+      }
+    }
+  }
+  return found;
+}
+
+function directTriples(values) {
+  const triples = [];
+  for (let i = 0; i < values.length; i++) {
+    for (let j = i + 1; j < values.length; j++) {
+      for (let k = j + 1; k < values.length; k++) {
+        if (values[i] + values[j] + values[k] === 0) triples.push([i, j, k]);
+      }
+    }
+  }
+  return triples;
+}
+
+function checkEncodings(values, triples) {
+  const wide = encode(values, false);
+  const narrow = { ...wide, formula: wide.formula.restrictWidth() };
+  const shared = encode(values, true);
+  const stats = [wide, narrow, shared].map(({ formula, indexConditions }, index) => {
+    const matches = enumerateFormula(formula, indexConditions);
+    const width = Math.max(...formula.clauses.map(clause => clause.length));
+    if (JSON.stringify(matches) !== JSON.stringify(triples) || (index > 0 && width > 3)) {
+      throw new Error("The formulas did not agree with direct enumeration.");
+    }
+    return { variables: formula.variables, clauses: formula.clauses.length, width };
+  });
+  const predicted = auxiliaryCounts(values);
+  if (stats[1].variables - stats[0].variables !== 3 * predicted.separate ||
+      stats[2].variables - stats[0].variables !== 3 * predicted.shared) {
+    throw new Error("The auxiliary-variable counts did not match the encoding rules.");
+  }
+  return stats;
+}
+
+function auxiliaryCounts(values) {
+  const { indexWidth, sumWidth, codeLimit } = encodingDimensions(values);
+  const perValueBit = Math.max(0, indexWidth - 2) * values.length;
+  const unusedCodes = Math.max(0, indexWidth - 3) * (codeLimit - values.length);
+  return {
+    separate: perValueBit * sumWidth + unusedCodes,
+    shared: indexWidth > 2 ? 2 * codeLimit - 4 : 0,
+    sumWidth
+  };
+}
+
+function parseArray(text) {
+  const entries = text.trim().split(/\s*,\s*|\s+/u);
+  if (entries.length < 3 || entries.length > 12 ||
+      entries.some(entry => !/^[+\-−]?\d+$/u.test(entry) || Math.abs(Number(entry.replace("−", "-"))) > 99)) {
+    throw new Error("Enter 3 to 12 integers from −99 to 99, separated by commas or spaces.");
+  }
+  return entries.map(entry => Number(entry.replace("−", "-")));
+}
+
+if (typeof module !== "undefined") module.exports = { directTriples, checkEncodings, parseArray };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const make = (type, text) => {
+    const node = document.createElement(type);
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const signed = value => String(value).replace("-", "−");
+  let values = [];
+  let solutions = [];
+  let chosen = [];
+  let next = 0;
+
+  function renderSelection() {
+    const beads = byId("beads");
+    for (const [index, button] of Array.from(beads.children).entries()) {
+      button.setAttribute("aria-pressed", String(chosen.includes(index)));
+    }
+    const sum = byId("sum");
+    const picks = [...chosen].sort((a, b) => a - b).map(index => values[index]);
+    const total = picks.reduce((result, value) => result + value, 0);
+    sum.dataset.zero = String(picks.length === 3 && total === 0);
+    sum.textContent = picks.length === 3
+      ? picks.map(signed).join(" + ") + " = " + signed(total)
+      : picks.length + " of 3 positions selected";
+  }
+
+  function renderBeads() {
+    const beads = byId("beads");
+    beads.replaceChildren(...values.map((value, index) => {
+      const button = make("button");
+      button.type = "button";
+      button.className = "bead";
+      button.setAttribute("aria-label", "Position " + (index + 1) + ", value " + value);
+      button.append(make("span", index + 1), make("span", signed(value)));
+      button.addEventListener("click", () => {
+        if (chosen.includes(index)) chosen = chosen.filter(selected => selected !== index);
+        else chosen = [...chosen, index].slice(-3);
+        renderSelection();
+      });
+      return button;
+    }));
+  }
+
+  function measure(name, value, max) {
+    const label = make("div");
+    const number = make("span", value + " " + name);
+    number.className = "bar-label";
+    const meter = make("meter");
+    meter.max = max;
+    meter.value = value;
+    meter.setAttribute("aria-label", name);
+    label.append(number, meter);
+    return label;
+  }
+
+  function renderEncodings(stats) {
+    const maxVariables = Math.max(...stats.map(row => row.variables));
+    const maxClauses = Math.max(...stats.map(row => row.clauses));
+    byId("encodings").replaceChildren(...stats.map((row, index) => {
+      const layout = make("div");
+      layout.className = "encoding " + scenarios[index].key;
+      const heading = make("h3", scenarios[index].name);
+      const width = make("span", "Width " + row.width);
+      width.className = "secondary";
+      heading.append(width);
+      layout.append(heading, measure("variables", row.variables, maxVariables),
+        measure("clauses", row.clauses, maxClauses));
+      return layout;
+    }));
+    const comparison = byId("comparison");
+    const saved = stats[1].variables - stats[2].variables;
+    if (saved > 0) {
+      comparison.textContent = "Sharing the index checks saves " + saved + " variables compared with narrowing each rule on its own.";
+    } else if (saved < 0) {
+      comparison.textContent = "Here separate width-3 checks use " + (-saved) + " fewer variables than shared ones.";
+    } else {
+      comparison.textContent = stats[0].width === 3
+        ? "These index codes are short enough for width 3 without extra variables."
+        : "Both width-3 encodings use the same number of variables.";
+    }
+    comparison.hidden = false;
+    const added = auxiliaryCounts(values);
+    byId("break-even").textContent = "This array needs " + added.sumWidth + " signed bits per value. " +
+      "Per selected position, narrowing adds " + added.separate + " variables with separate checks or " +
+      added.shared + " with shared lookups. The table counts all three positions.";
+  }
+
+  function run() {
+    const error = byId("error");
+    try {
+      const parsed = parseArray(byId("values").value);
+      const found = directTriples(parsed);
+      const stats = checkEncodings(parsed, found);
+      values = parsed;
+      solutions = found;
+      chosen = solutions[0] || [0, 1, 2];
+      next = 1;
+      renderBeads();
+      renderSelection();
+      renderEncodings(stats);
+      byId("model-count").textContent = found.length + " zero-sum " +
+        (found.length === 1 ? "triple" : "triples") + " in all three encodings.";
+      byId("next-solution").disabled = found.length < 2;
+      error.hidden = true;
+    } catch (failure) {
+      error.textContent = failure.message;
+      error.hidden = false;
+    }
+  }
+
+  byId("array-form").addEventListener("submit", event => {
+    event.preventDefault();
+    run();
+  });
+  byId("next-solution").addEventListener("click", () => {
+    chosen = solutions[next % solutions.length];
+    next++;
+    renderSelection();
+  });
+  run();
+}
+</script>
+</body>
+</html>

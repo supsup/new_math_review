@@ -157,6 +157,9 @@ A set in 4D space that contains a line segment pointing in every direction canno
 
 *No Lean link in the catalogue for this family. Treat as an unverified claim.*
 
+<!-- card-074-note:begin -->
+Update, 24 November 2026. The collection's family 079 (26 October) claims Sogge's local smoothing conjecture for the wave equation in every dimension from two up, and with it that every set containing a unit segment in each direction has full Hausdorff dimension, in every dimension from two up. Its Lean scope note lists that statement among its checked targets. If it holds, this card's four-dimensional result is a special case. We have read the scope note, not the proof. [Family 079's scope note](https://github.com/openai/math/blob/f57028540/lean/docs/079.md).
+<!-- card-074-note:end -->
 In the original repository: [Every four dimensional Kakeya set has full Hausdorff dimension September 24 2026](https://github.com/openai/math/tree/main/preprints/Every-four-dimensional-Kakeya-set-has-full-Hausdorff-dimension-September-24-2026) · [The Kakeya maximal conjecture in three dimensions September 23 2026](https://github.com/openai/math/tree/main/preprints/The-Kakeya-maximal-conjecture-in-three-dimensions-September-23-2026)
 
 ## One tensor square holds every irrep (Saxl's conjecture)
@@ -1127,11 +1130,14 @@ Two readers and two builds. A fresh-context Fixpoint skeptic read the four compa
 
 *Lean: kernel-checked for three of four comparators (builds by sub-agents in Confluence's containers, load-bearing log lines verified by Confluence; the comparator closure and the patched libraries compiled from source, Mathlib from its official cache at the pinned revision) (SiegelZeros; DirichletSevenEighths and QuasiRiemannHypothesis from one solution module, OAI.NumberTheory.DirichletL.Nonvanishing), statement MATCHES on two independent readings (a Fixpoint skeptic and Confluence). riemannZeta_ne_zero_of_seven_eighths_lt_re: 7/8 &lt; s.re -&gt; riemannZeta s != 0. The Dirichlet theorem: for every q and every chi : DirichletCharacter C q, 7/8 &lt; s.re and not (chi = 1 and s = 1) imply DirichletCharacter.LFunction chi s != 0. SiegelZeros: exists c &gt; 0 such that for all q &gt;= 3 and primitive, nonprincipal, real-valued chi, every zero beta in (0, 1) of L(chi, .) has c &lt;= (1 - beta) log q. Permitted axioms propext, Quot.sound, Classical.choice only. Part of the proof is in the collection's patches to PrimeNumberTheoremAnd and RellichKondrachov, kernel-checked but not upstream. HeckeSevenEighths not built; its L-function is an ad hoc definition. Not proved in the sense this page uses: no checker outside the crew has rebuilt it and no human expert has confirmed the mathematics.*
 
+<!-- card-003-note:begin -->
+Update, 24 November 2026. A Lean proof of the full Riemann Hypothesis, and of the same statement for every Dirichlet L-function, was announced on 20 November. If it stands, this card's zero-free region for the zeta function and for Dirichlet L-functions follows from it, since 7/8 lies to the right of 1/2. It also implies the card's claim of no Siegel zeros, the uniform gap from 1 for real zeros: a real zero could sit no further right than 1/2. This card's separate result for Hecke L-functions over Q(√−3) is not covered by that release. See the card 'Where are the zeros of the zeta function?' below.
+<!-- card-003-note:end -->
 In the original repository: [The Quasi Riemann Hypothesis October 5 2026](https://github.com/openai/math/tree/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026) · [The Quasi Riemann Hypothesis September 30 2026](https://github.com/openai/math/tree/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026) · [Uniform exclusion of Landau Siegel zeros October 1 2026](https://github.com/openai/math/tree/main/preprints/Uniform-exclusion-of-Landau-Siegel-zeros-October-1-2026) · [Lean scope](https://github.com/openai/math/blob/main/lean/docs/003.md)
 
 ## Claimed: the Exponential Time Hypothesis is false
 
-**STATEMENT READ; CHECKER NOT RUN.**
+**OPENAI 378 STATEMENT READ. ANTHROPIC ETH BUILT BY FIXPOINT.**
 
 *Family 378*
 
@@ -1198,10 +1204,223 @@ Fixpoint's checks, all of the statement and its numbers, none of the proof: the 
 
 **From the crew's debate.** A machine-checked theorem proves exactly its statement; here that is the (log log n)^2 route on a unit-cost machine with a unary encoding, not the paper's headline bound. A verified result does not travel through a reduction unless someone writes down how the parameters grow (Marlow); the perfect-matching corollary, subexponential in v + e but not in v, is the example. Because of this reading, the crew is drafting a pilot, one reviewer-owned acceptance statement with an explicit raw-input-to-model contract and independently written counterexamples; it is a proposal, not yet running.
 
-*Lean: STATEMENT READ; CHECKER NOT RUN. Challenge lean/ComparatorChallenges/SubexponentialSAT.lean (its proof is the comparator's sorry placeholder, as in every challenge file), solution module OAI.Algorithms.SubexponentialSAT.Main, theorem OAI.Algorithms.SubexponentialSAT.SqrtLogSpace.exact_count_and_sat; permitted axioms propext, Quot.sound, Classical.choice (configuration). 3,977 files, 710,320 lines, no sorry, admit, axiom or native_decide outside comments by a lexical scan; all added in one commit on 2026-10-26. The formal statement read by Fixpoint, Marlow and Lattice at revision 7ef5c0cc5. Not built by anyone on the crew and no comparator run. It covers the (log log n)^2 / sqrt(log n) route only; Theorem 1.1's sharper bounds and every corollary are outside the formalization (lean/docs/378.md). These recorded crew checks do not establish the theorem's mathematical correctness.*
+*OpenAI family 378 Lean: STATEMENT READ; CHECKER NOT RUN BY THE CREW. Challenge lean/ComparatorChallenges/SubexponentialSAT.lean (its proof is the comparator's sorry placeholder, as in every challenge file), solution module OAI.Algorithms.SubexponentialSAT.Main, theorem OAI.Algorithms.SubexponentialSAT.SqrtLogSpace.exact_count_and_sat; permitted axioms propext, Quot.sound, Classical.choice (configuration). 3,977 files, 710,320 lines, no sorry, admit, axiom or native_decide outside comments by a lexical scan; all added in one commit on 2026-10-26. The formal statement read by Fixpoint, Marlow and Lattice at revision 7ef5c0cc5. Not built by anyone on the crew and no comparator run. It covers the (log log n)^2 / sqrt(log n) route only; Theorem 1.1's sharper bounds and every corollary are outside the formalization (lean/docs/378.md). These recorded crew checks do not establish the theorem's mathematical correctness.*
 
 In the original repository: [The Exponential Time Hypothesis is False October 25 2026](https://github.com/openai/math/tree/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026) · [Comparator challenge](https://github.com/openai/math/blob/main/lean/ComparatorChallenges/SubexponentialSAT.lean) · [Lean scope](https://github.com/openai/math/blob/main/lean/docs/378.md)
 
+<!-- card-378-panel:begin -->
+**A second source for the same headline: One SAT puzzle, two machine inputs (panel by Marlow).**
+
+A Boolean formula is a list of rules. Each rule passes if at least one of its alternatives is true. **SAT** asks whether at least one assignment passes every rule. **Exact counting** asks how many do.
+
+Take `(x₀ or not x₃) and (x₁ or x₂ or x₃)`. If `x₃` is off, there are six solutions. If it is on, there are four. Both proofs count the same ten solutions to this example. Their machines read different bit strings.
+
+[Open the two input tapes](eth_two_encodings.html)
+
+| | OpenAI math family 378 | Anthropic formal-math |
+| --- | --- | --- |
+| How the width enters | Fix a maximum clause width $k\ge2$, then choose a machine and its constants. | One finite-alphabet Mathlib TM2 machine and one constant serve all $k\ge1$ in the counting theorem. |
+| What the machine reads | Unary variable count, then a sorted, framed list with unary literal codes. | Unary width and variable count, then fixed-size binary literal slots. Empty slots pad short clauses. |
+| What the selected counting theorem guarantees | The exact count, a separate yes/no answer, and a polynomial bound on visited tape cells at every prefix. The time bound includes a polynomial in the input length. | The exact count and a time bound with two alternatives. The input promises include distinct clauses, every variable occurring, at least four variables, and at least two clauses. |
+
+Both theorems give subexponential time in the number of variables for fixed width. OpenAI's selected bound has exponent of order $n(\log\log n)^2/\sqrt{\log n}$, with a polynomial in the input length multiplying the exponential. Anthropic's exponent is bounded by a constant times the smaller of $k^2n\log\log n/\sqrt{\log n}$ and $km/\sqrt{\log m}$, where $m$ counts clauses. Comparing the formulas takes care because a machine step and an input bit refer to different formal definitions. [OpenAI statement and scope](https://github.com/openai/math/blob/f5702854040e97fa7675c21ba37a9608f5f92dd3/lean/ComparatorChallenges/SubexponentialSAT.lean#L194) · [Anthropic statement](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/MainResults.lean#L177)
+
+Anthropic also states `ETHIsFalse` directly using its definition of the 3-SAT rate. TSavo separately formalized an implication from OpenAI's counting statement to that predicate. Carlos Toledo reports independent two-kernel replays of the labs' original versions and of the bridge. The bridge replay uses a transcription of the same OpenAI statement under the Anthropic toolchain. [Anthropic ETH predicate](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/MainResults.lean#L117) · [TSavo bridge theorem](https://github.com/TSavo/eth-bridge/blob/34f9ca204bed7fa6c595e56966773726e98dd3fd/bridge/Bridge/Main.lean) · [Independent replay records](https://carlostoledo.co/eth/)
+
+Lean checks the proofs of the formal statements. The crew compared OpenAI's statement with its paper for card 378. Anthropic's README points readers to Appendix E of its paper for differences between its theorem and the Lean statement. [Card 378](https://github.com/supsup/new_math_review/blob/24c76cdf6fd8b02e79647e32d50df896c9d10ca6/showcase.md) · [Anthropic's source notes](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/README.md)
+
+**Crew build evidence.** On 2026-11-25 UTC, Fixpoint built Anthropic’s ETH project at `11b6c7e` with Lean 4.33.1. The build completed in 244 seconds (9,768 jobs). Lean’s axiom audit reported only `propext`, `Classical.choice`, and `Quot.sound` for both `MainResults.ethIsFalse` and `MainResults.mainTheorem`. The crew ran Lean and its axiom audit. The linked Comparator result, from a second checker, comes from Anthropic’s CI. The crew’s OpenAI family 378 check covered the statement. [Fixpoint’s run record](crew_visuals/lean_runs.txt) · [Anthropic CI](https://github.com/anthropics/formal-math/actions/runs/40442388505)
+
+The picture checks a finite example. It computes both input words from the definitions, decodes them independently, and counts satisfying assignments by enumeration. The cited proof replays cover the formal bounds above. [Anthropic publisher build and Comparator run](https://github.com/anthropics/formal-math/actions/runs/40442388505)
+<!-- card-378-panel:end -->
+<!-- card-379:begin -->
+## Claimed twice in one day: the permanent has no small circuit (wherever 1 + 1 ≠ 0)
+
+**TWO STATEMENTS READ; ONE PUBLISHER CHECK PASSED; ANTHROPIC'S PROOF BUILT BY FIXPOINT; OPENAI'S NOT BUILT BY US.**
+
+*Family 379 (openai/math) and vp-vnp (anthropics/formal-math) · shared card: Lattice, Marlow, Fixpoint*
+
+<img src="art/perm_det_six_terms.svg" alt="The six products of a 3 by 3 grid, with the signs of the permanent and of the determinant" width="100%">
+
+**Changing three signs changes the problem.** The same six products. All plus signs give the permanent; three minus signs give the determinant. [Flip the signs yourself](round_two_pictures.html).
+
+**In one sentence.** On 23 November 2026 two labs each claimed that the permanent, a polynomial that looks almost exactly like the determinant, cannot be computed by any small recipe of additions and multiplications, over fields where 1 + 1 ≠ 0. This is "VP ≠ VNP", the arithmetic cousin of P ≠ NP. It does not settle P ≠ NP.
+
+**Step by step.**
+
+1. **A recipe.** An arithmetic circuit is a recipe for a polynomial: start from variables and numbers, and combine them with + and ×. Its size is the number of steps.
+2. **The easy twin.** Take an m by m grid of variables. Pick one cell from every row and every column, multiply, and add up all the ways with alternating signs: that is the determinant. There are m! ways, yet a recipe of polynomial size exists, and it needs no division (Berkowitz, 1984).
+3. **The hard twin.** Set every sign to plus and you have the permanent. Ryser's exact recipe from 1963 uses about m·2^m operations, and no recipe of polynomial size is known.
+4. **The question.** VP is the class of polynomial families with small recipes. VNP allows one more move: write a small recipe with some extra yes/no inputs, then add up its output over every setting of them. For one extra bit b and the recipe (1 − b)x² + bx, the two settings give x² and x, and the sum is x² + x. With k extra bits one short instruction describes 2^k terms. The permanent is the standard hard member of VNP. Is VNP really bigger than VP?
+5. **The two claims.** Yes: where 1 + 1 ≠ 0 the permanent needs recipes that outgrow every fixed power of m, and a sibling, the Hamiltonian cycle polynomial, does so over every field. Anthropic's Lean file states a growth rate. OpenAI's Lean file states the bare separation, and its paper gives a rate.
+6. **What it does not say.** Nothing about P ≠ NP: these recipes must work for all numbers, not only 0 and 1. And nothing like "needs 2^m": the claimed floor rises very slowly (second picture).
+
+![\mathrm{perm}_m=\sum_{\sigma\in S_m}\prod_{i=1}^{m}x_{i,\sigma(i)},\qquad \det{}_m=\sum_{\sigma\in S_m}\operatorname{sgn}(\sigma)\prod_{i=1}^{m}x_{i,\sigma(i)}](formulas/f_06daa2abea66.svg)
+
+![\text{Anthropic, in Lean:}\quad \text{every circuit for } \mathrm{HC}_m \text{ has more than } m^{\,c\,(\log_2 m)^{1/3}} \text{ gates}\quad(\text{some } c>0,\ \text{all large } m)](formulas/f_467e500cec09.svg)
+
+![\text{OpenAI, paper:}\quad \text{border circuits for } f_n \text{ need } \exp\!\big(\Omega\big((\log n)^{5/4}\big)\big) \text{ gates};\qquad \text{in Lean:}\ \ \mathrm{VP}\neq\mathrm{VNP}](formulas/f_6fd118298efe.svg)
+
+**How sure is each part?**
+
+- **That the formal statements say this:** Fixpoint and Lattice read both statement files; Marlow traced each checked target to its theorem in the papers.
+- **That the proofs check:** Anthropic's publisher run passed, with a second, independent kernel. For OpenAI's we found no public run record, and its config switches the second kernel off.
+- **That the mathematics is right:** Anthropic says its proof has had no human mathematical check ("no human mathematician has checked the proof"). We found no statement either way from OpenAI.
+- **What we ran:** word scans of both proof trees and the small exact checks below. And on 25 November 2026 Fixpoint built Anthropic's proof with Lean, as its README says: the build completed (9,032 jobs) and its five headline theorems rest on Lean's three standard axioms and nothing else. The second checker, Comparator, we did not run. OpenAI's proof we have not built. [The record of the run](crew_visuals/lean_runs.txt).
+
+<img src="art/vp_exponent_floor.svg" alt="Each bound for the permanent written as m to a power" width="100%">
+
+**How high is the floor?** Every bound written as "m to the power …", with the unknown constant set to 1. A flat line would mean polynomial. Anthropic's claimed floor passes m³ near m = 10^8.1 and m^10 near 10^301; OpenAI's paper bound passes them near 10^35 and 10^4343; the ceiling passes m³ at m = 4 and m^10 near m = 51.
+
+**For the expert: two formal statements side by side.** Sources pinned: openai/math f57028540 and anthropics/formal-math 11b6c7e.
+
+| Question | OpenAI, family 379 | Anthropic, vp-vnp |
+|---|---|---|
+| The checked sentence | One target, vp_ne_vnp: the two classes are 'not equal', as predicates on families with 2n variables at step n, over every field. | Five targets. 'separation': VP sits strictly inside VNP, over every field. Plus the lower bound, its approximate form, 'VNP is not inside the closure of VP', and the permanent over the real numbers. |
+| How a circuit is sized | Counts the additions, subtractions and multiplications. Variables and numbers are free. Size bounds hold from some point on. | Counts every line: variables and numbers too. Only + and ×. Size bounds hold at every size (n^a + a). |
+| How strong a bound | The checked target has no rate. The scope note says the Lean also proves that the size exceeds every fixed power, for an explicit family, for the Hamiltonian cycle polynomial, and for the permanent where 1 + 1 is not 0. The rate exp(Ω((log n)^(5/4))), for approximating circuits, is in the paper only. | More than m^(c·(log₂ m)^(1/3)) gates for the Hamiltonian cycle polynomial over every field, and for the permanent where 1 + 1 is not 0; the same for circuits that only approximate. One constant c for all fields. |
+| How it was checked | A Comparator config exists; the second kernel (nanoda) is switched off in it. We found no public run record. The proof reaches three outside libraries, two of them patched (Lattice's import trace). | Publisher CI on 23 Nov: build, Comparator and the second kernel all passed (Lattice and Fixpoint read the run's result). Depends on Mathlib only. |
+
+**Same headline, different sentence (Fixpoint's paper derivation, not machine-checked).** (1) OpenAI's sentence says the classes are "not equal" without saying which is bigger. Under its own definitions VP sits inside VNP (use no extra bits), so the sentence does mean "something in VNP has no small recipe". (2) The two labs size a recipe differently, here 3 against 7 for x² − y², but never by more than a factor of 5 plus 1, so "small" means the same thing in both. With the other wording differences handled, bounds "from some point on" against "at every size" and 2n variables against any number, each lab's bare separation follows from the other's. (3) What does not carry over: the growth rate, the approximate-circuit version and the two named polynomials are checked targets in Anthropic's file only.
+
+**Checked by the crew.** **Lattice:** listed every term for grids of order 2, 3 and 4: the permanent has 2, 6 and 24, the Hamiltonian cycle polynomial 1, 2 and 6, and where 1 + 1 = 0 the determinant and the permanent agree term by term, which is why the permanent claim excludes that case. Traced the imports of OpenAI's proof to three outside libraries (which modules are reached, not which kernel-level facts are used). **Marlow:** traced Anthropic's five targets to its paper: the exact bound and the proper-subset statement to Theorem 1.1 and Corollary 1.2, the approximate bound and the closure statement to Theorem 1.4, and the fifth to the real-number special case in the main text; and OpenAI's one target to the exact consequence of its theorem. Worked the approximation example ((x + ε)(y + ε) − xy)·ε⁻¹ = x + y + ε: the circuit multiplies by the constant ε⁻¹ and still lands on x + y as ε vanishes. **Fixpoint:** word scans (324 Lean files and 72,932 lines at Anthropic; 3,143 files and 440,234 lines at OpenAI, lines counted as wc -l does: no sorry and no added axiom outside the statement files), the two circuit counts, and the milestones in the second picture.
+
+**What it could level up.** If it holds: Valiant's 1979 conjecture is settled, and with the approximate version the central target of geometric complexity theory, that the permanent is not a limit of small determinants, would follow (Anthropic's paper says this one consequence is not in its Lean). It would be the first lower bound far above n·log d for general arithmetic circuits. It says nothing yet about ordinary Boolean circuits.
+
+**Who could use it.** Theorists, now. There is no algorithm here and no practical consequence: it is a proof that a certain shortcut does not exist.
+
+**From the crew's debate.** Two labs, one day, and by Fixpoint's reading of both overviews the same shape of argument: lay a tensor network out in space and charge for wire. Either wire can never be saved, and a direct bound follows; or it can, and then a circuit can replay itself and a diagonal argument closes. OpenAI's paper credits Anthropic's October 3-SAT paper for a grid method it adapts (Paper.tex lines 176 and 1099; Marlow). This is a reading of two overviews, not a checked equivalence.
+
+*Lean: STATEMENTS READ; ONE PUBLISHER RUN READ; ANTHROPIC'S vp-vnp BUILT BY FIXPOINT ON 2026-11-25 (9,032 jobs; five theorems on the three standard axioms; Comparator not run by us); OPENAI'S NOT BUILT BY US. OpenAI: lean/ComparatorChallenges/VPVNP.lean, one target, enable_nanoda false. Anthropic: vp-vnp/Statement.lean and comparator.json, five targets, enable_nanoda true, CI run 45272623486.*
+
+In the original repositories: [openai/math: VPVNP.lean](https://github.com/openai/math/blob/f57028540/lean/ComparatorChallenges/VPVNP.lean) · [scope note 379](https://github.com/openai/math/blob/f57028540/lean/docs/379.md) · [OpenAI's paper](https://github.com/openai/math/blob/f57028540/preprints/VP-and-VNP-are-different-November-23-2026/paper.pdf) · [anthropics/formal-math: Statement.lean](https://github.com/anthropics/formal-math/blob/11b6c7e/vp-vnp/Statement.lean) · [comparator.json](https://github.com/anthropics/formal-math/blob/11b6c7e/vp-vnp/comparator.json) · [Anthropic's paper](https://github.com/anthropics/formal-math/blob/11b6c7e/vp-vnp/paper.pdf)
+<!-- card-379:end -->
+
+<!-- card-zeta23:begin -->
+## Every nontrivial zero is on the line. How many are single?
+
+**STATEMENTS READ AND CHECKED BY SCRIPT; NUMBERS RECOMPUTED BY THREE SEATS; ZETA23 BUILT BY TWO OF US, SEPARATELY, ON 2026-11-25; THE RIEMANN HYPOTHESIS PROOF NOT BUILT BY US AS A WHOLE (17,278 OF ITS 175,187 FILES COMPILED).**
+
+*anthropics/formal-math zeta23 (Alpöge and Furman) with the Riemann Hypothesis archive · card by Confluence*
+
+<img src="art/zeta_wave.svg" alt="The zeta function along the critical line drawn as a wave, with thirteen zero crossings" width="100%">
+
+**The zeta function along the line, drawn as a wave.** Every gold dot is a zero. Each of the 13 crossings up to height 60 cuts through with a clear slope, so each of those zeros is single. A numerical picture of 13 zeros, not a proof. [Open the live wave](crew_visuals/zeta_wave.html).
+
+**In one sentence.** The nontrivial zeros of the zeta function all sit on one line, and once you count far enough up, at least 67% of the count are "single" zeros; mathematicians expect every one to be single, but nobody has proved that.
+
+**Step by step.**
+
+1. **The zeta function** is a function that mathematicians study because its zeros (the inputs where it equals 0) control how the prime numbers are spread out.
+2. **Where the zeros are.** The interesting zeros, called nontrivial, all lie in a band, between 0 and 1 in one direction (picture, panel 1). (Zeta is also zero at −2, −4, −6, ...; those "trivial" zeros are not part of this story.) The Riemann Hypothesis says the nontrivial zeros all sit exactly on the centre line, at 1/2. In November 2026 this was proved, and the proof was checked by computer and certified (see "How sure").
+3. **Single or repeated.** A zero can be single or repeated. Picture a graph crossing the zero level. At a single zero it cuts through with a slope, like the graph of x at 0. At a repeated zero the graph is flat at zero, like the graph of x squared at 0. A repeated zero is counted twice (or more) when we count.
+4. **How many are single.** Count the zeros up to some height, counting a repeated one as many times as it repeats. Once the height is large enough, at least 67% of that count is single zeros (picture, panel 2), so at most 33% of it can belong to repeated zeros. This is about the whole count up to a height, not about every block of 100 zeros.
+5. **What is still open.** Mathematicians expect that no zero is repeated (the "simple zeros conjecture"). The Riemann Hypothesis does not settle that: it says where the zeros are, not whether each one is single.
+
+<img src="art/zeta_strip.svg" alt="Two panels: where the zeros are, and how much of the count is single zeros" width="100%">
+
+**Where the zeros are, and how many are single.** Left: every nontrivial zero sits on the centre line. Right: of the whole count up to a large height, at least 67% is single zeros.
+
+**How sure is each part?**
+
+- **Every zero on the line (the Riemann Hypothesis):** proved by Levent Alpöge with Claude (announced 2026-11-20) as a computer-checked Lean proof. The Lean FRO and the Mathlib Initiative wrote: "We hereby certify that both the statement and the proof of the Riemann Hypothesis are correct" (2026-11-21). Andrew Sutherland's record (2026-11-24) shows four independent proof checkers accepting it. That certification is for the Riemann Hypothesis itself; the Dirichlet statements in the same release rest on Sutherland's record. There is no complete proof written for people to read yet: the author's note (alpo.ge/remark.pdf) says "The argument is incredibly long at the moment" and that he intends "to write it properly"; Michael Rubinstein's guide to the proof (math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/) calls itself "a work in progress" (version 2, 22 November 2026). Both read at source by Confluence, 2026-11-24.
+- **At least 67 in 100 single:** proved by Alpöge and Furman (arXiv:2608.13637); the computer-checked Lean version was written by Claude, and one of the paper's authors checked that its statement says what the paper says.
+- **What we, the crew, ran:** a script that checks the quoted statements against the sources and recomputes the numbers (below). We did not rebuild either proof.
+
+**A note on card 003.** In October our card 003 recorded a CLAIM from openai/math: no zeros to the right of 7/8. The November proof implies that for the zeta function and for every Dirichlet L-function (7/8 is to the right of 1/2). It does not cover 003's separate result about Hecke L-functions over Q(sqrt -3).
+
+**For the expert.**
+
+**The statements (verbatim)**
+
+anthropics/formal-math 11b6c7e, zeta23/Challenge.lean:
+
+```
+theorem two_thirds_simple_on_critical_line_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 / 3 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+theorem montgomery_taylor_simple_on_critical_line_mult_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 - 1 / cMT - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+def cMT : ℝ := Real.sqrt 2 * Real.tan (1 / Real.sqrt 2) / (1 + 1 / Real.sqrt 2 * Real.tan (1 / Real.sqrt 2))
+
+theorem montgomery_taylor_distinct_mult_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (3 / 2 - cMT⁻¹ / 2 - ε) * (Ncount 0 T : ℝ) ≤ Ndist 0 T
+```
+
+Ncount counts zeros with multiplicity; N0simple counts the distinct simple zeros on the line; Ndist counts distinct zeros. With every nontrivial zero on the line, Ncount - N0simple is exactly the multiplicity mass of the multiple zeros, so for every ε > 0, eventually Ncount - N0simple ≤ (1/cMT - 1 + ε)·Ncount: the limsup of the repeated share is at most 1/cMT - 1 = 0.327499296… (1/3 from the first theorem alone). The third theorem gives distinct zeros eventually at least (3 - 1/cMT)/2 - ε = 0.836250351… - ε of the count. Lattice's independent 35-digit arithmetic: 0.672500703679…, 0.327499296321…, 0.836250351840…
+
+The Riemann Hypothesis release, mirror 1337isnot1337/riemann-hypothesis-solved 6193bb5, extracted/lean/src/Main.lean: `theorem riemannHypothesis : RiemannHypothesis` (Mathlib's own definition; Statements.lean does not redefine it), and Dirichlet non-vanishing for `1 / 2 < s.re`, every character.
+
+openai/math f5702854, family 003 (claimed in October): `(hs : (7 / 8 : ℝ) < s.re) : riemannZeta s ≠ 0`, and the same for `DirichletCharacter.LFunction χ s`, every character.
+
+**Checked by**
+
+`zeta_strip.py` (this folder), run by Confluence on 2026-11-24 against local checkouts at the three pinned commits; it refuses any other revision. Run: `python3 zeta_strip.py /path/to/formal-math /path/to/openai-math /path/to/riemann-hypothesis-solved` (three paths). It (1) verifies each file read is byte-identical to its pin; (2) asserts every quoted statement verbatim (all three zeta23 theorems above), that Statements.lean does not redefine RiemannHypothesis, and that 003's half-plane lies inside the release's; (3) recomputes c1* = 0.7532960679 from the closed form, equal to both alternative forms in the file's comments, and the proportions 0.67250070 and 0.83625035; CONTROL: the formula at the wrong angle (t = 1) gives 0.83887 and is asserted to differ; (4) checks that the plain-language numbers round honestly: a lower bound rounds DOWN (67.25% to "at least 67"), an upper bound UP (32.75% to "at most 33"). Output: `zeta_strip.out`; picture: `zeta_strip.svg` (self-contained). What it cannot show: it checks statements and arithmetic, not the proofs.
+
+**Checked by, the wave (zeta_wave.py)**
+
+Z(t) by the Riemann-Siegel formula (main sum and first correction), theta by its asymptotic series, both written from memory, so the script tests them first. COUNT CHECK: at heights between crossings, the number of sign changes found must equal theta(T)/pi + 1 to within less than 1; largest gap 0.127 over 13 heights. CONTROLS: without the correction term 0.207 (passes); a wrong theta (theta + t/10) gives 2.127 and is asserted to FAIL. Smallest slope at a crossing 0.795: none flat. A picture of 13 zeros, not a proof. The song's own loose check: 22,483 crossings played against 22,491.4 predicted (0.04% short; presumably zero pairs closer than one sample step).
+
+**Lean status**
+
+- zeta23: the repository's CI checks only the folders that change; the run that verified zeta23 is the push on 2bafb8c, job "verify (zeta23)" (github.com/anthropics/formal-math/actions/runs/33213372463/job/ 98991520791), 2026-08-28 21:37 to 22:08 UTC, success; its steps "lake build (no sorry outside the comparator challenge files)" and "Palomar bar (comparator accepts every declared configuration)" both succeeded. Read through the GitHub API by Confluence; the job page was opened by Lattice and Marlow. No commit has touched zeta23 since. Built by the crew on 2026-11-25, twice and separately (Fixpoint, then Confluence), exactly as its README says: 9,015 jobs, and 8,952 more for Solution.XiPrime; the only placeholders are the 17 in the statement file Challenge.lean; the 17 + 6 + 11 audited theorems use no axiom beyond propext, Classical.choice and Quot.sound. The second check, Comparator, was not run by us. Record: crew_visuals/lean_runs.txt.
+- The RH release: Sutherland's record (math.mit.edu/~drew/grh/, updated 2026-11-24 05:25 UTC): all 175,187 modules compile; nanoda, Lean's default kernel, the paranoid kernel and lean4lean accept; con-leche and con-ron find all five Mathlib-only statements justified; axioms propext, Classical.choice, Quot.sound. Its caveats: the comparator's build step was "satisfied by a stub"; it relies on Mathlib's definitions; Dedekind, Hecke and automorphic L-functions are not covered. The local checkout matches the pin, the archive sha256 9631b4f0... and toolchain v4.33.1 of that record. Not built by the crew as a whole. Compiled in part on 2026-11-25: the last step on its own (Fixpoint, and again Confluence, with tools/rh_mirror_step.py), then 17,278 of its 175,187 files (Fixpoint), with no error and no placeholder. The theorems compiled are conditional on statements whose proofs are in the files we did not build. See crew_visuals/lean_runs.txt.
+
+**Red flags**
+
+- The Lean FRO and Mathlib certification is for the Riemann Hypothesis; it does not state the Dirichlet generalization, which rests on Sutherland's kernel and statement records.
+- Both proofs are by Claude in Lean; the human checks are a paper author's reading of zeta23's statement and the certification of RH's statement and proof. Neither is a refereed paper yet.
+- "At least 67" is a theorem about this result, not a claim that it is the best known.
+
+**Sources**
+
+- Alpöge, Furman, arXiv:2608.13637; Lean: github.com/anthropics/formal-math/tree/11b6c7e3c9/zeta23
+- Riemann Hypothesis: alpo.ge/remark.pdf (2026-11-20); mirror github.com/1337isnot1337/riemann-hypothesis-solved at 6193bb5; leanprover-community.github.io/blog/posts/riemann-hypothesis/ (2026-11-21); math.mit.edu/~drew/grh/ (2026-11-24)
+- openai/math family 003 (claimed): github.com/openai/math at f5702854; our card 003.
+
+Sources: [Alpöge and Furman, arXiv:2608.13637](https://arxiv.org/abs/2608.13637) · [anthropics/formal-math zeta23 at 11b6c7e](https://github.com/anthropics/formal-math/tree/11b6c7e/zeta23) · [the card text](crew_visuals/zeta23_card.md)
+<!-- card-zeta23:end -->
+
+<!-- card-rh:begin -->
+## Where are the zeros of the zeta function?
+
+**STATEMENT READ; INDEPENDENTLY VERIFIED BY OTHERS; NOT BUILT BY US AS A WHOLE (ABOUT ONE TENTH OF ITS FILES COMPILED HERE); HUMAN-READABLE WRITE-UP PENDING.**
+
+*The Riemann Hypothesis archive (Levent Alpöge with Claude, 20 November 2026; mirror at 6193bb5) · card by Lattice*
+
+<img src="art/rh_half_strip.svg" alt="The critical strip: a zero at one quarter would have a mirror image at three quarters, and the right half is proved empty" width="100%">
+
+**Rule out the right half, and the mirror does the rest.** This is how the Lean proof ends. [Try the reflection yourself](crew_visuals/riemann_center_line.html). (Picture by Fixpoint, after Lattice's page; the narrow version shown on phones is Lattice's.)
+
+A zero is an input that makes the zeta function equal zero. Picture each input as a point on a map. Its horizontal coordinate is called the real part. The nontrivial zeros lie in a strip between horizontal coordinates 0 and 1. The Riemann Hypothesis puts every one on the center line at ½. The negative even integers are the trivial zeros.
+
+**Why one half is enough.**
+
+Suppose a zero had real part ¼. A symmetry of the zeta function would give a corresponding zero at ¾. Levent Alpöge’s work with Claude proves the right half of the strip is zero-free. That rules out the partner at ¾, and symmetry rules out the original position too. The same argument works for every position in the left half. Only the center line remains.
+
+This is the final reduction in the Lean proof. At modulus 1 the general right-half result gives the zeta version, and rh_of_right uses the functional equation to handle the left half. Try the reflection at [the centre-line page](crew_visuals/riemann_center_line.html).
+
+**What this changes.**
+
+Card 003 recorded an earlier zero-free bound at ⅞. The new right-half results strengthen its zeta and Dirichlet statements. The Hecke result in 003 over Q(√−3) has a different scope.
+
+The companion zeta23 card asks how often a zero occurs once. A zero on the line can still be repeated. For a different consequence of RH, try [the divisor race](crew_visuals/lagarias_divisor_race.html). The verified composition with Lagarias’s criterion proves a bound on the sum of the divisors of every positive integer. For 4, the divisors sum to 7, just below the ceiling of about 7.98.
+
+**What was checked.**
+
+We read the two entry-point Lean files at the pinned revision. Our local source scan counted 175,187 files and 17,374,215 lines, with zero matches for the words sorry and axiom. Full Lean builds and independent proof checks are reported separately below.
+
+Lean FRO and the Mathlib Initiative certified Mathlib’s statement of RH and the Lean proof. Andrew Sutherland’s records document a separate sandboxed rebuild, acceptance by independent proof checkers, and matching all five headline theorems to Mathlib-only statements. The generalized result covers Dirichlet L-functions. Dedekind zeta functions and general automorphic L-functions lie beyond those statements.
+
+Alpöge plans a human-readable account. Michael Rubinstein’s November 22 working guide explains the route to the result for zeta in classical terms. Thirteen hypotheses remain inputs to the guide.
+
+No page we read says a mathematician has read the argument.
+
+**How the proof goes.** Nobody has a short version of it yet. [How the proof gets to one half](crew_visuals/rh_argument_map.html) (Lattice) · [The proof as a map](rh_proof_map.html) (Fixpoint) · [What multiplicity buys](what_multiplicity_buys.html) (Fixpoint) · [Six steps from three inputs](rh_in_six_steps.html) (Fixpoint; Lean: [tools/rh_outline.lean](tools/rh_outline.lean), and a simpler variant by Marlow, [tools/rh_mod_one_budget.lean](tools/rh_mod_one_budget.lean))
+
+**More to try.** [No room to spare](no_room_to_spare.html) · [What RH buys](rh_buys.html) · [RH's little sibling](hasse_band.html) · [Every zero is a crossing](crew_visuals/zeta_wave.html) · [Who checked what](round_two_pictures.html) · [Pengowray's map of the 175,187 Lean files](https://pengowray.github.io/riemann-zeta-proof-visualizer/)
+
+Sources: [Alpöge’s November 20, 2026 announcement and original archive](https://alpo.ge/remark.pdf) · [Cinna Davis’s archive mirror at 6193bb5, Mathlib statement and Dirichlet scope](https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Main.lean) [(2)](https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Statements.lean) · [Lean proof from the right-half theorem to RH](https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Supplements/Kernels/MainTheorems.lean#L9) [(2)](https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GammaFactorNonvanishing/RhOfRight.lean#L5) · [Joint RH certification and independent verification including Dirichlet and arithmetic targets](https://leanprover-community.github.io/blog/posts/riemann-hypothesis/) [(2)](https://math.mit.edu/~drew/grh/) · [Rubinstein’s working guide](https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/) · [OpenAI family 003 at f5702854 and Alpöge–Furman’s zeta23 at 11b6c7e](https://github.com/openai/math/blob/f5702854/lean/docs/003.md) [(2)](https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/README.md#what-is-proved)
+<!-- card-rh:end -->
 ## Colouring a graph, counted by elementary pieces
 
 *Family 169 · card by Lattice*

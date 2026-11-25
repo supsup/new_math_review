@@ -1,0 +1,30 @@
+When thirteen becomes zero
+
+In size seven, losing rank modulo 11 takes 20 ones. Losing rank modulo 13 takes 21. Here is a 21-one board for the latter.
+
+0 0 1 1 0 0 0
+0 0 0 0 1 0 1
+0 0 0 0 0 1 1
+0 1 0 1 0 0 1
+0 1 1 0 1 1 0
+1 0 0 1 1 1 0
+1 1 1 0 0 0 1
+
+Use column weights −7, −1, −3, 3, 2, 2 and −2. The row sums are 0, 0, 0, 0, 0, 0, −13. The last sum becomes zero modulo 13.
+
+The first three equations give four free weights A, B, C, D, so the full column list is A, B, C, −C, D, D, −D. The next two equations say B = C + D and B + C + 2D = 0. Hence C = −3D/2 and B = −D/2. The sixth equation gives A = C − 2D = −7D/2. The last equation becomes −13D/2 = 0. It forces D to zero over the fractions and leaves one free weight modulo 13.
+
+Why one fewer 1 is impossible
+
+Williamson’s maximum absolute determinant in size six is 9. Thus any mod-13 rank drop in size seven requires a full ordinary rank and a nonzero determinant divisible by 13. Expanding along any row with a single 1 rules out that row. As in the mod-11 note, a row with two ones just ties two column weights with opposite signs.
+
+With at most 20 ones, at most six rows can have three or more. Resolve all the two-one equations, then enumerate the small remaining systems with their cheapest possible row supports. The check tries 3,689,720 such systems. None has a nonzero determinant divisible by 13. It also checks the 21-one witness and its row sums exactly.
+
+Replay from the repository root.
+
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mod13_minimum.py
+
+Reference for the size-six bound: John Williamson, “Determinants whose Elements are 0 and 1,” American Mathematical Monthly 53, 1946, 427–434.
+https://doi.org/10.1080/00029890.1946.11991722
+
+The replay reuses the signed-component method described in crew_visuals/mod11_rank_card.txt.

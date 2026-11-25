@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A little gap to the right</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf9ef;
+      --ink: #283a36;
+      --green: #216848;
+      --blue: #305989;
+      --red: #9e482c;
+      --muted: #52635b;
+      --edge: #c8d3c5;
+      background: #e7ede3;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    h1 { font: clamp(2.55rem, 7vw, 4.45rem)/1.05 Georgia, serif; letter-spacing: -.045em; margin: .55rem 0 .7rem; }
+    p { max-width: 67ch; }
+    .intro { color: var(--muted); }
+    .demo { border: 1px solid var(--edge); padding: .95rem 1rem .65rem; border-radius: .4rem; background: #f0f4e9; }
+    .control { display: grid; grid-template-columns: 1fr auto; gap: .05rem .8rem; align-items: baseline; }
+    label { font-weight: 650; }
+    output, dd { font-variant-numeric: tabular-nums; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.5rem; margin: 0; accent-color: var(--red); }
+    input[type="checkbox"] { accent-color: var(--green); }
+    :focus-visible { outline: .17rem solid var(--red); outline-offset: .15rem; }
+    .zoom { display: flex; align-items: center; gap: .35rem; width: fit-content; min-height: 2.5rem; font-weight: 500; }
+    .ruler { position: relative; height: 1.4rem; margin: .55rem .15rem .16rem; border: 1px solid #b6c9b8; background: #d8e9de; }
+    .allow { position: absolute; inset: 0 auto 0 0; background: #e5ebdf; }
+    .mark { position: absolute; inset: -.24rem auto -.24rem auto; width: .16rem; transform: translateX(-50%); border-radius: .2rem; }
+    .estimate { background: var(--green); }
+    .boundary { background: var(--blue); }
+    .zero { background: var(--red); }
+    .ticks { display: flex; justify-content: space-between; font-size: .84rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+    .stat { display: flex; gap: .5rem 1.35rem; flex-wrap: wrap; margin: .9rem 0 .3rem; }
+    .stat div { flex: 1 1 9rem; }
+    dt { font-size: .84rem; }
+    dd { margin: 0; font: 1.55rem/1.25 Georgia, serif; }
+    .value-estimate { color: var(--green); }
+    .value-boundary { color: var(--blue); }
+    .value-zero { color: var(--red); }
+    .trail { padding-left: 1.35rem; }
+    .trail li { padding: .45rem 0; }
+    .trail p { margin: .28rem 0; }
+    details { border-top: 1px solid var(--edge); margin: 1rem 0 0; padding: .65rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>A little gap to the right</h1>
+    <p class="intro">Suppose a zero sat just to the right of ½. You would only need a prime-power bound with an exponent slightly closer to ½ than that zero is. Lean puts an intermediate line θ in the gap, then chooses a small enough ε to meet the bound on that line.</p>
+    <div class="demo">
+      <div class="control">
+        <label for="position">Real part β of the hypothetical zero</label>
+        <output id="position-value" for="position"></output>
+        <input id="position" type="range" min=".501" max=".99" value=".62" step=".001">
+      </div>
+      <label class="zoom"><input id="zoom" type="checkbox"> Magnify the gap</label>
+      <div class="ruler" aria-hidden="true">
+        <span id="allow" class="allow"></span>
+        <span id="est-mark" class="mark estimate"></span>
+        <span id="theta-mark" class="mark boundary"></span>
+        <span id="beta-mark" class="mark zero"></span>
+      </div>
+      <div class="ticks" aria-hidden="true"><span>½</span><span id="tick-right">1</span></div>
+      <dl class="stat">
+        <div class="value-estimate"><dt>Window exponent</dt><dd id="estimate"></dd></div>
+        <div class="value-boundary"><dt>Zero-free threshold θ</dt><dd id="theta"></dd></div>
+        <div class="value-zero"><dt>Hypothetical zero β</dt><dd id="beta"></dd></div>
+      </dl>
+    </div>
+    <p>The toy uses the estimate exponent ½ + 12ε. For β between ½ and 1, Lean puts θ halfway from ½ to β. The toy chooses ε = (θ − ½)/24, with room to spare. In the proof, the coefficient of ε comes from the family, and ε must also be below that family’s cutoff.</p>
+
+    <ol class="trail">
+      <li><strong>Fit a window bound under θ.</strong>
+        <p><code>level_of_tiedWin</code> makes the choice of ε and uses the family bound on arbitrarily large windows. It passes <code>FormBAt</code> the resulting inequality <var>G</var><sub>m</sub>(<var>y</var>) ≤ <var>y</var><sup>θ</sup>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/RamificationFrobenius/TotientGaloisClasses/TopWin.lean#L59-L81">The choice in Lean</a></p></li>
+      <li><strong>Give that bound to the analytic criterion.</strong>
+        <p><code>Comparison₂.formB</code> rewrites the weighted statistic as a positive combination for a family of characters. <code>zeroFree_of_rpow_window</code> turns the pointwise bound into an area budget and calls <code>lemmaL</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/PrimitiveCosets/Imports.lean#L8-L19">The family conversion</a> · <a href="rh_window_spike.html">Try the area budget</a></p></li>
+      <li><strong>Rule out a pole past θ.</strong>
+        <p><code>lemmaL</code> builds the transform and applies <code>landau_window</code>. A zero past θ would give a pole whose contribution grows too quickly, relative to the bound, as the Taylor order rises. The hypothetical zero at β lies in the region just ruled out. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/lemmaL.lean#L13-L22">The call to Landau’s criterion</a> · <a href="rh_nearest_pole.html">See the growth comparison</a></p></li>
+    </ol>
+    <details>
+      <summary>What the crew compiled and checked</summary>
+      <p>Fixpoint built <code>Formalism.GammaFactorNonvanishing.CritLine</code> with its 14,300 archive dependencies at archive revision <code>6193bb5</code>, using Lean 4.33.1. The crew asked Lean for resolved names, proof-term references and axiom lists. The verbatim output is recorded in <code>crew_visuals/lean_desk.txt</code> at <code>e6b44d7</code> on Fixpoint’s review branch.</p>
+      <p>The references confirm two connections in <code>zeroFreeAll_of_topG</code>. One provides <code>Comparison₂.formB</code>, which references <code>zeroFree_of_rpow_window</code>, which references <code>lemmaL</code>. The other goes through <code>zeroFreeOn_of_tiedWin_cyc</code> and <code>zeroFreeOn_of_tiedWin</code> to <code>level_of_tiedWin</code>. The second connection calls the supplied criterion as an argument. The desk’s axiom checks on <code>level_of_tiedWin</code>, <code>formB</code>, <code>lemmaL</code> and <code>landau_window</code> report <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>.</p>
+      <p>The built file also exposes <code>rh_of_every : EveryCharacter → RiemannHypothesis</code>. The archive supplies <code>EveryCharacter</code> in a later assembly and invokes <code>rhOfAll</code> in <code>Main.lean</code>. That assembly is outside this build. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GammaFactorNonvanishing/CritLine.lean#L29-L32">The checked conditional theorem</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Main.lean#L1-L12">The archive entry point</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const element = id => document.getElementById(id);
+      const input = element('position'), zoom = element('zoom');
+      const show = value => value.toFixed(5).replace(/0+$/, '').replace(/\.$/, '');
+      function update() {
+        const beta = input.valueAsNumber, half = .5;
+        const theta = (half + beta) / 2, estimate = (half + theta) / 2;
+        const end = zoom.checked ? Math.min(1, half + 1.18 * (beta - half)) : 1;
+        const chartX = value => 100 * (value - half) / (end - half) + '%';
+        element('allow').style.width = chartX(theta);
+        element('est-mark').style.left = chartX(estimate);
+        element('theta-mark').style.left = chartX(theta);
+        element('beta-mark').style.left = chartX(beta);
+        element('tick-right').textContent = show(end);
+        element('position-value').textContent = show(beta);
+        element('estimate').textContent = show(estimate);
+        element('theta').textContent = show(theta);
+        element('beta').textContent = show(beta);
+      }
+      input.addEventListener('input', update);
+      zoom.addEventListener('change', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

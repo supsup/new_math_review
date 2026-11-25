@@ -1,0 +1,81 @@
+What seven rows can make
+
+Seven rows of zeros and ones can reach determinant 24 with 21 ones, but determinant 17 needs 24 ones. Some smaller values, including 19 and 23, are impossible at this size. So making a bigger determinant does not always take more ones.
+
+The seven-row frontier
+
+ Absolute determinant   Fewest ones
+       1                     7
+       2                    10
+       3                    12
+       4                    13
+       5                    15
+       6                    15
+       7                    17
+       8                    17
+       9                    18
+      10                    19
+      11                    20
+      12                    19
+      13                    21
+      14                    21
+      15                    22
+      16                    20
+      17                    24
+      18                    23
+      20                    22
+      24                    21
+      32                    28
+
+The zero board makes determinant 0. The known set of absolute determinant values in size seven is 0 through 18, plus 20, 24 and 32. The support counts above come from our exact search, which kept working witnesses for each value. The 11 and 13 results agree with the separate signed-component checkers. The condition here is exactly seven rows and columns, so an entry such as 15 ones for determinant 5 differs from the 13-one minimum at size five.
+
+One more prime fits in seven rows
+
+0000011
+0001101
+0010110
+0101110
+0111001
+1011010
+1100101
+
+This board has 24 ones and determinant −17. Column weights −8, −4, 1, 5, −3, 2, −2 give zero on the first six rows and −17 on the last. Size six has maximum determinant magnitude 9, so seven is the first size for a rank drop modulo 17. At that size 17 is the only possible nonzero determinant magnitude divisible by 17, because the bound is 32. The search gives the minimum 24 ones.
+
+Primes 19 and 23 have to wait for size eight. Even a rank-deficient board would need a nonzero maximal minor divisible by the prime. There is no such minor in the size-seven list or at any smaller size, since smaller matrices can be padded with identity entries. Here are eight-row witnesses, with no claim of minimum support.
+
+         |det| = 19      |det| = 23
+           00110111        01100001
+           01111100        01011010
+           10101001        00100011
+           00010001        11100110
+           11010011        10111000
+           10001110        10110111
+           00001111        11001011
+           00111010        01101101
+
+How the check skips rearrangements
+
+Read a board row by row, and within each row read left to right. In each family of boards related by row and column permutations, consider the lexicographically least one. It has the same number of ones and the same absolute determinant as every other member of its family.
+
+Now build it one row at a time. After the first few rows, columns with identical entries so far form a group. Permuting columns inside a group leaves the completed rows intact. A candidate next row must put its zeros first inside every group. Also, no candidate for a later row could have made an earlier row smaller after sorting inside the groups that existed back then. If it could, we could move it up and sort those columns, which would contradict the choice of the least board. The search enforces both rules, so it includes the least board in every family. Several boards from a family can still pass the local rules.
+
+For an invertible matrix, every prefix of its rows must be independent. The search keeps the exact minors of the rows so far, updating via expansion along the newest row. If all of them are zero, the branch can stop. At the end the only remaining minor is the determinant of the board itself. This run checked 28,967,978 invertible seven-row boards passing the local rules. A second run kept the simpler condition that the final rows and columns are lexicographically sorted. It checked 373,908,469 invertible boards and gave the same minima.
+
+Replay from the repository root
+
+c++ -O3 -std=c++17 tools/check_seven_row_spectrum.cpp -o /tmp/check_seven_row_spectrum
+/tmp/check_seven_row_spectrum
+/tmp/check_seven_row_spectrum --sorted-only
+
+Sources and related checks
+
+The spectrum is credited to Metropolis, Stein and Wells. The published account is Metropolis, Spectra of determinant values in (0, 1) matrices, Computers in Number Theory (1971), pp. 271–276. The historical discussion and normalized spectrum appear in section 8 of Brent, Orrick, Osborn and Zimmermann, Maximal Determinants and Saturated D-optimal Designs of Orders 19 and 37 (2011 preprint).
+https://members.loria.fr/PZimmermann/papers/rpb244.pdf
+
+For independently computed determinant ranges and equivalence classes, see table 2 of Živković, Classification of small (0,1) matrices (2006).
+https://arxiv.org/abs/math/0511636
+
+crew_visuals/prime_rank_drop.html
+crew_visuals/mod11_rank_card.txt
+crew_visuals/mod13_rank_card.txt
+crew_visuals/which_primes_fit.txt

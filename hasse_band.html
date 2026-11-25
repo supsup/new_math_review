@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RH's Little Sibling</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: manipulation; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 900px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 44px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #state a { color: var(--teal); }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p { font-size: 12px; }
+    .wideonly { display: none; }
+    #state { height: 66px; bottom: 92px; font-size: 13px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="For one curve and each prime p in turn, a dot at height (p + 1 minus the number of points) divided by twice the square root of p. Every dot lies between minus one and one. A side panel piles the dots into a histogram, and a small strip shows the two zeros for the latest prime sitting on the centre line."></canvas>
+<div id="hud">
+  <h1>RH's little sibling</h1>
+  <p>Take a curve <span class="teal">y² = x³ + ax + b</span> and count its points when the coordinates are whole numbers modulo a prime p.
+  The count is always close to p + 1. How close? Hasse proved in 1933 that for every prime where the curve stays smooth, the miss, divided by 2√p, never leaves the band from −1 to 1.
+  That is a Riemann Hypothesis, one that has been a theorem for ninety years: <span class="gold">a dot inside the band is the same thing as two zeros sitting exactly on the centre line</span><span class="wideonly"> (small strip, top right: the zeros repeat up and down, and it shows one period)</span>.
+  The 2026 proof's author names Stepanov's argument for curves over finite fields, the same family of results, as an ancestor of his own. Watch every dot stay inside.</p>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button id="bPlay" aria-pressed="true">Pause</button>
+  <button id="bFast" aria-pressed="false">Faster</button>
+  <button data-curve="0" aria-pressed="true">y² = x³ − x + 1</button>
+  <button data-curve="1" aria-pressed="false">y² = x³ − x</button>
+  <button data-curve="2" aria-pressed="false">y² = x³ + 1</button>
+  <button id="bRand">A random curve</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const MATH = (function () {
+  const fail = [];
+  const PMAX = 30011;
+  // primes up to PMAX by sieve
+  const comp = new Uint8Array(PMAX + 1), PRIMES = [];
+  for (let i = 2; i <= PMAX; i++) { if (!comp[i]) { PRIMES.push(i); for (let j = i * i; j <= PMAX; j += i) comp[j] = 1; } }
+  if (PRIMES.length !== 3246 || PRIMES[PRIMES.length - 1] !== 30011) fail.push("the sieve did not find 3,246 primes up to 30,011");
+  const mod = (v, p) => ((v % p) + p) % p;
+  // a bad prime divides the discriminant -16(4a^3 + 27b^2); also skip 2
+  const bad = (a, b, p) => p === 2 || mod(4 * a * a * a + 27 * b * b, p) === 0;
+  // points over F_p, counted with the quadratic character: N = p + 1 + sum over x of chi(x^3 + ax + b)
+  const isSquare = new Uint8Array(PMAX);
+  function count(a, b, p) {
+    isSquare.fill(0, 0, p);
+    for (let y = 1; y <= (p - 1) / 2; y++) isSquare[(y * y) % p] = 1;
+    let s = 0;
+    for (let x = 0; x < p; x++) { const f = mod(((x * x) % p) * x + a * x + b, p); if (f !== 0) s += isSquare[f] ? 1 : -1; }
+    return p + 1 + s;                       // includes the one point at infinity
+  }
+  // the slow way, for the self-check only: try every pair (x, y)
+  function bruteCount(a, b, p) { let n = 1; for (let x = 0; x < p; x++) { const f = mod(x * x * x + a * x + b, p); for (let y = 0; y < p; y++) if ((y * y) % p === f) n++; } return n; }
+  const CURVES = [
+    { a: -1, b: 1, name: "y² = x³ − x + 1", kind: "ordinary" },
+    { a: -1, b: 0, name: "y² = x³ − x", kind: "special", note: "A curve with extra symmetry: for every prime that leaves remainder 3 when divided by 4, the count is exactly p + 1." },
+    { a: 0, b: 1, name: "y² = x³ + 1", kind: "special", note: "A curve with extra symmetry: for every prime that leaves remainder 2 when divided by 3, the count is exactly p + 1." }
+  ];
+  // self-check on small primes: two counting methods agree, Hasse's bound holds, and the two symmetry facts hold
+  for (const c of CURVES) for (const p of PRIMES) {
+    if (p > 200) break; if (bad(c.a, c.b, p)) continue;
+    const n = count(c.a, c.b, p), t = p + 1 - n;
+    if (n !== bruteCount(c.a, c.b, p)) fail.push("the two counts disagree for " + c.name + " at p = " + p);
+    if (t * t > 4 * p) fail.push("Hasse's bound fails for " + c.name + " at p = " + p + " (that would be news)");
+  }
+  for (const p of PRIMES) { if (p > 400) break; if (p % 4 === 3 && count(-1, 0, p) !== p + 1) fail.push("y² = x³ − x: count is not p + 1 at p = " + p);
+    if (p > 3 && p % 3 === 2 && count(0, 1, p) !== p + 1) fail.push("y² = x³ + 1: count is not p + 1 at p = " + p); }
+  if (count(-1, 1, 5) !== 8 || count(-1, 0, 5) !== 8 || count(0, 1, 7) !== 12) fail.push("a hand-counted value is wrong");
+  return { PRIMES, CURVES, count, bad, fail };
+})();
+
+/* ---------- the drawing ---------- */
+(function () {
+  const errBox = document.getElementById("err");
+  function stop(msg) { errBox.style.display = "block"; errBox.textContent = msg; }
+  if (MATH.fail.length) { stop("Checks failed, nothing drawn: " + MATH.fail.join("; ")); return; }
+  const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  if (!ctx) { stop("This browser gave no 2D canvas."); return; }
+  const stateEl = document.getElementById("state");
+  const still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const COL = { bg: "#0d1020", ink: "#e8e6f2", dim: "#9a98b4", gold: "#f2c14e", teal: "#4fd1c5", edge: "#39406e", band: "rgba(79,209,197,0.07)" };
+  const BINS = 24;
+  let W = 0, H = 0, G = null, curve = MATH.CURVES[0], idx = 0, dots = [], hist = new Uint32Array(BINS), lastDot = null, playing = true, fast = false, raf = 0, worst = 0;
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1; W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const hud = document.getElementById("hud").getBoundingClientRect(), stR = stateEl.getBoundingClientRect();
+    const top = hud.bottom + 18, bottom = stR.top - 26, narrow = W < 620;
+    const histW = narrow ? 70 : 150, stripW = narrow ? 0 : 150, left = 46, right = W - 14;
+    G = { top, bottom, left, plotR: right - histW - 14, histL: right - histW, histR: right, narrow, stripW,
+          mid: (top + bottom) / 2, half: (bottom - top) / 2 - 8 };
+  }
+  const Y = v => G.mid - v * G.half;
+  const X = i => G.left + (G.plotR - G.left) * i / (MATH.PRIMES.length - 1);
+
+  function reset(c) { curve = c; idx = 0; dots = []; hist = new Uint32Array(BINS); lastDot = null; worst = 0; say(); }
+  function step() {
+    while (idx < MATH.PRIMES.length) {
+      const p = MATH.PRIMES[idx], i = idx; idx++;
+      if (MATH.bad(curve.a, curve.b, p)) continue;
+      const n = MATH.count(curve.a, curve.b, p), t = p + 1 - n, v = t / (2 * Math.sqrt(p));
+      if (t * t > 4 * p) { stop("A dot left the band at p = " + p + ". Hasse's theorem says that cannot happen, so this page has a bug."); playing = false; return false; }
+      hist[Math.min(BINS - 1, Math.floor((v + 1) / 2 * BINS))]++; worst = Math.max(worst, Math.abs(v));
+      lastDot = { i, p, n, t, v }; dots.push(lastDot); return true;
+    }
+    return false;
+  }
+
+  function draw() {
+    ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+    // the band
+    ctx.fillStyle = COL.band; ctx.fillRect(G.left, Y(1), G.plotR - G.left, Y(-1) - Y(1));
+    ctx.strokeStyle = COL.teal; ctx.lineWidth = 1.5; ctx.setLineDash([6, 5]);
+    for (const v of [1, -1]) { ctx.beginPath(); ctx.moveTo(G.left, Y(v)); ctx.lineTo(G.histR, Y(v)); ctx.stroke(); }
+    ctx.setLineDash([]); ctx.strokeStyle = COL.edge; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(G.left, Y(0)); ctx.lineTo(G.plotR, Y(0)); ctx.stroke();
+    ctx.fillStyle = COL.dim; ctx.font = "12px Georgia, serif"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    ctx.fillText("+1", G.left - 6, Y(1)); ctx.fillText("0", G.left - 6, Y(0)); ctx.fillText("−1", G.left - 6, Y(-1));
+    ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillStyle = COL.teal; ctx.fillText(G.narrow ? "Hasse's band" : "Hasse's band: the miss can never be more than 2√p", G.left + 6, Y(1) - 5);
+    // prime axis
+    ctx.fillStyle = COL.dim; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (const q of (G.narrow ? [5003, 30011] : [1009, 5003, 10007, 20011, 30011])) { const i = MATH.PRIMES.indexOf(q); if (i >= 0) { ctx.fillText("p = " + q.toLocaleString("en-US"), Math.min(X(i), G.plotR - 34), Y(-1) + 8); } }
+    // dots
+    ctx.fillStyle = "rgba(242,193,78,0.75)"; const r = G.narrow ? 1.3 : 1.7;
+    for (const d of dots) { ctx.beginPath(); ctx.arc(X(d.i), Y(d.v), r, 0, 6.283); ctx.fill(); }
+    if (lastDot) { ctx.fillStyle = COL.ink; ctx.beginPath(); ctx.arc(X(lastDot.i), Y(lastDot.v), 4, 0, 6.283); ctx.fill(); }
+    // histogram, sideways, sharing the vertical scale
+    let max = 1; for (let k = 0; k < BINS; k++) max = Math.max(max, hist[k]);
+    const total = dots.length || 1, hw = G.histR - G.histL, bh = (Y(-1) - Y(1)) / BINS;
+    // scale so that the semicircle's peak (density 2/pi per unit, bin width 2/BINS) fills about 70% of the width for an ordinary curve
+    const peak = curve.kind === "ordinary" ? Math.max(max, total * (2 / Math.PI) * (2 / BINS) / 0.7) : max;
+    ctx.fillStyle = "rgba(242,193,78,0.55)";
+    for (let k = 0; k < BINS; k++) { const w = hw * hist[k] / peak; ctx.fillRect(G.histL, Y(-1) - (k + 1) * bh + 1, w, bh - 2); }
+    if (curve.kind === "ordinary" && dots.length > 30) {     // the semicircle the pile is expected to approach
+      ctx.strokeStyle = COL.teal; ctx.lineWidth = 2; ctx.beginPath();
+      for (let k = 0; k <= 100; k++) { const v = -1 + 2 * k / 100, dens = (2 / Math.PI) * Math.sqrt(1 - v * v), w = hw * (total * dens * (2 / BINS)) / peak; if (k === 0) ctx.moveTo(G.histL + w, Y(v)); else ctx.lineTo(G.histL + w, Y(v)); }
+      ctx.stroke();
+    }
+    ctx.fillStyle = COL.dim; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(G.narrow ? "the pile" : "where the dots pile up", G.histL, Y(-1) + 8);
+    // the small strip: the two zeros for the latest prime
+    if (lastDot && G.stripW) {
+      const sw = G.stripW + 20, sh = Math.min(120, G.half * 0.62), sx = G.plotR - sw - 10, sy = Y(1) + 26;
+      ctx.fillStyle = "rgba(13,16,32,0.86)"; ctx.fillRect(sx, sy, sw, sh); ctx.strokeStyle = COL.edge; ctx.strokeRect(sx, sy, sw, sh);
+      const x0 = sx + 22, x1 = sx + sw - 22, xm = (x0 + x1) / 2, ym = sy + sh / 2 + 6;
+      ctx.strokeStyle = COL.edge; ctx.beginPath(); ctx.moveTo(x0, sy + 20); ctx.lineTo(x0, sy + sh - 6); ctx.moveTo(x1, sy + 20); ctx.lineTo(x1, sy + sh - 6); ctx.stroke();
+      ctx.strokeStyle = COL.teal; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(xm, sy + 20); ctx.lineTo(xm, sy + sh - 6); ctx.stroke();
+      const theta = Math.acos(Math.max(-1, Math.min(1, lastDot.v))), dy = (sh / 2 - 18) * theta / Math.PI;
+      ctx.fillStyle = COL.gold; for (const s of [1, -1]) { ctx.beginPath(); ctx.arc(xm, ym - s * dy, 4.5, 0, 6.283); ctx.fill(); }
+      ctx.fillStyle = COL.dim; ctx.font = "11px Georgia, serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText("zeros for p = " + lastDot.p.toLocaleString("en-US") + ", one period", sx + sw / 2, sy + 4);
+      ctx.textBaseline = "bottom"; ctx.fillText("0", x0, sy + sh - 6 + 13); ctx.fillText("½", xm, sy + sh - 6 + 13); ctx.fillText("1", x1, sy + sh - 6 + 13);
+    }
+  }
+
+  function say() {
+    if (!lastDot) { stateEl.innerHTML = "<i>Counting the points of " + curve.name + ", one prime at a time… (Hasse 1933, Stepanov 1969 and Sato-Tate are recalled from the literature; the counts and the band are checked here, prime by prime.)</i>"; return; }
+    const d = lastDot, done = idx >= MATH.PRIMES.length;
+    stateEl.innerHTML = "p = " + d.p.toLocaleString("en-US") + ": " + d.n.toLocaleString("en-US") + " points, a miss of " + d.t + " from p + 1; the limit is " + (2 * Math.sqrt(d.p)).toFixed(1) +
+      ". &nbsp; " + dots.length.toLocaleString("en-US") + " primes so far, every dot inside; the closest to the edge reached " + (100 * worst).toFixed(1) + "% of the way." +
+      (G.narrow ? " Both zeros for this prime sit at real part exactly ½." : "") + (done ? " <i>All good primes up to 30,011 done." + (curve.note ? " " + curve.note : " The pile is approaching a half-circle, as Sato and Tate predicted in the 1960s; proved for curves without extra symmetry by <a href=\"https://doi.org/10.2977/PRIMS/31\">Barnet-Lamb, Geraghty, Harris and Taylor (2011)</a>.") + "</i>" : (curve.note ? " <i>" + curve.note + "</i>" : ""));
+  }
+  function frame() {
+    raf = 0;
+    if (playing) { const n = still ? MATH.PRIMES.length : (fast ? 40 : 4); let moved = false; for (let k = 0; k < n; k++) { if (!step()) break; moved = true; } if (moved) say(); }
+    draw();
+    if (playing && idx < MATH.PRIMES.length && !still) raf = requestAnimationFrame(frame); else if (idx >= MATH.PRIMES.length) say();
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+
+  const bPlay = document.getElementById("bPlay"), bFast = document.getElementById("bFast"), curveBtns = document.querySelectorAll("button[data-curve]");
+  bPlay.addEventListener("click", () => { playing = !playing; bPlay.textContent = playing ? "Pause" : "Play"; bPlay.setAttribute("aria-pressed", playing ? "true" : "false"); kick(); });
+  bFast.addEventListener("click", () => { fast = !fast; bFast.setAttribute("aria-pressed", fast ? "true" : "false"); kick(); });
+  function choose(c, btn) { curveBtns.forEach(o => o.setAttribute("aria-pressed", o === btn ? "true" : "false")); reset(c); playing = true; bPlay.textContent = "Pause"; bPlay.setAttribute("aria-pressed", "true"); kick(); }
+  curveBtns.forEach(b => b.addEventListener("click", () => choose(MATH.CURVES[parseInt(b.getAttribute("data-curve"), 10)], b)));
+  document.getElementById("bRand").addEventListener("click", () => {
+    let a, b; do { a = Math.floor(Math.random() * 21) - 10; b = Math.floor(Math.random() * 21) - 10; } while (4 * a * a * a + 27 * b * b === 0 || a === 0 || b === 0 || (6912 * a * a * a) % (4 * a * a * a + 27 * b * b) === 0);   // skip curves whose j-invariant is a whole number: only those can have extra symmetry
+    const sgn = v => (v < 0 ? " − " : " + ") + (Math.abs(v) === 1 ? "" : Math.abs(v));
+    choose({ a, b, name: "y² = x³" + sgn(a) + "x" + (b < 0 ? " − " : " + ") + Math.abs(b), kind: "ordinary" }, null);
+  });
+  window.addEventListener("resize", () => { layout(); kick(); });
+  layout(); reset(curve);
+  if (location.hash === "#done") { fast = true; while (step()) { /* run to the end */ } say(); }   // #done opens with every prime already counted
+  kick();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rows As Edges</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e;
+    --red: #ff6b81; --cell: #1c2140; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 14px 16px 28px; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  p, li { font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  b { color: var(--ink); font-weight: normal; } .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  a { color: var(--teal); }
+  #controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+  button { background: var(--cell); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 11px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  #stage { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  table.board { border-collapse: separate; border-spacing: 3px; }
+  table.board td.c { width: 26px; height: 26px; background: var(--cell); border-radius: 4px; cursor: pointer;
+    text-align: center; font: 13px monospace; color: var(--dim); user-select: none; }
+  table.board td.c.on { background: var(--teal); color: #0d1020; }
+  table.board th { font: 12px monospace; color: var(--dim); font-weight: normal; padding: 0 4px; }
+  table.board td.tag { font-size: 12.5px; color: var(--dim); padding-left: 6px; white-space: nowrap; }
+  svg { width: 300px; max-width: 100%; height: auto; }
+  #verdict { font-size: 16px; color: var(--accent); margin: 12px 0 4px; min-height: 22px; }
+  #parts { font-size: 14px; color: var(--dim); line-height: 1.55; }
+  table.R { border-collapse: collapse; margin: 6px 0; font: 13px monospace; }
+  table.R td, table.R th { border: 1px solid var(--line); padding: 3px 7px; text-align: right; color: var(--ink); font-weight: normal; }
+  table.R th { color: var(--dim); }
+  details { margin-top: 10px; } summary { cursor: pointer; color: var(--ink); font-size: 14.5px; }
+  #checks { font-size: 13px; }
+  #err { display: none; margin: 12px 0; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Rows with two ones are edges</h1>
+  <p>A grid of zeros and ones has a determinant. Here is a way to see most of it without computing anything.
+  Every row with <b>exactly two ones</b> joins its two columns, like an edge joining two dots. The other rows are
+  <b class="gold">heavy</b>. Click cells to change the grid; the picture and the numbers follow.</p>
+  <div id="controls">
+    <button data-preset="three">Three primes (det −30)</button>
+    <button data-preset="seventeen">Seventeen (det 17)</button>
+    <button data-preset="triangle">Triangle</button>
+    <button data-preset="square">Square</button>
+    <button data-preset="mixed">Loop and trees</button>
+    <button id="smaller">− size</button><button id="larger">+ size</button><button id="clear">Clear</button>
+  </div>
+  <div id="stage"><table class="board" id="board"></table><svg id="graph" viewBox="0 0 300 300" role="img" aria-label="Columns as dots, two-one rows as edges"></svg></div>
+  <div id="verdict"></div>
+  <div id="parts"></div>
+  <div id="err"></div>
+  <details open><summary>Why the picture decides so much</summary>
+  <p>Split the dots into connected pieces. Each piece is one of four kinds.</p>
+  <ul>
+    <li><b class="teal">A tree</b> (no loop). Its edge rows say "this column equals minus that one", so the whole tree
+    moves together with alternating signs, shown as + and −. It leaves <b>one</b> free direction.</li>
+    <li><b class="gold">One loop of odd length</b>, with trees hanging off it. Going round an odd loop flips the sign an
+    odd number of times, which pins everything down. It contributes a <b>factor of 2</b> and leaves nothing free.</li>
+    <li><b class="red">One loop of even length.</b> Adding its rows with alternating signs gives zero, so the
+    determinant is <b>0</b>.</li>
+    <li><b class="red">More edges than dots.</b> Too many rows live on too few columns, so again the determinant is <b>0</b>.</li>
+  </ul>
+  <p>If nothing is red, each heavy row only matters through the trees: add up its ones in a tree with that tree's
+  signs. That gives a small matrix <b>R</b>, one row per heavy row and one column per tree, and always exactly as many
+  of each. Then <b>|det| = 2<sup>c</sup> × |det R|</b>, where c is the number of odd loops. Ones that a heavy row puts
+  on a loop's dots drop out completely.</p>
+  <p><b>Why it is useful.</b> If a board needs a determinant divisible by 17, or by 30, and has few ones, most rows
+  must have exactly two ones, so R is tiny and its determinant is easy to bound. That is how Lattice's notes
+  (global_rank_minima.txt and which_primes_fit.txt) rule out boards of ten to twelve rows without searching them one
+  by one. The first two buttons load Lattice's record boards: an eight-by-eight grid shrinks to a six-by-six R.</p>
+  <p id="checks"><b>Checks.</b> Running…</p>
+  <p><b>Sources.</b> The reduction is the one in Lattice's notes, re-derived here by block elimination. The page's
+  claim is checked on load against the determinant itself. Page by Confluence for Marginalia:
+  crew_visuals/rows_as_edges.html in supsup/new_math_review.</p>
+  </details>
+</main>
+<script>
+// MATH-BEGIN
+// Rows with exactly two ones are edges between their two columns. Every other row is a "heavy" row.
+// A component of that graph is a tree (edges = vertices - 1), a cycle with trees attached (edges = vertices),
+// or has more edges than vertices. An even cycle or a component with more edges than vertices forces det 0.
+// Otherwise |det M| = 2^c * |det R|, where c counts odd cycles and R has one row per heavy row and one column
+// per tree: R[i][t] = sum over the tree's columns v of M[i][v] * s(v), with s = +1/-1 alternating along edges.
+const EDGES = (() => {
+  function det(A) {                         // Bareiss elimination over BigInt, exact
+    const n = A.length; if (n === 0) return 1n;
+    const a = A.map(r => r.map(x => BigInt(x))); let sign = 1n, prev = 1n;
+    for (let k = 0; k < n; k++) {
+      let p = k; while (p < n && a[p][k] === 0n) p++;
+      if (p === n) return 0n;
+      if (p !== k) { [a[p], a[k]] = [a[k], a[p]]; sign = -sign; }
+      for (let i = k + 1; i < n; i++) {
+        for (let j = k + 1; j < n; j++) a[i][j] = (a[i][j] * a[k][k] - a[i][k] * a[k][j]) / prev;
+        a[i][k] = 0n;
+      }
+      prev = a[k][k];
+    }
+    return sign * a[n - 1][n - 1];
+  }
+  function analyse(M) {
+    const n = M.length, edges = [], heavy = [];
+    M.forEach((row, i) => {
+      const ones = row.flatMap((x, j) => x ? [j] : []);
+      if (ones.length === 2) edges.push({ row: i, u: ones[0], v: ones[1] }); else heavy.push(i);
+    });
+    const adj = Array.from({ length: n }, () => []);
+    for (const e of edges) { adj[e.u].push(e.v); adj[e.v].push(e.u); }
+    const comp = new Array(n).fill(-1), sgn = new Array(n).fill(0), comps = [];
+    for (let s = 0; s < n; s++) {
+      if (comp[s] >= 0) continue;
+      const id = comps.length, verts = [s]; comp[s] = id; sgn[s] = 1; let bipartite = true;
+      for (let q = 0; q < verts.length; q++) {
+        const x = verts[q];
+        for (const y of adj[x]) {
+          if (comp[y] < 0) { comp[y] = id; sgn[y] = -sgn[x]; verts.push(y); }
+          else if (sgn[y] === sgn[x]) bipartite = false;
+        }
+      }
+      const e = edges.filter(ed => comp[ed.u] === id).length, V = verts.length;
+      const kind = e === V - 1 ? "tree" : e > V ? "crowded" : bipartite ? "even" : "odd";
+      comps.push({ id, verts, edges: e, kind });
+    }
+    const dead = comps.find(c => c.kind === "even" || c.kind === "crowded") || null;
+    const trees = comps.filter(c => c.kind === "tree"), c = comps.filter(x => x.kind === "odd").length;
+    const R = dead ? null : heavy.map(i => trees.map(t => t.verts.reduce((acc, v) => acc + M[i][v] * sgn[v], 0)));
+    return { n, edges, heavy, comps, comp, sgn, trees, c, dead, R, detM: det(M), detR: R ? det(R) : null };
+  }
+  const abs = x => x < 0n ? -x : x;
+  // the claim the page makes about any board: a dead component forces 0; otherwise |det M| = 2^c |det R|
+  function holds(a) {
+    if (a.dead) return a.detM === 0n;
+    return a.heavy.length === a.trees.length && abs(a.detM) === (1n << BigInt(a.c)) * abs(a.detR);
+  }
+  return { det, analyse, holds, abs };
+})();
+// MATH-END
+
+(() => {
+  const err = m => { const e = document.getElementById("err"); e.style.display = "block"; e.textContent = m; };
+  try {
+    const parse = rows => rows.map(r => [...r].map(Number));
+    const PRESETS = {
+      three: parse(["00000011","00001100","00110001","01010100","01101010","10011010","10100110","11001001"]),
+      seventeen: parse(["00000011","00000101","00001110","00011001","00110110","01101000","10101000","11010000"]),
+      triangle: parse(["110","011","101"]),
+      square: parse(["1100","0110","0011","1001"]),
+      mixed: parse(["1100000","0110000","1010000","0001100","0000110","1001010","0100101"]),
+    };
+    const L = "ABCDEFGHIJ", COLOR = { tree: "var(--teal)", odd: "var(--accent)", even: "var(--red)", crowded: "var(--red)" };
+    const NAME = { tree: "tree", odd: "odd loop", even: "even loop", crowded: "more edges than dots" };
+    let M = PRESETS.three.map(r => r.slice()), current = "three";
+    const board = document.getElementById("board"), svg = document.getElementById("graph");
+    const show = x => String(x).replace("-", "−");
+    const sup = k => String(k).split("").map(d => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]).join("");
+    function draw() {
+      const a = EDGES.analyse(M), n = M.length;
+      // board, with each row's role
+      board.replaceChildren();
+      const hr = board.insertRow(); hr.appendChild(document.createElement("th"));
+      for (let j = 0; j < n; j++) { const th = document.createElement("th"); th.textContent = L[j]; hr.appendChild(th); }
+      M.forEach((row, i) => {
+        const tr = board.insertRow(), th = document.createElement("th"); th.textContent = i + 1; tr.appendChild(th);
+        row.forEach((x, j) => { const td = tr.insertCell(); td.className = "c" + (x ? " on" : ""); td.textContent = x;
+          td.addEventListener("click", () => { M[i][j] ^= 1; current = null; draw(); }); });
+        const tag = tr.insertCell(); tag.className = "tag";
+        const e = a.edges.find(e => e.row === i);
+        if (e) { const k = a.comps[a.comp[e.u]].kind; tag.innerHTML = `edge ${L[e.u]}–${L[e.v]}`; tag.style.color = COLOR[k]; }
+        else { tag.textContent = "heavy"; tag.style.color = "var(--accent)"; }
+      });
+      // graph: columns on a circle
+      const pos = j => { const t = -Math.PI / 2 + 2 * Math.PI * j / n; return [150 + 112 * Math.cos(t), 150 + 112 * Math.sin(t)]; };
+      const parts = [];
+      const seen = {};
+      for (const e of a.edges) {
+        const key = Math.min(e.u, e.v) + "," + Math.max(e.u, e.v); const k = (seen[key] = (seen[key] || 0) + 1);
+        const [x1, y1] = pos(e.u), [x2, y2] = pos(e.v), col = COLOR[a.comps[a.comp[e.u]].kind];
+        if (k === 1) parts.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="3"/>`);
+        else { const mx = (x1 + x2) / 2 + (y2 - y1) * 0.18, my = (y1 + y2) / 2 - (x2 - x1) * 0.18;
+          parts.push(`<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="3"/>`); }
+      }
+      for (let j = 0; j < n; j++) {
+        const [x, y] = pos(j), k = a.comps[a.comp[j]].kind, col = COLOR[k];
+        const label = k === "tree" ? (a.sgn[j] > 0 ? "+" : "−") : "";
+        parts.push(`<circle cx="${x}" cy="${y}" r="15" fill="#0d1020" stroke="${col}" stroke-width="2.5"/>`,
+          `<text x="${x}" y="${y + 4.5}" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="Georgia">${L[j]}${label}</text>`);
+      }
+      svg.innerHTML = parts.join("");
+      // numbers
+      const counts = {}; a.comps.forEach(c => counts[c.kind] = (counts[c.kind] || 0) + 1);
+      const summary = Object.entries(counts).map(([k, v]) => `<span style="color:${COLOR[k]}">${v} ${NAME[k]}${v > 1 && k !== "crowded" ? "s" : ""}</span>`).join(", ");
+      let html = `<p>Pieces: ${summary}. Heavy rows: ${a.heavy.length}.</p>`;
+      const ok = EDGES.holds(a);
+      if (a.dead) {
+        html += `<p>A <span class="red">${NAME[a.dead.kind]}</span> (columns ${a.dead.verts.map(v => L[v]).join(", ")}) forces the determinant to be 0.</p>`;
+        document.getElementById("verdict").textContent = `det = ${show(a.detM)}, as the red piece forces. ${ok ? "✓" : "✗ check failed"}`;
+      } else {
+        if (a.trees.length) {
+          let t = "<table class=\"R\"><tr><th>R</th>" + a.trees.map(tr => `<th>${tr.verts.map(v => L[v] + (a.sgn[v] > 0 ? "+" : "−")).join(" ")}</th>`).join("") + "</tr>";
+          a.R.forEach((r, i) => { t += `<tr><th>row ${a.heavy[i] + 1}</th>` + r.map(x => `<td>${show(x)}</td>`).join("") + "</tr>"; });
+          html += `<p>R, one column per tree (the tree's columns with their signs):</p>${t}</table>`;
+        } else html += "<p>No trees and no heavy rows, so R is empty and its determinant is 1.</p>";
+        document.getElementById("verdict").textContent =
+          `det = ${show(a.detM)}, and 2${sup(a.c)} × det R = ${2 ** a.c} × ${show(a.detR)}: ${ok ? "the same size, up to sign ✓" : "✗ check failed"}`;
+      }
+      document.getElementById("parts").innerHTML = html;
+      for (const b of document.querySelectorAll("[data-preset]")) b.setAttribute("aria-pressed", b.dataset.preset === current);
+      document.getElementById("smaller").disabled = n <= 2; document.getElementById("larger").disabled = n >= 10;
+    }
+    for (const b of document.querySelectorAll("[data-preset]"))
+      b.addEventListener("click", () => { current = b.dataset.preset; M = PRESETS[current].map(r => r.slice()); draw(); });
+    document.getElementById("smaller").addEventListener("click", () => { if (M.length > 2) { M = M.slice(0, -1).map(r => r.slice(0, -1)); current = null; draw(); } });
+    document.getElementById("larger").addEventListener("click", () => { if (M.length < 10) { M = M.map(r => [...r, 0]); M.push(new Array(M.length + 1).fill(0)); current = null; draw(); } });
+    document.getElementById("clear").addEventListener("click", () => { M = M.map(r => r.map(() => 0)); current = null; draw(); });
+    // checks on load: the claim on seeded random boards biased to two-one rows, and the presets' determinants
+    let seed = 2026; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    let tried = 0, failed = 0, loops = 0;
+    for (let t = 0; t < 3000; t++) {
+      const n = 2 + Math.floor(rnd() * 7);
+      const B = Array.from({ length: n }, () => { if (rnd() < 0.55) { const r = new Array(n).fill(0), a = Math.floor(rnd() * n); let b = a; while (b === a) b = Math.floor(rnd() * n); r[a] = r[b] = 1; return r; }
+        return Array.from({ length: n }, () => rnd() < 0.45 ? 1 : 0); });
+      const a = EDGES.analyse(B); tried++; if (a.c) loops++; if (!EDGES.holds(a)) failed++;
+    }
+    const want = { three: -30n, seventeen: 17n, triangle: 2n, square: 0n, mixed: 4n };
+    const presetBad = Object.entries(want).filter(([k, v]) => EDGES.analyse(PRESETS[k]).detM !== v).map(([k]) => k);
+    document.getElementById("checks").innerHTML = (failed || presetBad.length)
+      ? `<b class="red">Checks failed:</b> ${failed} of ${tried} random boards, presets ${presetBad.join(", ") || "fine"}.`
+      : `<b>Checks.</b> On ${tried} random boards (${loops} with an odd loop), a red piece always meant determinant 0, and otherwise |det| = 2<sup>c</sup> × |det R| exactly. The record boards have determinants −30 and 17, the triangle 2, the square 0, the loop-and-trees board 4. Passed.`;
+    draw();
+  } catch (e) { err("Something went wrong: " + e.message); }
+})();
+</script>
+</body>
+</html>

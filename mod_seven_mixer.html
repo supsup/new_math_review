@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>One signal unlocks the mix</title>
+<style>
+  :root {
+    --paper: #f5f0e7;
+    --card: #fffcf6;
+    --ink: #192d36;
+    --muted: #4d5f64;
+    --edge: #c8cec4;
+    --teal: #0a5a55;
+    --teal-soft: #d9ece3;
+    --clay: #8d3b26;
+    --clay-soft: #f6e0d5;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font: 16px/1.55 system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 70rem); margin: auto; padding: 2.7rem 0 3.5rem; }
+  h1, h2, p { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
+  h1 { max-width: 13ch; font-size: clamp(2.9rem, 7.2vw, 5.6rem); letter-spacing: -.06em; }
+  h2 { font-size: clamp(1.55rem, 3vw, 2rem); letter-spacing: -.025em; }
+  a { color: var(--teal); text-underline-offset: .17em; }
+  p, ol { max-width: 73ch; }
+  .back { display: inline-block; margin-bottom: 1.25rem; }
+  .intro { margin-top: .9rem; font-size: clamp(1rem, 2vw, 1.16rem); }
+  .controls { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-top: 1.7rem; }
+  label { display: grid; gap: .25rem; font-size: .86rem; font-weight: 650; }
+  button, select { min-height: 2.6rem; padding: .45rem .65rem; font: 1rem/1.2 system-ui, sans-serif; color: var(--ink); background: var(--card); border: 1px solid #84968d; border-radius: .45rem; }
+  button { cursor: pointer; }
+  button:hover, select:hover { border-color: var(--teal); }
+  button[aria-pressed="true"] { color: var(--teal); background: var(--teal-soft); }
+  :focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+  .bench { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 1rem; align-items: start; margin-top: 1.15rem; }
+  .panel { padding: clamp(.8rem, 2vw, 1.1rem); background: var(--card); border: 1px solid var(--edge); border-radius: .7rem; }
+  .panel-header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
+  .hint, .note { color: var(--muted); font-size: .88rem; }
+  .count { color: var(--teal); font: 650 .9rem var(--mono); }
+  .table-wrap { position: relative; max-width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; color: var(--ink); text-align: center; font: .93rem var(--mono); }
+  th, td { min-width: 1.85rem; height: 2rem; padding: .12rem .23rem; border-bottom: 1px solid var(--edge); }
+  thead th:first-child, tbody th { text-align: left; padding-left: .45rem; padding-right: .45rem; }
+  thead { background: #edf0e8; }
+  tbody th { font-weight: 650; white-space: nowrap; }
+  tfoot { background: #f1ede3; }
+  .wire { display: inline-block; width: .66rem; height: .66rem; border-radius: 50%; background: var(--teal); vertical-align: middle; }
+  .missing th, .missing td { background: var(--clay-soft); }
+  .missing .wire { background: transparent; border: 1px solid var(--clay); }
+  .missing td:last-child { color: var(--clay); }
+  .probe { background: var(--teal-soft); color: var(--teal); }
+  .reading { font-weight: 750; }
+  .readout { margin-top: .7rem; font-size: .92rem; }
+  .play { min-height: 1.75rem; padding: .18rem .35rem; font-size: .82rem; }
+  .explanation { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; align-items: start; }
+  .explanation p { margin-top: .6rem; }
+  details { margin-top: 1.2rem; padding: .8rem 0; border-top: 1px solid var(--edge); }
+  details p { margin-top: .7rem; }
+  summary { cursor: pointer; font-weight: 650; }
+  code { font-family: var(--mono); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (max-width: 53rem) { .bench { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 38rem) {
+    main { padding-top: 1.25rem; }
+    .explanation { grid-template-columns: minmax(0, 1fr); }
+    .controls { gap: .7rem; }
+    table { font-size: .8rem; }
+    th, td { min-width: 1.35rem; padding-inline: .16rem; }
+    thead th:first-child, tbody th { padding-inline: .3rem; }
+    .play { font-size: .75rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="back" href="mod_seven_twins.html">← Mod Seven Twins</a>
+    <h1>One signal unlocks the mix</h1>
+    <p class="intro">The input signals are hidden notes numbered 0 to 6. Each mixed reading adds the notes wired to it and keeps the remainder after division by 7. Pick any input to hear directly and the decoder can recover every note, even with one mixed reading missing.</p>
+  </header>
+  <noscript><p>The interactive mixer needs JavaScript. The explanation below is also available without it.</p></noscript>
+  <div class="controls" role="group" aria-label="Mixer controls">
+    <label>Inputs
+      <select id="size">
+        <option value="6">6 inputs</option><option value="7">7 inputs</option><option value="8">8 inputs</option>
+        <option value="9">9 inputs</option><option value="10">10 inputs</option><option value="11">11 inputs</option>
+        <option value="12">12 inputs</option>
+      </select>
+    </label>
+    <label>Missing mixed reading <select id="erasure"></select></label>
+    <label>Direct input <select id="probe"></select></label>
+    <button type="button" id="transpose" aria-pressed="false">Transpose wiring</button>
+    <button type="button" id="new">New hidden notes</button>
+  </div>
+
+  <div class="bench">
+    <section class="panel" aria-labelledby="wiring-title">
+      <div class="panel-header">
+        <h2 id="wiring-title">What the decoder gets</h2>
+        <span class="count" id="budget"></span>
+      </div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Mixer wiring">
+        <table id="wiring"></table>
+      </div>
+      <p class="hint" id="wiring-scroll" hidden>Scroll sideways to see all the readings.</p>
+      <p class="hint readout">A dot connects an input S to a mixed reading M. An outlined dot belongs to the missing reading. The bottom row shows the direct input when you reveal one.</p>
+    </section>
+    <section class="panel" aria-labelledby="candidates-title">
+      <div class="panel-header">
+        <h2 id="candidates-title">Possible originals</h2>
+        <span class="count" id="candidate-count" role="status"></span>
+      </div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Candidate originals">
+        <table id="candidates"></table>
+      </div>
+      <p class="hint" id="candidates-scroll" hidden>Scroll sideways to see all the inputs and playback controls.</p>
+      <p class="readout" id="explanation"></p>
+      <p class="hint" id="audio-status" role="status"></p>
+    </section>
+  </div>
+
+  <div class="explanation">
+    <section class="panel">
+      <h2>Why any input works</h2>
+      <p>The mixed readings share a single linear relation in mod 7. Its coefficients are all nonzero, so any missing reading follows from the others. The seven possible originals differ by multiples of a single vector whose entries are also all nonzero. One direct reading tells you which multiple to use.</p>
+      <p class="note">The mixer keeps all information in ordinary integer arithmetic. The seven-way ambiguity appears when the readings wrap at 7.</p>
+    </section>
+    <section class="panel">
+      <h2>Five streams or six?</h2>
+      <p>For the six-input board, five mixed streams suffice if the receiver already has any one original. Send all six mixed streams when you want the receiver to tolerate losing one of them. Try dropping a different reading and choosing a different direct input.</p>
+      <p class="note">This saves a transmitted stream when the receiver already has one original. A standalone lossless file must also encode the information in that original.</p>
+    </section>
+  </div>
+
+  <details>
+    <summary>Why the larger mixers need exactly 2n + 3 connections</summary>
+    <p>We require an <em>n</em> by <em>n</em> matrix of zeros and ones that is invertible over the rationals and singular mod 7. We also require recovery from any <em>n</em> − 1 mixed readings and any one direct input. The exhibit starts with the 16-connection twins at size 6. The construction and lower bound below give the exact minimum at every size <em>n</em> ≥ 7.</p>
+    <p><strong>Build sizes 7 and 8.</strong> Begin with two stars. Use center inputs <code>a</code> and <code>b</code> and leaf inputs <code>u₁, u₂</code> and <code>v₁, v₂, v₃</code>. Mix each leaf with its own center, and add two readings <code>u₁ + u₂ + v₁</code> and <code>a + v₁ + v₂ + v₃</code>. Eliminating the leaves leaves rows <code>(−2, −1)</code> and <code>(1, −3)</code>, with determinant 7. The invisible input change has centers <code>(a,b) = (1,5)</code> modulo 7 and each leaf changes by the negative of its center. For the relation among readings, give the last two rows weights 1 and 2 and each leaf row the negative of the total weight assigned to its leaf by those two rows. All weights are nonzero mod 7. At size 8, split the shared leaf <code>v₁</code> into two leaves of <code>b</code>, one for each of the last two readings. The reduced rows stay the same and the two new leaf weights are −1 and −2.</p>
+    <p><strong>Grow by two.</strong> In any one reading, replace an input <code>x</code> by a fresh input <code>z₂</code>. Add readings <code>x + z₁</code> and <code>z₁ + z₂</code>, where <code>z₁</code> is also new. Elimination restores the original coefficient of <code>x</code> and preserves the determinant up to sign. In the invisible input change, the two new entries are <code>−x</code> and <code>x</code>. In the relation among readings, the two new rows take the original row's coefficient and its negative, respectively. This adds four connections per two inputs while preserving both recovery properties.</p>
+    <p><strong>Rule out 2n + 2.</strong> Every input entry in the invisible change must be nonzero, since any direct reading can resolve it. Thus every row needs at least two ones. If there are at most two extra ones, at most two rows have more than two. The two-input rows form a graph on the inputs. An odd cycle would force its inputs to change by zero mod 7. An even cycle would give a rational dependence among the rows. The graph is a forest, so it has fewer than <em>n</em> edges. Eliminating its leaf variables leaves one column per component and one or two rows. With one remaining row the determinant has magnitude at most 4. With two, each has absolute coefficient sum at most 3. A coefficient of magnitude 3 makes the determinant a multiple of 3 with magnitude at most 9. Otherwise both rows have Euclidean norm at most √5, and the determinant has magnitude at most 5. None can give a nonzero multiple of 7.</p>
+    <p class="note">Background reading includes <a href="https://poincare.matf.bg.ac.rs/~ezivkovm/publications/01classif.pdf">Živković’s classification of small binary matrices</a> and <a href="https://www.math.ias.edu/~avi/PUBLICATIONS/AbbeShWi2014.pdf">Abbe, Shpilka, and Wigderson’s treatment of erasures</a>. The exact connection bound above is this exhibit’s derivation.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const twin = ["110000", "101000", "011100", "000110", "100101", "011011"];
+const mod7 = value => (value % 7 + 7) % 7;
+const inverse = [0, 1, 4, 5, 2, 3, 6];
+
+function wiring(size, transposed = false) {
+  let rows;
+  if (size === 6) {
+    rows = twin.map(row => [...row].flatMap((value, column) => value === "1" ? [column] : []));
+  } else {
+    const splitLeaf = size % 2 === 0;
+    rows = [[0, 1], [0, 2], [3, 4], [3, 5], [3, 6]];
+    if (splitLeaf) rows.push([3, 7]);
+    rows.push([1, 2, splitLeaf ? 7 : 4], [0, 4, 5, 6]);
+
+    while (rows.length < size) {
+      const next = rows.length;
+      const replaced = rows[0][0];
+      rows[0][0] = next + 1;
+      rows.push([replaced, next], [next, next + 1]);
+    }
+  }
+  return Array.from({ length: size }, (_, i) =>
+    Array.from({ length: size }, (_, j) =>
+      Number(transposed ? rows[j].includes(i) : rows[i].includes(j))));
+}
+
+function measure(matrix, inputs) {
+  return matrix.map(row => mod7(row.reduce((sum, connected, j) => sum + connected * inputs[j], 0)));
+}
+
+function candidates(matrix, readings, erased, probe, directValue) {
+  const size = matrix.length;
+  const rows = matrix.flatMap((row, i) => i === erased ? [] : [[...row, readings[i]]]);
+  if (probe >= 0) {
+    const directRow = Array.from({ length: size }, (_, j) => Number(j === probe));
+    rows.push([...directRow, directValue]);
+  }
+
+  const pivots = [];
+  for (let column = 0; column < size; column++) {
+    const rank = pivots.length;
+    const pivot = rows.findIndex((row, i) => i >= rank && row[column] !== 0);
+    if (pivot === -1) continue;
+    [rows[rank], rows[pivot]] = [rows[pivot], rows[rank]];
+    rows[rank] = rows[rank].map(value => mod7(value * inverse[rows[rank][column]]));
+    for (const [i, row] of rows.entries()) {
+      if (i === rank || row[column] === 0) continue;
+      rows[i] = row.map((value, j) => mod7(value - row[column] * rows[rank][j]));
+    }
+    pivots.push(column);
+  }
+
+  if (rows.slice(pivots.length).some(row => row[size] !== 0)) return [];
+  const freeColumns = matrix[0].flatMap((_, j) => pivots.includes(j) ? [] : [j]);
+  if (freeColumns.length > 1) throw new Error("Unexpected rank loss in the mixer");
+  const [free] = freeColumns;
+  return Array.from({ length: freeColumns.length === 1 ? 7 : 1 }, (_, choice) => {
+    const result = Array(size).fill(0);
+    if (free !== undefined) result[free] = choice;
+    for (const [i, column] of pivots.entries()) {
+      result[column] = mod7(rows[i][size] - (rows[i][free] ?? 0) * choice);
+    }
+    return result;
+  });
+}
+
+if (typeof module !== "undefined") module.exports = { wiring, measure, candidates };
+
+if (typeof document !== "undefined") {
+  const get = id => document.getElementById(id);
+  const sizeControl = get("size");
+  const erasureControl = get("erasure");
+  const probeControl = get("probe");
+  const transpose = get("transpose");
+  const AudioContextType = window.AudioContext || window.webkitAudioContext;
+  let audio;
+  let lastPlayback;
+  let inputs = [2, 6, 1, 5, 4, 0];
+
+  function setupChoices() {
+    const size = Number(sizeControl.value);
+    const options = (prefix, first) => [first, ...Array.from({ length: size }, (_, i) => prefix + (i + 1))]
+      .map((label, i) => {
+        const option = document.createElement("option");
+        option.value = String(i - 1);
+        option.textContent = label;
+        return option;
+      });
+    erasureControl.replaceChildren(...options("M", "None"));
+    probeControl.replaceChildren(...options("S", "Hidden"));
+    erasureControl.value = String(size - 1);
+  }
+
+  function setNewInputs() {
+    inputs = Array.from({ length: Number(sizeControl.value) }, () => Math.floor(Math.random() * 7));
+  }
+
+  function showScrollHints() {
+    for (const id of ["wiring", "candidates"]) {
+      const wrapper = get(id).parentElement;
+      get(id + "-scroll").hidden = wrapper.scrollWidth <= wrapper.clientWidth;
+    }
+  }
+
+  async function listen(notes) {
+    try {
+      audio ??= new AudioContextType();
+      await audio.resume();
+    } catch {
+      get("audio-status").textContent = "This browser could not play the notes.";
+      return;
+    }
+    lastPlayback?.disconnect();
+    lastPlayback = audio.createGain();
+    lastPlayback.gain.value = 0.15;
+    lastPlayback.connect(audio.destination);
+    const scale = [0, 2, 3, 5, 7, 9, 10];
+    const start = audio.currentTime + 0.02;
+    for (const [i, note] of notes.entries()) {
+      const tone = audio.createOscillator();
+      const envelope = audio.createGain();
+      const time = start + i * 0.16;
+      tone.frequency.value = 261.63 * 2 ** (scale[note] / 12);
+      envelope.gain.setValueAtTime(0, time);
+      envelope.gain.linearRampToValueAtTime(0.45, time + 0.018);
+      envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+      tone.connect(envelope).connect(lastPlayback);
+      tone.start(time);
+      tone.stop(time + 0.23);
+    }
+    get("audio-status").textContent = "";
+  }
+
+  function render() {
+    const size = inputs.length;
+    const erased = Number(erasureControl.value);
+    const probe = Number(probeControl.value);
+    const matrix = wiring(size, transpose.getAttribute("aria-pressed") === "true");
+    const readings = measure(matrix, inputs);
+    const solutions = candidates(matrix, readings, erased, probe, inputs[probe]);
+    const wires = matrix.flat().reduce((sum, value) => sum + value, 0);
+    get("budget").textContent = wires + " connections";
+
+    const headers = matrix[0].map((_, j) => '<th scope="col"' +
+      (j === probe ? ' class="probe"' : "") + '>S' + (j + 1) + '</th>').join("");
+    const rows = matrix.map((row, i) => {
+      const missing = i === erased;
+      const cells = row.map(connected => connected
+        ? '<td><span class="wire" aria-hidden="true"></span><span class="sr-only">Connected</span></td>'
+        : '<td></td>').join("");
+      return '<tr' + (missing ? ' class="missing"' : '') + '><th scope="row">M' + (i + 1) + '</th>'
+        + cells + '<td class="reading">' + (missing ? 'Missing' : readings[i]) + '</td></tr>';
+    }).join("");
+    const direct = matrix[0].map((_, j) => j === probe
+      ? '<td class="probe reading">' + inputs[j] + '</td>' : '<td></td>').join("");
+    get("wiring").innerHTML = '<caption class="sr-only">Input connections and mixed readings</caption>'
+      + '<thead><tr><th scope="col">Mix</th>' + headers + '<th scope="col">Value</th></tr></thead>'
+      + '<tbody>' + rows + '</tbody><tfoot><tr><th scope="row">Direct</th>' + direct
+      + '<td>' + (probe === -1 ? 'Hidden' : 'Shown') + '</td></tr></tfoot>';
+
+    get("candidate-count").textContent = solutions.length === 1 ? "1 solution" : solutions.length + " solutions";
+    const options = solutions.map((solution, i) => {
+      const values = solution.map((value, j) => '<td' + (j === probe ? ' class="probe"' : '') + '>' + value + '</td>').join("");
+      const play = AudioContextType
+        ? '<td><button type="button" class="play" data-candidate="' + i + '" aria-label="Play candidate ' + (i + 1) + '">Play</button></td>'
+        : "";
+      return '<tr><th scope="row">' + (i + 1) + '</th>' + values + play + '</tr>';
+    }).join("");
+    get("candidates").innerHTML = '<caption class="sr-only">Input notes consistent with the visible readings</caption>'
+      + '<thead><tr><th scope="col">Candidate</th>' + headers
+      + (AudioContextType ? '<th scope="col">Sound</th>' : '') + '</tr></thead><tbody>' + options + '</tbody>';
+    const explanation = probe < 0
+      ? "The seven candidates differ at every input. Reveal any direct input to choose one."
+      : "Direct input S" + (probe + 1) + " eliminates six candidates.";
+    const recovered = erased < 0 ? "" : " The decoder can recover M" + (erased + 1) + " = "
+      + measure([matrix[erased]], solutions[0])[0] + " from the surviving mixed readings alone.";
+    get("explanation").textContent = explanation + recovered;
+    get("candidates").onclick = event => {
+      const button = event.target.closest("button[data-candidate]");
+      if (button) listen(solutions[Number(button.dataset.candidate)]);
+    };
+    showScrollHints();
+  }
+
+  sizeControl.addEventListener("change", () => {
+    setupChoices();
+    setNewInputs();
+    render();
+  });
+  erasureControl.addEventListener("change", render);
+  probeControl.addEventListener("change", render);
+  transpose.addEventListener("click", () => {
+    transpose.setAttribute("aria-pressed", String(transpose.getAttribute("aria-pressed") !== "true"));
+    render();
+  });
+  get("new").addEventListener("click", () => {
+    setNewInputs();
+    render();
+  });
+  window.addEventListener("resize", showScrollHints);
+
+  setupChoices();
+  render();
+}
+</script>
+</body>
+</html>

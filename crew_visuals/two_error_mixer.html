@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two wrong readings, four checks</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf6ec;
+      --ink: #27343b;
+      --muted: #54636a;
+      --teal: #1f666a;
+      --rust: #96482e;
+      --edge: #c5cfce;
+      background: #e5ebea;
+      color: var(--ink);
+      font: 100%/1.54 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 59rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .16em; }
+    h1 { font: clamp(2.6rem, 8vw, 4.5rem)/1.05 Georgia, serif; letter-spacing: -.045em; margin: .54rem 0 .7rem; }
+    p { max-width: 67ch; }
+    .intro { color: var(--muted); }
+    .controls, .controls > div { display: flex; gap: .55rem .75rem; flex-wrap: wrap; align-items: end; }
+    .controls { margin: 1rem 0 .75rem; }
+    [hidden] { display: none !important; }
+    label { display: grid; gap: .2rem; font-weight: 650; font-size: .89rem; }
+    select, button {
+      font: inherit; min-height: 2.65rem; color: var(--ink); background: #edf1ec;
+      border: 1px solid var(--edge); border-radius: .32rem; padding: .3rem .6rem;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #e1ece5; }
+    :focus-visible { outline: .17rem solid var(--rust); outline-offset: .15rem; }
+    .presets { display: flex; flex-wrap: wrap; gap: .5rem; margin: .65rem 0 1rem; }
+    .readouts { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .panel { border: 1px solid var(--edge); border-radius: .36rem; padding: .75rem .85rem; }
+    h2 { margin: 0 0 .55rem; font: 1.35rem Georgia,serif; }
+    .numbers { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .25rem 0 .85rem; }
+    .numbers div { flex: 1 1 3rem; }
+    dt { color: var(--muted); font-size: .83rem; }
+    dd { margin: 0; font-size: 1.2rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .panel p { margin: .48rem 0; }
+    #status { color: var(--teal); font-weight: 650; margin: .85rem 0 .6rem; }
+    #status[data-matches="false"] { color: var(--rust); }
+    .formula { font-family: Georgia, serif; overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: .9rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 39rem) { .readouts { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="four_loss_mixer.html">Back to the four-loss mixer</a>
+    <h1>Two wrong readings, four checks</h1>
+    <p class="intro">The same 60-reading mixer can locate two wrong reports, even without being told which changed. Four checking sums give a quadratic whose roots point to the two addresses. Try changing the report numbers and the amounts.</p>
+    <div class="controls">
+      <label for="error-count">Changes
+        <select id="error-count"><option value="0">None</option><option value="1">One</option><option selected value="2">Two</option><option value="3">Three-change example</option></select>
+      </label>
+      <div id="first-controls">
+        <label for="first">First report<select id="first"></select></label>
+        <label for="first-amount">Add<select id="first-amount"></select></label>
+      </div>
+      <div id="second-controls">
+        <label for="second">Second report<select id="second"></select></label>
+        <label for="second-amount">Add<select id="second-amount"></select></label>
+      </div>
+    </div>
+    <div class="presets">
+      <button id="cancel" type="button">Make the first check cancel</button>
+      <button id="collision" type="button">Try three changes with the same checks</button>
+    </div>
+    <div class="readouts">
+      <section class="panel">
+        <h2>Four sums modulo 61</h2>
+        <dl class="numbers">
+          <div><dt><var>S</var><sub>0</sub></dt><dd id="s0"></dd></div>
+          <div><dt><var>S</var><sub>1</sub></dt><dd id="s1"></dd></div>
+          <div><dt><var>S</var><sub>2</sub></dt><dd id="s2"></dd></div>
+          <div><dt><var>S</var><sub>3</sub></dt><dd id="s3"></dd></div>
+        </dl>
+        <p class="formula" id="locator"></p>
+      </section>
+      <section class="panel">
+        <h2>Actual and decoded changes</h2>
+        <p id="sent"></p>
+        <p id="found"></p>
+      </section>
+    </div>
+    <p id="status" role="status"></p>
+    <p>All four sums still determine both errors when the first sum is zero. The three-change preset shows how the same four sums can point to a different valid set of reports once the decoder’s two-change limit is exceeded.</p>
+    <p>Try the same checks with <a href="mixed_damage_mixer.html">two blanks and one bad reading</a>.</p>
+    <details>
+      <summary>Turn the checks into a quadratic</summary>
+      <p>Report <var>i</var> has address <var>z</var><sub><var>i</var></sub> = 35<sup>−<var>i</var></sup> and multiplier 42<sup>−<var>i</var></sup> modulo 61. The four checks weight each report by its multiplier and by the first four powers of its address. They vanish for every genuine set of mixed readings because the four geometric sequences span the left kernel of the board.</p>
+      <p>For two errors each check is <var>S</var><sub><var>j</var></sub> = <var>a</var><var>z</var><sub>1</sub><sup><var>j</var></sup> + <var>b</var><var>z</var><sub>2</sub><sup><var>j</var></sup>, where <var>a</var> and <var>b</var> are the errors multiplied by their report multipliers. Put σ = <var>z</var><sub>1</sub> + <var>z</var><sub>2</sub> and π = <var>z</var><sub>1</sub><var>z</var><sub>2</sub>. The checks satisfy <var>S</var><sub>2</sub> = σ<var>S</var><sub>1</sub> − π<var>S</var><sub>0</sub> and <var>S</var><sub>3</sub> = σ<var>S</var><sub>2</sub> − π<var>S</var><sub>1</sub>.</p>
+      <p>The determinant of these two equations is <var>S</var><sub>0</sub><var>S</var><sub>2</sub> − <var>S</var><sub>1</sub>² = <var>ab</var>(<var>z</var><sub>1</sub> − <var>z</var><sub>2</sub>)². Two distinct addresses and two nonzero errors make it nonzero. The roots of <var>Z</var>² − σ<var>Z</var> + π give the addresses. The first two sums now give <var>a</var> and <var>b</var>. For just one error, its address is already <var>S</var><sub>1</sub>/<var>S</var><sub>0</sub>. <a href="../tools/check_two_error_mixer.py">Replay the exact checks</a></p>
+    </details>
+    <details>
+      <summary>Why three changes can pass all four sums</summary>
+      <p>Take five distinct addresses. Four checking equations on five change amounts have a one-dimensional space of solutions. Every nonzero solution has all five entries nonzero, because any four address columns give an invertible Vandermonde matrix. Split those five changes into three and two. The three have the same checks as the negatives of the other two. The preset uses this collision. Recovering the original inputs from corrected mixed reports still requires the four direct probes from the <a href="four_loss_mixer.html">cubic puzzle</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const prime = 61, size = 60;
+      const byId = id => document.getElementById(id);
+      const mod = value => (value % prime + prime) % prime;
+      function power(value, exponent) {
+        let result = 1;
+        for (let j = 0; j < exponent; j++) result = mod(result * value);
+        return result;
+      }
+      const inverses = Array.from({ length: prime }, (_, value) => power(value, prime - 2));
+      const nodes = Array.from({ length: size }, (_, i) => power(inverses[35], i));
+      const gains = Array.from({ length: size }, (_, i) => power(inverses[42], i));
+      const checkVectors = [0, 1, 2, 3].map(k => gains.map((gain, i) => mod(gain*power(nodes[i],k))));
+      const source = Array.from({ length: size }, (_, i) => mod(2*i*i + 5*i + 7));
+      const sent = source.map((_, i) => mod([0,1,4,51,52].reduce((sum, k) => sum + source[(i+k)%size], 0)));
+      const count = byId('error-count'), first = byId('first'), second = byId('second');
+      const firstAmount = byId('first-amount'), secondAmount = byId('second-amount');
+      const collision = [[1,44],[4,30],[7,54]];
+
+      function populate(select, start, number, initial) {
+        select.replaceChildren(...Array.from({ length: number }, (_, i) => new Option(start + i, start + i)));
+        select.value = initial;
+      }
+      for (const select of [first, second]) populate(select, 0, size, select === first ? 4 : 32);
+      for (const select of [firstAmount, secondAmount]) populate(select, 1, prime - 1, 5);
+
+      function syndrome(readings) {
+        return checkVectors.map(check => mod(readings.reduce((sum, value, i) => sum + check[i]*value, 0)));
+      }
+
+      function diagnose([s0,s1,s2,s3]) {
+        if (!(s0 || s1 || s2 || s3)) return { changes: [], equation: 'All four sums are zero.' };
+        const delta = mod(s0*s2 - s1*s1);
+        if (!delta) {
+          const address = mod(s1*inverses[s0]);
+          const i = nodes.indexOf(address);
+          return { changes: [[i, mod(s0*inverses[gains[i]])]], equation: 'One address, Z = ' + address };
+        }
+        const sum = mod((s0*s3 - s1*s2)*inverses[delta]);
+        const product = mod((s1*s3 - s2*s2)*inverses[delta]);
+        const places = nodes.flatMap((z,i) => mod(z*z - sum*z + product) === 0 ? [i] : []);
+        const [i,j] = places, x = nodes[i], y = nodes[j];
+        const a = mod((s1 - y*s0)*inverses[mod(x-y)]), b = mod(s0 - a);
+        return {
+          changes: [[i,mod(a*inverses[gains[i]])],[j,mod(b*inverses[gains[j]])]],
+          equation: 'Z² − ' + sum + 'Z + ' + product + ' has roots ' + x + ' and ' + y + '.'
+        };
+      }
+
+      function description(changes) {
+        return changes.length ? changes.map(([i, value]) => '+' + value + ' at report ' + i).join(', ') : 'none';
+      }
+
+      function update() {
+        const mode = Number(count.value);
+        byId('first-controls').hidden = !(mode === 1 || mode === 2);
+        byId('second-controls').hidden = mode !== 2;
+        if (first.value === second.value) second.value = (Number(first.value) + 1) % size;
+        const choices = [[Number(first.value),Number(firstAmount.value)],[Number(second.value),Number(secondAmount.value)]];
+        const actual = mode === 3 ? collision : choices.slice(0,mode);
+        const received = sent.slice();
+        for (const [i, amount] of actual) received[i] = mod(received[i] + amount);
+        const sums = syndrome(received);
+        const diagnosis = diagnose(sums);
+        const corrected = received.slice();
+        for (const [i, amount] of diagnosis.changes) corrected[i] = mod(corrected[i] - amount);
+        const passes = syndrome(corrected).every(value => value === 0);
+        const matches = corrected.every((value,i) => value === sent[i]);
+        sums.forEach((value,k) => byId('s'+k).textContent = value);
+        byId('locator').textContent = diagnosis.equation;
+        byId('sent').textContent = 'Actual additions · ' + description(actual);
+        byId('found').textContent = 'Decoder subtracts · ' + description(diagnosis.changes);
+        const status = byId('status');
+        status.dataset.matches = matches;
+        status.textContent = matches ? 'The corrected reports match what was sent.'
+          : passes ? 'All four checks pass after correction. The reports differ from what was sent.'
+          : 'The checks still disagree after correction.';
+      }
+
+      for (const input of [count,first,second,firstAmount,secondAmount]) input.addEventListener('change',update);
+      byId('cancel').addEventListener('click', () => {
+        count.value = 2;
+        first.value = 0;
+        second.value = 14;
+        firstAmount.value = 5;
+        secondAmount.value = mod(-5*inverses[gains[14]]);
+        update();
+      });
+      byId('collision').addEventListener('click', () => {
+        count.value = 3;
+        update();
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>

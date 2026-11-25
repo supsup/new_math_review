@@ -1,0 +1,51 @@
+The real-axis boundary of the zeta-cousin dial
+
+For any real mixing angle, the completed mod-five functions can have a
+real zero only at s = 1/2. As the angle runs from 0 to 180 degrees, this
+happens once, at 135 degrees. The zero is simple.
+
+Write the character with chi(2) = i as L(s) = P(s) + i Q(s). For real
+s = σ > 0 the two sums are positive because each bracket is positive.
+
+    P(σ) = sum over k ≥ 0 of [(5k+1)^(-σ) − (5k+4)^(-σ)]
+    Q(σ) = sum over k ≥ 0 of [(5k+2)^(-σ) − (5k+3)^(-σ)]
+
+Let ε = exp(i φ) be the root number, with 0 < φ < π/2. The dial takes
+A cos τ + B sin τ. Here A is the completed L rotated by exp(−i φ/2),
+and B is the completed conjugate character rotated by exp(i φ/2).
+On the real axis the common completion factor is positive for σ > 0,
+and B is the complex conjugate of A. The functional equation makes A
+real at σ = 1/2, so Q(1/2)/P(1/2) = tan(φ/2).
+
+Why the ratio falls with σ
+
+Use the Gamma integral for a negative power in each bracket. After
+cancelling common factors, Q/P becomes a weighted average of
+
+    r(u) = (exp(−2u) − exp(−3u))/(exp(−u) − exp(−4u))
+         = 1/(1 + 2 cosh u).
+
+The weight is u^(σ−1) times (exp(−u) − exp(−4u))/(1 − exp(−5u)).
+It is positive for u > 0. Differentiating the normalized average
+gives the covariance of r(u) and log u under this weight. Twice that
+covariance is the average of (r(u) − r(v))(log u − log v) for two
+independent draws from the normalized weight. The first factor falls
+with u and the second rises, so the product is strictly negative away
+from u = v. Thus Q/P strictly decreases, with strictly negative derivative.
+
+For σ > 1/2, the phase of A now lies strictly between −φ/2 and 0.
+Consequently A/B has a nonzero imaginary part. Two nonzero terms whose
+ratio is nonreal cannot cancel with real weights. The functional equation
+reflects this exclusion to the left of 1/2 for the completed functions.
+
+At σ = 1/2, A = B > 0, so only cos τ + sin τ = 0 makes the mix vanish.
+The derivative of A/B at that point equals 2i times the derivative of
+Q/P divided by 1 + (Q/P)^2. The strict covariance bound makes it nonzero.
+This proves the simple zero at 135 degrees.
+
+As τ increases through 135 degrees, that zero moves down through the
+real axis. Near the root, R(s) = A(s)/B(s) satisfies R(s) = −tan τ, so
+ds/dτ = −sec² τ/R′(s). The derivative R′(1/2) is purely imaginary with
+negative imaginary part. Thus Im(ds/dτ) is negative. A ball-arithmetic
+check gives R′(1/2) ≈ −0.181461513046223060 i and a height derivative
+of about −11.021620873901492 per radian.

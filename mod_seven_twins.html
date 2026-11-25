@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Two shapes, one mirror</title>
+<style>
+  :root {
+    --base: #131923;
+    --surface: #1d2735;
+    --ink: #f1f1e7;
+    --muted: #b8c1d2;
+    --line: #4a596c;
+    --coral: #ffa490;
+    --cyan: #a1e4e5;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+    background: var(--base);
+    font: 16px/1.55 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 53rem); margin: auto; padding: 2.4rem 0; }
+  h1, h2, p, figure, dl { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
+  h1 { font-size: clamp(2.8rem, 7vw, 5rem); letter-spacing: -.05em; }
+  h2 { font-size: 1.6rem; }
+  .intro, .note, figcaption { color: var(--muted); margin-top: .6rem; max-width: 43rem; }
+  .workbench { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 1.2rem; margin-top: 1.25rem; align-items: start; }
+  figure, .readout { padding: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; }
+  svg { display: block; width: 100%; }
+  .grid { stroke: var(--line); stroke-width: 1; fill: none; }
+  .mirror { stroke: var(--cyan); stroke-width: 1.2; stroke-dasharray: 4 4; }
+  .piece { fill: var(--coral); transition: transform 520ms cubic-bezier(.26, .7, .26, 1); }
+  .axis-number { font: 15px var(--mono); fill: var(--cyan); text-anchor: middle; }
+  figcaption { font-size: .85rem; }
+  .buttons { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .8rem; }
+  button { background: var(--base); color: var(--ink); font: inherit; border: 1px solid var(--line); border-radius: .4rem; padding: .45rem .65rem; cursor: pointer; }
+  button:hover, button[aria-pressed="true"] { border-color: var(--cyan); }
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  dt { color: var(--muted); margin-top: .65rem; font-size: .88rem; }
+  dd { margin: .13rem 0 0; color: var(--cyan); font: 1.08rem var(--mono); overflow-wrap: anywhere; }
+  .note { font-size: .9rem; }
+  details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+  summary { cursor: pointer; }
+  a { color: var(--cyan); }
+  @media (max-width: 42rem) {
+    .workbench { grid-template-columns: minmax(0, 1fr); }
+    main { padding-top: 1.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .piece { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Two shapes, one mirror</h1>
+    <p class="intro">This board uses the fewest ones possible for a 6×6 table whose rank drops modulo 7. There are two such shapes. Shuffling rows and columns preserves the shape. Turning rows into columns reveals its twin.</p>
+  </header>
+  <div class="workbench">
+    <figure>
+      <svg id="board" viewBox="0 0 344 344" role="img" aria-label="A 6 by 6 binary board with sixteen ones">
+        <path class="grid" d="M24 24H312V312H24ZM72 24V312M120 24V312M168 24V312M216 24V312M264 24V312M24 72H312M24 120H312M24 168H312M24 216H312M24 264H312"></path>
+        <line class="mirror" x1="24" y1="24" x2="312" y2="312"></line>
+        <g id="dots"></g>
+        <g id="totals"></g>
+      </svg>
+      <figcaption>Each dot is a 1. The numbers on the edges count the dots in the row or column.</figcaption>
+      <div class="buttons">
+        <button id="shuffle" type="button">Shuffle rows and columns</button>
+        <button id="transpose" type="button" aria-pressed="false">Reflect across the diagonal</button>
+      </div>
+    </figure>
+    <section class="readout" aria-labelledby="shape-title">
+      <h2 id="shape-title">What stays the same?</h2>
+      <dl aria-live="polite">
+        <dt>Row counts, sorted</dt><dd id="rows"></dd>
+        <dt>Column counts, sorted</dt><dd id="columns"></dd>
+        <dt>Ranks in ordinary arithmetic and mod 7</dt><dd id="ranks"></dd>
+        <dt>Absolute determinant</dt><dd id="determinant"></dd>
+      </dl>
+      <p class="note" id="analysis"></p>
+    </section>
+  </div>
+  <p class="note"><a href="mod_seven_mixer.html">Try the twins as a signal mixer</a>. Lose any mixed reading and recover the hidden notes from one direct input.</p>
+  <details>
+    <summary>How we know these are the only two shapes</summary>
+    <p class="note">An exact determinant search found 720 minimum boards once row order was ignored. Each of the two shapes produces 360 different boards when you shuffle the columns and put the rows back in order. The two lists of row counts differ, so none of those boards overlap. That accounts for all 720.</p>
+    <p class="note">The full set of examples comes from the <a href="tools/check_sparse_rank.cpp">exhaustive checker</a>. Lattice independently verified the 16-one minimum and 720 witnesses. This page recomputes the determinant and rank of the current board. See the <a href="crew_visuals/fewest_ones.md">rank card</a> for the proof and other moduli.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const original = ["110000", "101000", "011100", "000110", "100101", "011011"].map(row => [...row].map(Number));
+const indices = [0, 1, 2, 3, 4, 5];
+const locations = original.flatMap((row, i) => row.flatMap((cell, j) => cell ? [[i, j]] : []));
+
+function determinant(values) {
+  if (values.length === 1) return values[0][0];
+  return values[0].reduce((sum, entry, column) => {
+    if (!entry) return sum;
+    const minor = values.slice(1).map(row => row.filter((_, at) => at !== column));
+    return sum + (column % 2 ? -entry : entry) * determinant(minor);
+  }, 0);
+}
+
+function rankMod7(values) {
+  const rows = values.map(row => [...row]);
+  let rank = 0;
+  for (const column of indices) {
+    const index = rows.findIndex((row, at) => at >= rank && row[column] !== 0);
+    if (index < 0) continue;
+    [rows[rank], rows[index]] = [rows[index], rows[rank]];
+    for (let row = rank + 1; row < rows.length; row++) {
+      const a = rows[rank][column];
+      const b = rows[row][column];
+      rows[row] = rows[row].map((cell, x) => (a * cell - b * rows[rank][x]) % 7);
+    }
+    rank++;
+  }
+  return rank;
+}
+
+if (typeof module !== "undefined") module.exports = { original, determinant, rankMod7 };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const set = (id, value) => { byId(id).textContent = value; };
+  const total = entries => entries.reduce((sum, cell) => sum + cell, 0);
+  const sorted = totals => [...totals].sort((a, b) => a - b).join(", ");
+  const position = at => 48 + 48 * at;
+  const svg = (tag, attributes) => {
+    const result = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [name, value] of Object.entries(attributes)) result.setAttribute(name, value);
+    return result;
+  };
+  const dots = locations.map(() => svg("circle", { r: 12, class: "piece" }));
+  byId("dots").append(...dots);
+  let rows = [...indices];
+  let columns = [...indices];
+  let reflected = false;
+
+  function render() {
+    const values = rows.map(i => columns.map(j => reflected ? original[j][i] : original[i][j]));
+    const rowTotals = values.map(total);
+    const columnTotals = indices.map(j => total(values.map(row => row[j])));
+    const absolute = Math.abs(determinant(values));
+    const rank = rankMod7(values);
+    if (absolute !== 7 || rank !== 5 || total(rowTotals) !== 16) throw new Error("Board verification failed.");
+    for (const [index, [i, j]] of locations.entries()) {
+      const destination = reflected ? [j, i] : [i, j];
+      const y = position(rows.indexOf(destination[0]));
+      const x = position(columns.indexOf(destination[1]));
+      dots[index].style.transform = "translate(" + x + "px," + y + "px)";
+    }
+    const labels = (at, value, isRow) => {
+      const point = svg("text", {
+        x: isRow ? 329 : position(at), y: isRow ? position(at) + 5 : 19, class: "axis-number"
+      });
+      point.textContent = value;
+      return point;
+    };
+    byId("totals").replaceChildren(...rowTotals.map((value, at) => labels(at, value, true)),
+      ...columnTotals.map((value, at) => labels(at, value, false)));
+    set("rows", sorted(rowTotals));
+    set("columns", sorted(columnTotals));
+    set("ranks", "6 → " + rank);
+    set("determinant", absolute);
+    set("analysis", reflected
+      ? "Now the old column counts are the row counts. A different sorted list means this is the second shape."
+      : "A shuffle can only reorder the row counts. Compare the sorted lists after a reflection.");
+    byId("transpose").setAttribute("aria-pressed", String(reflected));
+  }
+
+  function shuffle(order) {
+    const copy = [...order];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  byId("shuffle").addEventListener("click", () => {
+    rows = shuffle(rows);
+    columns = shuffle(columns);
+    render();
+  });
+  byId("transpose").addEventListener("click", () => {
+    reflected = !reflected;
+    [rows, columns] = [columns, rows];
+    render();
+  });
+  render();
+}
+</script>
+</body>
+</html>

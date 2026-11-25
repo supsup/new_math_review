@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Four shapes, same totals · SAT and rank</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f2f2e8; color: #202918;
+      --muted: #4d5844; --line: #b2b9a8; --green: #305936; --green-pale: #d9e5ca; --accent: #813831;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 56rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, p, dl { margin: 0; }
+    h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2.6rem, 7.5vw, 5.2rem); letter-spacing: -.06em; line-height: 1; margin: .55rem 0 .85rem; text-wrap: balance; }
+    .topic { color: var(--green); font-size: .86rem; font-weight: 700; letter-spacing: .06em; }
+    .intro, .comment, details { color: var(--muted); line-height: 1.55; max-width: 65ch; }
+    a { color: var(--green); text-underline-offset: .2em; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem; margin: 1.4rem 0 .85rem; }
+    button { min-height: 3rem; padding: .45rem .65rem; border: 1px solid var(--line); color: inherit; background: transparent; border-radius: .4rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #f9fff0; font-weight: 650; }
+    button[aria-pressed="false"]:hover { border-color: var(--green); }
+    .comment { min-height: 3.05em; margin-bottom: .95rem; }
+    .boards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(.8rem, 4.2vw, 2.7rem); }
+    .boards > section { display: flex; flex-direction: column; }
+    table { width: 100%; table-layout: fixed; text-align: center; border-spacing: 4px; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; font-family: Georgia, serif; font-size: clamp(1.35rem, 3.5vw, 1.9rem); padding: 0 0 .4rem; }
+    caption small { display: block; margin-top: .25rem; font: .88rem system-ui, sans-serif; color: var(--muted); }
+    th { font-weight: 550; font-size: .83rem; color: var(--muted); }
+    td { height: clamp(2rem, 4vw, 2.85rem); border-radius: .18rem; background: #e4e6db; }
+    td[data-value="1"] { background: var(--green-pale); color: var(--green); font-weight: 650; }
+    td[data-value="2"] { background: #bed7a7; }
+    td[data-value="3"] { background: #99be83; }
+    td[data-corner] { outline: 2px solid var(--accent); outline-offset: -2px; }
+    td.total, tfoot td { background: transparent; color: var(--muted); }
+    .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin-top: auto; padding-top: .65rem; border-top: 1px solid var(--line); }
+    .metrics dt { font-size: .84rem; color: var(--muted); }
+    .metrics dd { margin: .16rem 0 0; font-family: Georgia, serif; font-size: 1.95rem; line-height: 1.04; }
+    details { margin-top: 1.6rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+    summary { color: #202918; cursor: pointer; }
+    details p { margin-top: .65rem; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    @media (max-width: 39rem) {
+      .boards { grid-template-columns: 1fr; gap: 1.4rem; }
+      .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .comment { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">SAT · Arithmetic over two fields</p>
+      <h1>Four shapes, same totals</h1>
+      <p class="intro">This board has nine solutions. The total in each row and column is fixed, but the ones can move. Compare four arrangements to see what those totals leave out.</p>
+    </header>
+
+    <div class="choices" role="group" aria-label="Switch arrangements">
+      <button type="button" data-shape="0" aria-pressed="true">Original</button>
+      <button type="button" data-shape="1" aria-pressed="false">Corner swap</button>
+      <button type="button" data-shape="2" aria-pressed="false">Same score</button>
+      <button type="button" data-shape="3" aria-pressed="false">More overlap</button>
+    </div>
+    <p class="comment" id="explanation" aria-live="polite">Add the first two rows modulo 2 and you get the third. Over fractions all four rows are independent.</p>
+
+    <div class="boards">
+      <section aria-label="Solutions and ranks">
+        <table id="solutions">
+          <caption>Solutions <small>A 1 marks a satisfying assignment</small></caption>
+          <thead><tr><th scope="col"><span class="visually-hidden">First two bits</span></th><th scope="col">00</th><th scope="col">01</th><th scope="col">10</th><th scope="col">11</th><th scope="col">Total</th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><th scope="row">Total</th><td>1</td><td>3</td><td>3</td><td>2</td><td>9</td></tr></tfoot>
+        </table>
+        <dl class="metrics" aria-live="polite" aria-atomic="true">
+          <div><dt>Rank over fractions</dt><dd id="rational-rank">4</dd></div>
+          <div><dt>Rank modulo 2</dt><dd id="binary-rank">3</dd></div>
+        </dl>
+      </section>
+      <section aria-label="Shared completions and overlap score">
+        <table id="overlaps">
+          <caption>Shared completions <small>Columns where both rows have a 1</small></caption>
+          <thead><tr><th scope="col"><span class="visually-hidden">First row</span></th><th scope="col">00</th><th scope="col">01</th><th scope="col">10</th><th scope="col">11</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <dl class="metrics" aria-live="polite" aria-atomic="true">
+          <div><dt>Sum of squared overlaps</dt><dd id="score">39</dd></div>
+          <div><dt>Arrangements of this shape</dt><dd id="orbit-size">6 of 27</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <details>
+      <summary>How to read the second board and find all four shapes</summary>
+      <p>Each cell on the second board compares two rows of the solution board. For the overlap score, square each count and add the squares. The diagonal counts each row’s overlap with itself.</p>
+      <p>Rank counts independent rows. Modulo 2, a pair of ones adds to zero. The shared-completion board is the real Gram matrix <var>AA</var><sup>⊤</sup> of the solution table <var>A</var>. Its trace is 9 and its squared Frobenius norm is the overlap score <var>Q</var>. Cauchy–Schwarz on the nonzero eigenvalues gives ordinary rank at least 81/<var>Q</var>. The two buttons with score 39 show why that estimate can leave room for different ranks.</p>
+      <p>There are 384 ways to choose the four columns from their totals. Exactly 27 also have the required row totals. Group them by permuting the three rows of total 2 and the two columns of total 3, and you get the four arrangements you can try here. Any 0–1 board can be read as a truth table, with a 1 marking a satisfying assignment.</p>
+      <p>Zeta23 uses a related trace and squared-norm comparison in its multiplicity argument. In the pile puzzle next door, the squares count pairs at one location. Here they count pairs of completions shared by two rows. <a href="zeta_pile_puzzle.html">Pile puzzle</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/Zeta23/ZeroSide/Mult.lean">Zeta23 matrix comparison</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const labels = ['00', '01', '10', '11'];
+      const shapes = [
+        {rows:['0011','0101','0110','1110'], size:6, copy:'Add the first two rows modulo 2 and you get the third. Over fractions all four rows are independent.'},
+        {rows:['1010','0101','0110','0111'], size:12, copy:'The four outlined cells flip. Every total stays fixed, and now all four rows are independent modulo 2 as well.'},
+        {rows:['0011','0110','0110','1101'], size:6, copy:'The overlap score is still 39, just as in the original. This time two rows are identical, and the ordinary rank is only 3.'},
+        {rows:['0110','0110','1001','0111'], size:3, copy:'This arrangement has the largest overlap score. The totals and the number of solutions are still the same.'}
+      ];
+      const choices = document.querySelectorAll('[data-shape]');
+      const solutionBody = document.querySelector('#solutions tbody');
+      const overlapBody = document.querySelector('#overlaps tbody');
+      const explanation = document.getElementById('explanation');
+      const rational = document.getElementById('rational-rank');
+      const binary = document.getElementById('binary-rank');
+      const score = document.getElementById('score');
+      const orbit = document.getElementById('orbit-size');
+
+      function subsets(items, size) {
+        if (size === 0) return [[]];
+        return items.flatMap((item, index) => subsets(items.slice(index + 1), size - 1).map(rest => [item, ...rest]));
+      }
+
+      function determinant(square) {
+        if (square.length === 1) return square[0][0];
+        return square[0].reduce((total, value, j) => {
+          const minor = square.slice(1).map(row => row.filter((_, k) => k !== j));
+          return total + (j % 2 ? -1 : 1) * value * determinant(minor);
+        }, 0);
+      }
+
+      function rank(matrix, modTwo) {
+        for (let size = matrix.length; size > 0; size--) {
+          const selections = subsets(Object.keys(matrix).map(Number), size);
+          for (const rows of selections) {
+            for (const columns of selections) {
+              const det = determinant(rows.map(i => columns.map(j => matrix[i][j])));
+              if (modTwo ? det % 2 !== 0 : det !== 0) return size;
+            }
+          }
+        }
+        return 0;
+      }
+
+      function tableRows(matrix, withTotals, markCorners) {
+        return matrix.map((row, i) => {
+          const tr = document.createElement('tr');
+          const th = document.createElement('th');
+          th.scope = 'row';
+          th.textContent = labels[i];
+          tr.append(th);
+          row.forEach((value, j) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            cell.dataset.value = value;
+            if (markCorners && (i === 0 || i === 3) && (j === 0 || j === 3)) cell.dataset.corner = '';
+            tr.append(cell);
+          });
+          if (withTotals) {
+            const total = document.createElement('td');
+            total.textContent = row.reduce((sum, value) => sum + value, 0);
+            total.className = 'total';
+            tr.append(total);
+          }
+          return tr;
+        });
+      }
+
+      function show(index) {
+        const shape = shapes[index];
+        const bits = shape.rows.map(row => [...row].map(Number));
+        const overlaps = bits.map(row => bits.map(other => row.reduce((sum, item, j) => sum + item * other[j], 0)));
+        for (const choice of choices) choice.setAttribute('aria-pressed', String(Number(choice.dataset.shape) === index));
+        solutionBody.replaceChildren(...tableRows(bits, true, index < 2));
+        overlapBody.replaceChildren(...tableRows(overlaps, false, false));
+        explanation.textContent = shape.copy;
+        rational.textContent = rank(bits, false);
+        binary.textContent = rank(bits, true);
+        score.textContent = overlaps.flat().reduce((sum, value) => sum + value * value, 0);
+        orbit.textContent = `${shape.size} of 27`;
+      }
+
+      for (const choice of choices) choice.addEventListener('click', () => show(Number(choice.dataset.shape)));
+      show(0);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>How few ones can change rank?</title>
+<style>
+  :root {
+    --ink: #f2eee6;
+    --soft: #bcafc8;
+    --floor: #1a1423;
+    --panel: #261c33;
+    --line: #5e4d6e;
+    --violet: #d5b6ff;
+    --lime: #d0ec9a;
+    --orange: #ffd2a5;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+    background: var(--floor);
+    font: 16px/1.5 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 62rem); margin: auto; padding-block: 2.5rem; }
+  h1, h2, p { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; letter-spacing: -.04em; }
+  h1 { max-width: 15ch; font-size: clamp(2.8rem, 8vw, 5.3rem); }
+  h2 { font-size: 1.65rem; }
+  .intro { max-width: 43rem; margin-top: .7rem; color: var(--soft); }
+  .presets { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.1rem; }
+  button { font: inherit; color: inherit; border: 1px solid var(--line); border-radius: .4rem; background: var(--panel); padding: .45rem .65rem; cursor: pointer; }
+  button:hover { border-color: var(--violet); }
+  button[aria-pressed="true"] { border-color: var(--violet); color: var(--violet); }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .workbench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1rem; margin-top: 1rem; }
+  .panel { padding: 1.15rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--panel); }
+  .note { margin-top: .55rem; color: var(--soft); font-size: .9rem; }
+  .board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .35rem; margin-top: .9rem; }
+  .cell { display: grid; place-items: center; aspect-ratio: 1.65; min-width: 0; min-height: 2.6rem; padding: 0; color: var(--soft); font: 1.24rem var(--mono); background: var(--floor); }
+  .cell[aria-pressed="true"] { background: #47325c; }
+  .cell[data-in-minor="true"] { box-shadow: inset 0 -2px var(--lime); }
+  .ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem; margin: .7rem 0; }
+  .ranks div { border-block-end: 1px solid var(--line); padding: .45rem .1rem; }
+  .ranks dt { font-size: .84rem; color: var(--soft); }
+  .ranks dd { margin: 0; font: 2.2rem Georgia, serif; }
+  .ranks div[data-drop="true"] dd { color: var(--orange); }
+  .terms { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+  .term { padding: .3rem .45rem; border-radius: .35rem; color: var(--lime); background: var(--floor); font: .84rem var(--mono); }
+  .term[data-negative="true"] { color: var(--orange); }
+  details { padding-top: .8rem; margin-top: 1.15rem; border-top: 1px solid var(--line); }
+  details p { max-width: 49rem; }
+  summary { cursor: pointer; }
+  .census { width: min(100%, 32rem); margin-top: .6rem; border-collapse: collapse; font: .86rem var(--mono); }
+  .census caption { text-align: left; color: var(--soft); margin-bottom: .4rem; }
+  .census td, .census th { text-align: right; padding: .25rem .55rem; border-bottom: 1px solid var(--line); }
+  .census th:first-child { text-align: left; }
+  a { color: var(--violet); }
+  @media (max-width: 42rem) {
+    main { padding-block: 1.5rem; }
+    .workbench { grid-template-columns: minmax(0, 1fr); }
+    .panel { padding: .8rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>How few ones can change rank?</h1>
+    <p class="intro">Flip any square. The same board can have more independent rows in ordinary arithmetic than it has when you count modulo 2 or 3.</p>
+  </header>
+  <div class="presets" role="group" aria-label="Example boards">
+    <button type="button" data-example="0" aria-pressed="true">Six ones · mod 2</button>
+    <button type="button" data-example="1" aria-pressed="false">Seven ones · mod 2</button>
+    <button type="button" data-example="2" aria-pressed="false">Nine ones · mod 3</button>
+  </div>
+  <div class="workbench">
+    <section class="panel" aria-labelledby="board-title">
+      <h2 id="board-title">The board</h2>
+      <p class="note" id="one-count" role="status"></p>
+      <div class="board" id="board"></div>
+      <p class="note">Underlined squares belong to the selected subtable on the right.</p>
+    </section>
+    <section class="panel" aria-labelledby="rank-title">
+      <h2 id="rank-title">Independent rows</h2>
+      <dl class="ranks" aria-live="polite">
+        <div><dt>Ordinary</dt><dd id="rational"></dd></div>
+        <div><dt>Mod 2</dt><dd id="binary"></dd></div>
+        <div><dt>Mod 3</dt><dd id="ternary"></dd></div>
+      </dl>
+      <p id="witness"></p>
+      <div class="terms" id="terms"></div>
+      <p class="note" id="term-guide">Each term shows the columns picked from successive rows of the subtable. It picks a 1 in every row and every column.</p>
+    </section>
+  </div>
+  <details id="all-tables">
+    <summary>Count all 65,536 boards</summary>
+    <p class="note" id="census-total" role="status"></p>
+    <table class="census" id="census" hidden>
+      <caption>Boards whose rank drops, grouped by number of ones</caption>
+      <thead><tr><th scope="col">Ones</th><th scope="col">Mod 2</th><th scope="col">Mod 3</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </details>
+  <details>
+    <summary>Why six is the minimum modulo 2</summary>
+    <p class="note">A nonzero even determinant needs at least two terms with the same sign. Two same-sign terms must disagree in at least three rows. One term uses at least three ones, and the other needs three additional ones where they disagree. Five can never suffice.</p>
+    <p class="note">The <a href="crew_visuals/fewest_ones.md">card draft</a> gives the argument for every rank and the nine-one bound modulo 3. The first example is a sparse relative of <a href="nine_solutions_two_ranks.html">Lattice’s finite SAT example</a>.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const coordinates = [0, 1, 2, 3];
+const presets = ["0110101011000000", "0011010101101000", "0111100110101100"];
+const toMask = text => [...text].reduce((mask, bit, at) => mask | (Number(bit) << at), 0);
+const cellMask = (row, column) => 1 << (4 * row + column);
+
+function selections(values, size) {
+  if (size === 0) return [[]];
+  return values.flatMap((value, index) => selections(values.slice(index + 1), size - 1)
+    .map(tail => [value, ...tail]));
+}
+
+function permutations(values) {
+  if (values.length === 0) return [[]];
+  return values.flatMap((value, index) => permutations(values.filter((_, at) => index !== at))
+    .map(tail => [value, ...tail]));
+}
+
+function sign(columns) {
+  let parity = 0;
+  columns.forEach((column, index) => {
+    for (const later of columns.slice(index + 1)) if (column > later) parity ^= 1;
+  });
+  return parity ? -1 : 1;
+}
+
+const minors = [4, 3, 2, 1].flatMap(size => {
+  const groups = selections(coordinates, size);
+  return groups.flatMap(rows => groups.map(columns => ({
+    size, rows, columns,
+    terms: permutations(columns).map(choice => ({
+      choice,
+      sign: sign(choice),
+      mask: rows.reduce((mask, row, index) => mask | cellMask(row, choice[index]), 0)
+    }))
+  })));
+});
+
+function signedCount(terms, board) {
+  let result = 0;
+  for (const term of terms) if ((board & term.mask) === term.mask) result += term.sign;
+  return result;
+}
+
+function classify(board) {
+  let rational = 0;
+  let binary = 0;
+  let ternary = 0;
+  let witness;
+  let value;
+  for (const minor of minors) {
+    const total = signedCount(minor.terms, board);
+    if (!rational && total) {
+      rational = minor.size;
+      witness = minor;
+      value = total;
+    }
+    if (!binary && total % 2) binary = minor.size;
+    if (!ternary && total % 3) ternary = minor.size;
+    if (binary && ternary) break;
+  }
+  return { rational, binary, ternary, witness, value };
+}
+
+function ones(board) {
+  let count = 0;
+  while (board) {
+    board &= board - 1;
+    count++;
+  }
+  return count;
+}
+
+function census() {
+  const totals = Array.from({ length: 17 }, () => ({ binary: 0, ternary: 0 }));
+  for (let board = 0; board < (1 << 16); board++) {
+    const { rational, binary, ternary } = classify(board);
+    if (binary < rational) totals[ones(board)].binary++;
+    if (ternary < rational) totals[ones(board)].ternary++;
+  }
+  return totals;
+}
+
+if (typeof module !== "undefined") module.exports = { classify, census, toMask, ones };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const newElement = (tag, content) => {
+    const result = document.createElement(tag);
+    if (content !== undefined) result.textContent = content;
+    return result;
+  };
+  const choices = Array.from(document.querySelectorAll("[data-example]"));
+  let board = toMask(presets[0]);
+
+  const buttons = coordinates.flatMap(row => coordinates.map(column => {
+    const button = newElement("button");
+    button.type = "button";
+    button.className = "cell";
+    button.addEventListener("click", () => {
+      board ^= cellMask(row, column);
+      update();
+    });
+    byId("board").append(button);
+    return { button, row, column };
+  }));
+
+  function update() {
+    const result = classify(board);
+    const { witness, value, rational } = result;
+    byId("one-count").textContent = ones(board) + " ones in 16 squares";
+    for (const key of ["rational", "binary", "ternary"]) {
+      const target = byId(key);
+      target.textContent = result[key];
+      target.parentElement.dataset.drop = String(result[key] < rational);
+    }
+    for (const { button, row, column } of buttons) {
+      const filled = Boolean(board & cellMask(row, column));
+      button.textContent = Number(filled);
+      button.setAttribute("aria-pressed", String(filled));
+      button.setAttribute("aria-label", "Row " + (row + 1) + ", column " + (column + 1) + ", " + Number(filled));
+      button.dataset.inMinor = String(Boolean(witness?.rows.includes(row) && witness?.columns.includes(column)));
+    }
+    choices.forEach((button, index) => button.setAttribute("aria-pressed", String(board === toMask(presets[index]))));
+
+    byId("term-guide").hidden = !witness;
+    byId("terms").replaceChildren();
+    if (!witness) {
+      byId("witness").textContent = "The empty board has rank zero in all three fields.";
+      return;
+    }
+    const terms = witness.terms.filter(term => (board & term.mask) === term.mask);
+    const showValue = value < 0 ? "−" + (-value) : String(value);
+    byId("witness").textContent = "This " + rational + " × " + rational + " subtable has determinant " + showValue + ".";
+    byId("terms").append(...terms.map(term => {
+      const mark = newElement("span", (term.sign === 1 ? "+" : "−") + " [" +
+        term.choice.map(column => column + 1).join(", ") + "]");
+      mark.className = "term";
+      mark.dataset.negative = String(term.sign < 0);
+      return mark;
+    }));
+  }
+
+  choices.forEach((button, index) => button.addEventListener("click", () => {
+    board = toMask(presets[index]);
+    update();
+  }));
+
+  let counted = false;
+  const allTables = byId("all-tables");
+  allTables.addEventListener("toggle", () => {
+    if (!allTables.open || counted) return;
+    const values = census();
+    const binary = values.reduce((total, item) => total + item.binary, 0);
+    const ternary = values.reduce((total, item) => total + item.ternary, 0);
+    byId("census-total").textContent = binary.toLocaleString("en-US") +
+      " boards lose rank mod 2. " + ternary.toLocaleString("en-US") + " lose rank mod 3.";
+    const table = byId("census");
+    const body = table.tBodies[0];
+    for (const [count, row] of values.entries()) {
+      if (!row.binary && !row.ternary) continue;
+      const label = newElement("th", count);
+      label.scope = "row";
+      body.insertRow().append(label, newElement("td", row.binary), newElement("td", row.ternary));
+    }
+    table.hidden = false;
+    counted = true;
+  });
+  update();
+}
+</script>
+</body>
+</html>

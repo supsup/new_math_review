@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two blanks and one bad reading</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf6ec;
+      --ink: #293438;
+      --muted: #59676a;
+      --teal: #1b6261;
+      --rust: #943b26;
+      --edge: #c4cfca;
+      background: #e5ebea;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 58rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .16em; }
+    h1 { font: clamp(2.65rem, 8vw, 4.65rem)/1 Georgia, serif; letter-spacing: -.047em; margin: .6rem 0 .65rem; }
+    h2 { margin: 0 0 .4rem; font: 1.28rem Georgia, serif; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .6rem .8rem; align-items: flex-end; margin: 1.2rem 0; }
+    label { display: grid; gap: .2rem; font-size: .84rem; font-weight: 650; }
+    select, button { background: #eaf0ea; border: 1px solid var(--edge); border-radius: .3rem; color: var(--ink);
+      font: inherit; min-height: 2.65rem; padding: .3rem .62rem; }
+    button { cursor: pointer; }
+    :focus-visible { outline: .17rem solid var(--teal); outline-offset: .15rem; }
+    figure { margin: 0 0 1rem; }
+    .grid { display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); gap: .25rem;
+      list-style: none; padding: 0; margin: 0 0 .42rem; font-size: .72rem; }
+    .grid li { text-align: center; min-height: 2rem; line-height: 1.12; padding: .24rem .1rem;
+      background: #edf1ea; border: 1px solid #d9ded1; border-radius: .18rem; font-variant-numeric: tabular-nums; }
+    .grid span { display: block; color: var(--muted); font-size: .58rem; }
+    .grid b { font-size: .81rem; font-weight: 650; }
+    .grid .blank { border: 1px dashed var(--teal); background: #edf6f1; }
+    .grid .wrong { color: var(--rust); background: #f8e7dc; border-color: var(--rust); }
+    figcaption { font-size: .83rem; }
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+    .panel { background: #fffbf4; border: 1px solid var(--edge); border-radius: .32rem; padding: .72rem .8rem; }
+    .panel p { margin: .48rem 0 .2rem; }
+    dl { display: flex; gap: .35rem 1rem; flex-wrap: wrap; margin: .4rem 0 0; }
+    dt { font-size: .8rem; color: var(--muted); }
+    dd { margin: 0; font-size: 1.19rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    #status { font-weight: 650; color: var(--teal); }
+    #status[data-match="false"] { color: var(--rust); }
+    .formula { font: 1.08rem/1.45 Georgia, serif; overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: 1rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 39rem) {
+      .grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+      .panels { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="two_error_mixer.html">Back to two wrong readings</a>
+    <h1>Two blanks and one bad reading</h1>
+    <p class="intro">Four checking sums can fill two blanks and fix one wrong report. First combine the sums so the two blank positions drop out. The two sums left over tell you where the wrong report is.</p>
+
+    <div class="controls">
+      <label>First blank<select id="first"></select></label>
+      <label>Second blank<select id="second"></select></label>
+      <label>Wrong report<select id="wrong"></select></label>
+      <label>Amount added<select id="amount"></select></label>
+      <button id="collision" type="button" aria-pressed="false">Try two wrong reports</button>
+    </div>
+    <figure>
+      <ol id="board" class="grid" aria-label="Sixty readings by report number"></ol>
+      <figcaption>Report number above, received value below. A dash marks a blank. Changed values have a solid brown border so you can compare them with what the decoder finds.</figcaption>
+    </figure>
+
+    <div class="panels">
+      <section class="panel">
+        <h2>Check the received readings</h2>
+        <dl id="raw"></dl>
+        <p>Use zero for the two blanks when calculating these four sums modulo 61.</p>
+      </section>
+      <section class="panel">
+        <h2>Cancel the blanks</h2>
+        <dl id="filtered"></dl>
+        <p class="formula" id="factor"></p>
+        <p id="located"></p>
+      </section>
+    </div>
+    <p id="filled"></p>
+    <p id="status" role="status"></p>
+
+    <details>
+      <summary>Why the blanks vanish</summary>
+      <p>In the <a href="four_loss_mixer.html">60-report, five-wire mixer</a>, report <var>i</var> has address <var>z</var><sub><var>i</var></sub> = 35<sup>−<var>i</var></sup> and multiplier 42<sup>−<var>i</var></sup>, all modulo 61. Check <var>S</var><sub><var>j</var></sub> weights each reading by its multiplier times <var>z</var><sub><var>i</var></sub><sup><var>j</var></sup>, for <var>j</var> = 0, 1, 2, 3. All four checks are zero for the sent readings. The received readings differ only at the blanks and the wrong reports.</p>
+      <p>Call the two blank addresses <var>x</var> and <var>y</var>. In a new sum, multiply the weight at address <var>z</var> by (<var>z</var> − <var>x</var>)(<var>z</var> − <var>y</var>). The two blanks then have weight zero. Expanding the product gives the two combinations below.</p>
+      <p class="formula"><var>T</var><sub>0</sub> = <var>S</var><sub>2</sub> − (<var>x</var> + <var>y</var>)<var>S</var><sub>1</sub> + <var>xyS</var><sub>0</sub><br>
+        <var>T</var><sub>1</sub> = <var>S</var><sub>3</sub> − (<var>x</var> + <var>y</var>)<var>S</var><sub>2</sub> + <var>xyS</var><sub>1</sub></p>
+      <p>With one wrong report, <var>T</var><sub>0</sub> is its weighted error and <var>T</var><sub>1</sub> is the same amount times its address. Divide to get the address, then undo the weights to get the correction. With the wrong report fixed, the first two original sums give two equations for the two missing readings.</p>
+    </details>
+    <details>
+      <summary>Why a wrong reading uses two checks</summary>
+      <p>Suppose the received readings have <var>s</var> blanks and at most <var>e</var> wrong visible values. Two plausible originals could differ at all <var>s</var> blanks and at the <var>e</var> corrections proposed by each original. That is at most <var>s</var> + 2<var>e</var> positions in all. The four checks force these disagreements to be zero if there are at most four of them. The first <var>d</var> checks on <var>d</var> distinct addresses form an invertible Vandermonde matrix with scaled columns. So one known blank costs one check and one unknown wrong value costs two.</p>
+      <p>Five positions can support a nonzero difference that passes all four checks. In the two-error preset the true explanation and the decoder’s one-error explanation agree on every received position except their three distinct proposed corrections. With the two blanks there are five places for the recovered readings to differ. Both explanations pass all four checks.</p>
+    </details>
+    <p><a href="../tools/check_mixed_damage_mixer.py">Replay the exact modular checks</a> with Python and python-flint.</p>
+  </main>
+  <script>
+    (() => {
+      const prime = 61, size = 60, indices = Array.from({ length: size }, (_, i) => i);
+      const mod = value => (value % prime + prime) % prime;
+      const byId = id => document.getElementById(id);
+      function power(base, exponent) {
+        let value = 1;
+        for (let step = 0; step < exponent; step++) value = mod(value * base);
+        return value;
+      }
+      const inverses = Array.from({ length: prime }, (_, n) => power(n, prime - 2));
+      const addresses = indices.map(i => power(inverses[35], i));
+      const gains = indices.map(i => power(inverses[42], i));
+      const checks = [0, 1, 2, 3].map(k => gains.map((gain, i) => mod(gain * power(addresses[i], k))));
+      const inputs = indices.map(i => mod(2*i*i + 5*i + 7));
+      const sent = indices.map(i => mod([0, 1, 4, 51, 52].reduce((sum, k) => sum + inputs[(i+k) % size], 0)));
+
+      const first = byId('first'), second = byId('second'), wrong = byId('wrong'), amount = byId('amount');
+      const collision = byId('collision');
+      let showCollision = false;
+      for (const select of [first, second, wrong]) {
+        if (select === wrong) select.add(new Option('None', '-1'));
+        for (const i of indices) select.add(new Option(String(i), String(i)));
+      }
+      for (let i = 1; i < prime; i++) amount.add(new Option(String(i), String(i)));
+      first.value = 4;
+      second.value = 32;
+      wrong.value = 11;
+      amount.value = 5;
+      const cells = indices.map(i => {
+        const cell = document.createElement('li');
+        const label = document.createElement('span'), value = document.createElement('b');
+        label.textContent = i;
+        cell.append(label, value);
+        byId('board').append(cell);
+        return {cell, value};
+      });
+      const rawReadouts = makeReadouts('raw', 'S', 4), filteredReadouts = makeReadouts('filtered', 'T', 2);
+
+      function makeReadouts(id, symbol, length) {
+        return Array.from({ length }, (_, index) => {
+          const group = document.createElement('div');
+          const label = document.createElement('dt'), value = document.createElement('dd');
+          const subscript = document.createElement('sub');
+          subscript.textContent = index;
+          label.append(symbol, subscript);
+          group.append(label, value);
+          byId(id).append(group);
+          return value;
+        });
+      }
+
+      function syndrome(readings) {
+        return checks.map(row => mod(readings.reduce((sum, value, i) => sum + row[i] * value, 0)));
+      }
+
+      function update() {
+        const blankA = Number(first.value), blankB = Number(second.value);
+        const chosen = Number(wrong.value);
+        for (const option of second.options) option.disabled = Number(option.value) === blankA;
+        for (const option of first.options) option.disabled = Number(option.value) === blankB;
+        for (const option of wrong.options) option.disabled = [blankA, blankB].includes(Number(option.value));
+        const actual = showCollision ? [[7, 54], [13, 60]] : chosen < 0 ? [] : [[chosen, Number(amount.value)]];
+        amount.disabled = chosen < 0;
+        collision.setAttribute('aria-pressed', showCollision);
+        const received = sent.slice();
+        for (const [i, delta] of actual) received[i] = mod(received[i] + delta);
+        received[blankA] = received[blankB] = 0;
+        for (const [i, {cell, value}] of cells.entries()) {
+          const isBlank = i === blankA || i === blankB;
+          const isWrong = actual.some(([index]) => index === i);
+          cell.className = isBlank ? 'blank' : isWrong ? 'wrong' : '';
+          value.textContent = isBlank ? '—' : received[i];
+          cell.setAttribute('aria-label', 'Report ' + i + (isBlank ? ', blank' : ', value ' + received[i] + (isWrong ? ', changed' : '')));
+        }
+
+        const x = addresses[blankA], y = addresses[blankB], sums = syndrome(received);
+        const filtered = sums.slice(0, 2).map((sum, j) => mod(sums[j+2] - (x+y)*sums[j+1] + x*y*sum));
+        sums.forEach((sum, j) => rawReadouts[j].textContent = sum);
+        filtered.forEach((sum, j) => filteredReadouts[j].textContent = sum);
+        byId('factor').textContent = 'The weight factor (z − ' + x + ')(z − ' + y + ') is zero at both blank addresses.';
+
+        const [t0, t1] = filtered, corrected = received.slice();
+        let remainingFirst = sums[0], remainingSecond = sums[1];
+        let message = 'Both filtered sums are zero. No visible error is needed.';
+        if (t0) {
+          const node = mod(t1 * inverses[t0]), index = addresses.indexOf(node);
+          const weight = mod(t0 * inverses[mod((node-x)*(node-y))]);
+          const delta = mod(weight * inverses[gains[index]]);
+          corrected[index] = mod(received[index] - delta);
+          remainingFirst = mod(remainingFirst - weight);
+          remainingSecond = mod(remainingSecond - weight*node);
+          message = 'T₁ ÷ T₀ = ' + node + ' points to report ' + index + '. Subtract ' + delta + ' there.';
+        }
+        byId('located').textContent = message;
+        const weightA = mod((remainingSecond - y*remainingFirst) * inverses[mod(x-y)]);
+        const weightB = mod(remainingFirst - weightA);
+        corrected[blankA] = mod(-weightA*inverses[gains[blankA]]);
+        corrected[blankB] = mod(-weightB*inverses[gains[blankB]]);
+        byId('filled').textContent = 'Fill report ' + blankA + ' with ' + corrected[blankA] +
+          ' and report ' + blankB + ' with ' + corrected[blankB] + '.';
+        const matches = corrected.every((value, i) => value === sent[i]);
+        const passes = syndrome(corrected).every(sum => sum === 0);
+        byId('status').dataset.match = matches;
+        byId('status').textContent = matches ? 'All 60 readings match what was sent.'
+          : passes ? 'All four checks pass. The recovered readings differ from what was sent.'
+          : 'The recovered readings still fail a check.';
+      }
+
+      for (const select of [first, second, wrong, amount]) select.addEventListener('change', () => {
+        showCollision = false;
+        if ([first.value, second.value].includes(wrong.value)) wrong.value = '-1';
+        update();
+      });
+      collision.addEventListener('click', () => {
+        showCollision = !showCollision;
+        if (showCollision) {
+          first.value = 1;
+          second.value = 4;
+          wrong.value = 7;
+          amount.value = 54;
+        }
+        update();
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>

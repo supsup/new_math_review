@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two missing readings</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf8eb;
+      --ink: #1d3836;
+      --muted: #51635e;
+      --teal: #216a65;
+      --red: #973f33;
+      --line: #c1d0c6;
+      background: #e8ede4;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 58rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .16em; }
+    h1 { font: clamp(2.65rem, 8vw, 4.6rem)/1.03 Georgia, serif; letter-spacing: -.046em; margin: .55rem 0 .8rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .55rem .9rem; margin: 1rem 0; }
+    .controls label { display: grid; gap: .2rem; font-size: .9rem; font-weight: 650; }
+    select { min-height: 2.75rem; font: inherit; color: var(--ink); background: #eff3e9; padding: .3rem .5rem; border: 1px solid var(--line); border-radius: .32rem; }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+    .lab { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; gap: 1.25rem; }
+    figure { margin: 0; }
+    canvas { display: block; width: 100%; height: 19rem; background: #edf2e8; border-radius: .4rem; }
+    figcaption { font-size: .9rem; margin-top: .45rem; }
+    .probe-data { border: 1px solid var(--line); border-radius: .4rem; padding: .8rem .95rem; }
+    .probe-data label { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap; font-weight: 650; }
+    dl { margin: .6rem 0 .5rem; }
+    dt { font-size: .84rem; color: var(--muted); }
+    dd { margin: .12rem 0 .65rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    #status { margin: .65rem 0 0; font-weight: 650; color: var(--teal); }
+    #status[data-repeat="true"] { color: var(--red); }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: 1.1rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 40rem) { .lab { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { canvas { height: 16.5rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="signed_power_mixer.html">Back to the one-loss mixer</a>
+    <h1>Two missing readings</h1>
+    <p class="intro">A mixer reports sums of selected inputs modulo a prime. Each row follows the same wiring pattern one step farther around a circle. After two reports go missing, can any two direct input readings recover everything? On these boards they can. Pick the two inputs to see the independence check.</p>
+    <div class="controls">
+      <label for="board">Board
+        <select id="board"><option value="17">16 inputs, mod 17</option><option value="19">18 inputs, mod 19</option><option value="23">22 inputs, mod 23</option></select>
+      </label>
+      <label for="first">First direct input<select id="first"></select></label>
+      <label for="second">Second direct input<select id="second"></select></label>
+    </div>
+    <div class="lab">
+      <figure>
+        <canvas id="directions" role="img" aria-label="Every direct input at its distinct slope in the field, with arrows to the selected pair"></canvas>
+        <figcaption>Each dot is a slope in the field. The number on a dot is the input index. The teal and red arrows mark the chosen pair.</figcaption>
+      </figure>
+      <div class="probe-data">
+        <dl>
+          <dt>First slope</dt><dd id="slope-first"></dd>
+          <dt>Second slope</dt><dd id="slope-second"></dd>
+          <dt>Difference modulo the prime</dt><dd id="difference"></dd>
+        </dl>
+        <p id="status" aria-live="polite"></p>
+        <hr>
+        <label for="row">Read the wiring of row <select id="row"></select></label>
+        <dl>
+          <dt>That report adds these inputs</dt><dd id="wires"></dd>
+          <dt>Ordinary determinant of the full board</dt><dd id="determinant"></dd>
+        </dl>
+      </div>
+    </div>
+    <p>Once the surviving mixed readings are fixed, two numbers remain to be determined. Each direct input gives one equation in those two numbers. Distinct slopes mean the two equations have a unique solution. Try choosing the same input twice to see why repetition fails.</p>
+    <details>
+      <summary>Why throwing away any two reports works</summary>
+      <p>With the full board, the space of inputs that read as zero is two-dimensional. Each pair of input coordinates gives an invertible map from this space to a pair of values. Turning the board over swaps inputs and reports. For these rotating boards that is just reversal of the circular numbering, so every pair of report coordinates is independent in the space of dependencies among reports too.</p>
+      <p>A dependency among the surviving reports would be a dependency with zeros at the two removed positions. That would give a nonzero vector in the report dependency space with two zero coordinates, which its independent pairs rule out. The remaining reports therefore have full row rank. Their kernel still has dimension two and equals the full board’s kernel. The two direct inputs resolve exactly that ambiguity.</p>
+    </details>
+    <details>
+      <summary>How the rotations build the slopes</summary>
+      <p>Write the wiring offsets as exponents of a polynomial <var>f</var>. For the mod 23 board, row zero adds inputs 0, 1 and 4, so <var>f</var>(<var>T</var>) = 1 + <var>T</var> + <var>T</var><sup>4</sup>. If λ is a common root of <var>f</var> and <var>T</var><sup><var>n</var></sup> − 1, then the sequence 1, λ, λ², … reads as zero in every row. Each example has exactly two such roots α and β, and they account for the two-dimensional kernel. The <var>j</var>th direct input has coefficients (α<sup><var>j</var></sup>, β<sup><var>j</var></sup>). Divide both by α<sup><var>j</var></sup> to get its slope (β/α)<sup><var>j</var></sup>.</p>
+      <p>The ratio β/α has order <var>n</var> in each field, so the slopes traverse all <var>n</var> distinct nonzero residues. Two different slopes give a nonzero two-by-two determinant. The mod 19 example is Marlow’s. The three examples and the search below are checked with <a href="../tools/check_two_loss_circulants.py">the exact replay</a>.</p>
+    </details>
+    <details>
+      <summary>How small can a rotating board be?</summary>
+      <p>There are only <var>p</var> + 1 directions in a two-dimensional space modulo <var>p</var>, so a board can have at most that many inputs. The exact replay checks every binary rotating pattern, up to rotation, at sizes 3 through <var>p</var> + 1 for each prime through 17. The first modulus that works is 17, at size 16 with five marks per row as the minimum. Marlow’s size-10 mod 11 example shows that other wiring patterns can work at a smaller modulus.</p>
+      <p>Three marks per row at mod 23 are the fewest possible for any ordinary-invertible rotating board that loses rank modulo an odd prime. With two marks, each report adds an input to its neighbor by a fixed step. On even cycles the alternating-sign input is already in the ordinary kernel. On odd cycles the alternating condition forces the input to equal its own negative, so the kernel is still zero modulo an odd prime.</p>
+      <p>For the search, the greatest common divisor <var>g</var> of <var>f</var> and <var>T</var><sup><var>n</var></sup> − 1 gives the recurrence for the kernel. Indeed, <var>g</var> is a combination of those two polynomials and divides both, so <var>f</var> and <var>g</var> kill the same vectors under the cyclic shift. Every degree-<var>d</var> recurrence solution has <var>d</var> free initial values and closes after <var>n</var> steps because <var>g</var> divides <var>T</var><sup><var>n</var></sup> − 1. The replay keeps only degree two over the finite field and degree zero over the rationals. It checks probe 0 against every offset using the recurrence. Rotation covers all other pairs, including the transpose.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const boards = new Map([
+        [17, { offsets: [0, 1, 2, 3, 9], ratio: 7, det: -1445 }],
+        [19, { offsets: [0, 1, 5, 7], ratio: 10, det: -20216 }],
+        [23, { offsets: [0, 1, 4], ratio: 10, det: 1587 }]
+      ]);
+      const byId = id => document.getElementById(id);
+      const board = byId('board'), first = byId('first'), second = byId('second'), row = byId('row');
+      const canvas = byId('directions'), ctx = canvas.getContext('2d');
+
+      function draw(slopes, firstIndex, secondIndex) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const x0 = w / 2, y0 = h / 2, radius = Math.min(w, h) / 2 - 34;
+        const turn = 2 * Math.PI;
+        const at = (slope, distance) => {
+          const angle = turn * (slope - 1) / slopes.length - Math.PI / 2;
+          return [x0 + distance * Math.cos(angle), y0 + distance * Math.sin(angle)];
+        };
+
+        ctx.strokeStyle = '#b9c9bc';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x0, y0, radius, 0, turn);
+        ctx.stroke();
+        const selections = [[firstIndex, '#216a65'], [secondIndex, '#973f33']];
+        for (const [index, color] of selections) {
+          const [x, y] = at(slopes[index], radius);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2.5;
+          if (firstIndex === secondIndex && color === '#973f33') ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          const angle = Math.atan2(y - y0, x - x0);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          for (const flank of [-.5, .5]) {
+            ctx.lineTo(x - 13 * Math.cos(angle + flank), y - 13 * Math.sin(angle + flank));
+          }
+          ctx.fill();
+        }
+        ctx.setLineDash([]);
+
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const [index, slope] of slopes.entries()) {
+          const chosen = selections.find(([i]) => i === index);
+          const [x, y] = at(slope, radius);
+          ctx.fillStyle = chosen ? chosen[1] : '#518178';
+          ctx.beginPath();
+          ctx.arc(x, y, chosen ? 5 : 3.1, 0, turn);
+          ctx.fill();
+          const [tx, ty] = at(slope, radius + 17);
+          ctx.fillText(String(index), tx, ty);
+        }
+      }
+
+      function update() {
+        const prime = Number(board.value), size = prime - 1;
+        const { offsets, ratio, det } = boards.get(prime);
+        const i = Number(first.value), j = Number(second.value), r = Number(row.value);
+        const slopes = [1];
+        while (slopes.length < size) slopes.push(slopes[slopes.length - 1] * ratio % prime);
+        const difference = (slopes[j] - slopes[i] + prime) % prime;
+        byId('slope-first').textContent = slopes[i];
+        byId('slope-second').textContent = slopes[j];
+        byId('difference').textContent = difference;
+        byId('wires').textContent = offsets.map(offset => 'x' + subscript((offset + r) % size)).join(' + ');
+        byId('determinant').textContent = det.toLocaleString('en-US').replace('-', '−');
+        const status = byId('status');
+        status.dataset.repeat = difference === 0;
+        status.textContent = difference ? 'Independent. The two readings resolve both unknowns.' : 'Repeated direction. One unknown is still free.';
+        draw(slopes, i, j);
+      }
+
+      function subscript(value) {
+        return String(value).replace(/[0-9]/g, digit => '₀₁₂₃₄₅₆₇₈₉'[digit]);
+      }
+
+      function chooseBoard() {
+        const size = Number(board.value) - 1;
+        for (const select of [first, second, row]) {
+          const prior = Number(select.value);
+          select.replaceChildren(...Array.from({ length: size }, (_, j) => new Option(j, j)));
+          select.value = Math.min(prior, size - 1);
+        }
+        update();
+      }
+
+      board.addEventListener('change', chooseBoard);
+      for (const select of [first, second, row]) select.addEventListener('change', update);
+      chooseBoard();
+      second.value = 1;
+      update();
+      new ResizeObserver(update).observe(canvas);
+    })();
+  </script>
+</body>
+</html>

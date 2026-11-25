@@ -1,0 +1,40 @@
+Build a determinant one dozen at a time
+
+Marlow’s path counter builds any positive integer into a binary determinant by reading the integer in base two. The same idea can read larger digits. A small board from the seven-row determinant search multiplies by 12 with 19 ones. Add a place for the next digit and the cost is at most 21 ones per base-12 digit, plus a fixed setup. In the long run that is at most 5.86 ones per binary bit.
+
+The block for one digit
+
+Read the first six columns as u₁ through u₆ and the last as the current value y. Each of the first six rows says its indicated variables add to zero.
+
+0000110
+0011000
+0001101
+0110001
+1100100
+1000011
+0101010
+
+Those six equations can be solved using only integer row operations. They give the six values (2, −5, 4, −4, 3, −3) times y. The last row is u₂ + u₄ + u₆, which is −12y. Add one 1 in a new column for the next value y′. For a nonzero digit d, add another 1 in a prepared column whose value is −dx. The augmented equation is y′ − 12y − dx = 0, or y′ = 12y + dx. Here x is the one unknown left free at the beginning of the construction.
+
+To check the arithmetic, u₄ = −u₃, u₅ = u₃−y, u₆ = y−u₃ and u₂ = −y−u₃. The fifth row then gives u₁ = 2y. The sixth gives u₃ = 4y. This also shows why every eliminated variable has a unit pivot. The six-by-six block in the upper left has determinant −1.
+
+Read the whole number
+
+First provide columns for ±x, ±2x, …, ±11x. Each new signed multiple is made by adding one copy of x and changing a sign as needed. For example, to set z to 2x, use z + x₋ + another copy of x₋ = 0, where each copy of x₋ is defined by x₋ + x = 0. The copies avoid putting a 2 into the binary matrix. This setup uses 22 equations and 54 ones.
+
+Set y to the positive column for the leading digit. Each remaining digit uses one seven-row block and costs 20 ones plus one more when the digit is nonzero. For example, the base-12 digits 2, 1, 5 first give 2x, then 25x, then 305x. End with the one-entry equation y = 0. Eliminating all helper variables and intermediate values has unit pivots throughout, leaving only mx = 0 for the target integer m. The resulting square binary matrix has determinant magnitude m. A prime that divides m erases the last constraint and drops the rank by one.
+
+For L base-12 digits, the construction has 7L+16 rows and at most 21L+34 ones. This is an upper bound with a fixed small-number cost, useful for long inputs. The earlier binary ladder uses at most eight ones per binary digit plus a constant.
+
+A lower bound for any construction
+
+Suppose a binary matrix with w ones loses rank modulo every prime dividing the squarefree product P. A nonzero minor of maximal ordinary rank must have determinant magnitude at least P, because it is divisible by every one of those primes. If its row weights are d₁, d₂, …, Hadamard bounds its squared determinant by their product. For every positive integer d, d ≤ 3^(d/3). The inequality holds directly at 1 and 2, and log(d)/d decreases for d ≥ 3. So P² ≤ 3^(w/3), giving w ≥ 6 log₃ P, about 3.79 ones per binary bit of P.
+
+Replay from the repository root
+
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_base_twelve.py
+
+The script also prints a binary matrix when given a positive integer argument.
+
+crew_visuals/determinant_doubling_note.txt
+crew_visuals/seven_row_spectrum.txt

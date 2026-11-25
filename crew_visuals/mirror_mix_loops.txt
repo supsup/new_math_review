@@ -1,0 +1,38 @@
+Four loops of zeros, with a boundary check
+
+Mix the two completed, phase-rotated L-functions of the conjugate order-four characters modulo 5. The mixture at angle τ is A cos τ + B sin τ. For every real τ the zeros respect the mirror across the center line.
+
+As you raise τ, a pair can leave the line, trace two reflected arcs, and return. Fixpoint found four such loops numerically. We can check that each connects the claimed endpoints without relying on the numerical tracing.
+
+    Height window         Leaves at       Returns at      Total zeros in the box
+      76.96–77.50          128.113004°     157.080635°       2
+      80.90–83.98           99.425927°     161.330623°       3
+      85.10–86.00           23.733657°      84.930642°       2
+      88.47–91.26          109.621179°     167.330028°       3
+
+The count includes multiplicity. In a box with three zeros, the third stays on the line while the pair is away. The 85.10–86.00 box holds the Davenport–Heilbronn pair when τ is 45°.
+
+What keeps the pair inside
+
+First draw a rectangle around each proposed loop. Use real parts between 0 and 1 for the two small loops and between −1.25 and 2.25 for the two wider loops. We check the entire boundary for every angle in an interval containing both contacts.
+
+On a patch of the boundary, a zero could occur only if the ratio −A/B lies in the real interval of tan τ. It is enough to show its imaginary part stays away from zero, or that its real part stays outside the interval. If B might vanish, try the reciprocal ratio and the reciprocal interval. The common completion factor cancels out of both ratios. FLINT interval arithmetic encloses the ratios on small pieces of each boundary and checks this exclusion. There is no boundary zero at any angle used below.
+
+Pick an angle between the contacts and count by winding. Intervals verify exactly two zeros in each of the two small boxes, with none on the line. In each wide box there are exactly three zeros. Direct interval checks isolate one simple zero on the line and exclude any other line zero at that sample angle.
+
+The total number of zeros stays fixed as long as the boundary stays clear. The number on the line can change only at a contact or at the boundary. The companion check certifies that each box has just the two listed contacts, each with nonzero curvature, so neither count changes between those two angles. Exactly two zeros are off the line throughout that interval. They are simple because a double off-line zero and its reflection would use four zeros. The one on the right therefore has a unique continuous path, and the local contacts join its ends to the reflected path on the left.
+
+The arcs cannot cross themselves. If two different values of tan τ give the same off-line zero, subtracting the two mixture equations shows that both component functions vanish there. That point would then also be an off-line zero in the same box at a contact angle, where the certified count is exhausted by zeros on the line. The certificates apply to these four boxes and their mixing intervals. Their distinct height windows make the four loops distinct.
+
+The additional height-boundary check in mirror_mix_all_angles.html shows that these four loops account for every off-line zero of these mixtures at heights 76–96.
+
+Replays
+
+Install python-flint (tested with 0.6.0). From the repository root run
+
+    PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mirror_mix_loops.py
+
+The replay verifies the contact heights first, the uniform boundary checks second, and the winding and center-line counts last.
+
+crew_visuals/mirror_mix_contacts.txt
+crew_visuals/certify_a_zeta_cousin_zero.html

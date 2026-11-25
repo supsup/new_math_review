@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>More rows, fewer ones</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f7f0e3; color: #313038;
+      --ink: #26352e; --muted: #565c5a; --pine: #2a5547; --mint: #d9eadc;
+      --paper: #fffaf0; --line: #aeb9ac; --gold: #f1d299;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 63rem); padding: clamp(1.9rem,6vw,4.2rem) 0; margin: auto; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.8rem,8vw,5.8rem)/.97 Georgia,serif; letter-spacing: -.063em; text-wrap: balance; }
+    h2 { font: 1.65rem/1.13 Georgia,serif; }
+    p { line-height: 1.55; }
+    .intro { max-width: 66ch; margin: .85rem 0 1.15rem; color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .8rem; }
+    button { border: 1px solid var(--line); border-radius: .35rem; background: var(--paper); color: inherit; padding: .42rem .6rem; min-height: 2.65rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--pine); border-color: var(--pine); color: white; font-weight: 650; }
+    :focus-visible { outline: 3px solid #a14e2a; outline-offset: 3px; }
+    .boards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; align-items: start; margin-bottom: .8rem; }
+    .panel { padding: .78rem clamp(.5rem,2.6vw,1.1rem) 1rem; border: 1px solid var(--line); border-radius: .62rem; background: var(--paper); }
+    .facts { color: var(--muted); margin: .33rem 0 .55rem; }
+    .facts strong { color: var(--pine); }
+    table { width: 100%; max-width: 24rem; table-layout: fixed; border-spacing: 3px; text-align: center; font-variant-numeric: tabular-nums; }
+    th { font-weight: 600; color: var(--muted); font-size: .84rem; }
+    .sum-heading { width: 3rem; }
+    td { height: clamp(1.65rem,4.7vw,2.3rem); padding: 0; border-radius: .27rem; color: var(--muted); background: #eeeae0; }
+    td.on { color: var(--ink); background: var(--mint); font-weight: 650; }
+    tr:last-child td.on { background: var(--gold); }
+    td:last-child { background: transparent; font-weight: 700; color: var(--pine); }
+    .equation { margin-top: .5rem; color: var(--muted); }
+    #result { max-width: 62ch; margin-bottom: 1rem; }
+    details { max-width: 74ch; border-top: 1px solid var(--line); padding-top: .72rem; }
+    details p { margin-top: .6rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--pine); text-underline-offset: .18em; }
+    @media (max-width: 43rem) { .boards { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { table { border-spacing: 2px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>More rows, fewer ones</h1>
+    <p class="intro">Both boards lose a rank modulo 17. The smallest square board has seven rows and needs 24 ones. Give it an eighth row and column, and a different arrangement gets the same result with 23 ones.</p>
+    <div class="controls" role="group" aria-label="Arithmetic used for the row sums">
+      <button type="button" data-mod="false" aria-pressed="true">Over fractions</button>
+      <button type="button" data-mod="true" aria-pressed="false">Modulo 17</button>
+    </div>
+
+    <div class="boards">
+      <section class="panel" id="seven" aria-labelledby="title-seven">
+        <h2 id="title-seven">Fewest rows</h2>
+        <p class="facts"></p>
+        <table aria-label="Seven-row board and column weights"><thead></thead><tbody></tbody></table>
+        <p class="equation"></p>
+      </section>
+      <section class="panel" id="eight" aria-labelledby="title-eight">
+        <h2 id="title-eight">Fewest ones</h2>
+        <p class="facts"></p>
+        <table aria-label="Eight-row board and column weights"><thead></thead><tbody></tbody></table>
+        <p class="equation"></p>
+      </section>
+    </div>
+    <p id="result" aria-live="polite"></p>
+
+    <details>
+      <summary>How the comparison was checked</summary>
+      <p>In each column, the number at the top is its weight. Add those weights wherever the row has a 1. Every sum above the last row is zero from the start. The last sum is −17, which also vanishes when we switch arithmetic.</p>
+      <p>Both determinants have magnitude 17, so each matrix loses exactly one rank there. The exhaustive seven-row scan found a minimum of 24 ones at that size. To rule out 22 in a larger board, expand away any row or column containing just one 1. A remaining board with at least two ones in each row can have at most eleven rows. The searches cover all of those sizes. <a href="global_rank_minima.txt">Exact results and replay commands</a> · <a href="prime_rank_drop.html">Try other primes</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const boards = [
+        {panel:'seven', rows:['0000011','0001101','0010110','0101110','0111001','1011010','1100101'], weights:[-8,-4,1,5,-3,2,-2]},
+        {panel:'eight', rows:['00000011','00000101','00001110','00011001','00110110','01101000','10101000','11010000'], weights:[-7,-7,5,-3,2,-1,-1,1]}
+      ];
+      const controls = document.querySelectorAll('[data-mod]');
+      const result = document.getElementById('result');
+      const signed = n => String(n).replace('-','−');
+
+      function draw({panel,rows,weights}, modular) {
+        const root = document.getElementById(panel);
+        const table = root.querySelector('table');
+        const n = rows.length;
+        const ones = rows.join('').replaceAll('0','').length;
+        const emphasis = document.createElement('strong'); emphasis.textContent = `${n} × ${n}`;
+        root.querySelector('.facts').replaceChildren(emphasis, ` · ${ones} ones`);
+        table.tHead.replaceChildren();
+        const heading = table.tHead.insertRow();
+        for (const value of [...weights.map(signed),'Sum']) {
+          const cell = document.createElement('th'); cell.scope = 'col'; cell.textContent = value;
+          if (value==='Sum') cell.className = 'sum-heading';
+          heading.append(cell);
+        }
+        const tableBody = table.tBodies[0];
+        tableBody.replaceChildren();
+        const sums = rows.map(bits => {
+          const tr = tableBody.insertRow();
+          let sum = 0;
+          [...bits].forEach((bit,i) => {
+            const cell = tr.insertCell(); cell.textContent = bit;
+            cell.classList.toggle('on',bit==='1');
+            if (bit==='1') sum += weights[i];
+          });
+          tr.insertCell().textContent = signed(modular ? (sum%17+17)%17 : sum);
+          return sum;
+        });
+        root.querySelector('.equation').textContent = modular
+          ? `The last sum ${signed(sums.at(-1))} becomes 0. Rank ${n} falls to ${n-1}.`
+          : `The last sum is ${signed(sums.at(-1))}. Rank is ${n}.`;
+      }
+
+      function render(modular) {
+        for (const board of boards) draw(board,modular);
+        result.textContent = modular
+          ? 'Both boards lose one rank. The eight-row board does it with one fewer 1.'
+          : 'Both boards have independent columns over the fractions.';
+      }
+      for (const control of controls) control.addEventListener('click', () => {
+        for (const item of controls) item.setAttribute('aria-pressed',String(item===control));
+        render(control.dataset.mod==='true');
+      });
+      render(false);
+    })();
+  </script>
+</body>
+</html>

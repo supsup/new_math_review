@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Where two zeta zeros meet</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f8f2e8; color: #2d2a38;
+      --muted: #5c5963; --wave: #624373; --green: #36594b; --gold: #a34e22;
+      --paper: #fffbf1; --edge: #c7bcc4;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 64rem); margin: auto; padding: clamp(1.8rem, 6vw, 4.25rem) 0; }
+    h1, p { margin: 0; }
+    h1 { font: clamp(2.8rem, 8vw, 5.65rem)/.98 Georgia, serif; letter-spacing: -.055em; text-wrap: balance; }
+    p { line-height: 1.56; }
+    .intro { color: var(--muted); max-width: 67ch; margin: .85rem 0 1.15rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: .95rem; }
+    button { min-height: 2.65rem; padding: .42rem .65rem; color: inherit; background: var(--paper); border: 1px solid #a896a2; border-radius: .35rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { color: white; background: var(--wave); border-color: var(--wave); }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .dial { display: grid; grid-template-columns: auto minmax(0,1fr); gap: .45rem .85rem; align-items: center; }
+    .dial label { font-weight: 650; }
+    input[type="range"] { width: 100%; min-height: 2rem; accent-color: var(--wave); }
+    output { font-variant-numeric: tabular-nums; color: var(--wave); font-weight: 650; }
+    .wave { margin: .7rem 0 0; background: var(--paper); border: 1px solid var(--edge); border-radius: .65rem; overflow: hidden; }
+    canvas { display: block; height: clamp(14rem, 37vw, 21rem); width: 100%; }
+    .readout { margin: .65rem 0 1.1rem; }
+    #event { font-weight: 650; }
+    #nearby { color: var(--muted); }
+    details { max-width: 77ch; padding-top: .72rem; border-top: 1px solid var(--edge); }
+    summary { cursor: pointer; font-weight: 650; }
+    details p { margin-top: .62rem; }
+    a { color: var(--green); text-underline-offset: .18em; }
+    @media (max-width: 25rem) { .controls button { padding-inline: .49rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Where two zeta zeros meet</h1>
+    <p class="intro">At zeta’s usual setting, these two zeros lie just 0.0377 apart in height. Follow the same pair while turning the de Bruijn–Newman heat parameter below zero. Their two crossings meet near <var>t</var> = −0.0007112, then leave the line.</p>
+
+    <div class="controls" role="group" aria-label="Heat parameter presets">
+      <button type="button" data-stage="initial" aria-pressed="true">Zeta</button>
+      <button type="button" data-stage="closing" aria-pressed="false">Closing in</button>
+      <button type="button" data-stage="meeting" aria-pressed="false">Meeting</button>
+      <button type="button" data-stage="past" aria-pressed="false">Afterward</button>
+    </div>
+    <div class="dial">
+      <label for="heat">Heat parameter <var>t</var></label>
+      <input type="range" id="heat" min="0" max="1100" value="0" step="1" aria-describedby="time">
+      <output id="time" for="heat"></output>
+    </div>
+    <figure class="wave">
+      <canvas id="wave" role="img" aria-label="Scaled wave for the two zeta zeros near height 7005"></canvas>
+    </figure>
+    <div class="readout" aria-live="polite"><p id="event"></p><p id="nearby"></p></div>
+
+    <details>
+      <summary>How the wave and meeting were computed</summary>
+      <p>The de Bruijn–Newman family <var>H</var><sub><var>t</var></sub> has <var>H</var><sub>0</sub> proportional to the completed zeta function on the line, with its argument <var>x</var> equal to twice the height here. The Gaussian identity in Rodgers and Tao’s equation (15) computes the wave for negative <var>t</var> by averaging the initial values around each height. <a href="https://arxiv.org/html/1801.05914v5">Rodgers and Tao’s paper</a></p>
+      <p>We computed the meeting by solving for zero wave height and zero slope together. Increasing the precision and the number of Gaussian quadrature nodes returned <var>t</var> ≈ −0.000711204733903 at height 7005.08171470549. The page heats a local polynomial fit for smooth playback. Its values were spot-checked against direct Gaussian quadrature at 20 height/time combinations. These are numerical estimates for this pair.</p>
+      <p>Near a double zero with nonzero curvature, the leading shape is a constant times [(<var>x</var> − <var>x</var><sub>0</sub>)² − 2(<var>t</var> − <var>t</var><sub>0</sub>)]. Before the meeting it crosses twice. At the meeting it touches zero, and afterward the nearby pair is complex so the real wave has no crossing there.</p>
+      <p>From the original gap, an isolated-pair estimate predicts −0.000710588365404. It differs from the numerical meeting time here by about 0.087% in magnitude. The browser’s approximation and the independent numerical check can be reproduced with <code>tools/check_lehmer_heat.py</code> and mpmath 1.3.0.</p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const CENTER = 7005.081714705492812;
+      const MEETING = 0.000711204733902982;
+      const INITIAL_WAVE = [
+        0.003967137352516686, 2.189093807258892e-05, -11.170618032765688, -0.015476720472232426,
+        13.613546870136078, -2.8408948345674694, -5.2847801850737435, 1.7665850109353514,
+        0.9280173149981876, -0.4503646518211431, -0.0715543903387901, 0.062076900307975386,
+        -0.00041800115746419005, -0.005116132818698528, 0.0005741310216967068, 0.0002586668537852692,
+        -5.5655368732064354e-05, -7.327411082798733e-06, 2.987158336945462e-06, 3.4597904660155144e-08,
+        -1.0456343479635104e-07, 6.6762423462457035e-09, 2.4056987787515438e-09, -3.240324759888109e-10
+      ];
+      const stages = {initial:0, closing:0.00056, meeting:MEETING, past:0.00094};
+      const dial = document.getElementById('heat');
+      const time = document.getElementById('time');
+      const canvas = document.getElementById('wave');
+      const context = canvas.getContext('2d');
+      const event = document.getElementById('event');
+      const nearby = document.getElementById('nearby');
+      const buttons = document.querySelectorAll('[data-stage]');
+      const left = -.052;
+      const right = .052;
+      let s = 0;
+
+      function heatPolynomial(s) {
+        const coefficients = [...INITIAL_WAVE];
+        let layer = [...INITIAL_WAVE];
+        for (let n = 1; layer.length >= 3; n++) {
+          layer = layer.slice(2).map((value,i) => value*(i+1)*(i+2)*s/(4*n));
+          layer.forEach((value,i) => { coefficients[i] += value; });
+        }
+        return x => coefficients.reduceRight((value,c) => value*x + c, 0);
+      }
+
+      function crossings(wave) {
+        if (s === MEETING) return [0];
+        const roots = [];
+        let x0 = left;
+        let last = wave(x0);
+        for (let i=1; i<=600; i++) {
+          const x1 = left + (right-left)*i/600;
+          const next = wave(x1);
+          if (last*next < 0) {
+            let lo = x0, hi = x1;
+            for (let j=0; j<45; j++) {
+              const mid = (lo+hi)/2;
+              if (last*wave(mid) > 0) lo = mid;
+              else hi = mid;
+            }
+            roots.push((lo+hi)/2);
+          }
+          x0 = x1;
+          last = next;
+        }
+        return roots;
+      }
+
+      function draw(wave, roots) {
+        if (!context) return;
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width*dpr);
+        canvas.height = Math.round(height*dpr);
+        context.setTransform(dpr,0,0,dpr,0,0);
+        const X = d => 22 + (width-44)*(d-left)/(right-left);
+        const Y = z => 20 + (height-60)*(.013-z)/.055;
+        context.strokeStyle = '#aa9da4';
+        context.setLineDash([5,4]);
+        context.beginPath(); context.moveTo(10,Y(0)); context.lineTo(width-10,Y(0)); context.stroke();
+        context.setLineDash([]);
+        context.strokeStyle = '#624373'; context.lineWidth = 2.5;
+        context.beginPath();
+        for (let i=0; i<=400; i++) {
+          const d = left + (right-left)*i/400;
+          context.lineTo(X(d),Y(wave(d)));
+        }
+        context.stroke();
+        context.fillStyle = '#a34e22';
+        for (const d of roots) {
+          context.beginPath(); context.arc(X(d),Y(0),5,0,2*Math.PI); context.fill();
+        }
+        context.fillStyle = '#5c5963'; context.font = '12px system-ui'; context.textAlign = 'center';
+        for (const label of [7005.04,7005.08,7005.12]) {
+          context.fillText(label.toFixed(2),X(label-CENTER),height-12);
+        }
+      }
+
+      function render() {
+        const wave = heatPolynomial(s);
+        const roots = crossings(wave);
+        draw(wave, roots);
+        time.textContent = s === 0 ? '0' : `−${s.toFixed(10)}`;
+        dial.setAttribute('aria-valuetext', `Heat parameter ${time.textContent}`);
+        buttons.forEach(button => button.setAttribute('aria-pressed', String(stages[button.dataset.stage] === s)));
+        if (s === MEETING) {
+          event.textContent = 'One touch. The zeros have met.';
+          nearby.textContent = `Height ≈ ${CENTER.toFixed(11)}.`;
+        } else if (roots.length === 2) {
+          event.textContent = 'Two crossings on the line.';
+          nearby.textContent = `Heights ≈ ${(CENTER+roots[0]).toFixed(8)} and ${(CENTER+roots[1]).toFixed(8)}.`;
+        } else {
+          event.textContent = 'No crossings near the meeting.';
+          nearby.textContent = 'The pair has moved off the line.';
+        }
+      }
+
+      for (const button of buttons) button.addEventListener('click', () => {
+        s = stages[button.dataset.stage];
+        dial.value = Math.round(s*1e6);
+        render();
+      });
+      dial.addEventListener('input', () => { s = Number(dial.value)*1e-6; render(); });
+      if (window.ResizeObserver) new ResizeObserver(render).observe(canvas);
+      else window.addEventListener('resize', render);
+      render();
+    })();
+  </script>
+</body>
+</html>

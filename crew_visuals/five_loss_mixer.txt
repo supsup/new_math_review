@@ -1,0 +1,83 @@
+A quartic recovers five missing readings
+
+Put 58 inputs on a circle and number them 0 through 57. Reading i adds the
+inputs at offsets 0, 4, 14, 36, 43, 46 and 48 from i, wrapping around at 58.
+The readout keeps the remainder modulo 59. Any five missing readings can
+be replaced by direct observations of any five distinct inputs.
+
+The ordinary determinant is 3,047,747,308,987,465, which is
+4,263,035 times 59 to the fifth power. Modulo 59 the rank is exactly 53.
+This is a seven-connection construction for each reading. A lower bound
+of six follows from the requirement that any five input coordinates vary
+independently on the kernel. An equation with one through five nonzero
+coefficients would violate that independence. Ordinary invertibility
+excludes any empty row.
+
+Why five direct inputs work
+
+Take the polynomial with a term for each of the seven offsets. Its roots
+among the 58 nonzero residues modulo 59 are exactly
+23, 46, 33, 7 and 14. They form the progression 23 times 2^k for k from
+0 through 4. The evaluation at a root shows that its geometric sequence
+is invisible to the mixer. These five independent sequences span the
+kernel. Therefore any change invisible to the readings has the form
+
+    change at j = 23^j P(2^j)
+
+where P is a polynomial of degree at most four. The addresses 2^j are
+all distinct modulo 59. Five direct observations, after subtracting any
+one consistent base solution and dividing by 23^j, determine P at five
+distinct points. Two such polynomials agreeing at five points must coincide.
+
+The transpose is the original mixer with both circular orders reversed.
+A dependency among the rows left after five readings are lost would give
+a nonzero vector in the left kernel with zeros in those five positions.
+The same polynomial argument rules that out. Thus the surviving readings
+keep exactly the original five dimensions of ambiguity, and the direct
+observations resolve them.
+
+Replay with python-flint installed
+
+    python3 -B tools/check_five_loss_mixer.py
+
+The replay checks the integer determinant, the finite-field rank and roots,
+and actual row replacement on 128 fixed erasure/probe pairs. All
+4,582,116 probe sets are covered by the distinct-address argument.
+
+A larger board meets the six-connection lower bound
+
+At prime 14717, use 14716 inputs and just the offsets
+
+    0, 1912, 4076, 5184, 12912, 13005.
+
+Among the 14716th roots modulo 14717, the wiring polynomial vanishes
+exactly at 16, 32, 64, 128 and 256. The ratio is again 2, now of order
+14716. The same quartic argument therefore gives recovery from any five
+lost readings and any five direct inputs. The ordinary determinant is
+nonzero by the integer-polynomial gcd with T^14716 − 1.
+
+The six taps came from a generating function. Work modulo 14717 and
+take the terms through degree six in exp(t + 13758 t² + 6281 t³). Call
+this polynomial E(t). The next two coefficients vanish, so through
+degree eight log E(t) equals t + 13758 t² + 6281 t³. Here
+E(t) = ∏(1 + x_i t), with these six distinct tap addresses.
+
+    3944, 5822, 12349, 4816, 13339, 3882.
+
+The coefficient of t^k in each log(1 + x_i t) is
+(−1)^(k−1) x_i^k / k. The vanishing log coefficients at degrees 4
+through 8 give the five required power-sum zeros. Writing the addresses
+as powers of 2 yields tap offsets. Subtracting the least offset from
+all six amounts to a cyclic shift, which leaves the modular root set
+unchanged. The replay checks that the wiring polynomial has exactly the
+five specified roots.
+
+Replay with python-flint installed
+
+    python3 -B tools/check_six_tap_mixer.py
+
+The replay uses polynomial gcds, so it never materializes the large
+matrix. The same exact integer gcd and an independent gcd modulo
+1,000,003 both certify ordinary invertibility. Six connections are
+optimal for recovery at this size. The example supplies no minimum
+claim for the prime or board size needed to attain six.

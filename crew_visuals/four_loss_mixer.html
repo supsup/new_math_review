@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A cubic saves four readings</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf8ec;
+      --ink: #2a3532;
+      --muted: #50605a;
+      --green: #235c49;
+      --warm: #855036;
+      --edge: #c7d1c5;
+      background: #e7eddf;
+      color: var(--ink);
+      font: 100%/1.52 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 61rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    h1 { font: clamp(2.65rem, 8vw, 4.55rem)/1.02 Georgia, serif; letter-spacing: -.045em; margin: .56rem 0 .72rem; }
+    p { max-width: 68ch; }
+    .intro, .empty, caption { color: var(--muted); }
+    .quick { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0 .75rem; }
+    button { font: inherit; color: var(--ink); border: 1px solid var(--edge); background: #eff3e6; min-height: 2.6rem; padding: .3rem .55rem; border-radius: .28rem; cursor: pointer; }
+    button:hover:not(:disabled) { background: #e2ecd8; }
+    :focus-visible { outline: .17rem solid var(--warm); outline-offset: .15rem; }
+    .lab { display: grid; grid-template-columns: minmax(0, 6fr) minmax(12rem, 4fr); gap: 1rem; align-items: start; }
+    .grid { display: grid; grid-template-columns: repeat(10,minmax(0,1fr)); gap: .27rem; }
+    .grid button { font-size: .87rem; padding: .19rem 0; font-variant-numeric: tabular-nums; }
+    .grid [aria-pressed="true"] { color: #fff; background: var(--green); border-color: var(--green); }
+    .grid [aria-pressed="true"]:hover { background: #1b4738; }
+    .grid :disabled { color: #576455; background: #e8eee3; cursor: default; }
+    .desk { border: 1px solid var(--edge); border-radius: .4rem; padding: .75rem .9rem; }
+    #status { margin: .2rem 0 .7rem; color: var(--green); font-weight: 650; }
+    table { width: 100%; border-collapse: collapse; font-size: .89rem; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; margin-bottom: .25rem; }
+    th, td { padding: .2rem .3rem; text-align: left; border-bottom: 1px solid var(--edge); }
+    #solution { margin: .8rem 0 .5rem; font-weight: 650; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: .95rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    #restored { display: grid; grid-template-columns: repeat(auto-fit,minmax(2.15rem,1fr)); gap: .35rem; margin: .45rem 0 0; padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+    #restored li { background: #eef3e8; border-radius: .22rem; padding: .2rem .32rem; }
+    #restored li span { display: block; color: var(--muted); font-size: .75rem; }
+    @media (max-width: 51rem) { .grid { grid-template-columns: repeat(8,minmax(0,1fr)); } }
+    @media (max-width: 43rem) { .lab { grid-template-columns: 1fr; } }
+    @media (max-width: 26rem) { .grid { grid-template-columns: repeat(6,minmax(0,1fr)); } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="two_loss_circulants.html">Back to the two-loss mixer</a>
+    <h1>A cubic saves four readings</h1>
+    <p class="intro">A rotating mixer sends 60 reports, each adding five inputs modulo 61. Suppose reports 1, 8, 29, and 54 go missing. The remaining reports narrow the possibilities to one family, described by a cubic polynomial. Pick any four direct input readings to determine it and recover all 60 inputs.</p>
+    <div class="quick">
+      <button id="adjacent" type="button">Try four adjacent inputs</button>
+      <button id="spread" type="button">Try four spread out</button>
+      <button id="clear" type="button">Clear probes</button>
+    </div>
+    <div class="lab">
+      <div id="grid" class="grid" role="group" aria-label="Choose up to four direct inputs"></div>
+      <section class="desk" aria-label="What the probes tell us">
+        <p id="status" aria-live="polite"></p>
+        <p id="empty" class="empty">Choose an input to learn one value of the cubic.</p>
+        <table id="observed" hidden>
+          <caption>Each probe gives one point on the cubic</caption>
+          <thead><tr><th scope="col">Input</th><th scope="col">Reading</th><th scope="col"><var>z</var></th><th scope="col"><var>P</var>(<var>z</var>)</th></tr></thead>
+          <tbody id="observations"></tbody>
+        </table>
+        <p id="solution" hidden></p>
+      </section>
+    </div>
+    <details id="whole-board" hidden>
+      <summary>See all 60 recovered inputs</summary>
+      <ol id="restored"></ol>
+    </details>
+    <p>Every input has a different address <var>z</var> modulo 61. The input value gives the height of the cubic at that address after a rescaling. Two cubics agreeing at four distinct addresses would have a difference with four roots, which forces that difference to be zero. <a href="two_error_mixer.html">Use the same board to find two wrong readings</a></p>
+    <details>
+      <summary>Where the polynomial comes from</summary>
+      <p>Report <var>i</var> adds inputs at offsets 0, 1, 4, 51, and 52 from <var>i</var>, wrapping around at 60. The wiring polynomial is 1 + <var>T</var> + <var>T</var><sup>4</sup> + <var>T</var><sup>51</sup> + <var>T</var><sup>52</sup>. Among the 60th roots of unity modulo 61 it vanishes at exactly 42, 6, 27, and 30. They form the progression 42 · 35<sup><var>k</var></sup> for <var>k</var> from 0 through 3.</p>
+      <p>Each root λ gives a sequence λ<sup><var>j</var></sup> that reads as zero in every report. Together they give all changes that leave the reports fixed. From any one input vector <var>a</var> consistent with the visible reports, the general solution is <var>x</var><sub><var>j</var></sub> = <var>a</var><sub><var>j</var></sub> + 42<sup><var>j</var></sup><var>P</var>(35<sup><var>j</var></sup>) for an arbitrary cubic or lower-degree polynomial <var>P</var>. The exercise uses a fixed <var>a</var> and hides a cubic. Each direct reading subtracts <var>a</var><sub><var>j</var></sub> and divides by 42<sup><var>j</var></sup> to expose one point.</p>
+      <p>The transpose is the same rotating board with the circle reversed. Its dependency patterns therefore also have the four-point property. If the surviving reports were dependent, their dependency would extend to a full-board dependency with zeros at the four erased positions. Four zero values force the dependency polynomial to be zero. The survivors have full row rank, so erasing any four rows keeps exactly the same four-dimensional ambiguity.</p>
+    </details>
+    <details>
+      <summary>Why five wires is the minimum</summary>
+      <p>A report with four or fewer wires would say that the corresponding direct coordinates sum to zero on every input change that leaves the reports fixed. Yet any four direct coordinates can vary independently in that four-dimensional space. Any smaller selection can be completed to four, so the same independence applies. This forces at least five wires for every report, even without the rotating pattern.</p>
+      <p>A smaller example modulo 29 with 28 inputs tolerates three lost reports, using five wires per report and a quadratic. Those five wires are optimal among rotating boards at that modulus and size. Marlow counted the 2,925 normalized four-offset patterns and found a dependent probe triple in each of the 348 patterns with three modular roots. The replay reproduces the count and checks both determinants, including 14,175 · 61<sup>4</sup> in the 60-input example. <a href="../tools/check_multiple_loss_circulants.py">The exact replay</a></p>
+      <p>Lean confirms the order of 35, the four root evaluations, and existence and uniqueness of the interpolating cubic for any four distinct input places. The integer determinant and the full modular rank are checked in the exact Python replay. <a href="../tools/four_loss_interpolation.lean">The Lean file</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const prime = 61, size = 60, degree = 3;
+      const byId = id => document.getElementById(id);
+      const mod = x => (x % prime + prime) % prime;
+      function power(x, exponent) {
+        let result = 1;
+        for (let j = 0; j < exponent; j++) result = mod(result*x);
+        return result;
+      }
+      const inverse = value => power(value, prime - 2);
+      const evaluate = (coefficients, node) => coefficients.reduceRight((value, c) => mod(node*value + c), 0);
+      const grid = byId('grid'), observations = byId('observations'), restored = byId('restored');
+      const hidden = [7, 4, 50, 2];
+      const inputs = Array.from({ length: size }, (_, j) => {
+        const node = power(35, j), gain = power(42, j), base = mod(11*j*j + 7*j + 3);
+        return { node, gain, base, actual: mod(base + gain*evaluate(hidden, node)) };
+      });
+      const buttons = inputs.map((_, j) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = j;
+        button.setAttribute('aria-label', 'Input ' + j);
+        grid.appendChild(button);
+        return button;
+      });
+      const chosen = new Set();
+
+      function interpolate(points) {
+        const matrix = points.map(([node, value]) => [1, node, mod(node**2), mod(node**3), value]);
+        for (let col = 0; col <= degree; col++) {
+          const pivot = matrix.findIndex((row, i) => i >= col && row[col] !== 0);
+          [matrix[col], matrix[pivot]] = [matrix[pivot], matrix[col]];
+          const scale = inverse(matrix[col][col]);
+          matrix[col] = matrix[col].map(entry => mod(entry*scale));
+          for (const [rowIndex, row] of matrix.entries()) {
+            if (rowIndex === col) continue;
+            const factor = row[col];
+            matrix[rowIndex] = row.map((entry, j) => mod(entry - factor*matrix[col][j]));
+          }
+        }
+        return matrix.map(row => row[degree + 1]);
+      }
+
+      function update() {
+        const full = chosen.size === 4;
+        for (const [j, button] of buttons.entries()) {
+          button.disabled = full && !chosen.has(j);
+          button.setAttribute('aria-pressed', chosen.has(j));
+        }
+        const points = [];
+        observations.replaceChildren();
+        for (const j of [...chosen].sort((a,b) => a-b)) {
+          const { node, gain, base, actual } = inputs[j];
+          const value = mod((actual - base)*inverse(gain));
+          points.push([node, value]);
+          const row = observations.insertRow();
+          for (const entry of [j, actual, node, value]) row.insertCell().textContent = entry;
+        }
+        byId('empty').hidden = points.length > 0;
+        byId('observed').hidden = points.length === 0;
+        byId('solution').hidden = !full;
+        byId('whole-board').hidden = !full;
+        const remaining = prime ** (4 - chosen.size);
+        byId('status').textContent = full ? 'One possibility remains. All inputs recovered.'
+          : remaining.toLocaleString('en-US') + ' possible input vectors';
+        if (!full) return;
+        const coefficients = interpolate(points);
+        const [a,b,c,d] = coefficients;
+        byId('solution').textContent = 'P(z) = ' + a + ' + ' + b + 'z + ' + c + 'z² + ' + d + 'z³';
+        restored.replaceChildren(...inputs.map(({ node, gain, base }, j) => {
+          const item = document.createElement('li');
+          const index = document.createElement('span');
+          index.textContent = 'x' + j;
+          item.append(index, String(mod(base + gain*evaluate(coefficients, node))));
+          return item;
+        }));
+      }
+
+      for (const [j, button] of buttons.entries()) {
+        button.addEventListener('click', () => {
+          if (chosen.has(j)) chosen.delete(j);
+          else chosen.add(j);
+          update();
+        });
+      }
+      function preset(indices) {
+        chosen.clear();
+        for (const j of indices) chosen.add(j);
+        update();
+      }
+      byId('adjacent').addEventListener('click', () => preset([0, 1, 2, 3]));
+      byId('spread').addEventListener('click', () => preset([0, 15, 30, 45]));
+      byId('clear').addEventListener('click', () => preset([]));
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When five becomes zero · A modular rank puzzle</title>
+  <style>
+    :root {
+      color-scheme: light; color: #2c2230; background: #f5edf4;
+      --muted: #645468; --line: #beadbf; --accent: #743d78; --pale: #ead9ed; --dark: #432446;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 53rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, p, dl { margin: 0; }
+    h1 { font: clamp(2.5rem, 7.8vw, 5.45rem)/.99 Georgia, serif; letter-spacing: -.06em; margin: .55rem 0 .8rem; text-wrap: balance; }
+    .topic { font-size: .86rem; letter-spacing: .07em; color: var(--accent); font-weight: 700; }
+    .intro, .live, details { color: var(--muted); line-height: 1.55; max-width: 65ch; }
+    a { color: var(--accent); text-underline-offset: .2em; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .controls { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.25rem 0 .7rem; }
+    button { background: transparent; color: inherit; border: 1px solid var(--line); border-radius: .4rem; padding: .5rem .75rem; min-height: 2.65rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { color: #fff6fd; background: var(--accent); border-color: var(--accent); font-weight: 650; }
+    button:hover { border-color: var(--accent); }
+    table { border-spacing: 4px; width: min(100%, 36rem); table-layout: fixed; text-align: center; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; padding-bottom: .55rem; font-family: Georgia, serif; font-size: clamp(1.4rem, 4vw, 1.95rem); }
+    th { color: var(--muted); font-size: .86rem; font-weight: 550; }
+    thead th:first-child, thead th:last-child { width: 4.8rem; }
+    td { border-radius: .18rem; background: #ece5ed; height: clamp(2rem, 4vw, 2.6rem); }
+    td[data-value="1"] { background: var(--pale); color: var(--dark); font-weight: 650; }
+    td.row-sum { background: transparent; font-weight: 650; }
+    td.row-sum[data-live="true"] { outline: 2px solid var(--accent); outline-offset: -2px; color: var(--accent); background: var(--pale); }
+    .live { max-width: 55ch; margin: .8rem 0; }
+    details { border-top: 1px solid var(--line); margin-top: 1.15rem; padding-top: .65rem; }
+    summary { cursor: pointer; color: #2c2230; }
+    details p, details button { margin-top: .65rem; }
+    #audit:empty { display: none; }
+    @media (max-width: 24rem) {
+      thead th:first-child, thead th:last-child { width: 3.45rem; }
+      th { font-size: .74rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">SAT companion · Rank and modular arithmetic</p>
+      <h1>When five becomes zero</h1>
+      <p class="intro">Multiply each column by its weight and add across each row. The last row gives 5. Switch to arithmetic modulo 5 and watch that last sum become zero too.</p>
+    </header>
+
+    <div class="controls" role="group" aria-label="Arithmetic for row sums">
+      <button type="button" data-field="ordinary" aria-pressed="true">Ordinary arithmetic</button>
+      <button type="button" data-field="mod5" aria-pressed="false">Modulo 5</button>
+    </div>
+
+    <table>
+      <caption>Five column weights</caption>
+      <thead>
+        <tr><th scope="col">Row</th><th scope="col">×2</th><th scope="col">×2</th><th scope="col" aria-label="Times negative one">×−1</th><th scope="col" aria-label="Times negative one">×−1</th><th scope="col">×1</th><th scope="col">Sum</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="live" id="result" aria-live="polite">The last sum is 5. The five columns are independent over the fractions.</p>
+
+    <details>
+      <summary>Why this is a smallest example</summary>
+      <p>The board has 13 ones and determinant 5. Its first four equations force every column weight to be a multiple of the last one, in the proportions 2, 2, −1, −1, 1. The last equation becomes five times the last weight equals zero. Over fractions it forces that weight to be zero. Modulo 5 it leaves one free choice, so the rank drops from five to four.</p>
+      <p>A smaller ordinary rank would give a nonzero determinant from a square subtable of size at most four. Any such determinant is at most 3 in absolute value, as the four-row scan checks. Smaller subtables can be padded to size four with identity entries. So a 5 × 5 board losing rank modulo 5 must have a nonzero determinant divisible by 5.</p>
+      <p>To check the 13-one minimum, look at every choice of five distinct nonzero rows from the 31 possible rows. Reordering rows preserves the absolute determinant and the number of ones. The count below uses signed permutation terms, with exact integer sums.</p>
+      <button type="button" id="scan">Check all 169,911 choices</button>
+      <p id="audit" aria-live="polite"></p>
+      <p>This follows up Marlow’s experiments about rank drops modulo 2 and 3. <a href="sat_four_square_swap.html">Four shapes, same totals</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const weights = [2,2,-1,-1,1];
+      const matrix = ['00011','00101','01110','10110','11001'].map(row => [...row].map(Number));
+      const sums = matrix.map(row => row.reduce((total, bit, i) => total + bit * weights[i], 0));
+      const rows = document.getElementById('rows');
+      const result = document.getElementById('result');
+      const buttons = document.querySelectorAll('[data-field]');
+      const audit = document.getElementById('audit');
+
+      function show(modulo) {
+        rows.replaceChildren(...matrix.map((row, i) => {
+          const tr = document.createElement('tr');
+          const label = document.createElement('th');
+          label.scope = 'row';
+          label.textContent = String(i + 1);
+          tr.append(label);
+          for (const bit of row) {
+            const cell = tr.insertCell();
+            cell.dataset.value = String(bit);
+            cell.textContent = String(bit);
+          }
+          const sum = tr.insertCell();
+          sum.className = 'row-sum';
+          sum.textContent = String(modulo ? sums[i] % 5 : sums[i]);
+          sum.dataset.live = String(i === 4);
+          return tr;
+        }));
+        for (const button of buttons) button.setAttribute('aria-pressed', String((button.dataset.field === 'mod5') === modulo));
+        result.textContent = modulo
+          ? 'All five sums are zero. These nonzero weights give a dependence, so the rank drops to four.'
+          : 'The last sum is 5. That equation prevents these weights from giving a dependence over the fractions.';
+      }
+
+      function permutations(values) {
+        if (!values.length) return [[]];
+        return values.flatMap((value, i) => permutations(values.filter((_, j) => i !== j)).map(rest => [value, ...rest]));
+      }
+
+      function determinantTerms(size) {
+        return permutations(Array.from({length:size}, (_, i) => i)).map(permutation => {
+          const inversions = permutation.reduce((total, value, i) => total + permutation.slice(i + 1).filter(next => next < value).length, 0);
+          return {sign: (-1) ** inversions, bits: permutation.map(value => 1 << value)};
+        });
+      }
+
+      function scanBoards(size, visit) {
+        const terms = determinantTerms(size);
+        const maxRow = (1 << size) - 1;
+        const ones = Array.from({length:maxRow + 1}, (_, row) => [...row.toString(2)].filter(bit => bit === '1').length);
+        const chosen = [];
+        function choose(start) {
+          if (chosen.length === size) {
+            let det = 0;
+            for (const term of terms) {
+              if (term.bits.every((bit, row) => chosen[row] & bit)) det += term.sign;
+            }
+            visit(det, chosen.reduce((total, row) => total + ones[row], 0));
+            return;
+          }
+          for (let row = start; row <= maxRow - (size - chosen.length - 1); row++) {
+            chosen.push(row);
+            choose(row + 1);
+            chosen.pop();
+          }
+        }
+        choose(1);
+      }
+
+      for (const button of buttons) button.addEventListener('click', () => show(button.dataset.field === 'mod5'));
+      document.getElementById('scan').addEventListener('click', () => {
+        let maxAtFour = 0;
+        scanBoards(4, det => { maxAtFour = Math.max(maxAtFour, Math.abs(det)); });
+        let checked = 0;
+        let minimum = Infinity;
+        let minimizing = 0;
+        scanBoards(5, (det, ones) => {
+          checked++;
+          if (det === 0 || det % 5 !== 0) return;
+          if (ones < minimum) { minimum = ones; minimizing = 1; }
+          else if (ones === minimum) minimizing++;
+        });
+        audit.textContent = `Largest 4 × 4 absolute determinant: ${maxAtFour}. Checked ${checked.toLocaleString('en')} five-row choices. Minimum: ${minimum} ones, attained by ${minimizing} choices up to row order.`;
+      });
+      show(false);
+    })();
+  </script>
+</body>
+</html>

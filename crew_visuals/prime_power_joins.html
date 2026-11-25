@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When a prime power joins</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf9f1;
+      --ink: #23332d;
+      --muted: #4b5d54;
+      --green: #21654e;
+      --gold: #a04826;
+      --line: #b7c1b6;
+      color: var(--ink);
+      background: #e8ede6;
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; padding: clamp(1rem, 5vw, 3rem); margin: auto; background: var(--paper); }
+    h1, h2, h3 { font-family: Georgia, serif; line-height: 1.1; }
+    h1 { font-size: clamp(2.6rem, 7vw, 4.65rem); letter-spacing: -.05em; margin: .6rem 0; text-wrap: balance; }
+    h2 { font-size: 1.65rem; margin-top: 1.35rem; }
+    h3 { font-size: 1.18rem; margin: 0 0 .25rem; }
+    p { max-width: 66ch; }
+    .intro, figcaption { color: var(--muted); }
+    a { color: var(--green); text-underline-offset: .17em; }
+    .controls { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; margin-top: 1.2rem; }
+    label { display: grid; font-weight: 650; font-size: .9rem; gap: .18rem; }
+    .place { flex: 1 1 12rem; }
+    output { color: var(--green); font-variant-numeric: tabular-nums; }
+    select, button {
+      background: #f5f8f1; color: var(--ink); border: 1px solid var(--line);
+      border-radius: .35rem; min-height: 2.7rem; font: inherit; padding: .25rem .6rem; cursor: pointer;
+    }
+    input { width: 100%; min-height: 2.4rem; accent-color: var(--green); }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .jump { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; margin: 1rem 0; }
+    figure { min-width: 0; margin: 0; padding: .7rem; border: 1px solid var(--line); border-radius: .4rem; }
+    canvas { width: 100%; height: 7rem; display: block; }
+    .ticks { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
+    .ticks span { min-width: 2rem; text-align: center; }
+    figcaption { margin-top: .5rem; }
+    .result { color: var(--green); font-weight: 700; }
+    .totals { font-variant-numeric: tabular-nums; }
+    .totals span { font-weight: 700; }
+    details { border-top: 1px solid var(--line); padding-top: .64rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin: .6rem 0 1rem; font-variant-numeric: tabular-nums; }
+    th, td { border-bottom: 1px solid var(--line); padding: .25rem .3rem; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    tr.chosen { color: var(--green); background: #e4eee4; font-weight: 650; }
+    @media (max-width: 37rem) { .pair { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>When a prime power joins</h1>
+    <p class="intro">An ordinary prime-power count jumps when you reach a new prime power. The count used in the zeta proof gives that new term a weight of zero at first. Try moving across 8 to see the difference.</p>
+
+    <div class="controls">
+      <label for="term">Prime power <select id="term"></select></label>
+      <label for="offset" class="place"><span>Count up to <var>X</var> <output id="x" for="offset">8</output></span>
+        <input type="range" id="offset" min="-1" max="1" step="0.25" value="0">
+      </label>
+      <div class="jump">
+        <button type="button" data-offset="-0.25">Before</button>
+        <button type="button" data-offset="0">At entry</button>
+        <button type="button" data-offset="0.25">After</button>
+      </div>
+    </div>
+
+    <div class="pair">
+      <figure>
+        <h3>Ordinary count</h3>
+        <canvas id="ordinary" role="img" aria-label="The term jumps at its prime power"></canvas>
+        <div class="ticks" aria-hidden="true"></div>
+        <figcaption>Selected term <output class="result" id="ordinary-value"></output>. It jumps straight to log <var>p</var>.</figcaption>
+      </figure>
+      <figure>
+        <h3>Count used in the proof</h3>
+        <canvas id="smooth" role="img" aria-label="The term starts from zero at its prime power"></canvas>
+        <div class="ticks" aria-hidden="true"></div>
+        <figcaption>Selected term <output class="result" id="smooth-value"></output>. Its weight grows from zero as <var>X</var> moves past it.</figcaption>
+      </figure>
+    </div>
+    <p>The charts show the contribution of the selected term. Each plot uses its own vertical scale. For a prime power <var>n</var> = <var>p</var><sup><var>k</var></sup>, the proof multiplies log <var>p</var> by max(0, <var>X</var>/<var>n</var> − 1).</p>
+
+    <h2>From the count to the remainder</h2>
+    <p class="totals" aria-live="polite" aria-atomic="true">Add the weighted terms to get <var>S</var>(<var>X</var>) = <span id="sum"></span>. Subtract the main term, <var>X</var> log <var>X</var> − (1 + γ)<var>X</var> = <span id="main-term"></span>. The remainder is <var>G</var>(<var>X</var>) = <span id="remainder"></span>.</p>
+    <p>Each new prime power changes the slope of <var>G</var> while leaving its value continuous. The proof needs an upper bound on this remainder over much larger intervals. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=5">Rubinstein’s definition and criterion</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/StatementOC.lean#L9-L13">Lean’s definitions</a></p>
+    <details>
+      <summary>Show the terms in the sum</summary>
+      <table>
+        <thead><tr><th scope="col">Prime power</th><th scope="col">log <var>p</var></th><th scope="col">Contribution</th></tr></thead>
+        <tbody id="entries"></tbody>
+      </table>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const powers = [];
+      const superscripts = ['', '', '²', '³', '⁴', '⁵'];
+      for (const base of [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]) {
+        for (let n = base, exponent = 1; n <= 32; n *= base, exponent++) {
+          const name = exponent === 1 ? String(n) : `${n} = ${base}${superscripts[exponent]}`;
+          powers.push({n, name, log: Math.log(base)});
+        }
+      }
+      powers.sort((a, b) => a.n - b.n);
+      const select = document.getElementById('term');
+      for (const {n, name} of powers) select.add(new Option(name, n));
+      select.value = '8';
+      const offset = document.getElementById('offset');
+      const chart = [document.getElementById('ordinary'), document.getElementById('smooth')];
+      const xOutput = document.getElementById('x');
+      const entries = document.getElementById('entries');
+      const gamma = 0.5772156649015329;
+      const contribution = (x, {n, log}) => log * Math.max(0, (x - n)/n);
+      const value = n => (Math.abs(n) < .0005 ? '0.000' : n.toFixed(3)).replace('-', '−');
+
+      function plot(canvas, position, ramp) {
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width * density);
+        canvas.height = Math.round(height * density);
+        context.setTransform(density, 0, 0, density, 0, 0);
+        const x = u => 15 + (width - 30) * (u + 1)/2;
+        const y = v => height - 10 - v * (height - 20);
+        function line(points, color, thickness) {
+          context.strokeStyle = color;
+          context.lineWidth = thickness;
+          context.beginPath();
+          for (const [u, v] of points) context.lineTo(x(u), y(v));
+          context.stroke();
+        }
+        line([[-1, 0], [1, 0]], '#9eaba0', 1);
+        context.setLineDash([4, 4]);
+        line([[0, 0], [0, 1]], '#9eaba0', 1);
+        context.setLineDash([]);
+        const path = ramp ? [[-1, 0], [0, 0], [1, 1]] : [[-1, 0], [0, 0], [0, 1], [1, 1]];
+        line(path, '#21654e', 2.5);
+        const heightAtX = ramp ? Math.max(0, position) : Number(position >= 0);
+        context.beginPath();
+        context.arc(x(position), y(heightAtX), 4.5, 0, 2*Math.PI);
+        context.fillStyle = '#a04826';
+        context.fill();
+      }
+
+      function render() {
+        const chosen = powers.find(power => power.n === Number(select.value));
+        const position = Number(offset.value);
+        const x = chosen.n + position;
+        xOutput.textContent = x;
+        offset.setAttribute('aria-valuetext', `Count up to ${x}`);
+        const values = [position >= 0 ? chosen.log : 0, contribution(x, chosen)];
+        for (const [index, canvas] of chart.entries()) {
+          plot(canvas, position, index === 1);
+          canvas.setAttribute('aria-label', `${index ? 'Weighted' : 'Ordinary'} contribution of ${chosen.n} at X = ${x}: ${value(values[index])}`);
+          canvas.nextElementSibling.replaceChildren(...[-1,0,1].map(shift => {
+            const tick = document.createElement('span');
+            tick.textContent = chosen.n + shift;
+            return tick;
+          }));
+          document.getElementById(`${canvas.id}-value`).textContent = value(values[index]);
+        }
+
+        let total = 0;
+        const rows = [];
+        for (const term of powers) {
+          if (term.n > Math.max(x, chosen.n)) break;
+          const amount = contribution(x, term);
+          total += amount;
+          const row = document.createElement('tr');
+          if (term.n === chosen.n) row.classList.add('chosen');
+          for (const contents of [term.name, value(term.log), value(amount)]) {
+            row.insertCell().textContent = contents;
+          }
+          rows.push(row);
+        }
+        entries.replaceChildren(...rows);
+        const mainTerm = x * (Math.log(x) - 1 - gamma);
+        document.getElementById('sum').textContent = value(total);
+        document.getElementById('main-term').textContent = value(mainTerm);
+        document.getElementById('remainder').textContent = value(total - mainTerm);
+      }
+
+      select.addEventListener('change', render);
+      offset.addEventListener('input', render);
+      for (const button of document.querySelectorAll('[data-offset]')) button.addEventListener('click', () => {
+        offset.value = button.dataset.offset;
+        render();
+      });
+      const observer = new ResizeObserver(() => {
+        chart.forEach((canvas, index) => plot(canvas, Number(offset.value), index === 1));
+      });
+      chart.forEach(canvas => observer.observe(canvas));
+      render();
+    })();
+  </script>
+</body>
+</html>

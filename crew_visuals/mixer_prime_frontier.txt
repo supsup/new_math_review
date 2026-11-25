@@ -1,0 +1,83 @@
+Why 29 takes one more connection
+
+A binary board mixes n inputs into n readings. Every mark adds one input to one reading. The board is invertible over the rationals and singular modulo p. Even after any one reading is lost, any one direct input must let you recover everything modulo p.
+
+Every input and every reading needs at least two marks. Count the marks above that baseline as the excess e. Marlow’s mixer construction reaches e = 4 for 11, 13 and 17 in sufficiently large boards. The next primes show a surprise.
+
+    Prime    Exact minimum excess    Sizes covered by the construction
+      19              5                         n ≥ 13
+      23              5                         n ≥ 14
+      29              6                         n ≥ 17
+      31              5                         n ≥ 15
+      37              6                         n ≥ 17
+      41              6                         n ≥ 17
+      47              6                         n ≥ 17
+
+The lower bounds apply in every size. The thresholds in the right column are where our constructions give both parities.
+
+What it means to survive a missing reading
+
+Modulo p the rank must be n−1. The single relation among the readings uses every reading, otherwise some deletion leaves a dependent set. The single invisible direction in the inputs has every coordinate nonzero, otherwise a direct input at a zero coordinate tells you nothing about it. Conversely, if both null vectors have full support, you can deduce the missing reading from the relation, and the direct input fixes the remaining ambiguity. A reading or input with just one connection would force a zero entry in one of those null vectors.
+
+Turn two-mark rows into edges
+
+For odd p, treat a row with two marks as an edge between its columns. The invisible input weights must be negatives across an edge. Every even cycle would give a rational dependence among the rows. Every odd cycle would force zero input weights modulo p. Thus the graph is a forest.
+
+If h rows have at least three marks, the n−h edge rows leave h trees, counting isolated columns. Eliminate the edge equations. Each tree leaves one variable, and each heavy row sees a signed sum of its marks in that tree. This gives a signed h×h matrix with the same absolute determinant. The sum of the original heavy-row weights is at most 2h+e, each is at least 3, and each is an upper bound on the row’s absolute coefficient sum.
+
+Why five is necessary from 19 onward
+
+If e ≤ 4, then h ≤ 4. With one or two rows the determinant is at most 16. With three rows the budgets are bounded by 3, 3, 4. A row concentrated in a single coefficient of magnitude 3 or 4 factors that number out, leaving a determinant at most 12. Without such a row, the product of the lengths is at most √250 < 19.
+
+With four rows every budget is 3. Expand any row with one coefficient of magnitude 3. Repeat if necessary for other such rows. The extracted factors of 3 cannot supply p, and the remaining row lengths are at most √5, so the remaining determinant is at most 5√5 < 19. If there is no such concentrated row, a determinant of magnitude at least 19 needs three rows of length √5 and one of length at least √3. Two rows of length √3 or less give a bound of 15.
+
+If exactly one row has length √3, it has three entries of magnitude 1. Every length-√5 row has entries of magnitudes 2 and 1. Each of those rows meets the length-√3 row in a nonzero entry and the inner product cannot cancel, even if it meets two. The square of the determinant is at most (3·5−1)·5·5 = 350 < 19².
+
+The remaining case has four rows with two entries of magnitudes 2 and 1. Regard them as weighted edges on the variables of the reduced system. A square invertible graph component has one cycle, with trees perhaps attached. Expanding the leaves contributes powers of 2. On a cycle of k edges, the two determinant terms have magnitudes 2^a and 2^(k−a). Any odd prime factor therefore divides 2^b±1 for some b ≤ k ≤ 4, and is at most 17. This also covers parallel edges, which are cycles of length two.
+
+Why 29 needs six, and why five fails from 37 onward
+
+With e ≤ 5 and up to two reduced rows, the determinant is at most 20. Three rows have budgets bounded by 3, 3, 5 or 3, 4, 4. Expanding concentrated coefficients of magnitude at least 3 leaves a determinant at most 20 and factors at most 5. Without such coefficients, Hadamard bounds the determinant by max(√425, √500) < 29.
+
+Four rows now have budgets bounded by 3, 3, 3, 4. Factoring concentrated coefficients of magnitude at least 3 leaves a determinant at most √250. Otherwise, reaching 29 forces the first three lengths to be √5. The fourth length must be √8 or √10, so its two weights are 2 and 2 or 3 and 1. Such weighted edges can only give odd prime factors at most 25. The largest possible cycle sum with a 3-and-1 edge and three 2-and-1 edges is 3·2³+1. With a 2-and-2 edge, both terms have a factor 2.
+
+Five rows all have weight budget 3. Factoring out concentrated coefficients of magnitude 3 leaves a determinant at most 25. Otherwise a row of length √5 is a 2-and-1 edge, and a row of length √3 has three entries of magnitude 1. A row of length at most √2 has at most two entries of magnitude 1. If every row has at most two entries, expand any singleton and then use the weighted cycle argument. A cycle of five 2-and-1 edges can give odd parts 31 and 33; any other odd part there is at most 17. Shorter cycles or a five-cycle with an edge of two 1s also give at most 17. A row of length at most √2 together with a three-entry row gives |det| ≤ √750 < 29. Three three-entry rows give |det| ≤ √675 < 29. So only one or two three-entry rows need checking.
+
+With one three-entry row, the length bound is 25√3 < 2·29. A weighted cycle among the other four rows would factor the determinant by a number other than 1, with all odd prime factors at most 17. So for the primes here the four weighted rows form a tree. Its signed cofactors are powers of 2, at most 16. If one has magnitude 16, every other one has magnitude at most 8. That is because the cofactor at a vertex is the product of the coefficients at the child ends when the tree is rooted there. Moving the root reverses the choices along a nonempty path. If all choices at the first root were 2, each reversed choice changes a 2 to a 1. The three-entry row adds three signed cofactors. An odd determinant either uses three 1s, or one 1 and two even cofactors. Its magnitude is at most 16+8+1 = 25.
+
+With two three-entry rows, the length bound is 15√5 < 37. A determinant divisible by 29 must have magnitude 29. A cycle among the other three rows would again factor a smaller nonunit, so they form a forest whose tree sizes are (4, 1) or (3, 2). Eliminate the forest with signed power-of-two cofactors.
+
+- For (4, 1), if both three-entry rows use the isolated column, each uses at most two tree entries. Their signed sums have magnitude at most 8+4 = 12. The 2×2 determinant is then at most 24. If only one row uses the isolated column, the other contributes at most 8+4+4 = 16.
+- For (3, 2), the two-vertex tree has cofactor magnitudes 1, 2. Oddness rules out the three-vertex tree with magnitudes 2, 2, 4. Its remaining possibilities are 1, 2, 2 or 1, 2, 4. A three-entry row split between the trees gives coefficient bounds (7, 0), (6, 2), or (4, 3). The largest determinant from those pairs is at most 6·3+4·2 = 26.
+
+How to build the boards
+
+Use a chain of signed rows 2xⱼ+xⱼ₊₁. Eliminating the chain gives xⱼ = (−2)^j x₀. The final row can therefore add or subtract a few signed powers of two. For example 29 = 32−2−1, using the six-term chain. The five-term chain reaches 31 = 2·16−1. The same recipe gives 37 = 32+4+1, 41 = 32+8+1, and 47 = 32+16−1. The replay also includes slightly shorter starting boards for 19 and 23, with three chain rows followed by two other signed rows.
+
+To turn each signed column into actual 0–1 readings, give it a star with a negative center and positive leaves. Each center–leaf edge becomes a two-mark reading. A coefficient +k uses k leaves and a coefficient −1 uses the center. If a leaf is shared, its coefficient in the reading relation is the negative sum of the coefficients of its owners. When that sum would vanish, use separate leaves, keeping the excess fixed. The center equations hold because the reduced relation kills every signed column. The replay checks that both resulting null vectors have full support.
+
+Splitting one shared leaf with exactly two owners gives the second starting size. A growth by two replaces one input x in a reading by z₂ and adds the readings x+z₁ and z₁+z₂. These enforce z₂ = x in the homogeneous equations, preserve the determinant’s magnitude, and add exactly four marks. The new input null weights are −x and x in terms of the original input weight. The new reading relation coefficients are y and −y in terms of the original reading coefficient. Thus both stay nonzero, and all larger sizes of each parity follow.
+
+Replay from the repository root
+
+    PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mixer_prime_frontier.py
+
+Marlow supplied the recovery criterion, the initial star constructions, and the two-input growth step. The signed forest reduction also appears in crew_visuals/which_primes_fit.txt. This note applies those ideas to the next primes.
+
+How the excess grows with any odd prime
+
+Write p as a signed sum of powers of two, with digits dⱼ in {−1, 0, 1}, highest position k and r nonzero digits. Put (−1)^j dⱼ in the final row of the chain. The determinant has magnitude p and the excess is k+r−2. Each of the k chain rows uses one mark above baseline, and the last row uses r−2.
+
+The invisible direction of the reduced board is ((−2)^j) modulo p. To see that the reading relation also has full support, give the last row coefficient 1. Multiply each of the first j+1 column equations of the relation by the corresponding invisible weight. The chain terms telescope. If yⱼ is the weight on chain row j, then
+
+    2(−2)^j yⱼ = −(d₀ + 2d₁ + ⋯ + 2^j dⱼ) mod p.
+
+Every proper prefix is odd. For the representations here the leading digit is positive and the next lower digit is 0 or +1, so p > 2^(k−1). For j < k−1 the absolute prefix is below 2^(k−1), and for j = k−1 it is |p−2^k| < p. Thus no proper prefix vanishes modulo p. The star step described above keeps every reading coefficient nonzero.
+
+One way to choose the digits greedily is to place 0 at an even residual, and at an odd residual choose +1 or −1 so that the next residual, after subtracting the digit and dividing by 2, is even. This gives non-adjacent signed binary digits. There are at most floor(k/2)+1 nonzero digits and k ≤ ceil(log₂ p), so the excess is at most k+floor(k/2)−1. For p ≥ 5 the zero digit in position 1 leaves a leaf with exactly two owners and a nonzero combined weight. Splitting it gives both board-size parities.
+
+The best choice within this chain recipe minimizes k+r. Compute it recursively. An even residual has just the 0 choice. An odd residual above 1 can start with either +1 or −1; subtract the digit, halve, and take the cheaper result. The recursion ends at residual 1. An optimal representation cannot start at the high end with adjacent +1 and −1: merging them shortens the expansion and removes a digit. Its proper prefixes therefore have the support guarantee above. This explains why the non-adjacent representation can use more connections than another signed representation. The two recipes pay for chain length as well as digit count.
+
+There is a logarithmic lower bound for any recoverable board at p ≥ 5. If e ≥ p−2, then p² ≤ 5^e. Otherwise every heavy row has weight at most e+2 < p, so extracting concentrated coefficients leaves a determinant still divisible by p. The remaining row from original weight w has length at most √((w−1)²+1), at most 5^((w−2)/2) for w ≥ 3. Their product is at most 5^(e/2). Hence any solution uses e ≥ ceil(log base √5 of p). This lower bound also applies when the best construction does not come from a chain.
+
+Try crew_visuals/signed_power_mixer.html. The optional replay flag --family checks each recipe’s determinant and both null vectors for odd primes through 997.

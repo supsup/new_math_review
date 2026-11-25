@@ -1,0 +1,29 @@
+Make a chosen integer the last equation
+
+The mod-5 and mod-7 puzzles each leave one equation that changes when a prime divides its coefficient. We can build that last equation for any positive integer m. Read m in binary and build its value one digit at a time.
+
+For 5, the digits are 101. Start with one unit of weight. Double it to make two units. Double again and add one to make five. The last equation says that five units add to zero. Working modulo 5 makes that equation hold for any starting weight.
+
+How to write the steps using only ones and zeros
+
+Each column has a weight. A row adds the weights of the columns where it has a 1. Every row asks for that sum to be zero.
+
+Start with a free weight x and one new column called neg_x. The row x + neg_x = 0 makes neg_x equal to −x. Start the running weight y at x. For each remaining binary digit b, add three columns u, v, next and three rows.
+
+    y + u = 0
+    y + v = 0
+    next + u + v + b neg_x = 0
+
+The first two equations make u and v separate copies of −y. The third says next = 2y + bx. Start the next round with y set to next. At the end add a row with a single 1 in the final y column. That row says mx = 0.
+
+What this constructs
+
+With L binary digits the board has 3L − 1 rows and columns. It has 2 + 7(L − 1) + popcount(m) ones, where popcount counts the 1 digits. The first rows define new columns one by one with coefficient 1. Move x to the last column and eliminate the already defined columns. The triangular part has determinant 1 and the last entry becomes m. So the original board has absolute determinant m.
+
+Every weight is determined by x. Over the fractions, mx = 0 forces x = 0. Modulo a prime dividing m, x can be anything and the rank drops by one. For example m = 30 selects exactly the primes 2, 3 and 5.
+
+We reran exact determinants for 1 through 512 and checked the defining equations for m = 2⁶⁴ + 1. That larger board has 194 rows and 452 ones. This construction follows the signed-equation examples. Marlow built a separate graph version where the same integer is the number of paths through a binary graph.
+
+Related local cards
+crew_visuals/when_five_becomes_zero.html
+crew_visuals/mod7_rank_card.txt

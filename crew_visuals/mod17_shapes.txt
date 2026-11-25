@@ -1,0 +1,43 @@
+Seventeen by three edits
+
+The seven-line Fano board starts at determinant magnitude 24. Turning on three zeros can bring it to 17. For one solution, use row 1 point C, row 2 point F, and row 3 point G, where row 1 originally lights A, B and D. The result has 24 ones, the minimum for determinant 17 among seven-row boards. There are 168 winning triples on this board. They all give the same shape up to relabeling rows and columns. There are five such shapes at this size, four of which cannot be reached by adding three ones to the Fano board.
+
+The pattern to look for
+
+After choosing three zeros, take the original entries in their three rows and three columns, in the order of your moves. Keep the chosen zeros on the diagonal. Between every pair of moves, the two opposite off-diagonal entries must contain exactly one 1. The directions of the three 1s must be consistent with an order. In the example above the three-by-three crossing looks like this.
+
+0 0 0
+1 0 0
+1 1 0
+
+Why it is the only winning pattern
+
+For the seven-by-seven starting board A, the one-move experiment gives A⁻¹ = Aᵀ/2 − J/6. If we add three ones at positions (r_i,c_i), express the change as U Vᵀ with U and V formed from the three corresponding coordinate vectors. Factoring out A and shrinking the product via det(I+XY)=det(I+YX) makes the absolute determinant of the edited board 24 times |det(I+VᵀA⁻¹U)|. Multiply the small matrix by six and transpose it. It now has diagonal 5 and off-diagonal entries 2 or −1 according to whether the crossing was originally a 1 or a 0. The scale is 24/6³ = 1/9, so we want a small determinant of magnitude 153.
+
+The small determinant is 125 minus five times the sum of the three opposite-pair products, plus the two oriented cycle products. The pair products each equal −2, 1 or 4. The cycle products each lie in {−4, −1, 2, 8}, so the small determinant is positive. If the pair sum is at least zero, the determinant is at most 141. If the pair sum is −3, the cycle products would have to sum to 13 to reach 153, which none of those values can do. The remaining case is a pair sum of −6. Then all pairs have just one 1. A cyclic orientation gives 155+7 = 162, or 18 on the large board. An orientation consistent with an order gives 155−2 = 153, or 17. The conclusion also excludes repeated rows or columns among the moves, since either would create a pair with both crossings zero.
+
+Why there are 168
+
+Take any ordered triple of Fano lines which have no common point. There are 7 choices for the first, 6 for the second, and 4 for the third. In the ordering shown by the triangular pattern, the first chosen column is the point shared by lines 2 and 3. The second column is the point on line 3 outside lines 1 and 2. The third column is the unique point outside all three lines. This gives exactly one winning triple per ordering. Any winning pattern gives such an ordering, because a common point would force the first chosen column onto line 1 too. In F₂³ the three nonconcurrent lines have independent normal vectors, so changing their ordered basis relates every winning board to every other one.
+
+Five shapes at size seven
+
+The seven-row checker supplies every candidate that survives its row and column rules with 24 ones and determinant magnitude 17. For each candidate, try all 7! column relabelings, sorting the rows after each one, and keep the lexicographically least version. This yields five distinct shapes. Counting the distinct versions across those column relabelings gives the number of boards with rows unordered and column labels fixed.
+
+  Shape  Rows                                                     Boards   Transpose shape
+    1    0000011 0001101 0010110 0101110 0111001 1011010 1100101      5040          1
+    2    0000011 0001101 0010110 0111001 1011001 1100101 1101010      2520          3
+    3    0000111 0001011 0011100 0101101 0110010 1010001 1101110      2520          2
+    4    0000111 0001011 0011100 0110001 1010001 1101101 1110010      1260          4
+    5    0000111 0011001 0101010 0110101 1001100 1101001 1110010      5040          5
+
+There are 16,380 such boards total. The Fano puzzle reaches shape 5. If transposing is also allowed, shapes 2 and 3 combine and the total is four shapes.
+
+Replay from the repository root
+
+c++ -O3 -std=c++17 tools/check_seven_row_spectrum.cpp -o /tmp/check_seven_row_spectrum
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mod17_shapes.py /tmp/check_seven_row_spectrum
+
+crew_visuals/find_seventeen.html
+crew_visuals/fano_determinant_lab.html
+crew_visuals/seven_row_spectrum.txt

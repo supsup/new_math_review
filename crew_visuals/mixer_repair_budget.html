@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Six checks, two kinds of damage</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font: 100%/1.55 system-ui, sans-serif;
+      color: #1d2e38;
+      background: #e6edef;
+      --paper: #fbfaf4;
+      --ink: #254d65;
+      --border: #bdcbd1;
+      --missing: #e1eaf0;
+      --wrong: #f7e4cf;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    h1 { margin: .5rem 0; font: clamp(2.35rem, 7vw, 4rem)/1.04 Georgia, serif; }
+    h2 { margin: 1.55rem 0 .35rem; font: 1.45rem/1.15 Georgia, serif; }
+    p { max-width: 68ch; }
+    a { color: var(--ink); text-underline-offset: .2em; }
+    :focus-visible { outline: .18rem solid #a6592b; outline-offset: .18rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: .65rem 1rem; align-items: end; }
+    label { display: grid; gap: .2rem; font-size: .9rem; font-weight: 650; }
+    select, button {
+      min-height: 2.65rem; padding: .35rem .7rem; border: 1px solid #8399a6; border-radius: .3rem;
+      background: #f0f5f6; color: #1d2e38; font: inherit;
+    }
+    button { cursor: pointer; }
+    .budget { display: flex; flex-wrap: wrap; gap: .36rem; list-style: none; margin: .75rem 0 .3rem; padding: 0; }
+    .budget li { min-width: 1.8rem; padding: .14rem .35rem; border: 1px solid var(--border); border-radius: .22rem; text-align: center; }
+    .budget [data-kind="missing"], tbody [data-kind="missing"] { background: var(--missing); }
+    .budget [data-kind="wrong"], tbody [data-kind="wrong"] { background: var(--wrong); }
+    .budget [data-extra="true"] { border-color: #95623f; border-style: dashed; }
+    .small { margin: .3rem 0; color: #4c626f; font-size: .88rem; }
+    .scroll { overflow: auto; max-width: 100%; border: 1px solid var(--border); border-radius: .32rem; }
+    table { width: 100%; border-collapse: collapse; text-align: right; font-variant-numeric: tabular-nums; }
+    th, td { border-bottom: 1px solid var(--border); padding: .28rem .5rem; }
+    th:first-child { text-align: left; min-width: 7rem; }
+    tr:last-child > * { border-bottom: 0; }
+    thead { background: #eaf0f1; }
+    td[data-kind="wrong"] { text-decoration: underline dotted; text-underline-offset: .18em; }
+    output { display: block; margin: .65rem 0; }
+    details { margin: 1rem 0; padding-top: .6rem; border-top: 1px solid var(--border); }
+    summary { cursor: pointer; font-weight: 650; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="six_loss_mixer.txt">The seven-tap mixer notes</a>
+    <h1>Six checks, two kinds of damage</h1>
+    <p>A missing reading comes with an address. To repair a wrong reading, the decoder must also find its address. On this mixer, one missing reading costs one check and one wrong reading costs two. Any combination that costs at most six is repairable.</p>
+    <div class="controls">
+      <label for="missing">Known missing readings
+        <select id="missing"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+      </label>
+      <label for="wrong">Wrong readings to locate
+        <select id="wrong"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+      </label>
+      <button id="ambiguity" type="button">Show two possible originals</button>
+    </div>
+    <p id="cost" aria-live="polite"></p>
+    <ol id="budget" class="budget" aria-hidden="true"></ol>
+    <p class="small">M = find a missing value. W = locate a wrong reading or find its correction. A dashed border marks checks the mixer would need in addition to the six it has.</p>
+
+    <h2>What arrives</h2>
+    <p class="small" id="report-caption">A close-up of reports 0 through 6 out of 110,908. A question mark marks a known hole. An underline shows a changed value. The decoder receives the readings and the list of holes.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="Seven report columns">
+      <table aria-describedby="report-caption">
+        <thead><tr><th scope="col">Report</th><th scope="col">0</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th></tr></thead>
+        <tbody id="reports"></tbody>
+      </table>
+    </div>
+    <output id="status" aria-live="polite"></output>
+    <p id="filtered" class="small"></p>
+
+    <details>
+      <summary>How the decoder spends its checks</summary>
+      <p>The six checks are weighted sums modulo 110,909. All six vanish for clean mixed readings. Each damaged report leaves a geometric sequence in the checks. Its ratio is the address and its scale records how far the value changed.</p>
+      <p>First, use a polynomial whose roots are the known missing addresses to cancel their contributions. With <var>r</var> holes, that leaves 6 − <var>r</var> filtered checks. Find the unknown addresses and changes from those checks. Then use the original checks to fill the known holes. <a href="../tools/check_mixed_damage.py">Replay the exact arithmetic</a>.</p>
+    </details>
+    <details>
+      <summary>Why the limit is sharp</summary>
+      <p>Two valid sets of readings can differ in seven positions. In the example, three of those positions are missing. Split the other four between the two possible originals. The received values are then two changes away from either original, so the same six checks cannot identify which was sent.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const prime = 110909, size = prime - 1;
+      const byId = id => document.getElementById(id);
+      const mod = value => (value % prime + prime) % prime;
+      function power(value, exponent) {
+        let result = 1;
+        for (; exponent; exponent = Math.floor(exponent / 2)) {
+          if (exponent % 2) result = mod(result * value);
+          value = mod(value * value);
+        }
+        return result;
+      }
+      const inverse = value => power(mod(value), prime - 2);
+      const addresses = [1], invTwo = inverse(2);
+      for (let i = 1; i < size; i++) addresses.push(mod(addresses[i-1] * invTwo));
+
+      function checks(changes) {
+        const values = Array(6).fill(0);
+        for (const [index, error] of changes) {
+          const x = addresses[index];
+          let weight = mod(error * mod(x * x));
+          for (let k = 0; k < values.length; k++) {
+            values[k] = mod(values[k] + weight);
+            weight = mod(weight * x);
+          }
+        }
+        return values;
+      }
+
+      function solve(matrix, column) {
+        const rows = matrix.map((row, i) => [...row, column[i]]);
+        for (let j = 0; j < rows.length; j++) {
+          const pivot = rows.findIndex((row, i) => i >= j && row[j] !== 0);
+          if (pivot < 0) return null;
+          [rows[j], rows[pivot]] = [rows[pivot], rows[j]];
+          const unit = inverse(rows[j][j]);
+          rows[j] = rows[j].map(value => mod(value * unit));
+          for (let i = 0; i < rows.length; i++) {
+            if (i === j) continue;
+            const factor = rows[i][j];
+            rows[i] = rows[i].map((value, k) => mod(value - factor * rows[j][k]));
+          }
+        }
+        return rows.map(row => row.at(-1));
+      }
+
+      function evaluate(coefficients, x) {
+        return coefficients.reduceRight((value, c) => mod(value * x + c), 0);
+      }
+
+      function locate(values) {
+        for (let count = Math.floor(values.length / 2); count > 0; count--) {
+          const matrix = values.slice(0, count).map((_, i) => values.slice(i, i + count));
+          const column = values.slice(count, 2*count).map(value => mod(-value));
+          const coefficients = solve(matrix, column);
+          if (!coefficients) continue;
+          coefficients.push(1);
+          const places = [];
+          for (let i = 0; i < addresses.length; i++) {
+            if (evaluate(coefficients, addresses[i]) === 0) places.push(i);
+          }
+          return places.length === count ? places : null;
+        }
+        return values.every(value => value === 0) ? [] : null;
+      }
+
+      function weights(values, places) {
+        const first = values.slice(0, places.length);
+        return solve(first.map((_, k) => places.map(i => power(addresses[i], k))), first);
+      }
+
+      function repair(values, holes) {
+        let filter = [1];
+        for (const i of holes) {
+          const x = addresses[i];
+          filter = [...filter, 0].map((value, k) => mod((filter[k-1] ?? 0) - x * value));
+        }
+        const filtered = values.slice(holes.length).map((_, k) =>
+          mod(filter.reduce((sum, coefficient, j) => sum + coefficient * values[k+j], 0)));
+        const places = locate(filtered);
+        if (!places || places.some(i => holes.includes(i))) return { filtered, changes: null };
+        const unknownWeights = weights(filtered, places);
+        const changes = new Map(places.map((i, j) => {
+          const x = addresses[i];
+          return [i, mod(unknownWeights[j] * inverse(mod(x*x) * evaluate(filter, x)))];
+        }));
+        const unknownChecks = checks(changes);
+        const remaining = values.map((value, k) => mod(value - unknownChecks[k]));
+        const missingWeights = weights(remaining, holes);
+        holes.forEach((i, j) => changes.set(i, mod(missingWeights[j] * inverse(addresses[i]**2))));
+        return { filtered, changes: checks(changes).every((value, k) => value === values[k]) ? changes : null };
+      }
+
+      function readingAt(i) {
+        return mod([0, 1583, 55273, 58490, 73564, 94050, 94848].reduce((sum, tap) => {
+          const j = (i + tap) % size;
+          return sum + mod(2026 + 122*j + 3*j*j);
+        }, 0));
+      }
+
+      function* unchangedReports() {
+        for (let i = 7; i < size; i++) yield [i, readingAt(i)];
+      }
+
+      const sample = Array.from({ length: 7 }, (_, i) => readingAt(i));
+      const backgroundChecks = checks(unchangedReports());
+
+      const difference = sample.map((_, i) => {
+        const x = addresses[i];
+        let divisor = mod(x*x);
+        for (let j = 0; j < sample.length; j++) if (i !== j) divisor = mod(divisor * (x - addresses[j]));
+        return inverse(divisor);
+      });
+
+      function row(label, readings, holes, wrong) {
+        const tr = document.createElement('tr');
+        const heading = document.createElement('th');
+        heading.scope = 'row';
+        heading.textContent = label;
+        tr.append(heading);
+        readings.forEach((value, i) => {
+          const td = document.createElement('td');
+          const missing = holes.includes(i);
+          td.textContent = missing ? '?' : String(value);
+          td.dataset.kind = missing ? 'missing' : wrong.includes(i) ? 'wrong' : 'clean';
+          if (wrong.includes(i)) td.setAttribute('aria-label', value + ', changed');
+          tr.append(td);
+        });
+        return tr;
+      }
+
+      const missingSelect = byId('missing'), wrongSelect = byId('wrong');
+      let showAmbiguity = false;
+      function update() {
+        const missing = Number(missingSelect.value);
+        for (const option of wrongSelect.options) option.disabled = Number(option.value) > 7 - missing;
+        if (Number(wrongSelect.value) > 7 - missing) wrongSelect.value = String(7 - missing);
+        const wrong = Number(wrongSelect.value), spent = missing + 2*wrong;
+        const holes = sample.slice(0, missing).map((_, i) => i);
+        const damage = sample.slice(missing, missing + wrong).map((_, i) => i + missing);
+        const received = sample.map((value, i) => {
+          if (holes.includes(i)) return 0;
+          const change = showAmbiguity ? difference[i] : 77 + 4199*i;
+          return damage.includes(i) ? mod(value + change) : value;
+        });
+        const receivedChecks = checks(received.entries()).map((value, k) => mod(value + backgroundChecks[k]));
+        const { filtered, changes } = repair(receivedChecks, holes);
+        const repaired = changes && sample.map((_, i) => mod(received[i] - (changes.get(i) ?? 0)));
+
+        byId('cost').textContent = spent + ' checks needed. The mixer supplies six.';
+        byId('budget').replaceChildren(...Array.from({ length: Math.max(6, spent) }, (_, i) => {
+          const token = document.createElement('li');
+          token.dataset.kind = i < missing ? 'missing' : i < spent ? 'wrong' : 'unused';
+          token.dataset.extra = String(i >= 6);
+          token.textContent = i < missing ? 'M' : i < spent ? 'W' : '·';
+          return token;
+        }));
+        const rows = [row('Received', received, holes, damage)];
+        let status;
+        if (showAmbiguity) {
+          const alternate = sample.map((value, i) => mod(value + difference[i]));
+          rows.push(row('Original A', sample, [], []), row('Original B', alternate, [], []));
+          status = 'Both originals pass all six checks. Outside the three holes, the received row differs from either original in two positions.';
+        } else if (repaired) {
+          rows.push(row('Decoder result', repaired, [], []));
+          status = spent <= 6 ? 'The decoder recovered the original mixed readings.'
+            : 'The decoder found readings that pass the checks. This much damage exceeds the guarantee.';
+          if ([...changes.keys()].some(i => i >= sample.length)) status += ' It changed a report outside this close-up.';
+        } else {
+          status = 'The decoder found no repair within its six-check limit.';
+        }
+        byId('reports').replaceChildren(...rows);
+        byId('status').textContent = status;
+        byId('filtered').textContent = filtered.length ? 'After removing the known holes, the checks are ' + filtered.join(', ') + '.'
+          : 'All six checks are needed for the known holes.';
+      }
+
+      for (const select of [missingSelect, wrongSelect]) select.addEventListener('change', () => {
+        showAmbiguity = false;
+        update();
+      });
+      byId('ambiguity').addEventListener('click', () => {
+        missingSelect.value = '3';
+        wrongSelect.value = '2';
+        showAmbiguity = true;
+        update();
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>

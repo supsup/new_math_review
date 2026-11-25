@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Find the wrong reading</title>
+<style>
+  :root {
+    --paper: #f4efe6;
+    --card: #fffdf8;
+    --ink: #20313b;
+    --muted: #495d62;
+    --border: #c4cec5;
+    --teal: #13605a;
+    --teal-light: #dcece4;
+    --clay: #8f3b28;
+    --clay-light: #f4e0d6;
+    --mono: ui-monospace, monospace;
+    font: 16px/1.52 system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 67rem); margin: auto; padding: 2rem 0 3rem; }
+  h1, h2, p, figure { margin: 0; }
+  h1, h2 { font: 400 clamp(1.4rem, 3vw, 2rem)/1.1 Georgia, serif; }
+  h1 { font-size: clamp(2.8rem, 7vw, 5.8rem); letter-spacing: -.064em; margin-top: .6rem; }
+  a { color: var(--teal); text-underline-offset: .15em; }
+  .intro { max-width: 64ch; margin: .7rem 0 1.1rem; }
+  .controls, .changes { display: flex; flex-wrap: wrap; align-items: end; gap: .55rem .8rem; }
+  .changes[hidden] { display: none; }
+  label { display: grid; gap: .2rem; font-size: .86rem; font-weight: 650; }
+  button, select { min-height: 2.5rem; padding: .4rem .5rem; font: inherit; color: var(--ink); background: var(--card); border: 1px solid #79928a; border-radius: .4rem; }
+  :focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .bench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: start; gap: 1rem; margin-top: 1rem; }
+  .panel { padding: clamp(.7rem, 2vw, 1rem); border: 1px solid var(--border); border-radius: .6rem; background: var(--card); }
+  .panel p, figcaption { margin-top: .55rem; }
+  figcaption, .muted { font-size: .9rem; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(11, minmax(0,1fr)); gap: 2px; max-width: 23rem; margin: .75rem auto 0; aspect-ratio: 1; }
+  .cell { display: grid; place-items: center; min-width: 0; border-radius: .2rem; background: #edf0e9; color: var(--muted); font: clamp(.62rem, 2.5vw, .8rem) var(--mono); }
+  .origin { background: var(--teal-light); color: var(--teal); }
+  .current { background: var(--teal); color: white; font-weight: 750; }
+  .syndrome { font: 700 1.15rem var(--mono); color: var(--teal); }
+  .table-wrap { position: relative; overflow-x: auto; max-width: 100%; margin-top: .7rem; }
+  table { width: 100%; border-collapse: collapse; text-align: center; font: .82rem var(--mono); }
+  td, th { padding: .28rem .15rem; min-width: 1.38rem; border-bottom: 1px solid var(--border); }
+  tbody th { white-space: nowrap; text-align: left; padding-right: .4rem; }
+  .changed { color: var(--clay); background: var(--clay-light); font-weight: 750; }
+  .check { color: var(--teal); background: var(--teal-light); font-weight: 750; }
+  details { border-top: 1px solid var(--border); padding-top: .75rem; margin-top: 1rem; }
+  details p { margin-top: .65rem; max-width: 68ch; }
+  summary { cursor: pointer; font-weight: 700; }
+  @media (max-width: 52rem) { .bench { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a href="two_readings_missing.html">← Two readings missing</a>
+    <h1>Find the wrong reading</h1>
+    <p class="intro">Alter a value in a twelve-reading mix. Two checking sums, each wrapping at 11, tell the decoder exactly which reading changed and by how much.</p>
+  </header>
+  <noscript><p>JavaScript is needed to change the readings. The explanation below is also available on its own.</p></noscript>
+  <div class="controls">
+    <label>Number of changes
+      <select id="error-count">
+        <option value="0">0 changes</option>
+        <option value="1" selected>1 change</option>
+        <option value="2">2 changes</option>
+      </select>
+    </label>
+    <div class="changes" id="first">
+      <label>Reading to change <select id="first-row"></select></label>
+      <label>Amount to add <select id="first-amount"></select></label>
+    </div>
+    <div class="changes" id="second" hidden>
+      <label>Second reading <select id="second-row"></select></label>
+      <label>Second amount <select id="second-amount"></select></label>
+    </div>
+  </div>
+  <div class="bench">
+    <figure class="panel">
+      <h2>Where the check points</h2>
+      <p id="syndrome" class="syndrome"></p>
+      <div class="grid" id="grid" role="img"></div>
+      <figcaption>The column and row give the two checking sums, starting at 0. Each tile names the reading a one-error decoder would change. The tile marked ✓ is the all-zero check.</figcaption>
+    </figure>
+    <section class="panel">
+      <h2>Sent, received, corrected</h2>
+      <p id="status" role="status"></p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Readings table"><table id="table" aria-label="Sent, received and corrected values"></table></div>
+      <p class="muted" id="scroll-hint" hidden>Scroll the table sideways to see all twelve readings.</p>
+    </section>
+  </div>
+  <details>
+    <summary>Why every single error has a unique address</summary>
+    <p>The 12-input mixer has 48 connections and ordinary determinant −121. Modulo 11 it loses two dimensions. Two independent weighted sums of its mixed readings always give zero. Together the sums are called a syndrome.</p>
+    <p>Each reading contributes a different direction to the syndrome. Changing a single reading by a nonzero amount moves along its direction. There are 12 choices of location and 10 nonzero amounts, so the 120 single mistakes fill all 120 nonzero points of the grid. Each point therefore tells the decoder where to subtract an amount.</p>
+    <p>Two altered values also give a nonzero syndrome. It still points to one reading, so a decoder that assumes one error can force the checks to pass while returning the wrong vector. Try two changes to see this happen. Recovering the original input values takes two direct input readings in addition to the corrected mix. <a href="two_readings_missing.html">See the direct-input puzzle</a></p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const prime = 11;
+const mixer = ["101100000000", "100010000100", "000001000101", "000010010010",
+  "011000000001", "100100001001", "000001100010", "000100110110",
+  "010100001110", "110001010010", "010110000011", "011101101000"].map(row => [...row].map(Number));
+const checks = [[4, 3, 8, 7, 7, 6, 5, 6, 5, 9, 1, 0], [3, 2, 3, 9, 7, 1, 2, 8, 9, 5, 0, 1]];
+const mod = value => (value % prime + prime) % prime;
+
+function weightedSums(weights, values) {
+  return weights.map(row => mod(row.reduce((sum, factor, j) => sum + factor * values[j], 0)));
+}
+
+function syndromes() {
+  const addresses = [null];
+  for (let row = 0; row < mixer.length; row++) {
+    for (let magnitude = 1; magnitude < prime; magnitude++) {
+      const [x, y] = checks.map(weights => mod(weights[row] * magnitude));
+      const address = x + prime * y;
+      if (addresses[address] !== undefined) throw new Error("Two errors share an address");
+      addresses[address] = { row, magnitude };
+    }
+  }
+  if (addresses.filter(Boolean).length !== prime * prime - 1) throw new Error("Incomplete syndrome grid");
+  return addresses;
+}
+
+function correct(received, addresses) {
+  const [x, y] = weightedSums(checks, received);
+  const error = addresses[x + prime*y];
+  const values = [...received];
+  if (error) values[error.row] = mod(values[error.row] - error.magnitude);
+  return { x, y, error, values };
+}
+
+if (typeof module !== "undefined") module.exports = { mixer, checks, mod, weightedSums, syndromes, correct };
+
+if (typeof document !== "undefined") {
+  const get = id => document.getElementById(id);
+  const addresses = syndromes();
+  const sent = weightedSums(mixer, mixer.map((_, j) => mod(2*j*j + j + 1)));
+  const first = get("first-row");
+  const second = get("second-row");
+  const amount = get("first-amount");
+  const secondAmount = get("second-amount");
+
+  function populate(select, first, length, initial) {
+    for (let i = first; i < first + length; i++) {
+      const option = document.createElement("option");
+      option.value = String(i);
+      option.textContent = String(i);
+      select.append(option);
+    }
+    select.value = String(initial);
+  }
+
+  function showScrollHint() {
+    const wrapper = get("table").parentElement;
+    get("scroll-hint").hidden = wrapper.scrollWidth <= wrapper.clientWidth;
+  }
+
+  function render() {
+    const count = Number(get("error-count").value);
+    get("first").hidden = count === 0;
+    get("second").hidden = count !== 2;
+    if (first.value === second.value) second.value = String(Number(first.value) % mixer.length + 1);
+    const received = [...sent];
+    for (const [index, delta] of [[first, amount], [second, secondAmount]].slice(0, count)) {
+      const row = Number(index.value) - 1;
+      received[row] = mod(received[row] + Number(delta.value));
+    }
+    const { x, y, error, values } = correct(received, addresses);
+    const index = x + prime*y;
+    get("syndrome").textContent = "Checking sums (" + x + ", " + y + ")";
+    get("grid").setAttribute("aria-label", "Syndrome grid. Selected point (" + x + ", " + y + ")."
+      + (error ? " It points to reading " + (error.row + 1) + "." : " No change indicated."));
+    get("grid").innerHTML = addresses.map((location, i) =>
+      '<span aria-hidden="true" class="cell' + (!i ? ' origin' : '') + (i === index ? ' current' : '') + '">'
+      + (location ? location.row + 1 : '✓') + '</span>').join("");
+
+    const correction = error ? "The decoder subtracts " + error.magnitude + " from reading " + (error.row + 1) + ". " : "";
+    get("status").textContent = correction + [
+      "Both checking sums are zero. The decoder leaves the received values alone.",
+      "The corrected readings match what was sent.",
+      "The checks pass after correction. The corrected readings differ from what was sent because the decoder assumed one error."
+    ][count];
+    const header = '<thead><tr><th scope="col">Reading</th>' + sent.map((_, i) => '<th scope="col">' + (i+1) + '</th>').join("") + '</tr></thead>';
+    const row = (label, data, highlight, className) => '<tr><th scope="row">' + label + '</th>'
+      + data.map((value, i) => '<td' + (highlight(i) ? ' class="' + className + '"' : '') + '>' + value + '</td>').join("") + '</tr>';
+    get("table").innerHTML = header + "<tbody>" + row("Sent", sent, () => false, "")
+      + row("Received", received, i => received[i] !== sent[i], "changed")
+      + row("Corrected", values, i => values[i] !== received[i], "check") + "</tbody>";
+    showScrollHint();
+  }
+
+  for (const [select, start, length, initial] of [
+    [first, 1, mixer.length, 7], [second, 1, mixer.length, 3],
+    [amount, 1, prime - 1, 3], [secondAmount, 1, prime - 1, 8]
+  ]) populate(select, start, length, initial);
+  for (const select of [get("error-count"), first, second, amount, secondAmount]) select.addEventListener("change", render);
+  window.addEventListener("resize", showScrollHint);
+  render();
+}
+</script>
+</body>
+</html>

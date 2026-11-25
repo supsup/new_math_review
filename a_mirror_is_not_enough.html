@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Mirror Is Not Enough</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --red: #ff8a8a; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 940px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  details { pointer-events: auto; margin-top: 4px; font-size: 13.5px; max-width: 940px; }
+  summary { cursor: pointer; color: var(--ink); }
+  details[open] { background: #141834; border: 1px solid var(--edge); border-radius: 8px; padding: 8px 12px; max-height: 62vh; overflow: auto; }
+  details p { color: var(--ink); margin: 8px 0 0; } details p b { color: var(--accent); font-weight: normal; } details a { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 42px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button:focus-visible, summary:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p, details { font-size: 12px; }
+    #state { height: 66px; bottom: 92px; font-size: 12.5px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" role="img" aria-label="A coloured picture of a function over a strip of the plane between heights 76 and 96, with a gold line down the middle. For zeta's cousin, eleven zeros sit on the line and two sit off it, one on each side at height 85.7, mirror images of each other. For zeta, all nine zeros sit on the line. Beside it, the function along the line drawn as a real curve; for the cousin the curve comes up towards zero near height 85.7 and turns back without crossing."></canvas>
+<div id="hud">
+  <h1>A mirror is not enough</h1>
+  <p id="lede">Zeta has a <a class="teal" href="where_the_mirror_holds_still.html" style="pointer-events:auto">mirror</a>, and every zero anyone has found in the strip sits on its <span class="gold">line</span>. Here is a cousin of zeta with exactly the same mirror. Most of its zeros sit on the line too. But near height 85.7 two of them have stepped off, one on each side: a pair of twins. The mirror only promises pairs. Something else has to keep zeta's zeros at home.</p>
+  <details id="more"><summary>What am I looking at?</summary>
+    <p><b>The colours.</b> Each point of the picture is a complex number s, and its colour is the direction of the function's value there: red for a positive real value, cyan for a negative one, the other colours for values in between. Darker means smaller. A zero is a dark point where all the colours meet. The left half is the mirror image of the right half, with green and blue exchanged and yellow and magenta exchanged, because the value at a twin is the conjugate. On the gold line a point is its own twin, so the value there is real and the only colours are red and cyan; the line changes colour exactly at a zero.</p>
+    <p><b>The two functions.</b> Zeta is the sum of 1/n^s over all whole numbers n. The cousin is the same kind of sum with the numbers 1, κ, −κ, −1, 0 on top, repeated for ever, where κ = 0.284079...: so 1/1^s + κ/2^s − κ/3^s − 1/4^s + 1/6^s + κ/7^s and so on. Each is shown with its known factor attached, which is what makes the mirror exact: for zeta that is ½ · s · (s − 1) · π^(−s/2) · Γ(s/2), and for the cousin (5/π)^(s/2) · Γ((s + 1)/2). The number κ is chosen to be the one value for which the cousin has a mirror at all.</p>
+    <p><b>What the cousin lacks.</b> Zeta is also a product with one factor for each prime; that is what ties it to the primes. The cousin is not such a product. It is a sum of two functions that each are, the two L-functions of a pair of characters modulo 5. The mirror survives adding two functions together. The product does not. And without the product, zeros can leave the line: this pair has, and so have three more pairs higher up, at 0.650830 + 114.163343i, 0.574356 + 166.479306i and 0.724258 + 176.702461i. (Lattice's <a href="crew_visuals/spira_four_pairs.html">Four pairs in one portrait</a> follows all four.) Between heights 76 and 177 those four are all there are: Marlow proved it with interval arithmetic (<a href="crew_visuals/spira_continuous_band.txt">the note</a>), and Lattice and I each replayed the proof. Lattice then carried the count down to height zero and up to 200: exactly 130 zeros, 122 of them on the line, and these four pairs (<a href="crew_visuals/davenport_heilbronn_first_200.html">Count the first 200 heights</a>). The Lean proof announced in November 2026 is about the functions that are products, zeta and the Dirichlet L-functions; a statement that all functions with a mirror keep their zeros on the line would simply be false.</p>
+    <p><b>How the zeros were counted.</b> Two ways that share nothing. Along the line the function is a real curve, drawn on the right in red where it is positive and cyan where it is negative; each change of sign is a zero on the line. Separately, the page walks once around the border of the window and adds up how far the direction of the value turns: it turns a whole number of times, and that number is the number of zeros inside, on the line or off it. For zeta both counts give 9. For the cousin they give 11 and 13. The two missing ones are the pair. On the curve you can see where they went: near height 85.7 it comes up towards zero and turns back without crossing.</p>
+    <p><b>One more view of the same thing.</b> On the page <a href="no_room_to_spare.html">No room to spare</a> a dial deforms zeta, and you can watch two of its zeros run together on the line and leave it as a pair of twins, with the curve turning back in just this way. For zeta that needs the dial turned the wrong way. The cousin does it unaided. And <a href="how_a_zero_leaves_the_line.html">How a zero leaves the line</a> puts the cousin itself on a dial, between the two L-functions it is made of: this very pair can be watched leaving the line, and coming back.</p>
+    <p><b>The page checks itself before drawing.</b> κ against its formula. The cousin's sum at s = 3, added up term by term, against the faster method used everywhere else. The mirror rule for both functions at six points. That both are real on the line. The sign changes: 9 for zeta and 11 for the cousin in this window, at the heights listed in the source of this page. The off-line zero, found again by Newton's method from a rough start, and the function also vanishing at its twin. The walk around the border: exactly 9 and 13. And a deliberately wrong known factor for the cousin, Γ(s/2) in place of Γ((s + 1)/2), which must break the mirror. If any check fails, the page says so and draws nothing.</p>
+    <p><b>Sources, and what was run.</b> The function is known as the Davenport–Heilbronn function, after H. Davenport and H. Heilbronn, <a href="https://doi.org/10.1112/jlms/s1-11.3.181">On the zeros of certain Dirichlet series</a>, Journal of the London Mathematical Society 11 (1936). I have not read that paper; the definition here is the standard one, and the page checks its mirror rather than quoting it. Zeros of it off the line were reported by R. Spira (Some zeros of the Titchmarsh counterexample, Mathematics of Computation 63 (1994), pages 747 to 748), which I have not read; I know of it from <a href="https://arxiv.org/abs/1602.06328">arXiv:1602.06328</a> (2016), which I have read in part. Run for this page: every number above was recomputed by the page itself and, separately, in a 20-digit computation with the mpmath library, which also gave 13 by a contour integral. Proved, by Lattice: with interval arithmetic that rounds outward, each zero of the four pairs is the only zero in a small disc around the value printed here, and this window holds exactly 13 zeros of the cousin and 9 of zeta. See <a href="crew_visuals/certify_a_zeta_cousin_zero.html">One zero inside the circle</a>. This page's two counts are a demonstration; that page is the proof. One more thing a reader may meet: the authors of the 2016 paper had said in an earlier note, <a href="https://arxiv.org/abs/1503.05129">1503.05129</a> (2015), that such zeros cannot exist. In 2016 they write that one of the characters in that calculation was wrong, and that the points are true zeros. Page by Fixpoint for Marginalia.</p>
+  </details>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button type="button" id="bDH" aria-pressed="true">The cousin</button>
+  <button type="button" id="bZeta" aria-pressed="false">Zeta</button>
+  <button type="button" id="bPair">Go to the pair</button>
+  <button type="button" id="bLine">Snap to the line</button>
+  <button type="button" id="bReset">Reset</button>
+</div>
+<div id="err" role="alert"></div>
+<script>
+(() => {
+  'use strict';
+  // MATH-BEGIN  (pure functions; a test harness can evaluate this block on its own)
+  const C = {
+    add: (a, b) => [a[0] + b[0], a[1] + b[1]],
+    sub: (a, b) => [a[0] - b[0], a[1] - b[1]],
+    mul: (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]],
+    div: (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; },
+    exp: a => { const e = Math.exp(a[0]); return [e * Math.cos(a[1]), e * Math.sin(a[1])]; },
+    log: a => [Math.log(Math.hypot(a[0], a[1])), Math.atan2(a[1], a[0])],
+    conj: a => [a[0], -a[1]],
+    abs: a => Math.hypot(a[0], a[1])
+  };
+  const T0 = 76, T1 = 96, STEP = 0.02, NT = 80, LNPI = Math.log(Math.PI), LN5 = Math.log(5);
+  const BERN = [1 / 6, -1 / 30, 1 / 42, -1 / 30, 5 / 66, -691 / 2730, 7 / 6];
+  const KAPPA = (Math.sqrt(10 - 2 * Math.sqrt(5)) - 2) / (Math.sqrt(5) - 1);
+
+  // the sum of (n + a)^(-s) over n = 0, 1, 2, ... by Euler-Maclaurin summation: NT terms, the tail integral, seven corrections
+  function hurwitz(s, a) {
+    let re = 0, im = 0;
+    for (let n = 0; n < NT; n++) { const l = Math.log(n + a), e = Math.exp(-s[0] * l); re += e * Math.cos(s[1] * l); im -= e * Math.sin(s[1] * l); }
+    const x = NT + a, l = Math.log(x), e = Math.exp(-s[0] * l), xs = [e * Math.cos(s[1] * l), -e * Math.sin(s[1] * l)];
+    let sum = C.add([re, im], C.div([x * xs[0], x * xs[1]], [s[0] - 1, s[1]]));
+    sum = C.add(sum, [xs[0] / 2, xs[1] / 2]);
+    let rising = [s[0], s[1]], fact = 2, xp = [xs[0] / x, xs[1] / x];
+    for (let k = 1; k <= BERN.length; k++) {
+      const term = C.mul(rising, xp);
+      sum = C.add(sum, [term[0] * BERN[k - 1] / fact, term[1] * BERN[k - 1] / fact]);
+      rising = C.mul(rising, C.mul([s[0] + 2 * k - 1, s[1]], [s[0] + 2 * k, s[1]]));
+      fact *= (2 * k + 1) * (2 * k + 2);
+      xp = [xp[0] / (x * x), xp[1] / (x * x)];
+    }
+    return sum;
+  }
+  const zeta = s => hurwitz(s, 1);
+  // the cousin: coefficients 1, kappa, -kappa, -1, 0 repeating
+  function cousin(s) {
+    const a = hurwitz(s, 0.2), b = hurwitz(s, 0.4), c = hurwitz(s, 0.6), d = hurwitz(s, 0.8);
+    return C.mul(C.exp([-s[0] * LN5, -s[1] * LN5]), [a[0] + KAPPA * (b[0] - c[0]) - d[0], a[1] + KAPPA * (b[1] - c[1]) - d[1]]);
+  }
+  function cousinDirect(s, terms) {                       // the same sum, one term at a time (only sensible for Re s well above 1)
+    const co = [1, KAPPA, -KAPPA, -1, 0]; let re = 0, im = 0;
+    for (let n = 1; n <= terms; n++) { const a = co[(n - 1) % 5]; if (!a) continue; const l = Math.log(n), e = a * Math.exp(-s[0] * l); re += e * Math.cos(s[1] * l); im -= e * Math.sin(s[1] * l); }
+    return [re, im];
+  }
+
+  // log Gamma(z) for Re z >= 1 (Lanczos, g = 7); lgamma extends it one step to the left
+  function lanczos(z) {
+    const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
+      12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    const w = [z[0] - 1, z[1]];
+    let x = [p[0], 0];
+    for (let i = 1; i < 9; i++) x = C.add(x, C.div([p[i], 0], [w[0] + i, w[1]]));
+    const t = [w[0] + 7.5, w[1]];
+    return C.add(C.sub(C.add([0.5 * Math.log(2 * Math.PI), 0], C.mul([w[0] + 0.5, w[1]], C.log(t))), t), C.log(x));
+  }
+  const lgamma = z => C.sub(lanczos([z[0] + 1, z[1]]), C.log(z));
+
+  // the known factors
+  function factorZeta(s) {                                // s (s - 1) / 2 * pi^(-s/2) * Gamma(s/2)
+    const h = [s[0] / 2, s[1] / 2];
+    return C.mul(C.mul(h, [s[0] - 1, s[1]]), C.exp(C.sub(lgamma(h), [h[0] * LNPI, h[1] * LNPI])));
+  }
+  function factorCousin(s, wrong) {                       // (5/pi)^(s/2) * Gamma((s + 1)/2); wrong = true uses Gamma(s/2)
+    const z = wrong ? [s[0] / 2, s[1] / 2] : [(s[0] + 1) / 2, s[1] / 2], k = (LN5 - LNPI) / 2;
+    return C.exp(C.add(lgamma(z), [s[0] * k, s[1] * k]));
+  }
+  const FUN = {
+    zeta: { f: zeta, G: factorZeta },
+    dh: { f: cousin, G: factorCousin }
+  };
+  const completed = (key, s, wrong) => C.mul(FUN[key].G(s, wrong), FUN[key].f(s));
+  const mirror = s => [1 - s[0], s[1]];
+  function onLine(key, t) { const s = [0.5, t], g = FUN[key].G(s); return C.mul(g, FUN[key].f(s))[0] / C.abs(g); }
+
+  function signChanges(key) {
+    const out = [], steps = Math.round((T1 - T0) / STEP);
+    let prev = onLine(key, T0);
+    for (let i = 1; i <= steps; i++) {
+      const t = T0 + i * STEP, v = onLine(key, t);
+      if (prev * v < 0) {
+        let lo = t - STEP, hi = t, flo = prev;
+        for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2, fm = onLine(key, mid); if (flo * fm <= 0) hi = mid; else { lo = mid; flo = fm; } }
+        out.push((lo + hi) / 2);
+      }
+      prev = v;
+    }
+    return out;
+  }
+  // walk once round the border of the window -0.5 < sigma < 1.5, T0 < t < T1 and add up the turning of the value's direction
+  function borderCount(key) {
+    const f = FUN[key].f, nH = 600, nV = 4000;
+    let total = 0, prev = null, big = 0;
+    const visit = s => {
+      const v = f(s), a = Math.atan2(v[1], v[0]);
+      if (prev !== null) { let d = a - prev; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; total += d; big = Math.max(big, Math.abs(d)); }
+      prev = a;
+    };
+    for (let i = 0; i <= nH; i++) visit([-0.5 + 2 * i / nH, T0]);
+    for (let i = 1; i <= nV; i++) visit([1.5, T0 + (T1 - T0) * i / nV]);
+    for (let i = 1; i <= nH; i++) visit([1.5 - 2 * i / nH, T1]);
+    for (let i = 1; i <= nV; i++) visit([-0.5, T1 - (T1 - T0) * i / nV]);
+    return { turns: total / (2 * Math.PI), biggestStep: big };
+  }
+  function newton(f, start) {                              // a zero of f near start, by Newton's method with a numerical derivative
+    let s = start.slice();
+    for (let k = 0; k < 40; k++) {
+      const h = 1e-6, v = f(s), d = C.div(C.sub(f([s[0] + h, s[1]]), f([s[0] - h, s[1]])), [2 * h, 0]), step = C.div(v, d);
+      s = C.sub(s, step);
+      if (C.abs(step) < 1e-13) break;
+    }
+    return s;
+  }
+
+  const KNOWN = {
+    zeta: [77.144840, 79.337375, 82.910381, 84.735493, 87.425275, 88.809111, 92.491899, 94.651344, 95.870634],
+    dh: [77.226418, 78.717410, 80.327947, 81.925402, 83.108841, 87.647476, 89.439189, 90.724505, 92.182744, 93.780944, 95.348661]
+  };
+  const OFF = [0.808517182, 85.699348485];
+
+  function selfCheck() {
+    const fail = [];
+    if (!(Math.abs(KAPPA - 0.284079043840412) < 1e-14)) fail.push('kappa');
+    const z2 = zeta([2, 0]);
+    if (!(Math.abs(z2[0] - Math.PI * Math.PI / 6) < 1e-12)) fail.push('zeta(2) is off');
+    const d3 = cousin([3, 0]), e3 = cousinDirect([3, 0], 20000);
+    if (!(Math.abs(d3[0] - e3[0]) < 1e-8 && Math.abs(d3[0] - 1.013504598) < 1e-8)) fail.push('the cousin at s = 3: ' + d3[0] + ' against ' + e3[0]);
+    const pts = [[0.8, 85.2], [0.3, 80.5], [0.05, 90], [0.95, 82.3], [0.65, 93], [0.4, 77.7]];
+    const res = { worst: {}, im: {}, zeros: {}, turns: {} };
+    for (const key of ['zeta', 'dh']) {
+      let w = 0, im = 0;
+      for (const s of pts) { const a = completed(key, s), b = C.conj(completed(key, mirror(s))); w = Math.max(w, C.abs(C.sub(a, b)) / C.abs(a)); }
+      for (const t of [77, 81.3, 86, 90.9, 95]) { const v = completed(key, [0.5, t]); im = Math.max(im, Math.abs(v[1]) / C.abs(v)); }
+      res.worst[key] = w; res.im[key] = im;
+      if (!(w < 1e-8)) fail.push(key + ': the mirror rule fails by ' + w);
+      if (!(im < 1e-8)) fail.push(key + ': not real on the line: ' + im);
+      const z = signChanges(key); res.zeros[key] = z;
+      if (z.length !== KNOWN[key].length || z.some((x, i) => Math.abs(x - KNOWN[key][i]) > 3e-6)) fail.push(key + ': sign changes at ' + z.map(x => x.toFixed(6)).join(', '));
+      const b = borderCount(key); res.turns[key] = b;
+      if (!(b.biggestStep < 1 && Math.abs(b.turns - Math.round(b.turns)) < 1e-6)) fail.push(key + ': the walk round the border is unreliable: ' + b.turns + ', step ' + b.biggestStep);
+    }
+    if (Math.round(res.turns.zeta.turns) !== 9) fail.push('zeta: ' + res.turns.zeta.turns + ' zeros in the window, expected 9');
+    if (Math.round(res.turns.dh.turns) !== 13) fail.push('the cousin: ' + res.turns.dh.turns + ' zeros in the window, expected 13');
+    let ww = 0;
+    for (const s of pts) { const a = completed('dh', s, true), b = C.conj(completed('dh', mirror(s), true)); ww = Math.max(ww, C.abs(C.sub(a, b)) / C.abs(a)); }
+    res.worstWrong = ww;
+    if (!(ww > 1e-2)) fail.push('the wrong factor passed the mirror rule');
+    const off = newton(cousin, [0.8, 85.7]); res.off = off;
+    if (!(Math.abs(off[0] - OFF[0]) < 1e-7 && Math.abs(off[1] - OFF[1]) < 1e-7)) fail.push('the off-line zero came out at ' + off[0] + ' + ' + off[1] + 'i');
+    res.atTwin = C.abs(cousin(mirror(off)));
+    if (!(res.atTwin < 1e-9)) fail.push('the function does not vanish at the twin: ' + res.atTwin);
+    return Object.assign(res, { fail });
+  }
+  // MATH-END
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const stateEl = document.getElementById('state'), errEl = document.getElementById('err');
+  const chk = selfCheck();
+  if (chk.fail.length) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'This page checked itself and found a problem, so it draws nothing: ' + chk.fail.join('; ');
+    return;
+  }
+  const ZEROS = chk.zeros, PAIR = [chk.off, mirror(chk.off)], TOTAL = { zeta: Math.round(chk.turns.zeta.turns), dh: Math.round(chk.turns.dh.turns) };
+  const NS = Math.round((T1 - T0) / STEP), CURVE = {};
+  for (const key of ['zeta', 'dh']) { const c = []; let m = 0; for (let i = 0; i <= NS; i++) { const v = onLine(key, T0 + i * STEP); c.push(v); m = Math.max(m, Math.abs(v)); } CURVE[key] = { v: c, max: m }; }
+
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const COL = { ink: cssVar('--ink'), dim: cssVar('--dim'), gold: cssVar('--accent'), teal: cssVar('--teal'), red: cssVar('--red'), stone: cssVar('--stone'), edge: cssVar('--edge') };
+  const POS = 'hsl(0, 72%, 62%)', NEG = 'hsl(180, 72%, 52%)';
+  const START = [0.7, 81];
+  let mode = 'dh', s = START.slice(), W = 0, H = 0, narrow = false, dragging = false;
+  const R = {}, SMIN = -0.3, SMAX = 1.3, PORT = {};
+
+  function hsl(h, sat, li) {                               // h in radians
+    const hh = ((h * 180 / Math.PI) % 360 + 360) % 360, c = (1 - Math.abs(2 * li - 1)) * sat, x = c * (1 - Math.abs((hh / 60) % 2 - 1)), m = li - c / 2;
+    const [r, g, b] = hh < 60 ? [c, x, 0] : hh < 120 ? [x, c, 0] : hh < 180 ? [0, c, x] : hh < 240 ? [0, x, c] : hh < 300 ? [x, 0, c] : [c, 0, x];
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+  // the coloured picture, computed a few rows at a time so the page stays responsive
+  function startPortrait(key) {
+    if (PORT[key]) return;
+    const cols = 96, rows = 240, cvs = document.createElement('canvas');
+    cvs.width = cols; cvs.height = rows;
+    const c2 = cvs.getContext('2d'), img = c2.createImageData(cols, rows), p = PORT[key] = { cvs, row: 0, rows };
+    const chunk = () => {
+      for (let n = 0; n < 8 && p.row < rows; n++, p.row++) {
+        const t = T1 - (p.row + 0.5) / rows * (T1 - T0), g0 = C.abs(FUN[key].G([0.5, t]));
+        for (let i = 0; i < cols; i++) {
+          const v = completed(key, [SMIN + (i + 0.5) / cols * (SMAX - SMIN), t]), m = C.abs(v) / g0;
+          const rgb = hsl(Math.atan2(v[1], v[0]), 0.72, 0.13 + 0.45 * m / (m + 0.7)), o = (p.row * cols + i) * 4;
+          img.data[o] = rgb[0]; img.data[o + 1] = rgb[1]; img.data[o + 2] = rgb[2]; img.data[o + 3] = 255;
+        }
+      }
+      c2.putImageData(img, 0, 0);
+      if (key === mode) draw();
+      if (p.row < rows) setTimeout(chunk, 0);
+    };
+    chunk();
+  }
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth; H = window.innerHeight; narrow = W < 620;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const top = Math.ceil(document.getElementById('lede').getBoundingClientRect().bottom) + 34;
+    const bottom = H - (narrow ? 166 : 112), x0 = 16, w = W - 32, h = Math.max(160, bottom - top);
+    if (narrow) {
+      R.strip = { x: x0, y: top, w: w * 0.52, h: h };
+      R.info = { x: x0 + w * 0.56, y: top, w: w * 0.44, h: h * 0.50 };
+      R.curve = { x: x0 + w * 0.56, y: top + h * 0.52, w: w * 0.44, h: h * 0.48 };
+    } else {
+      R.strip = { x: x0, y: top, w: w * 0.42, h: h };
+      R.info = { x: x0 + w * 0.47, y: top, w: w * 0.53, h: 136 };
+      R.curve = { x: x0 + w * 0.47, y: top + 146, w: w * 0.53, h: h - 146 };
+    }
+  }
+  const box = () => ({ x: R.strip.x + 30, y: R.strip.y + 4, w: R.strip.w - 36, h: R.strip.h - 26 });
+  const sx = sig => { const b = box(); return b.x + (sig - SMIN) / (SMAX - SMIN) * b.w; };
+  const ty = t => { const b = box(); return b.y + b.h - (t - T0) / (T1 - T0) * b.h; };
+  const onTheLine = () => Math.abs(s[0] - 0.5) < 1e-9;
+  const pairIndex = () => mode === 'dh' ? PAIR.findIndex(z => Math.abs(z[0] - s[0]) < 1e-9 && Math.abs(z[1] - s[1]) < 1e-9) : -1;
+  const atZero = () => pairIndex() >= 0 || onTheLine() && ZEROS[mode].some(z => Math.abs(z - s[1]) < 1e-9);
+
+  function setPoint(sig, t, snap) {
+    sig = Math.min(1, Math.max(0, sig)); t = Math.min(T1, Math.max(T0, t));
+    if (snap && mode === 'dh') for (const z of PAIR) if (Math.abs(sig - z[0]) < 0.04 && Math.abs(t - z[1]) < 0.25) { sig = z[0]; t = z[1]; }
+    if (snap && Math.abs(sig - 0.5) < 0.02) sig = 0.5;
+    if (snap && sig === 0.5) for (const z of ZEROS[mode]) if (Math.abs(z - t) < 0.09) t = z;
+    s = [sig, t]; draw();
+  }
+  function setMode(key) {
+    mode = key;
+    document.getElementById('bDH').setAttribute('aria-pressed', String(key === 'dh'));
+    document.getElementById('bZeta').setAttribute('aria-pressed', String(key === 'zeta'));
+    const bp = document.getElementById('bPair'); bp.disabled = key !== 'dh'; bp.textContent = key === 'dh' ? 'Go to the pair' : 'No pair to go to';
+    if (pairIndex() < 0 && !onTheLine()) s = [s[0], s[1]];
+    startPortrait(key); draw();
+  }
+
+  const minus = x => x.replace('-', '−');
+  function sci(v) {
+    const m = C.abs(v); if (m === 0) return '0';
+    const k = Math.floor(Math.log10(m)), f = Math.pow(10, -k), a = v[0] * f, b = v[1] * f;
+    return '(' + minus(a.toFixed(2)) + (b < 0 ? ' − ' : ' + ') + Math.abs(b).toFixed(2) + 'i) × 10<sup>' + minus(String(k)) + '</sup>';
+  }
+  const pt = (z, d) => z[0].toFixed(d || 2) + ' + ' + z[1].toFixed(d || 2) + 'i';
+  function text(str, x, y, col, size, align) {
+    ctx.fillStyle = col; ctx.font = (size || 12) + 'px Georgia, serif'; ctx.textAlign = align || 'left'; ctx.fillText(str, x, y);
+  }
+  function textOn(str, x, y, size, align) {              // white text with a dark edge, for labels on the coloured picture
+    ctx.font = size + 'px Georgia, serif'; ctx.textAlign = align || 'center'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(5,6,13,0.9)'; ctx.lineWidth = 3.5; ctx.strokeText(str, x, y); ctx.fillStyle = '#fff'; ctx.fillText(str, x, y);
+  }
+  function ring(x, y, r, col, width, fill) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); if (fill) { ctx.fillStyle = fill; ctx.fill(); } ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke();
+  }
+
+  function drawStrip() {
+    const b = box(), fs = narrow ? 11 : 12, p = PORT[mode];
+    ctx.fillStyle = '#05060d'; ctx.fillRect(b.x, b.y, b.w, b.h);
+    if (p) { ctx.imageSmoothingEnabled = true; ctx.drawImage(p.cvs, b.x, b.y, b.w, b.h); }
+    if (!p || p.row < p.rows) text('drawing the picture…', b.x + b.w / 2, b.y + b.h - 10, COL.dim, fs, 'center');
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1;
+    for (const e of [0, 1]) { ctx.beginPath(); ctx.moveTo(sx(e), b.y); ctx.lineTo(sx(e), b.y + b.h); ctx.stroke(); }
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.5; ctx.setLineDash([2, 5]); ctx.beginPath(); ctx.moveTo(sx(0.5), b.y); ctx.lineTo(sx(0.5), b.y + b.h); ctx.stroke(); ctx.setLineDash([]);
+    text('0', sx(0), b.y + b.h + 16, COL.dim, fs, 'center'); text('½', sx(0.5), b.y + b.h + 16, COL.gold, fs + 1, 'center'); text('1', sx(1), b.y + b.h + 16, COL.dim, fs, 'center');
+    for (let t = 80; t <= 95; t += 5) text(String(t), b.x - 5, ty(t) + 4, COL.dim, fs, 'right');
+    for (const z of ZEROS[mode]) ring(sx(0.5), ty(z), 4.5, '#fff', 1.5);
+    if (mode === 'dh') {
+      for (const z of PAIR) ring(sx(z[0]), ty(z[1]), 8, '#fff', 2.5);
+      if (!narrow) { textOn('a zero off the line', sx(PAIR[0][0]) + 2, ty(PAIR[0][1]) - 14, fs + 1); textOn('its twin', sx(PAIR[1][0]), ty(PAIR[1][1]) - 14, fs + 1); }
+    }
+    const px = sx(s[0]), qx = sx(1 - s[0]), y = ty(s[1]);
+    if (!onTheLine()) {
+      ctx.setLineDash([4, 4]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(qx, y); ctx.stroke(); ctx.setLineDash([]);
+      ring(qx, y, 5.5, '#000', 3); ring(qx, y, 5.5, '#fff', 1.5);
+    }
+    ring(px, y, 5.5, '#000', 1.5, '#fff');
+  }
+
+  function drawInfo() {
+    const r = R.info, n = TOTAL[mode], on = ZEROS[mode].length, big = narrow ? 15 : 21, fs = narrow ? 11.5 : 14;
+    let y = r.y + big;
+    const line = (str, col, size) => { text(str, r.x, y, col, size); y += size + (narrow ? 5 : 7); };
+    line(n + ' zeros in this window', COL.gold, big);
+    if (mode === 'dh') {
+      if (narrow) { line(on + ' on the line,', COL.ink, fs); line('each its own twin.', COL.ink, fs); line((n - on) + ' off it: a pair', COL.red, fs); line('of twins at height', COL.red, fs); line(PAIR[0][1].toFixed(4) + ', at', COL.red, fs); line('σ = ' + PAIR[0][0].toFixed(4) + ' and ' + PAIR[1][0].toFixed(4), COL.red, fs); }
+      else { line(on + ' sit on the line, each its own twin.', COL.ink, fs); line((n - on) + ' have left it: a pair of twins, at ' + pt(PAIR[0], 6) + ' and ' + pt(PAIR[1], 6) + '.', COL.red, fs); }
+    } else {
+      if (narrow) { line('All ' + on + ' on the line,', COL.ink, fs); line('each its own twin.', COL.ink, fs); line('None has left it.', COL.teal, fs); }
+      else { line('All ' + on + ' sit on the line, each its own twin.', COL.ink, fs); line('None has left it.', COL.teal, fs); }
+    }
+    if (!narrow) { line('Counted two ways: changes of sign along the line, and one walk around the border of the window.', COL.dim, 12);
+      line('In the picture, colour is the direction of the value: red positive, cyan negative. A zero is a dark point where all colours meet.', COL.dim, 12); }
+  }
+
+  function drawCurve() {
+    const c = R.curve, fs = narrow ? 11 : 12, x = c.x + 6, w = c.w - 12, y0 = c.y + 22, h = c.h - 44, mid = y0 + h / 2, cu = CURVE[mode];
+    const X = t => x + (t - T0) / (T1 - T0) * w, Y = v => mid - v / (cu.max * 1.08) * (h / 2);
+    text(narrow ? 'along the line: a real curve' : 'along the line the function is a real curve: red where positive, cyan where negative', x, c.y + 12, COL.dim, fs, 'left');
+    ctx.strokeStyle = COL.edge; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, mid); ctx.lineTo(x + w, mid); ctx.stroke();
+    ctx.lineWidth = 1.8;
+    for (let i = 1; i < cu.v.length; i++) {
+      ctx.strokeStyle = cu.v[i] + cu.v[i - 1] >= 0 ? POS : NEG;
+      ctx.beginPath(); ctx.moveTo(X(T0 + (i - 1) * STEP), Y(cu.v[i - 1])); ctx.lineTo(X(T0 + i * STEP), Y(cu.v[i])); ctx.stroke();
+    }
+    for (const z of ZEROS[mode]) ring(X(z), mid, 3.5, '#fff', 1.5, '#0d1020');
+    for (let t = 80; t <= 95; t += 5) text(String(t), X(t), y0 + h + 16, COL.dim, fs - 1, 'center');
+    if (!narrow) text('height', x, y0 + h + 16, COL.dim, fs - 1, 'left');
+    if (mode === 'dh') {
+      const tx = X(PAIR[0][1]), yy = Y(onLine('dh', PAIR[0][1]));
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, yy - 6); ctx.lineTo(tx, mid - 26); ctx.stroke();
+      text(narrow ? 'turns back' : 'turns back without crossing:', tx, mid - (narrow ? 32 : 46), '#fff', fs, 'center');
+      if (!narrow) text('two zeros are missing here', tx, mid - 31, '#fff', fs, 'center');
+    }
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.dim; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(s[1]), y0); ctx.lineTo(X(s[1]), y0 + h); ctx.stroke(); ctx.setLineDash([]);
+    if (onTheLine()) ring(X(s[1]), Y(onLine(mode, s[1])), 5, '#000', 1.5, '#fff');
+  }
+
+  function describe() {
+    const name = mode === 'dh' ? 'the cousin' : 'zeta';
+    if (pairIndex() >= 0) return 's = ' + pt(s, 4) + ' is a zero of the cousin, and it is not on the line. Its twin ' + pt(mirror(s), 4) + ' is a zero as well. <i>The mirror is satisfied; the line is not needed.</i>';
+    if (atZero()) return 's = ' + pt(s) + ' is a zero of ' + name + ' on the line: its own twin.';
+    const a = completed(mode, s);
+    if (onTheLine()) return 's = ' + pt(s) + ' is on the line, so the value of ' + name + ' (with its known factor) is real here: ' + (a[0] >= 0 ? 'positive, red.' : 'negative, cyan.') + ' <i>The line changes colour only at a zero.</i>';
+    return 's = ' + pt(s) + ', twin ' + pt(mirror(s)) + '. For ' + name + ' the two values are ' + sci(a) + ' and ' + sci(completed(mode, mirror(s))) + ': <i>mirror images, as always.</i>';
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawStrip(); drawInfo(); drawCurve();
+    stateEl.innerHTML = describe();
+    try { history.replaceState(null, '', '#f=' + mode + '&s=' + s[0].toFixed(6) + ',' + s[1].toFixed(6)); } catch (e) { /* the address bar is a convenience only */ }
+  }
+
+  function fromEvent(ev) {
+    const b = box(), r = cv.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+    return { inside: x >= b.x - 6 && x <= b.x + b.w + 6 && y >= b.y - 6 && y <= b.y + b.h + 6,
+      sig: SMIN + (x - b.x) / b.w * (SMAX - SMIN), t: T0 + (b.y + b.h - y) / b.h * (T1 - T0) };
+  }
+  cv.addEventListener('pointerdown', ev => { const p = fromEvent(ev); if (!p.inside) return; dragging = true; cv.setPointerCapture(ev.pointerId); setPoint(p.sig, p.t, true); });
+  cv.addEventListener('pointermove', ev => { if (!dragging) return; const p = fromEvent(ev); setPoint(p.sig, p.t, true); });
+  const stop = () => { dragging = false; };
+  cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+  window.addEventListener('keydown', ev => {
+    if (ev.target && ev.target.closest && ev.target.closest('button, summary, a')) return;
+    const k = ev.key; let moved = true;
+    if (k === 'ArrowLeft') setPoint(Math.round((s[0] - 0.02) * 100) / 100, s[1], false);
+    else if (k === 'ArrowRight') setPoint(Math.round((s[0] + 0.02) * 100) / 100, s[1], false);
+    else if (k === 'ArrowUp') setPoint(s[0], s[1] + 0.1, true);
+    else if (k === 'ArrowDown') setPoint(s[0], s[1] - 0.1, true);
+    else moved = false;
+    if (moved) ev.preventDefault();
+  });
+  document.getElementById('bDH').onclick = () => setMode('dh');
+  document.getElementById('bZeta').onclick = () => setMode('zeta');
+  document.getElementById('bPair').onclick = () => { if (mode !== 'dh') return; const i = pairIndex(); s = PAIR[i === 0 ? 1 : 0].slice(); draw(); };
+  document.getElementById('bLine').onclick = () => setPoint(0.5, s[1], false);
+  document.getElementById('bReset').onclick = () => { s = START.slice(); setMode('dh'); };
+  window.addEventListener('resize', () => { layout(); draw(); });
+
+  const m = /^#f=(zeta|dh)&s=([0-9.]+),([0-9.]+)$/.exec(location.hash);
+  if (m && isFinite(+m[2]) && isFinite(+m[3])) {
+    mode = m[1]; s = [Math.min(1, Math.max(0, +m[2])), Math.min(T1, Math.max(T0, +m[3]))];
+    if (mode === 'dh') for (const z of PAIR) if (Math.abs(z[0] - s[0]) < 1e-4 && Math.abs(z[1] - s[1]) < 1e-4) s = z.slice();
+    if (s[0] === 0.5) for (const z of ZEROS[mode]) if (Math.abs(z - s[1]) < 1e-3) s[1] = z;
+  }
+  layout(); setMode(mode);
+})();
+</script>
+</body>
+</html>

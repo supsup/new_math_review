@@ -1,0 +1,82 @@
+Eight connections recover seven missing readings
+
+At prime 12,871,291, put 12,871,290 inputs on a circle. Each mixed reading
+adds the eight inputs at these offsets from its own position.
+
+    0, 120092, 567832, 2537342, 2624638, 3857764, 5427245, 6166315
+
+The board is invertible over the rationals. Modulo the prime its rank is
+12,871,283. Remove any seven mixed readings. The survivors, together with
+any seven direct input observations, determine every original input.
+Eight taps attain the lower bound for this guarantee. If a nonzero row
+used at most seven inputs, its equation would restrict coordinates that
+must vary freely in the kernel.
+
+Why the straight exponential gives an extra root
+
+The d-tap recipe based on E(t) = sum of t^j/j! through degree d gives zero
+address moments at exponents 2 through d. For even d it gives another
+zero at exponent 2d + 2. To see this, differentiate the logarithm.
+
+    E'(t)/E(t) = 1 − t^d / (d! E(t)).
+
+The coefficient of t^(d+1) in 1/E(t) is the coefficient in exp(−t),
+plus 1/(d+1)! from the first omitted term of E. Those contributions
+cancel for even d. Thus E'/E has zero coefficient at t^(2d+1).
+Writing E as the product of (1 + x_i t) turns that coefficient into
+minus the sum of x_i^(2d+2). When the prime exceeds 2d+3, the resulting
+circulant on the full multiplicative group has this extra root in
+addition to the roots we wanted. For eight taps the extra exponent is 18.
+
+The shifted construction
+
+Use the degree-eight truncation of exp(t − b t²/2), with b = 6,826,730.
+The degree-nine coefficient is zero at this prime. The truncation splits
+into factors (1 + x_i t) over the field, with these eight addresses.
+
+    6251446, 7032005, 7394094, 9503192, 10513549, 11507449, 12319869, 12706143
+
+The logarithm agrees with t − b t²/2 through degree nine, so all seven
+power sums at exponents 3 through 9 vanish. Take logarithms to base 10
+and rotate the least offset to zero. The replay checks every power of 10
+to establish that the seven expected roots are the only ones. The right
+kernel consists of sequences 1000^j P(10^j) for polynomials of degree at
+most six. Any seven direct probes therefore determine the invisible
+part of the inputs by interpolation. Reversing indices gives the left
+kernel, so any relation among surviving mixed readings would have seven
+zeros and would be identically zero.
+
+To check ordinary invertibility, choose auxiliary prime 64,356,451 and
+an element of order 12,871,290 there. For each divisor m of the circle
+size, raise the element to a power that gives order m. The wiring
+polynomial evaluates nonzero at each such element. If it shared a
+rational factor with T^12,871,290 − 1, that factor would include some
+cyclotomic polynomial Φ_m, so it would vanish at the checked element
+of order m. One evaluation per divisor suffices for this rational check.
+
+The cubic shift gives a shorter board
+
+At prime 1,630,987, take the degree-eight truncation of
+exp(t + 1049519 t² + 462134 t³). Its degree-nine and degree-ten
+coefficients vanish. Those two equations are polynomials in the two
+coefficients. Eliminating the cubic coefficient by a resultant gives a
+degree-fifteen polynomial in the quadratic coefficient, which makes
+searching primes for candidates practical. The replay checks the selected
+coefficients directly.
+
+The eight factor addresses and the rotated base-2 offsets are
+
+    235911, 400580, 529184, 586582, 974843, 982688, 1261976, 1552185
+    0, 109707, 401729, 466398, 694256, 807724, 875762, 935276
+
+The only seven modular roots are 2^4 through 2^10. The kernel and recovery
+argument above then use P(2^j) with multiplier 16^j. The board has
+1,630,986 inputs and rank 1,630,979. Auxiliary prime 8,154,931 with root
+16,807 certifies ordinary invertibility at all sixteen orders.
+
+Replay with python-flint installed
+
+    python3 -B tools/check_eight_tap_mixer.py
+
+Both boards attain the eight-tap lower bound. The smallest possible
+prime and board size for this guarantee remain open here.

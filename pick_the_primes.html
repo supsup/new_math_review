@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Pick the primes that change rank</title>
+<style>
+  :root {
+    --ink: #ffefe2;
+    --muted: #d4b8a8;
+    --background: #251713;
+    --panel: #33211b;
+    --line: #72544a;
+    --honey: #ffd199;
+    --rose: #ffb5b4;
+    --glow: #59412c;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    background: var(--background);
+    color: var(--ink);
+    font: 16px/1.55 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 62rem); margin: auto; padding: 2.5rem 0; }
+  h1, h2, p { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: normal; line-height: 1.08; }
+  h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); letter-spacing: -.05em; max-width: 15ch; }
+  h2 { font-size: 1.65rem; }
+  .intro, .note { color: var(--muted); max-width: 43rem; margin-top: .6rem; }
+  .note { font-size: .9rem; }
+  form { margin-top: 1.1rem; }
+  label { color: var(--muted); font-size: .88rem; }
+  .controls, .digits { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .35rem; }
+  input, button {
+    padding: .45rem .65rem;
+    font: inherit;
+    color: inherit;
+    border: 1px solid var(--line);
+    border-radius: .4rem;
+    background: var(--panel);
+  }
+  input { width: 10rem; max-width: 100%; font-family: var(--mono); }
+  button { cursor: pointer; }
+  button:hover, button[aria-pressed="true"] { border-color: var(--honey); }
+  button[aria-pressed="true"] { color: var(--honey); background: var(--glow); }
+  .reuse { display: flex; align-items: center; gap: .45rem; margin-top: .6rem; }
+  .reuse input { width: auto; margin: 0; accent-color: var(--honey); }
+  .submit { color: var(--background); background: var(--honey); }
+  :focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+  .workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: start;
+    gap: .9rem;
+    margin-top: 1.2rem;
+  }
+  section { padding: clamp(.85rem, 3vw, 1.25rem); border: 1px solid var(--line); border-radius: .75rem; background: var(--panel); }
+  .digits { margin-block: .75rem .6rem; }
+  .digits button { min-width: 2.45rem; font-family: var(--mono); }
+  svg { display: block; width: 100%; }
+  .edge { stroke: var(--honey); stroke-width: 2.6; fill: none; }
+  .carry { stroke: var(--rose); stroke-dasharray: 4 4; }
+  .vertex { fill: var(--panel); stroke: var(--honey); stroke-width: 2; }
+  .branch { fill: var(--rose); }
+  .route-text { fill: var(--ink); font: 15px var(--mono); text-anchor: middle; }
+  .lower-text { fill: var(--muted); }
+  #recurrence { color: var(--honey); margin-top: .3rem; }
+  dl { margin: .5rem 0; }
+  dt { font-size: .88rem; color: var(--muted); }
+  dd { margin: 0 0 .55rem; font: 1.35rem var(--mono); overflow-wrap: anywhere; }
+  #rank-summary { color: var(--honey); }
+  #error { margin-top: .5rem; color: var(--rose); }
+  details { margin-top: .8rem; padding-top: .7rem; border-top: 1px solid var(--line); }
+  summary { cursor: pointer; }
+  details p { margin-top: .55rem; color: var(--muted); max-width: 52rem; }
+  #matrix { width: min(20rem, 100%); margin-top: .5rem; background: var(--background); }
+  #matrix .one { fill: var(--honey); }
+  #matrix .bridge { fill: var(--rose); }
+  a { color: var(--honey); }
+  @media (max-width: 44rem) {
+    main { padding-top: 1.5rem; }
+    .workbench { grid-template-columns: minmax(0, 1fr); }
+    .route-text { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Pick the primes that change rank</h1>
+    <p class="intro">Choose a number. Its binary digits build a little network of paths. Turn that network into a table of zeros and ones, and precisely the primes dividing your number will make the table lose a row of rank.</p>
+  </header>
+  <form id="choose">
+    <label for="target">Integer from 1 to 1,000,000</label>
+    <div class="controls">
+      <input type="number" id="target" min="1" max="1000000" step="1" value="30" required>
+      <button class="submit" type="submit">Build table</button>
+      <button type="button" data-value="7">Try 7</button>
+      <button type="button" data-value="257">Try 257</button>
+    </div>
+    <label class="reuse"><input type="checkbox" id="reuse" checked> Reuse the add-one route</label>
+    <p id="error" role="alert" hidden></p>
+  </form>
+  <div class="workbench">
+    <section aria-labelledby="graph-title">
+      <h2 id="graph-title">Count routes in binary</h2>
+      <div class="digits" id="digits" role="group" aria-label="Inspect a binary digit"></div>
+      <svg viewBox="0 0 460 202" id="route" role="img" aria-label="A stage of the route counter"></svg>
+      <p id="recurrence" role="status"></p>
+    </section>
+    <section aria-labelledby="result-title">
+      <h2 id="result-title">Which primes change rank?</h2>
+      <dl aria-live="polite">
+        <dt>Exact determinant</dt><dd id="determinant"></dd>
+        <dt>Prime factors</dt><dd id="factors"></dd>
+        <dt>Table size and number of ones</dt><dd id="size"></dd>
+      </dl>
+      <p id="rank-summary"></p>
+      <p class="note" id="comparison"></p>
+      <details>
+        <summary>Show the binary table</summary>
+        <svg id="matrix" role="img" aria-label="The nonzero entries of the constructed table"></svg>
+        <p>Each square is a 1. Pink squares join the route's endpoints to a new row and column.</p>
+      </details>
+    </section>
+  </div>
+  <details>
+    <summary>Why the routes give the determinant</summary>
+    <p>Read the binary digits from left to right. The leading 1 starts one route. Each next digit doubles the route count. A digit of 1 adds a route that comes along a separate track. The first route has length one. Each doubling adds two steps, and a reused add-one path enters after three steps. Every route to the end therefore has odd length.</p>
+    <p>Reusing the add-one route removes the need for a new carry track at each digit. The compact version adds three vertices and four or five arrows per digit. Its number of ones grows only as fast as the number of digits.</p>
+    <p>Order the vertices so the arrows point forward. Mark one square for each arrow and one on every diagonal. This gives the triangular matrix I + N, where N records the arrows and the diagonal ones keep this block invertible in every field. Add a new row that selects the start and a new column that selects the end. The determinant of the bordered table is the negative start-to-end entry of (I + N)⁻¹.</p>
+    <p>The inverse is the finite series I − N + N² − N³ + ···. Its start-to-end entry counts routes with alternating signs by length. Every route here has odd length, so the negative of that entry is the number entered. The triangular block guarantees that the rank can drop by only one.</p>
+    <p>This exhibit pairs a layered binary counter with a graph-to-determinant construction. The page checks the path count and uses exact integer elimination to verify its determinant. Related constructions appear in Section 2 of <a href="https://arxiv.org/abs/1410.8202">Hüttenhain and Ikenmeyer's Binary Determinantal Complexity</a>. The smallest examples for particular primes are in <a href="fewest_ones.html">How few ones can change rank?</a>.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+function makeTable(target, reuse) {
+  const digits = [...target.toString(2)].map(Number);
+  const edges = [[0, 1], [reuse ? 1 : 0, 2]];
+  let vertices = 3;
+  let total = 1;
+  let carry = 2;
+  let last = 1;
+  const stages = [{ bit: 1, count: 1 }];
+  for (const bit of digits.slice(1)) {
+    const up = vertices++;
+    const down = vertices++;
+    const extra = reuse ? carry : vertices++;
+    const end = vertices++;
+    edges.push([last, up], [last, down], [up, end], [down, end]);
+    if (!reuse) {
+      const next = vertices++;
+      edges.push([carry, extra], [extra, next]);
+      carry = next;
+    }
+    if (bit) edges.push([extra, end]);
+    const before = total;
+    total = 2 * before + bit;
+    stages.push({ bit, before, count: total });
+    last = end;
+  }
+  const paths = Array(vertices).fill(0);
+  paths[0] = 1;
+  for (const [from, to] of edges) paths[to] += paths[from];
+  if (paths[last] !== target) throw new Error("The graph's path count did not match the input.");
+  const size = vertices + 1;
+  const coordinates = [...Array.from({ length: vertices }, (_, index) => [index + 1, index + 1]),
+    ...edges.map(([from, to]) => [from + 1, to + 1]), [0, 1], [last + 1, 0]];
+  const matrix = Array.from({ length: size }, () => Array(size).fill(0n));
+  for (const [row, column] of coordinates) matrix[row][column] = 1n;
+  return { stages, coordinates, matrix, size };
+}
+
+function determinant(matrix) {
+  const rows = matrix.map(row => [...row]);
+  let divisor = 1n;
+  let sign = 1n;
+  for (let step = 0; step + 1 < rows.length; step++) {
+    const pivotRow = rows.findIndex((row, index) => index >= step && row[step] !== 0n);
+    if (pivotRow < 0) return 0n;
+    if (pivotRow !== step) {
+      [rows[pivotRow], rows[step]] = [rows[step], rows[pivotRow]];
+      sign = -sign;
+    }
+    const pivot = rows[step][step];
+    for (let row = step + 1; row < rows.length; row++) {
+      for (let column = step + 1; column < rows.length; column++) {
+        rows[row][column] = (pivot * rows[row][column] - rows[row][step] * rows[step][column]) / divisor;
+      }
+      rows[row][step] = 0n;
+    }
+    divisor = pivot;
+  }
+  return sign * rows.at(-1).at(-1);
+}
+
+function factor(value) {
+  const primes = [];
+  for (let divisor = 2; divisor * divisor <= value; divisor++) {
+    if (value % divisor) continue;
+    primes.push(divisor);
+    do { value /= divisor; } while (value % divisor === 0);
+  }
+  if (value > 1) primes.push(value);
+  return primes;
+}
+
+if (typeof module !== "undefined") module.exports = { makeTable, determinant, factor };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const set = (id, value) => { byId(id).textContent = value; };
+  const svg = (tag, attrs, value) => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [key, data] of Object.entries(attrs)) node.setAttribute(key, data);
+    if (value !== undefined) node.textContent = value;
+    return node;
+  };
+
+  function showStage(stage, index, reuse) {
+    const graph = byId("route");
+    graph.replaceChildren();
+    const line = (x1, y1, x2, y2, cls = "edge") => graph.append(svg("line", { x1, y1, x2, y2, class: cls }));
+    const node = (cx, cy, title, extraClass = "") => {
+      graph.append(svg("circle", { cx, cy, r: 18, class: "vertex " + extraClass }),
+        svg("text", { x: cx, y: cy + 37, class: "route-text " + extraClass }, title));
+    };
+    if (index === 0) {
+      line(85, 77, 370, 77);
+      node(85, 77, "Start");
+      node(370, 77, "1 route");
+      graph.setAttribute("aria-label", "One path starts the counter at one.");
+      set("recurrence", "The leading 1 starts the count at one.");
+    } else {
+      line(65, 72, 230, 37);
+      line(65, 72, 230, 102);
+      line(230, 37, 399, 72);
+      line(230, 102, 399, 72);
+      line(65, 160, 230, 160, "edge carry");
+      if (!reuse) line(230, 160, 399, 160, "edge carry");
+      if (stage.bit) line(230, 160, 399, 72, "edge carry");
+      node(65, 72, stage.before);
+      node(399, 72, stage.count);
+      for (const cy of [37, 102]) graph.append(svg("circle", { cx: 230, cy, r: 7, class: "vertex" }));
+      for (const cx of reuse ? [65, 230] : [65, 230, 399]) {
+        graph.append(svg("circle", { cx, cy: 160, r: 6, class: "branch" }));
+      }
+      graph.append(svg("text", { x: 230, y: 190, class: "route-text lower-text" },
+        reuse ? "The shared add-one route" : "One route on the separate track"));
+      const sentence = "Double " + stage.before + ", then add " + stage.bit + ", to get " + stage.count + " routes.";
+      graph.setAttribute("aria-label", sentence);
+      set("recurrence", sentence);
+    }
+  }
+
+  function render(data, alternative, primes, exact, reuse) {
+    const digits = byId("digits");
+    const buttons = data.stages.map((stage, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = stage.bit;
+      button.setAttribute("aria-label", "Digit " + (index + 1) + ", " + stage.bit);
+      button.addEventListener("click", () => selectStage(index));
+      return button;
+    });
+    function selectStage(index) {
+      buttons.forEach((button, at) => button.setAttribute("aria-pressed", String(at === index)));
+      showStage(data.stages[index], index, reuse);
+    }
+    digits.replaceChildren(...buttons);
+    selectStage(buttons.length - 1);
+
+    set("determinant", exact);
+    set("factors", primes.length ? primes.join(", ") : "None");
+    set("size", data.size + " × " + data.size + " · " + data.coordinates.length + " ones");
+    set("comparison", (reuse ? "With a fresh carry track at each digit" : "With the add-one route reused") +
+      ", the same determinant takes " + alternative.coordinates.length + " ones.");
+    set("rank-summary", primes.length ? "Rank " + data.size + " drops to " + (data.size - 1) +
+      " modulo any of the listed primes." : "Rank " + data.size + " is preserved modulo every prime.");
+
+    const matrix = byId("matrix");
+    matrix.setAttribute("viewBox", "0 0 " + data.size + " " + data.size);
+    matrix.replaceChildren(...data.coordinates.map(([row, column]) => svg("rect", {
+      x: column, y: row, width: .88, height: .88, class: row === 0 || column === 0 ? "bridge" : "one"
+    })));
+  }
+
+  function run() {
+    const field = byId("target");
+    const target = field.valueAsNumber;
+    const error = byId("error");
+    try {
+      if (!Number.isInteger(target) || target < 1 || target > 1000000) throw new Error("Enter a whole number from 1 to 1,000,000.");
+      const reuse = byId("reuse").checked;
+      const data = makeTable(target, reuse);
+      const exact = determinant(data.matrix);
+      if (exact !== BigInt(target)) throw new Error("The determinant check did not match the route count.");
+      render(data, makeTable(target, !reuse), factor(target), exact.toString(), reuse);
+      error.hidden = true;
+    } catch (failure) {
+      set("error", failure.message);
+      error.hidden = false;
+    }
+  }
+
+  byId("choose").addEventListener("submit", event => { event.preventDefault(); run(); });
+  byId("reuse").addEventListener("change", run);
+  document.querySelectorAll("[data-value]").forEach(button => {
+    button.addEventListener("click", () => { byId("target").value = button.dataset.value; run(); });
+  });
+  run();
+}
+</script>
+</body>
+</html>

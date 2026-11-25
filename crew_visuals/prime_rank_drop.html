@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When a prime changes the rank</title>
+  <style>
+    :root {
+      color-scheme: light; background: #fcf6e9; color: #2f2b3d;
+      --ink: #2f2b3d; --muted: #555160; --plum: #644568; --blush: #ead6e8;
+      --card: #fffaf2; --line: #c3b7bc; --gold: #f8de91; --on: #e3ccd7;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 68rem); margin: auto; padding: clamp(1.85rem, 6vw, 4.5rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.9rem, 8vw, 6rem)/.98 Georgia, serif; letter-spacing: -.065em; text-wrap: balance; }
+    h2 { font: 1.7rem/1.12 Georgia, serif; }
+    p, details { line-height: 1.55; }
+    .intro { color: var(--muted); max-width: 65ch; margin: .8rem 0 1.2rem; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+    .controls span { color: var(--muted); margin-right: .2rem; }
+    button { background: var(--card); border: 1px solid #a892a1; border-radius: .35rem; color: var(--ink); font: inherit; font-weight: 620; min-height: 2.65rem; padding: .35rem .7rem; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--plum); color: white; border-color: var(--plum); }
+    button:hover { border-color: var(--plum); }
+    :focus-visible { outline: 3px solid #5a459c; outline-offset: 3px; }
+    .example { display: grid; grid-template-columns: minmax(0, 29rem) minmax(0, 1fr); align-items: start; gap: .9rem; margin: .9rem 0 1.35rem; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: .6rem; padding: .9rem clamp(.55rem, 3vw, 1.35rem) 1.1rem; }
+    .board { width: 100%; table-layout: fixed; border-spacing: 3px; text-align: center; font-variant-numeric: tabular-nums; }
+    .board caption { text-align: left; margin-bottom: .5rem; }
+    .board col.edge { width: 3.2rem; }
+    .board th, .board td { height: clamp(2.05rem, 6vw, 2.6rem); padding: 0 .04rem; }
+    .board th { color: var(--muted); font-weight: 600; font-size: .82rem; }
+    .board tbody td { border-radius: .23rem; background: #f3ecea; }
+    .board tbody td[data-bit="1"] { background: var(--on); font-weight: 670; }
+    .board tbody tr[data-active="true"] td[data-bit="1"] { background: var(--gold); }
+    .board tbody td:last-child { background: transparent; color: var(--plum); font-weight: 650; }
+    .row-button { width: 100%; min-height: 2rem; border: 0; padding: .25rem 0; font-size: .85rem; }
+    .step p { margin-top: .6rem; }
+    #equation { font-variant-numeric: tabular-nums; font: clamp(1.3rem, 4vw, 1.9rem)/1.35 Georgia, serif; }
+    #summary { margin-top: .9rem; }
+    a { color: var(--plum); text-underline-offset: .16em; }
+    details { max-width: 76ch; border-top: 1px solid var(--line); padding-top: .7rem; }
+    details p { margin: .6rem 0; }
+    summary { cursor: pointer; font-weight: 650; }
+    .checks { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    .checks th, .checks td { padding: .4rem .3rem; text-align: left; border-bottom: 1px solid var(--line); }
+    .checks thead th { color: var(--muted); }
+    @media (max-width: 46rem) { .example { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) {
+      .board col.edge { width: 2.45rem; }
+      .board { border-spacing: 2px; }
+      .primes { gap: .3rem; }
+      .primes button { padding-inline: .5rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>When a prime changes the rank</h1>
+    <p class="intro">A board of zeros and ones can have independent columns over the fractions. Then a prime makes one column combination vanish. Follow the same column weights across the rows to see where that happens.</p>
+
+    <div class="controls primes" role="group" aria-label="Choose the prime">
+      <span>Prime</span>
+      <button type="button" data-prime="2" aria-pressed="false">2</button>
+      <button type="button" data-prime="3" aria-pressed="true">3</button>
+      <button type="button" data-prime="5" aria-pressed="false">5</button>
+      <button type="button" data-prime="7" aria-pressed="false">7</button>
+      <button type="button" data-prime="11" aria-pressed="false">11</button>
+      <button type="button" data-prime="13" aria-pressed="false">13</button>
+    </div>
+
+    <section class="example" aria-label="Smallest boards for a rank drop">
+      <div class="panel">
+        <table class="board" id="board">
+          <caption>Follow a row to add its column weights.</caption>
+          <colgroup id="columns"></colgroup>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel step">
+        <h2>Read the highlighted row</h2>
+        <p id="equation" aria-live="polite"></p>
+        <div class="controls" role="group" aria-label="Arithmetic for the sums">
+          <button type="button" data-modular="false" aria-pressed="true">Over fractions</button>
+          <button type="button" data-modular="true" aria-pressed="false" id="modular">Modulo 3</button>
+        </div>
+        <p id="summary" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <details>
+      <summary>Why these are the smallest boards</summary>
+      <p>Each displayed determinant equals the chosen prime up to sign. The rows above the last row stay independent modulo that prime. This gives the exact ranks shown above.</p>
+      <p>A matrix loses rank modulo a prime if that prime divides every minor of maximal ordinary rank. The absolute determinant bounds below imply that the first possible square board for each prime must have full ordinary rank. Once the size is fixed, we ask how few ones it can use.</p>
+      <table class="checks">
+        <thead><tr><th scope="col">Prime</th><th scope="col">Size</th><th scope="col">Fewest ones</th><th scope="col">Check of the minimum</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">2</th><td>3 × 3</td><td>6</td><td>Two per row</td></tr>
+          <tr><th scope="row">3</th><td>4 × 4</td><td>9</td><td>One heavier row</td></tr>
+          <tr><th scope="row">5</th><td>5 × 5</td><td>13</td><td><a href="when_five_becomes_zero.html">The five-row check</a></td></tr>
+          <tr><th scope="row">7</th><td>6 × 6</td><td>16</td><td><a href="mod7_rank_card.txt">Short proof and exact check</a></td></tr>
+          <tr><th scope="row">11</th><td>7 × 7</td><td>20</td><td><a href="mod11_rank_card.txt">Reduced exact search</a></td></tr>
+          <tr><th scope="row">13</th><td>7 × 7</td><td>21</td><td><a href="mod13_rank_card.txt">Reduced exact search</a></td></tr>
+        </tbody>
+      </table>
+      <p>At the first possible size a row with just one 1 would reduce the question to a smaller determinant by expansion, so every row needs at least two. That gives six ones for the prime 2. For the prime 3, rows with two ones ask two weights to be opposites. An even cycle lets one weight vary and an odd cycle forces it to zero. This works both over the fractions and modulo 3, so a board made entirely of those rows cannot change rank. A heavier row raises the minimum to nine.</p>
+      <p>For the size bounds, the maximum absolute determinants through size four are 1, 1, 2 and 3 by direct enumeration. At size five, bordering into a sign matrix and applying Hadamard bounds the determinant by 6³/2⁵ &lt; 7. For size six the maximum is 9. <a href="https://doi.org/10.1080/00029890.1946.11991722">Williamson on binary determinant maxima</a></p>
+      <p>This experiment uses the same distinction between count and rank as the nine-solution SAT table. A small field can change how many separated products that table needs. <a href="sat_three_products.html">Three products make nine solutions</a> · <a href="which_primes_fit.txt">Simultaneous rank drops</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const examples = {
+        2: {rows:['101','011','110'], weights:[1,1,-1]},
+        3: {rows:['1100','1010','1001','0111'], weights:[1,-1,-1,-1]},
+        5: {rows:['00011','00101','01110','10110','11001'], weights:[2,2,-1,-1,1]},
+        7: {rows:['110000','101000','000110','011100','100101','011011'], weights:[1,-1,-1,2,-2,-3]},
+        11: {rows:['1100000','1010000','0001100','0110010','1001010','0111001','1000111'], weights:[1,-1,-1,-3,3,2,5]},
+        13: {rows:['0011000','0000101','0000011','0101001','0110110','1001110','1110001'], weights:[-7,-1,-3,3,2,2,-2]}
+      };
+      const primeButtons = document.querySelectorAll('[data-prime]');
+      const arithmetic = document.querySelectorAll('[data-modular]');
+      const board = document.getElementById('board');
+      const columns = document.getElementById('columns');
+      const equation = document.getElementById('equation');
+      const summary = document.getElementById('summary');
+      const modularButton = document.getElementById('modular');
+      let prime = 3;
+      let modular = false;
+      let activeRow = examples[prime].rows.length - 1;
+
+      const signed = n => String(n).replace('-', '−');
+
+      function buildBoard() {
+        const {rows, weights} = examples[prime];
+        columns.replaceChildren(...Array.from({length:weights.length + 2}, (_, i) => {
+          const col = document.createElement('col');
+          col.classList.toggle('edge', i === 0 || i === weights.length + 1);
+          return col;
+        }));
+        board.tHead.replaceChildren();
+        const headings = board.tHead.insertRow();
+        ['Row', ...weights.map(signed), 'Sum'].forEach((name, i) => {
+          const th = document.createElement('th');
+          th.scope = 'col';
+          th.textContent = name;
+          if (i > 0 && i <= weights.length) th.setAttribute('aria-label', `Column ${i}, weight ${name}`);
+          headings.append(th);
+        });
+        const body = board.tBodies[0];
+        body.replaceChildren();
+        rows.forEach((bits, i) => {
+          const row = body.insertRow();
+          const header = document.createElement('th');
+          header.scope = 'row';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'row-button';
+          button.textContent = i + 1;
+          button.setAttribute('aria-label', `Read row ${i + 1}`);
+          button.addEventListener('click', () => { activeRow = i; showSums(); });
+          header.append(button);
+          row.append(header);
+          for (const bit of bits) {
+            const cell = row.insertCell();
+            cell.dataset.bit = bit;
+            cell.textContent = bit;
+          }
+          row.insertCell();
+        });
+        showSums();
+      }
+
+      function showSums() {
+        const {rows, weights} = examples[prime];
+        const sums = [];
+        const n = rows.length;
+        rows.forEach((bits, i) => {
+          const row = board.tBodies[0].rows[i];
+          const terms = weights.filter((_, k) => bits[k] === '1');
+          const sum = terms.reduce((total, term) => total + term, 0);
+          sums.push(sum);
+          row.dataset.active = i === activeRow;
+          row.querySelector('button').setAttribute('aria-pressed', String(i === activeRow));
+          row.lastElementChild.textContent = signed(modular ? ((sum % prime) + prime) % prime : sum);
+          if (i === activeRow) {
+            const expression = terms.slice(1).reduce((text, term) => {
+              return `${text} ${term < 0 ? '−' : '+'} ${Math.abs(term)}`;
+            }, signed(terms[0]));
+            const ending = modular && sum !== 0 ? ` ≡ 0 (mod ${prime})` : '';
+            equation.textContent = `${expression} = ${signed(sum)}${ending}`;
+          }
+        });
+        const count = rows.reduce((total, bits) => total + [...bits].filter(b => b === '1').length, 0);
+        const basis = `This ${n} × ${n} board uses ${count} ones.`;
+        summary.textContent = modular
+          ? `Every sum is now zero. The weights give a dependence, and rank falls from ${n} to ${n - 1}. ${basis}`
+          : `Only the last sum is nonzero (${signed(sums.at(-1))}). The columns are independent and the rank is ${n}. ${basis}`;
+        modularButton.textContent = `Modulo ${prime}`;
+      }
+
+      for (const button of primeButtons) {
+        button.addEventListener('click', () => {
+          prime = Number(button.dataset.prime);
+          activeRow = examples[prime].rows.length - 1;
+          for (const item of primeButtons) item.setAttribute('aria-pressed', String(item === button));
+          buildBoard();
+        });
+      }
+      for (const button of arithmetic) {
+        button.addEventListener('click', () => {
+          modular = button.dataset.modular === 'true';
+          for (const item of arithmetic) item.setAttribute('aria-pressed', String(item === button));
+          showSums();
+        });
+      }
+      buildBoard();
+    })();
+  </script>
+</body>
+</html>

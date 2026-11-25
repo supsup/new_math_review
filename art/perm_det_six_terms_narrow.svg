@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 520" width="450" height="520" role="img" aria-label="The six products of a 3 by 3 grid, stacked: all plus for the permanent, three minus for the determinant" font-family="Georgia, serif">
+<rect width="450" height="520" fill="#fbf9f4"/>
+<text x="20.0" y="30.0" font-size="17" fill="#8a4b16" text-anchor="start">Six ways to pick one cell from every row and column</text>
+<text x="20.0" y="52.0" font-size="13" fill="#5b5348" text-anchor="start">P: the sign in the permanent.   D: the sign in the determinant.</text>
+<rect x="34.3" y="76.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="51.3" y="98.0" font-size="15" fill="#1d1b18" text-anchor="middle">a</text>
+<rect x="71.3" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="88.3" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">b</text>
+<rect x="108.3" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="125.3" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">c</text>
+<rect x="34.3" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="51.3" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">d</text>
+<rect x="71.3" y="113.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="88.3" y="135.0" font-size="15" fill="#1d1b18" text-anchor="middle">e</text>
+<rect x="108.3" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="125.3" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">f</text>
+<rect x="34.3" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="51.3" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">g</text>
+<rect x="71.3" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="88.3" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">h</text>
+<rect x="108.3" y="150.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="125.3" y="172.0" font-size="15" fill="#1d1b18" text-anchor="middle">i</text>
+<text x="88.3" y="211.0" font-size="17" fill="#1d1b18" text-anchor="middle">a·e·i</text>
+<text x="42.3" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="64.3" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="64.3" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="102.3" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="124.3" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="124.3" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<rect x="171.0" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="188.0" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">a</text>
+<rect x="208.0" y="76.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="225.0" y="98.0" font-size="15" fill="#1d1b18" text-anchor="middle">b</text>
+<rect x="245.0" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="262.0" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">c</text>
+<rect x="171.0" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="188.0" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">d</text>
+<rect x="208.0" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="225.0" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">e</text>
+<rect x="245.0" y="113.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="262.0" y="135.0" font-size="15" fill="#1d1b18" text-anchor="middle">f</text>
+<rect x="171.0" y="150.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="188.0" y="172.0" font-size="15" fill="#1d1b18" text-anchor="middle">g</text>
+<rect x="208.0" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="225.0" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">h</text>
+<rect x="245.0" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="262.0" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">i</text>
+<text x="225.0" y="211.0" font-size="17" fill="#1d1b18" text-anchor="middle">b·f·g</text>
+<text x="179.0" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="201.0" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="201.0" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="239.0" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="261.0" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="261.0" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<rect x="307.7" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="324.7" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">a</text>
+<rect x="344.7" y="76.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="361.7" y="98.0" font-size="15" fill="#5b5348" text-anchor="middle">b</text>
+<rect x="381.7" y="76.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="398.7" y="98.0" font-size="15" fill="#1d1b18" text-anchor="middle">c</text>
+<rect x="307.7" y="113.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="324.7" y="135.0" font-size="15" fill="#1d1b18" text-anchor="middle">d</text>
+<rect x="344.7" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="361.7" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">e</text>
+<rect x="381.7" y="113.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="398.7" y="135.0" font-size="15" fill="#5b5348" text-anchor="middle">f</text>
+<rect x="307.7" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="324.7" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">g</text>
+<rect x="344.7" y="150.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="361.7" y="172.0" font-size="15" fill="#1d1b18" text-anchor="middle">h</text>
+<rect x="381.7" y="150.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="398.7" y="172.0" font-size="15" fill="#5b5348" text-anchor="middle">i</text>
+<text x="361.7" y="211.0" font-size="17" fill="#1d1b18" text-anchor="middle">c·d·h</text>
+<text x="315.7" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="337.7" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="337.7" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="375.7" y="243.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="397.7" cy="238.0" r="12" fill="#1f7a52"/>
+<text x="397.7" y="244.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<rect x="34.3" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="51.3" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">a</text>
+<rect x="71.3" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="88.3" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">b</text>
+<rect x="108.3" y="294.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="125.3" y="316.0" font-size="15" fill="#1d1b18" text-anchor="middle">c</text>
+<rect x="34.3" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="51.3" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">d</text>
+<rect x="71.3" y="331.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="88.3" y="353.0" font-size="15" fill="#1d1b18" text-anchor="middle">e</text>
+<rect x="108.3" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="125.3" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">f</text>
+<rect x="34.3" y="368.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="51.3" y="390.0" font-size="15" fill="#1d1b18" text-anchor="middle">g</text>
+<rect x="71.3" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="88.3" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">h</text>
+<rect x="108.3" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="125.3" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">i</text>
+<text x="88.3" y="429.0" font-size="17" fill="#1d1b18" text-anchor="middle">c·e·g</text>
+<text x="42.3" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="64.3" cy="456.0" r="12" fill="#1f7a52"/>
+<text x="64.3" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="102.3" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="124.3" cy="456.0" r="12" fill="#b83a2e"/>
+<text x="124.3" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">−</text>
+<rect x="171.0" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="188.0" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">a</text>
+<rect x="208.0" y="294.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="225.0" y="316.0" font-size="15" fill="#1d1b18" text-anchor="middle">b</text>
+<rect x="245.0" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="262.0" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">c</text>
+<rect x="171.0" y="331.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="188.0" y="353.0" font-size="15" fill="#1d1b18" text-anchor="middle">d</text>
+<rect x="208.0" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="225.0" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">e</text>
+<rect x="245.0" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="262.0" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">f</text>
+<rect x="171.0" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="188.0" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">g</text>
+<rect x="208.0" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="225.0" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">h</text>
+<rect x="245.0" y="368.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="262.0" y="390.0" font-size="15" fill="#1d1b18" text-anchor="middle">i</text>
+<text x="225.0" y="429.0" font-size="17" fill="#1d1b18" text-anchor="middle">b·d·i</text>
+<text x="179.0" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="201.0" cy="456.0" r="12" fill="#1f7a52"/>
+<text x="201.0" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="239.0" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="261.0" cy="456.0" r="12" fill="#b83a2e"/>
+<text x="261.0" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">−</text>
+<rect x="307.7" y="294.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="324.7" y="316.0" font-size="15" fill="#1d1b18" text-anchor="middle">a</text>
+<rect x="344.7" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="361.7" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">b</text>
+<rect x="381.7" y="294.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="398.7" y="316.0" font-size="15" fill="#5b5348" text-anchor="middle">c</text>
+<rect x="307.7" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="324.7" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">d</text>
+<rect x="344.7" y="331.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="361.7" y="353.0" font-size="15" fill="#5b5348" text-anchor="middle">e</text>
+<rect x="381.7" y="331.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="398.7" y="353.0" font-size="15" fill="#1d1b18" text-anchor="middle">f</text>
+<rect x="307.7" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="324.7" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">g</text>
+<rect x="344.7" y="368.0" width="34" height="34" rx="3" fill="#e6eefc" stroke="#2456c8"/>
+<text x="361.7" y="390.0" font-size="15" fill="#1d1b18" text-anchor="middle">h</text>
+<rect x="381.7" y="368.0" width="34" height="34" rx="3" fill="#fbf9f4" stroke="#e3ddd2"/>
+<text x="398.7" y="390.0" font-size="15" fill="#5b5348" text-anchor="middle">i</text>
+<text x="361.7" y="429.0" font-size="17" fill="#1d1b18" text-anchor="middle">a·f·h</text>
+<text x="315.7" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">P</text>
+<circle cx="337.7" cy="456.0" r="12" fill="#1f7a52"/>
+<text x="337.7" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">+</text>
+<text x="375.7" y="461.0" font-size="14" fill="#5b5348" text-anchor="middle">D</text>
+<circle cx="397.7" cy="456.0" r="12" fill="#b83a2e"/>
+<text x="397.7" y="462.0" font-size="18" fill="#fbf9f4" text-anchor="middle" font-weight="bold">−</text>
+</svg>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nine solutions make a double zero</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f7f0df; color: #2b302f;
+      --muted: #525b57; --ink: #203b35; --green: #215c4c; --mint: #d4e8d8;
+      --paper: #fffaee; --line: #aebdb0; --gold: #f2cc8c; --ochre: #85482b;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 66rem); margin: auto; padding: clamp(1.8rem, 6vw, 4.4rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.75rem, 8vw, 5.6rem)/.98 Georgia, serif; letter-spacing: -.058em; text-wrap: balance; }
+    h2 { font: 1.65rem/1.14 Georgia, serif; }
+    p { line-height: 1.55; }
+    .intro { color: var(--muted); max-width: 66ch; margin: .85rem 0 1.2rem; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; margin-bottom: .85rem; }
+    label { font-weight: 650; }
+    select, button { min-height: 2.65rem; border-radius: .35rem; border: 1px solid var(--line); background: var(--paper); color: inherit; font: inherit; }
+    select { min-width: 4.25rem; padding: .3rem .6rem; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--ochre); outline-offset: 3px; }
+    .residues { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: 1rem; }
+    .residues button { min-width: 2.18rem; width: 2.65rem; height: 2.9rem; font-variant-numeric: tabular-nums; }
+    .residues button[data-order="1"] { background: var(--mint); border-color: #52816c; }
+    .residues button[data-order="2"] { background: var(--gold); border-color: #936733; font-weight: 700; }
+    .residues button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: white; font-weight: 700; }
+    .panel { padding: .85rem clamp(.6rem, 2vw, 1.15rem) 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: .62rem; }
+    .gallery { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: .8rem; align-items: start; }
+    .polynomial { font: clamp(1.4rem, 4vw, 1.85rem)/1.4 Georgia, serif; margin: .42rem 0 .72rem; }
+    .groups { padding: 0; margin: 0; list-style: none; }
+    .groups li { display: grid; grid-template-columns: 4.45rem 1fr; gap: .4rem; padding: .46rem 0; border-top: 1px solid var(--line); }
+    .groups li span { font-weight: 600; }
+    .groups code { font-size: .85rem; color: var(--muted); }
+    .coefficients { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .35rem; margin: .7rem 0; }
+    .coefficients div { padding: .4rem .14rem; text-align: center; border: 1px solid var(--line); border-radius: .35rem; }
+    .coefficients div[data-zero="true"] { background: var(--mint); }
+    .coefficients div[data-first="true"] { background: var(--gold); border-color: #936733; }
+    .coefficients span { display: block; font-size: .77rem; color: var(--muted); }
+    .coefficients strong { display: block; font: 1.3rem Georgia, serif; }
+    #result { font-weight: 650; }
+    #rank { margin-top: .45rem; color: var(--muted); }
+    details { margin-top: 1.05rem; padding-top: .7rem; border-top: 1px solid var(--line); max-width: 76ch; }
+    details p { margin-top: .6rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--green); text-underline-offset: .18em; }
+    @media (max-width: 42rem) { .gallery { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) {
+      .residues { gap: .3rem; }
+      .residues button { width: 2.25rem; height: 2.65rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Nine solutions make a double zero</h1>
+    <p class="intro">Give a solution with one 1 a weight of <var>t</var>, a solution with two 1s a weight of <var>t</var>², and so on. Add the weights. Modulo 13, this polynomial has a double root at <var>t</var> = 10. The rank of the matrix that counts the solutions drops by one there.</p>
+
+    <div class="controls">
+      <label for="prime">Work modulo</label>
+      <select id="prime"><option>2</option><option>3</option><option>5</option><option>7</option><option>11</option><option selected>13</option><option>17</option></select>
+      <span>Choose a value of <var>t</var>.</span>
+    </div>
+    <div id="residues" class="residues" role="group" aria-label="Value of t"></div>
+
+    <div class="gallery">
+      <section class="panel" aria-labelledby="nearby">
+        <h2 id="nearby">Look near the chosen value</h2>
+        <p id="shift"></p>
+        <div class="coefficients" id="coefficients" aria-label="Coefficients in ascending degree"></div>
+        <p id="result" aria-live="polite"></p>
+        <p id="rank"></p>
+      </section>
+      <section class="panel" aria-labelledby="solutions">
+        <h2 id="solutions">The nine solutions</h2>
+        <p class="polynomial"><var>G</var>(<var>t</var>) = <var>t</var> + 5<var>t</var>² + 3<var>t</var>³</p>
+        <ul class="groups" id="groups"></ul>
+      </section>
+    </div>
+
+    <details>
+      <summary>Why twice can still mean one missing rank</summary>
+      <p>At <var>t</var> = 10, put <var>t</var> = 10 + <var>u</var>. The constant and linear terms are zero modulo 13. The quadratic term is 4<var>u</var>², followed by 3<var>u</var>³. The first surviving power is two, which makes this a double root. In the original variable, <var>G</var>(<var>t</var>) = 3<var>t</var>(<var>t</var> − 10)² modulo 13.</p>
+      <p>For the matrix, use nine vertices. Draw arrows from a start vertex to four row choices, then from row choices to column choices, and from the columns back to the start. A row-to-column arrow represents a solution and has its weight <var>t</var><sup>number of 1s</sup>. The other arrows have weight 1, and every vertex except the start has a loop of weight 1. Every contributing term of the determinant contains exactly one three-step cycle through the start, with positive sign. Its value is the weight of that solution, so the determinant equals <var>G</var>(<var>t</var>).</p>
+      <p>The eight rows and columns away from the start give a triangular submatrix with diagonal entries 1. Its determinant is always 1, so the full matrix has rank at least eight. At a root of <var>G</var>, the rank is exactly eight. That says how many independent directions survive at that value. Multiplicity asks how many powers of <var>u</var> vanish before the polynomial starts to change.</p>
+      <p>This adds weights to Marlow’s route construction for the same nine-solution puzzle. <a href="sat_three_products.html">The solution table and its rank</a> · <a href="zeta_pile_puzzle.html">Counting repeated zeros</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const fixture = ['0011','0101','0110','1110'];
+      const groups = Array.from({length:5}, () => []);
+      fixture.forEach((row, i) => [...row].forEach((bit, j) => {
+        if (bit === '0') return;
+        const assignment = (4*i+j).toString(2).padStart(4, '0');
+        groups[[...assignment].filter(x => x === '1').length].push(assignment);
+      }));
+      const [, linear, quadratic, cubic] = groups.map(g => g.length);
+      const primeControl = document.getElementById('prime');
+      const residues = document.getElementById('residues');
+      const coefficients = document.getElementById('coefficients');
+      const shift = document.getElementById('shift');
+      const result = document.getElementById('result');
+      const rank = document.getElementById('rank');
+      let t = 10;
+
+      groups.forEach((set, ones) => {
+        if (!set.length) return;
+        const row = document.createElement('li');
+        const title = document.createElement('span');
+        const list = document.createElement('code');
+        title.textContent = `${ones} ${ones===1?'one':'ones'}`;
+        list.textContent = set.join(' ');
+        row.append(title,list);
+        document.getElementById('groups').append(row);
+      });
+
+      function shiftCoefficients(a, prime) {
+        return [
+          linear*a + quadratic*a**2 + cubic*a**3,
+          linear + 2*quadratic*a + 3*cubic*a**2,
+          quadratic + 3*cubic*a,
+          cubic
+        ].map(x => x % prime);
+      }
+
+      function renderValue() {
+        const prime = Number(primeControl.value);
+        const terms = shiftCoefficients(t, prime);
+        const order = terms.findIndex(Boolean);
+        shift.textContent = `Coefficients after replacing t with ${t} + u, modulo ${prime}.`;
+        coefficients.replaceChildren(...terms.map((term, power) => {
+          const cell = document.createElement('div');
+          const number = document.createElement('strong');
+          const label = document.createElement('span');
+          cell.dataset.zero = term === 0;
+          cell.dataset.first = power === order;
+          number.textContent = term;
+          label.textContent = ['constant','u','u²','u³'][power];
+          cell.append(number,label);
+          return cell;
+        }));
+        const verdict = ['No root here.', 'A simple root.', 'A double root.', 'A triple root.'];
+        result.textContent = verdict[order];
+        rank.textContent = order === 0 ? 'The counting matrix has rank 9.' : 'The counting matrix has rank 8. One direction disappears.';
+        [...residues.children].forEach((button, a) => button.setAttribute('aria-pressed', String(a === t)));
+      }
+
+      function renderChoices() {
+        const prime = Number(primeControl.value);
+        t %= prime;
+        residues.replaceChildren(...Array.from({length:prime}, (_, a) => {
+          const button = document.createElement('button');
+          const order = shiftCoefficients(a, prime).findIndex(Boolean);
+          button.type = 'button';
+          button.textContent = a;
+          button.dataset.order = order;
+          button.setAttribute('aria-label', `t is ${a}${['', ', simple root', ', double root', ', triple root'][order]}`);
+          button.addEventListener('click', () => { t = a; renderValue(); });
+          return button;
+        }));
+        renderValue();
+      }
+
+      primeControl.addEventListener('change', renderChoices);
+      renderChoices();
+    })();
+  </script>
+</body>
+</html>

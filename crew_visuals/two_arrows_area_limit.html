@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two arrows, one area limit</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fdf9f0;
+      --ink: #24322d;
+      --muted: #4f5f56;
+      --green: #26664f;
+      --blue: #245e85;
+      --gold: #a34c27;
+      --line: #b8c1b5;
+      color: var(--ink);
+      background: #e8ece4;
+      font: 100%/1.53 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 64rem; margin: auto; padding: clamp(1rem, 4vw, 3rem); background: var(--paper); }
+    h1, h2 { font-family: Georgia, serif; line-height: 1.12; }
+    h1 { font-size: clamp(2.55rem, 7.8vw, 4.6rem); margin: .48rem 0 .65rem; letter-spacing: -.05em; text-wrap: balance; }
+    h2 { font-size: 1.4rem; margin: 0 0 .55rem; }
+    p { max-width: 66ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: flex; align-items: end; gap: .65rem; flex-wrap: wrap; margin: 1.2rem 0; }
+    label { display: grid; gap: .2rem; font-size: .92rem; font-weight: 650; }
+    select, button {
+      border: 1px solid var(--line); border-radius: .3rem; min-height: 2.8rem;
+      padding: .35rem .65rem; font: inherit; color: var(--ink); background: #f7faf6; cursor: pointer;
+    }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    figure { min-width: 0; margin: 0; border: 1px solid var(--line); border-radius: .45rem; padding: clamp(.6rem, 2vw, 1.1rem); }
+    .square { width: min(100%, 19rem); aspect-ratio: 1; margin: auto; }
+    canvas { display: block; }
+    .residue {
+      display: grid; gap: .25rem; padding: .35rem;
+      background: #f1f3ed; border: 1px solid var(--line); border-radius: .3rem;
+    }
+    .residue span {
+      display: grid; place-items: center; min-width: 0; border: 1px solid #c2c9bd;
+      border-radius: .2rem; background: #faf9f3;
+    }
+    .residue span::after { content: ""; width: 32%; aspect-ratio: 1; border-radius: 50%; background: #b3bdb3; }
+    .residue .reachable { background: #dcebe2; border-color: #90ae9d; }
+    .residue .reachable::after { background: var(--green); }
+    .residue .origin { outline: 2px solid var(--blue); outline-offset: -2px; }
+    figcaption { margin-top: .65rem; }
+    .result { margin: .6rem 0 .1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .u { color: var(--green); font-weight: 650; }
+    .v { color: var(--blue); font-weight: 650; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: 1rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--green); text-underline-offset: .16em; }
+    @media (max-width: 39rem) { .views { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>Two arrows, one area limit</h1>
+    <p class="intro">Keep one arrow fixed and move the other among eight positions of the same length. The area changes, and so do the primes for which the arrows can reach only a line of targets.</p>
+
+    <div class="controls">
+      <label for="tip">Second arrow tip
+        <select id="tip">
+          <option value="0">(2, 1)</option><option value="1" selected>(1, 2)</option>
+          <option value="2">(−1, 2)</option><option value="3">(−2, 1)</option>
+          <option value="4">(−2, −1)</option><option value="5">(−1, −2)</option>
+          <option value="6">(1, −2)</option><option value="7">(2, −1)</option>
+        </select>
+      </label>
+      <button id="next" type="button">Move to next tip</button>
+      <label for="prime">Prime to wrap by
+        <select id="prime">
+          <option value="2">Mod 2</option><option value="3">Mod 3</option>
+          <option value="5" selected>Mod 5</option><option value="7">Mod 7</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="views">
+      <figure>
+        <h2>Area on the integer grid</h2>
+        <canvas class="square" id="geometry" role="img" aria-label="Two arrows and their parallelogram"></canvas>
+        <figcaption><span class="u">First arrow (2, 1)</span> · <span class="v" id="second">Second arrow (1, 2)</span></figcaption>
+        <p class="result" id="area" aria-live="polite"></p>
+      </figure>
+      <figure>
+        <h2>Targets after wrapping</h2>
+        <div class="residue square" id="residues" role="img" aria-label="Reachable residue pairs"></div>
+        <figcaption>Add whole-number multiples of the arrows to reach the green targets, wrapping each coordinate. In mod 5, 6 wraps to 1 and −1 wraps to 4.</figcaption>
+        <p class="result" id="coverage" aria-live="polite"></p>
+      </figure>
+    </div>
+
+    <p>Both arrows have length √5, so their parallelogram has area at most 5. A nonzero determinant divisible by both 2 and 3 would have magnitude at least 6. The arrows are too short for that to happen. Try a nonzero area and switch to mod 7. Every target is reachable because 7 cannot divide an area this small.</p>
+
+    <details>
+      <summary>Why area decides which primes work</summary>
+      <p>The area is the absolute value of the determinant of the two columns. Over a prime field, a nonzero determinant gives a unique solution for every target. When the determinant vanishes, the two arrows point along the same line in that field. The first arrow remains nonzero for every prime here, so the line has exactly <var>p</var> targets out of <var>p</var>². Over the integers the arrows with zero area already lie on a line.</p>
+      <p>For nonzero area, the determinant’s magnitude is the index of the lattice generated by the arrows. It counts how many distinct classes of integer points remain when points differing by combinations of the arrows are put in the same class. The volume bound generalizes to larger matrices as Hadamard’s inequality. The zeta proof uses a lattice comparison to combine divisibility with separate size estimates. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=32">Rubinstein, Part II §2</a> · <a href="prime_rank_drop.html">Try the same test on binary boards</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const tips = [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]];
+      const tip = document.getElementById('tip');
+      const prime = document.getElementById('prime');
+      const second = document.getElementById('second');
+      const area = document.getElementById('area');
+      const coverage = document.getElementById('coverage');
+      const residues = document.getElementById('residues');
+      const canvas = document.getElementById('geometry');
+      const context = canvas.getContext('2d');
+      const pale = '#d5dbcf';
+      const green = '#26664f';
+      const blue = '#245e85';
+      const pair = ([a, b]) => `(${a}, ${b})`.replaceAll('-', '−');
+
+      function draw([a, b]) {
+        if (!context) return;
+        const pixels = canvas.clientWidth;
+        const density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(pixels * density);
+        canvas.height = canvas.width;
+        context.setTransform(density, 0, 0, density, 0, 0);
+        const step = pixels / 10;
+        const center = pixels / 2;
+        const screen = ([x, y]) => [center + step*x, center - step*y];
+        const origin = [0, 0];
+        const first = [2, 1];
+        const current = [a, b];
+
+        function path(points) {
+          context.beginPath();
+          context.moveTo(...screen(points[0]));
+          for (const point of points.slice(1)) context.lineTo(...screen(point));
+        }
+        for (let line = -5; line <= 5; line++) {
+          context.strokeStyle = line === 0 ? '#91a095' : pale;
+          context.lineWidth = 1;
+          path([[line, -5], [line, 5]]);
+          context.stroke();
+          path([[-5, line], [5, line]]);
+          context.stroke();
+        }
+        path([origin, first, [2 + a, 1 + b], current]);
+        context.closePath();
+        context.fillStyle = '#89afac60';
+        context.strokeStyle = '#68918b';
+        context.fill();
+        context.stroke();
+
+        for (const point of tips) {
+          context.beginPath();
+          context.arc(...screen(point), 3, 0, 2 * Math.PI);
+          context.fillStyle = '#8d9c91';
+          context.fill();
+        }
+
+        for (const [point, ink, width] of [[first, green, 5], [current, blue, 3]]) {
+          path([origin, point]);
+          context.strokeStyle = ink;
+          context.lineWidth = width;
+          context.stroke();
+          const [x, y] = screen(point);
+          const angle = Math.atan2(y - center, x - center);
+          context.beginPath();
+          context.moveTo(x, y);
+          for (const side of [angle - .5, angle + .5]) {
+            context.lineTo(x - (9 + width) * Math.cos(side), y - (9 + width) * Math.sin(side));
+          }
+          context.closePath();
+          context.fillStyle = ink;
+          context.fill();
+        }
+      }
+
+      function render() {
+        const [a, b] = tips[Number(tip.value)];
+        const p = Number(prime.value);
+        const determinant = 2*b - a;
+        const magnitude = Math.abs(determinant);
+        const mod = n => ((n % p) + p) % p;
+        const coordinate = (x, y) => y*p + x;
+        const hits = new Set();
+        for (let i = 0; i < p; i++) {
+          for (let j = 0; j < p; j++) hits.add(coordinate(mod(2*i + a*j), mod(i + b*j)));
+        }
+        second.textContent = `Second arrow ${pair([a, b])}`;
+        area.textContent = `Area ${magnitude} of at most 5.`;
+        coverage.textContent = `${hits.size} of ${p*p} targets reachable.`;
+        canvas.setAttribute('aria-label', `Integer grid with arrows (2, 1) and ${pair([a,b])}; parallelogram area ${magnitude}.`);
+        residues.setAttribute('aria-label', `${hits.size} of ${p*p} targets reachable modulo ${p}.`);
+        residues.style.gridTemplateColumns = `repeat(${p}, minmax(0, 1fr))`;
+        const cells = [];
+        for (let y = p - 1; y >= 0; y--) {
+          for (let x = 0; x < p; x++) {
+            const cell = document.createElement('span');
+            if (hits.has(coordinate(x, y))) cell.classList.add('reachable');
+            if (x === 0 && y === 0) cell.classList.add('origin');
+            cell.title = `(${x}, ${y})`;
+            cell.setAttribute('aria-hidden', 'true');
+            cells.push(cell);
+          }
+        }
+        residues.replaceChildren(...cells);
+        draw([a, b]);
+      }
+
+      tip.addEventListener('change', render);
+      prime.addEventListener('change', render);
+      document.getElementById('next').addEventListener('click', () => {
+        tip.value = (Number(tip.value) + 1) % tips.length;
+        render();
+      });
+      new ResizeObserver(() => draw(tips[Number(tip.value)])).observe(canvas);
+      render();
+    })();
+  </script>
+</body>
+</html>

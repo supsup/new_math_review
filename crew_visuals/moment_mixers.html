@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choose the wires by their moments</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf8ed;
+      --ink: #342e25;
+      --muted: #605b50;
+      --green: #2c6b4d;
+      --ochre: #8d5631;
+      --edge: #d4cbbc;
+      background: #eae8de;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 59rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    h1 { font: clamp(2.55rem, 8vw, 4.65rem)/1.04 Georgia, serif; letter-spacing: -.046em; margin: .55rem 0 .7rem; }
+    p { max-width: 68ch; }
+    .intro, caption { color: var(--muted); }
+    .control { display: flex; gap: .35rem .75rem; flex-wrap: wrap; align-items: center; margin: 1rem 0 .8rem; }
+    label { font-weight: 650; }
+    select, button { min-height: 2.65rem; font: inherit; color: var(--ink); background: #f0f1e7; border: 1px solid var(--edge); border-radius: .3rem; padding: .3rem .6rem; }
+    button { cursor: pointer; }
+    :focus-visible { outline: .17rem solid var(--ochre); outline-offset: .15rem; }
+    .moments { display: grid; grid-template-columns: repeat(auto-fit, minmax(4.6rem, 1fr)); gap: .38rem; margin: .65rem 0 .9rem; }
+    .moments button { display: grid; justify-items: center; min-width: 0; font-variant-numeric: tabular-nums; }
+    .moments button span { font-size: .83rem; }
+    .moments button.zero { color: var(--green); background: #e3ecdf; }
+    .moments button[aria-pressed="true"] { border-color: var(--ochre); box-shadow: inset 0 -.16rem var(--ochre); font-weight: 650; }
+    .body { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(12rem,1fr); align-items: start; gap: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .91rem; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; margin-bottom: .25rem; }
+    th, td { text-align: right; border-bottom: 1px solid var(--edge); padding: .23rem .38rem; }
+    .readout { border: 1px solid var(--edge); border-radius: .35rem; padding: .7rem .9rem; }
+    .readout p { margin: .15rem 0 .5rem; }
+    #status { font-weight: 650; color: var(--green); }
+    #status[data-zero="false"] { color: var(--ochre); }
+    details { padding-top: .65rem; margin-top: .9rem; border-top: 1px solid var(--edge); }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 40rem) { .body { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="four_loss_mixer.html">Back to cubic recovery</a>
+    <h1>Choose the wires by their moments</h1>
+    <p class="intro">To recover from five lost reports, every report needs at least six wires. Here is a rotating board that reaches six, built by making five consecutive power sums vanish. A second board tolerates six losses on seven wires. Try the moments to see the missing modes.</p>
+    <div class="control">
+      <label for="board">Board</label>
+      <select id="board"><option value="4229">Five losses · mod 4,229</option><option value="261587">Six losses · mod 261,587</option></select>
+    </div>
+    <div id="moments" class="moments" role="group" aria-label="Select a power sum"></div>
+    <div class="body">
+      <table>
+        <caption>Every report connects to these offsets on the circle.</caption>
+        <thead><tr><th scope="col">Offset <var>k</var></th><th scope="col">Address 2<sup><var>k</var></sup></th><th scope="col" id="term-heading">Address cubed</th></tr></thead>
+        <tbody id="taps"></tbody>
+      </table>
+      <div class="readout">
+        <p id="board-size"></p>
+        <p id="eigenvalue"></p>
+        <p id="status" aria-live="polite"></p>
+        <p>Each moment adds the values in the last column and takes the remainder. A zero means that mode is invisible to the mixer.</p>
+      </div>
+    </div>
+    <p>These boards have exactly <var>r</var> invisible modes in one consecutive run. They give an ambiguity described by a polynomial of degree below <var>r</var>. Any <var>r</var> distinct direct inputs sample it at distinct addresses, which determine it. Reversing the circle swaps inputs and reports, so removing any <var>r</var> reports leaves exactly that same ambiguity.</p>
+    <details>
+      <summary>Make the moments vanish by design</summary>
+      <p>We first look for <var>d</var> addresses <var>u</var><sub>1</sub>, …, <var>u</var><sub><var>d</var></sub> with power sums <var>S</var><sub><var>j</var></sub> = ∑ <var>u</var><sub><var>i</var></sub><sup><var>j</var></sup>. Let <var>E</var>(<var>t</var>) = ∏(1 + <var>u</var><sub><var>i</var></sub><var>t</var>). Its logarithmic derivative has coefficients <var>S</var><sub>1</sub> − <var>S</var><sub>2</sub><var>t</var> + <var>S</var><sub>3</sub><var>t</var>² − ⋯. To make the terms from degree 2 through <var>d</var> vanish, we want <var>E</var>′(<var>t</var>) = (1 − <var>b</var><var>t</var>)<var>E</var>(<var>t</var>) through degree <var>d</var>.</p>
+      <p>Write the coefficients of <var>E</var> as <var>h</var><sub><var>j</var></sub>/<var>j</var>!. Start with <var>h</var><sub>0</sub> = <var>h</var><sub>1</sub> = 1 and use <var>h</var><sub><var>j</var>+1</sub> = <var>h</var><sub><var>j</var></sub> − <var>jb</var><var>h</var><sub><var>j</var>−1</sub>. Choose <var>b</var> so <var>h</var><sub><var>d</var>+1</sub> = 0. Then solve for the <var>u</var><sub><var>i</var></sub> using the elementary coefficients of the monic polynomial ∏(<var>X</var> − <var>u</var><sub><var>i</var></sub>). We use <var>b</var> = 2,534 for the six wires and <var>b</var> = 120,498 for the seven. In these fields the addresses are distinct and nonzero.</p>
+      <p>Divide all the addresses by one of them so the first wire has offset zero. This only rescales each moment, so it preserves the zeros. Since 2 generates the nonzero residues in both fields, every address is a unique power of 2 and gives an offset. The exact replay checks that each prescribed run gives all the modular zeros, and that each full board is invertible over the rationals. <a href="../tools/check_moment_mixers.py">The exact replay</a></p>
+      <p>For an input sequence <var>x</var><sub><var>i</var></sub> = <var>z</var><sup><var>i</var></sup>, report <var>i</var> equals <var>z</var><sup><var>i</var></sup> times the sum of <var>z</var><sup><var>k</var></sup> over the offsets <var>k</var>. At mode <var>z</var> = 2<sup><var>j</var></sup> that sum is precisely the displayed power sum, so a zero makes the whole sequence invisible.</p>
+    </details>
+    <details>
+      <summary>Why the number of wires is optimal</summary>
+      <p>Any <var>r</var> direct coordinates of an invisible change are independent. A report with at most <var>r</var> wires would impose an equation among those same coordinates. So every report needs at least <var>r</var> + 1 wires. Marlow’s <a href="five_loss_mixer.txt">quartic mixer note</a> gives a much smaller five-loss board with seven wires per report and a second six-wire construction from a different exponential series.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const cases = new Map([
+        [4229, [0, 93, 231, 298, 708, 4088]],
+        [261587, [0, 155820, 162656, 176918, 194813, 246353, 256525]]
+      ]);
+      const byId = id => document.getElementById(id);
+      const board = byId('board'), moments = byId('moments'), taps = byId('taps');
+      let selected = 3;
+
+      function power(base, exponent, prime) {
+        let result = 1;
+        while (exponent > 0) {
+          if (exponent % 2) result = result*base % prime;
+          base = base*base % prime;
+          exponent = Math.floor(exponent / 2);
+        }
+        return result;
+      }
+
+      const display = value => value.toLocaleString('en-US');
+      function update() {
+        const prime = Number(board.value), offsets = cases.get(prime);
+        const addresses = offsets.map(k => power(2, k, prime));
+        const contributions = addresses.map(address => power(address, selected, prime));
+        const sum = (terms, exponent) => terms.reduce((value, a) => (value + power(a, exponent, prime)) % prime, 0);
+
+        if (moments.children.length !== offsets.length + 3) {
+          moments.replaceChildren();
+          for (let j = 0; j <= offsets.length + 2; j++) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            const label = document.createElement('span');
+            const value = document.createElement('strong');
+            label.textContent = 'Moment ' + j;
+            button.append(label, value);
+            button.addEventListener('click', () => { selected = j; update(); });
+            moments.append(button);
+          }
+        }
+        for (const [j, button] of Array.from(moments.children).entries()) {
+          const value = sum(addresses,j);
+          button.lastChild.textContent = display(value);
+          button.classList.toggle('zero', value === 0);
+          button.setAttribute('aria-pressed', j === selected);
+        }
+        taps.replaceChildren();
+        offsets.forEach((offset, i) => {
+          const row = taps.insertRow();
+          for (const value of [offset, addresses[i], contributions[i]]) row.insertCell().textContent = display(value);
+        });
+        const total = sum(addresses,selected);
+        byId('term-heading').textContent = 'Power ' + selected;
+        byId('board-size').textContent = display(prime - 1) + ' inputs, ' + offsets.length + ' wires per report';
+        byId('eigenvalue').textContent = 'Mode address 2^' + selected + ' ≡ ' + display(power(2,selected,prime));
+        const status = byId('status');
+        status.dataset.zero = total === 0;
+        status.textContent = 'Moment ' + selected + ' ≡ ' + display(total) + (total === 0 ? '. The mode vanishes.' : '. The mode remains visible.');
+      }
+      board.addEventListener('change', () => { selected = 3; update(); });
+      update();
+    })();
+  </script>
+</body>
+</html>

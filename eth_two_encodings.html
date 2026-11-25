@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>One SAT puzzle, two machine inputs</title>
+<style>
+  :root {
+    --ink: #243044;
+    --soft: #52627a;
+    --paper: #fbfdff;
+    --rule: #bdcbd8;
+    --a: #685190;
+    --a-pale: #eee9fb;
+    --b: #15675e;
+    --b-pale: #e3f4ed;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+    background: #edf3f8;
+    font: 16px/1.5 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 64rem); margin: auto; padding: 2.4rem 0; }
+  h1, h2, p { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.07; letter-spacing: -.04em; }
+  h1 { max-width: 15ch; font-size: clamp(2.55rem, 8vw, 5.1rem); }
+  h2 { font-size: 1.65rem; }
+  .intro { max-width: 42rem; margin-top: .7rem; color: var(--soft); }
+  .formula-box, .tape {
+    margin-top: 1.2rem;
+    padding: clamp(.9rem, 3vw, 1.35rem);
+    border: 1px solid var(--rule);
+    border-radius: .75rem;
+    background: var(--paper);
+  }
+  .controls { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: .75rem 1.25rem; }
+  label, .note, .bit-name { color: var(--soft); font-size: .87rem; }
+  select, input { display: block; width: 100%; min-width: 0; margin-top: .35rem; }
+  select { padding: .5rem; font: inherit; color: inherit; border: 1px solid var(--rule); border-radius: .35rem; background: var(--paper); }
+  input { accent-color: var(--a); }
+  :focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .width-label { display: flex; justify-content: space-between; gap: .5rem; }
+  .formula { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .8rem 0 .45rem; }
+  .clause { padding: .4rem .55rem; border-radius: .35rem; background: #e7edf5; font: .88rem var(--mono); }
+  #count { color: var(--b); }
+  .tapes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .tape { --accent: var(--a); --tint: var(--a-pale); }
+  .tape + .tape { --accent: var(--b); --tint: var(--b-pale); }
+  .tape .note { margin-top: .45rem; }
+  .total { color: var(--accent); margin-top: .75rem; }
+  .sections { display: grid; gap: .7rem; margin-top: .65rem; }
+  .bit-group { padding: .45rem .55rem; border-radius: .35rem; background: var(--tint); }
+  .bit-name { display: block; margin-bottom: .25rem; color: var(--accent); }
+  .bits { display: block; overflow-wrap: anywhere; font: .86rem/1.4 var(--mono); letter-spacing: .06em; }
+  #comparison, details { margin: .95rem 0 0; }
+  #comparison { color: var(--soft); }
+  details { padding-top: .75rem; border-top: 1px solid var(--rule); }
+  details p { margin-top: .6rem; color: var(--soft); max-width: 52rem; }
+  summary { cursor: pointer; }
+  #error { margin-top: .75rem; color: #9a4135; }
+  a { color: var(--a); }
+  @media (max-width: 43rem) {
+    main { padding-top: 1.5rem; }
+    .controls, .tapes { grid-template-columns: minmax(0, 1fr); }
+    .tapes { gap: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>One SAT puzzle, two machine inputs</h1>
+    <p class="intro">An encoding determines how many bits the machine receives. The two counting proofs turn the same puzzle into different tapes. Change the width limit and watch which tape changes.</p>
+  </header>
+  <section class="formula-box" aria-label="Pick a Boolean formula">
+    <div class="controls">
+      <div>
+        <label for="puzzle">Puzzle</label>
+        <select id="puzzle">
+          <option value="0">Two short clauses</option>
+          <option value="1">Every clause is a pair</option>
+          <option value="2">Six variables, two clauses</option>
+        </select>
+      </div>
+      <div>
+        <label class="width-label" for="width">Allowed terms per clause <output id="width-value" for="width">3</output></label>
+        <input id="width" type="range" min="3" max="14" step="1" value="3">
+      </div>
+    </div>
+    <div class="formula" id="formula" aria-label="Formula"></div>
+    <p id="count" role="status"></p>
+    <p id="error" role="alert" hidden></p>
+  </section>
+  <div class="tapes">
+    <section class="tape" aria-labelledby="openai-title">
+      <h2 id="openai-title">OpenAI math</h2>
+      <p class="note">The tape starts with the variable count. It sorts the clauses and encodes the literal numbers in unary.</p>
+      <p class="total" id="openai-total"></p>
+      <div class="sections" id="openai-tape"></div>
+    </section>
+    <section class="tape" aria-labelledby="anthropic-title">
+      <h2 id="anthropic-title">Anthropic formal-math</h2>
+      <p class="note">The tape starts with the width limit and variable count. Clauses have fixed-size binary slots, including empty slots.</p>
+      <p class="total" id="anthropic-total"></p>
+      <div class="sections" id="anthropic-tape"></div>
+    </section>
+  </div>
+  <p id="comparison" role="status"></p>
+  <details>
+    <summary>How this connects to the ETH card</summary>
+    <p>OpenAI's selected theorem chooses a machine for each fixed width and gives an explicit polynomial bound on visited tape space. Anthropic's selected counting theorem uses one machine for all widths and gives a time bound in terms of variables and clauses. Both count solutions exactly on the inputs covered by their statements.</p>
+    <p><b>Crew build evidence.</b> On 2026-11-25 UTC, Fixpoint built Anthropic’s ETH project at <code>11b6c7e</code> with Lean 4.33.1. The build completed in 244 seconds (9,768 jobs). Lean’s axiom audit reported only <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code> for both <code>MainResults.ethIsFalse</code> and <code>MainResults.mainTheorem</code>. The crew ran Lean and its axiom audit. The linked Comparator result, from a second checker, comes from Anthropic’s CI. The crew’s OpenAI family 378 check covered the statement. <a href="crew_visuals/lean_runs.txt">Fixpoint’s run record</a> · <a href="https://github.com/anthropics/formal-math/actions/runs/40442388505">Anthropic CI</a></p>
+    <p>The page independently decodes both bit strings and enumerates their satisfying assignments. See the <a href="crew_visuals/eth_two_encodings.md">card text</a>, <a href="https://github.com/openai/math/blob/f5702854040e97fa7675c21ba37a9608f5f92dd3/lean/ComparatorChallenges/SubexponentialSAT.lean#L53">OpenAI encoding</a>, and <a href="https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/MainResults.lean#L73">Anthropic encoding</a>.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+// Literals are signed, one-based variable numbers. The page labels variables from zero.
+const examples = [
+  { variables: 4, clauses: [[1, -4], [2, 3, 4]] },
+  { variables: 4, clauses: [[-1, 4], [-3, 1], [2, 3]] },
+  { variables: 6, clauses: [[1, -2, 6], [-3, 4, 5]] }
+];
+const unary = value => "1".repeat(value) + "0";
+const frame = bits => [...bits].map(bit => "1" + bit).join("") + "0";
+const list = (items, encode) => items.map(item => "1" + frame(encode(item))).join("") + "0";
+const varIndex = literal => Math.abs(literal) - 1;
+const openCode = literal => 2 * varIndex(literal) + Number(literal > 0);
+const antCode = literal => 2 * varIndex(literal) + 1 + Number(literal > 0);
+
+function lex(left, right) {
+  for (let index = 0; index < Math.min(left.length, right.length); index++) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return left.length - right.length;
+}
+
+function openaiTape(example) {
+  const { variables, clauses } = example;
+  const body = clauses.map(rule => rule.map(openCode).sort((a, b) => a - b)).sort(lex);
+  return [
+    { label: "Variable count", bits: unary(variables) },
+    ...body.map((rule, index) => ({ label: "Framed clause " + (index + 1), bits: "1" + frame(list(rule, unary)) })),
+    { label: "End of clauses", bits: "0" }
+  ];
+}
+
+function anthropicTape(example, width) {
+  const { variables, clauses } = example;
+  const slotBits = Math.floor(Math.log2(2 * variables)) + 1;
+  return [
+    { label: "Width limit", bits: unary(width) },
+    { label: "Variable count", bits: unary(variables) },
+    ...clauses.map((rule, index) => ({
+      label: "Clause " + (index + 1) + " · " + (width - rule.length) + " empty slots",
+      bits: Array.from({ length: width }, (_, slot) => {
+        const number = slot < rule.length ? antCode(rule[slot]) : 0;
+        return Array.from({ length: slotBits }, (_, position) => String((number >> position) & 1)).join("");
+      }).join("")
+    }))
+  ];
+}
+
+function reader(bits) {
+  let offset = 0;
+  function take() {
+    if (offset >= bits.length) throw new Error("The input ended unexpectedly.");
+    return Number(bits[offset++]);
+  }
+  function natural() {
+    let value = 0;
+    while (take()) value++;
+    return value;
+  }
+  function framed() {
+    let value = "";
+    while (take()) value += take();
+    return value;
+  }
+  return { take, natural, framed, finished: () => offset === bits.length };
+}
+
+function decodeList(stream, decode) {
+  const items = [];
+  while (stream.take()) items.push(decode(stream.framed()));
+  if (!stream.finished()) throw new Error("Unexpected trailing list bits.");
+  return items;
+}
+
+function decodeOpenAI(word) {
+  const stream = reader(word);
+  const variables = stream.natural();
+  const clauses = decodeList(stream, encodedClause => decodeList(reader(encodedClause), encoded => {
+    const literal = reader(encoded);
+    const code = literal.natural();
+    if (!literal.finished()) throw new Error("Unexpected trailing literal bits.");
+    return (Math.floor(code / 2) + 1) * (code % 2 ? 1 : -1);
+  }));
+  return { variables, clauses };
+}
+
+function decodeAnthropic(word) {
+  const stream = reader(word);
+  const width = stream.natural();
+  const variables = stream.natural();
+  const slotBits = Math.floor(Math.log2(2 * variables)) + 1;
+  const clauses = [];
+  while (!stream.finished()) {
+    const rule = [];
+    for (let position = 0; position < width; position++) {
+      let code = 0;
+      for (let bit = 0; bit < slotBits; bit++) code += stream.take() << bit;
+      if (code) rule.push(Math.ceil(code / 2) * (code % 2 ? -1 : 1));
+    }
+    clauses.push(rule);
+  }
+  return { variables, clauses };
+}
+
+function solutions(example) {
+  const result = [];
+  for (let assignment = 0; assignment < 1 << example.variables; assignment++) {
+    if (example.clauses.every(rule => rule.some(literal =>
+      Boolean(assignment & (1 << varIndex(literal))) === (literal > 0)))) {
+      result.push(assignment);
+    }
+  }
+  return result;
+}
+
+function model(example, width) {
+  const openai = openaiTape(example);
+  const anthropic = anthropicTape(example, width);
+  const concatenate = tape => tape.map(section => section.bits).join("");
+  const words = [concatenate(openai), concatenate(anthropic)];
+  const decoded = [decodeOpenAI(words[0]), decodeAnthropic(words[1])];
+  const expected = solutions(example);
+  const canonical = clauses => clauses.map(rule => [...rule].sort((a, b) => a - b)).sort(lex);
+  const clausesMatch = clauses => JSON.stringify(canonical(clauses)) === JSON.stringify(canonical(example.clauses));
+  if (decoded.some(formula => formula.variables !== example.variables || !clausesMatch(formula.clauses) ||
+      JSON.stringify(solutions(formula)) !== JSON.stringify(expected))) {
+    throw new Error("A decoded puzzle does not match the original.");
+  }
+  return { openai, anthropic, words, count: expected.length };
+}
+
+if (typeof module !== "undefined") module.exports = { examples, model, decodeAnthropic, decodeOpenAI };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const option = byId("puzzle");
+  const widthControl = byId("width");
+  const element = (name, text, className) => {
+    const node = document.createElement(name);
+    if (text) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  const subscript = "₀₁₂₃₄₅₆₇₈₉";
+
+  function renderTape(id, sections, word) {
+    byId(id + "-total").textContent = word.length + " input bits";
+    byId(id + "-tape").replaceChildren(...sections.map(section => {
+      const group = element("div", "", "bit-group");
+      group.append(element("span", section.label, "bit-name"), element("code", section.bits, "bits"));
+      return group;
+    }));
+  }
+
+  function update() {
+    try {
+      const puzzle = examples[Number(option.value)];
+      widthControl.min = Math.max(...puzzle.clauses.map(rule => rule.length));
+      const width = Number(widthControl.value);
+      const result = model(puzzle, width);
+      byId("width-value").value = width;
+      byId("formula").replaceChildren(...puzzle.clauses.flatMap((rule, index) => {
+        const label = rule.map(literal => (literal < 0 ? "not " : "") + "x" + subscript[varIndex(literal)]).join(" or ");
+        const clause = element("span", label, "clause");
+        return index ? [element("span", "and"), clause] : [clause];
+      }));
+      byId("count").textContent = result.count + " satisfying assignments after decoding either tape.";
+      renderTape("openai", result.openai, result.words[0]);
+      renderTape("anthropic", result.anthropic, result.words[1]);
+      byId("comparison").textContent = "Raising the width limit by one leaves OpenAI’s tape alone. " +
+        "It adds " + (puzzle.clauses.length * (Math.floor(Math.log2(2 * puzzle.variables)) + 1) + 1) +
+        " bits to Anthropic’s tape for this puzzle.";
+      byId("error").hidden = true;
+    } catch (error) {
+      byId("error").textContent = error.message;
+      byId("error").hidden = false;
+    }
+  }
+
+  option.addEventListener("change", update);
+  widthControl.addEventListener("input", update);
+  update();
+}
+</script>
+</body>
+</html>

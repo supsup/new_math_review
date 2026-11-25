@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Two readings missing</title>
+<style>
+  :root {
+    --paper: #f4efe6;
+    --surface: #fffdf7;
+    --ink: #213340;
+    --muted: #4b5e67;
+    --rule: #c4d0cc;
+    --blue: #175e77;
+    --blue-light: #d6edf1;
+    --orange: #97442d;
+    --orange-light: #f4dfd4;
+    font: 16px/1.53 system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 72rem); margin: auto; padding: 2rem 0 3rem; }
+  a { color: var(--blue); text-underline-offset: .15em; }
+  h1, h2, p, figure { margin: 0; }
+  h1, h2 { font: 400 clamp(1.5rem, 2.8vw, 2.15rem)/1.1 Georgia, serif; }
+  h1 { font-size: clamp(3rem, 7.8vw, 5.8rem); letter-spacing: -.065em; margin-top: .65rem; }
+  .intro { max-width: 62ch; margin: .75rem 0 1.3rem; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
+  label { font-weight: 650; }
+  select, button { min-height: 2.3rem; background: var(--surface); color: var(--ink); border: 1px solid #849994; border-radius: .35rem; padding: .35rem .5rem; font: inherit; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--blue); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .bench { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; align-items: start; }
+  .panel { padding: .95rem; background: var(--surface); border: 1px solid var(--rule); border-radius: .6rem; }
+  .panel > p, .panel > figcaption { margin-top: .55rem; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .matrix-wrap { position: relative; max-width: 100%; overflow-x: auto; margin-top: .7rem; }
+  table { width: 100%; border-collapse: collapse; text-align: center; font: .86rem ui-monospace, monospace; }
+  td, th { height: 1.8rem; min-width: 1.7rem; padding: .1rem .15rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  table button { min-height: 1.65rem; padding: .12rem .22rem; font: inherit; }
+  .read-value { font-weight: 700; padding-inline: .35rem; }
+  .erased { background: var(--orange-light); color: var(--orange); }
+  .probe { background: var(--blue-light); color: var(--blue); }
+  .wire { display: inline-block; height: .55rem; width: .55rem; border-radius: 50%; background: currentColor; vertical-align: middle; }
+  .erased .wire { background: none; border: 1px solid currentColor; }
+  .plane { display: grid; grid-template-columns: repeat(var(--size), minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 24rem; aspect-ratio: 1; margin: .8rem auto .35rem; }
+  .point { background: #e7e9e1; border-radius: 18%; }
+  .point.valid { background: var(--blue); }
+  .count { font: 700 1.25rem ui-monospace, monospace; color: var(--blue); }
+  .numbers { overflow-wrap: anywhere; font: .9rem/1.7 ui-monospace, monospace; }
+  details { border-top: 1px solid var(--rule); padding-top: .7rem; margin-top: 1.15rem; }
+  details p { margin-top: .55rem; max-width: 73ch; }
+  summary { cursor: pointer; font-weight: 700; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (max-width: 56rem) { .bench { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 38rem) {
+    table { font-size: .75rem; }
+    td, th { min-width: 1.35rem; padding-inline: .11rem; }
+    table button { padding-inline: .18rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a href="mod_seven_twins.html">← Mod Seven Twins</a>
+    <h1>Two readings missing</h1>
+    <p class="intro">Mute any two mixed readings. You can still recover every hidden input by reading any two of the originals directly. Choose the rows to mute and the columns to reveal.</p>
+  </header>
+  <div class="controls">
+    <label for="board">Mixer</label>
+    <select id="board">
+      <option value="11">10 inputs, mod 11</option>
+      <option value="19">18 inputs, mod 19</option>
+    </select>
+    <button type="button" id="hide">Hide direct inputs</button>
+    <button type="button" id="new">New hidden values</button>
+  </div>
+  <noscript><p>JavaScript is needed to change the readings. The mathematical explanation is below.</p></noscript>
+  <div class="bench">
+    <section class="panel" aria-labelledby="wiring-title">
+      <h2 id="wiring-title">Wiring and readings</h2>
+      <p class="muted" id="facts"></p>
+      <div class="matrix-wrap" tabindex="0" role="region" aria-label="Mixer wiring table"><table id="matrix"></table></div>
+      <p class="muted" id="scroll-hint" hidden>Scroll sideways to see all the inputs and readings.</p>
+      <p class="muted">Each dot contributes its column’s input to that row’s sum. The row keeps the remainder. Choosing a third row or column replaces the earliest choice in that group.</p>
+    </section>
+    <figure class="panel" aria-labelledby="plane-title">
+      <h2 id="plane-title">The remaining possibilities</h2>
+      <p class="count" id="count" role="status"></p>
+      <div class="plane" id="plane" role="img"></div>
+      <figcaption class="muted" id="plane-caption"></figcaption>
+      <p class="numbers" id="decoded"></p>
+    </figure>
+  </div>
+  <details>
+    <summary>Why either pair works</summary>
+    <p>The mixed readings leave two freely adjustable values. Draw every possible pair of those values as a dot on a square grid. A direct reading restricts the dot to a line. Any two direct readings give lines with different directions, and over a prime field they intersect in exactly one dot.</p>
+    <p>The same condition holds when rows and columns are exchanged. It says the mixed readings have two independent relations and any two missing readings can be recovered from them. Therefore losing two rows leaves exactly the same space of possible originals.</p>
+  </details>
+  <details>
+    <summary>Why mod 11 is the first prime that works</summary>
+    <p>Each direct reading has a direction in the two-dimensional space of possible changes. There are only <em>p</em> + 1 directions mod <em>p</em>, so at most <em>p</em> + 1 inputs can all work in pairs. Losing two dimensions modulo <em>p</em> also makes the ordinary determinant divisible by <em>p</em><sup>2</sup>. The largest binary determinants at sizes 3, 4 and 6 are 2, 3 and 9, which rules out primes 2, 3 and 5. At size 8 the largest is 56 and 49 is missing from the complete list, which rules out mod 7. An identity block pads smaller matrices without changing their determinant. <a href="https://poincare.matf.bg.ac.rs/~ezivkovm/publications/01classif.pdf">Živković’s determinant spectrum in Table 2</a></p>
+    <p>For mod 11 the size-9 spectrum has maximum 144 and omits 121. The displayed 10-input board has determinant 121 and passes all 2,025 choices of two missing rows and two direct readings. Ten is the minimum size.</p>
+    <p>The mod-19 board is circular. Row <em>i</em> reads inputs <em>i</em>, <em>i</em> + 1, <em>i</em> + 5 and <em>i</em> + 7, wrapping at 18. Among the eighteenth roots modulo 19, the polynomial <code>1 + t + t⁵ + t⁷</code> vanishes just at 13 and 16. The kernel is spanned by the corresponding geometric progressions. Their ratio 2 generates all nonzero residues mod 19, so every pair of coordinate directions is distinct. Transposition reverses the circular order.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const small = ["1011010111", "0100111100", "1000001011", "1110001101", "0111101011",
+  "0110010010", "1110110001", "1101011011", "1010111000", "1100100110"];
+
+function mixer(prime) {
+  if (prime === 11) return small.map(row => [...row].map(Number));
+  return Array.from({length: 18}, (_, i) => Array.from({length: 18}, (_, j) =>
+    Number([0, 1, 5, 7].includes((j - i + 18) % 18))));
+}
+
+function remainder(value, prime) {
+  return (value % prime + prime) % prime;
+}
+
+function readingsFor(matrix, inputs, prime) {
+  return matrix.map(row => remainder(row.reduce((sum, value, j) => sum + value * inputs[j], 0), prime));
+}
+
+function solutionPlane(matrix, readings, missing, prime) {
+  const size = matrix.length;
+  const rows = matrix.flatMap((row, i) => missing.includes(i) ? [] : [[...row, readings[i]]]);
+  const columns = matrix[0].map((_, j) => j);
+  const pivots = [];
+  for (const column of columns) {
+    const rank = pivots.length;
+    const pivot = rows.findIndex((row, i) => i >= rank && row[column] !== 0);
+    if (pivot < 0) continue;
+    [rows[pivot], rows[rank]] = [rows[rank], rows[pivot]];
+    const value = rows[rank][column];
+    const inverse = Array.from({length: prime - 1}, (_, i) => i + 1).find(i => i * value % prime === 1);
+    rows[rank] = rows[rank].map(cell => remainder(cell * inverse, prime));
+    for (const [i, row] of rows.entries()) {
+      if (i === rank || !row[column]) continue;
+      rows[i] = row.map((cell, j) => remainder(cell - row[column] * rows[rank][j], prime));
+    }
+    pivots.push(column);
+  }
+  const free = columns.filter(column => !pivots.includes(column));
+  if (free.length !== 2 || rows.slice(pivots.length).some(row => row[size])) throw new Error("Invalid plane of inputs");
+  return Array.from({length: prime * prime}, (_, index) => {
+    const u = index % prime;
+    const v = Math.floor(index / prime);
+    const values = Array(size).fill(0);
+    values[free[0]] = u;
+    values[free[1]] = v;
+    for (const [i, column] of pivots.entries()) {
+      const row = rows[i];
+      values[column] = remainder(row[size] - row[free[0]] * u - row[free[1]] * v, prime);
+    }
+    return values;
+  });
+}
+
+if (typeof module !== "undefined") module.exports = {mixer, readingsFor, solutionPlane};
+
+if (typeof document !== "undefined") {
+  const get = id => document.getElementById(id);
+  let prime, matrix, inputs, missing, probes;
+
+  function reset() {
+    prime = Number(get("board").value);
+    matrix = mixer(prime);
+    inputs = matrix.map((_, i) => (i * i + 2 * i + 3) % prime);
+    missing = [0, matrix.length - 1];
+    probes = [];
+    render();
+  }
+
+  function toggle(list, index) {
+    if (list.includes(index)) return list.filter(i => i !== index);
+    return [...list, index].slice(-2);
+  }
+
+  function showScrollHint() {
+    const wrapper = get("matrix").parentElement;
+    get("scroll-hint").hidden = wrapper.scrollWidth <= wrapper.clientWidth;
+  }
+
+  function render() {
+    const readings = readingsFor(matrix, inputs, prime);
+    const possible = solutionPlane(matrix, readings, missing, prime);
+    const matches = possible.map(candidate => probes.every(j => candidate[j] === inputs[j]));
+    const count = matches.filter(Boolean).length;
+    const wires = matrix.flat().filter(Boolean).length;
+    get("facts").textContent = wires + " connections · ordinary determinant " + (prime === 11 ? "121" : "−20,216");
+
+    const choice = (kind, index, on) => '<button type="button" data-' + kind + '="' + index
+      + '" aria-pressed="' + on + '" aria-label="' + (kind === "probe" ? "Direct input " : "Mute mixed reading ")
+      + (index + 1) + '">' + (index + 1) + '</button>';
+    const columns = matrix[0].map((_, j) => '<th scope="col"' + (probes.includes(j) ? ' class="probe"' : '')
+      + '>' + choice("probe", j, probes.includes(j)) + '</th>').join("");
+    const rows = matrix.map((row, i) => {
+      const muted = missing.includes(i);
+      return '<tr' + (muted ? ' class="erased"' : '') + '><th scope="row">' + choice("missing", i, muted) + '</th>'
+        + row.map(value => value ? '<td><span class="wire" aria-hidden="true"></span><span class="sr">Connected</span></td>'
+          : '<td></td>').join("") + '<td class="read-value">' + (muted ? "Lost" : readings[i]) + '</td></tr>';
+    }).join("");
+    const direct = inputs.map((value, j) => probes.includes(j) ? '<td class="probe read-value">' + value + '</td>' : '<td></td>').join("");
+    get("matrix").innerHTML = '<caption class="sr">Rows select missing readings, columns select visible inputs.</caption>'
+      + '<thead><tr><th scope="col">Mix</th>' + columns + '<th scope="col">Value</th></tr></thead><tbody>' + rows
+      + '</tbody><tfoot><tr><th scope="row">Direct</th>' + direct + '<td></td></tr></tfoot>';
+
+    const plane = get("plane");
+    plane.style.setProperty("--size", prime);
+    plane.innerHTML = matches.map(match => '<span aria-hidden="true" class="point' + (match ? " valid" : "") + '"></span>').join("");
+    plane.setAttribute("aria-label", count + " compatible points out of " + possible.length);
+    get("count").textContent = count === 1 ? "1 possible original" : count + " possible originals";
+    get("plane-caption").textContent = [
+      "Each blue dot is a different input vector with the same visible mixed readings.",
+      "One direct reading leaves a line of possibilities, wrapped around the grid.",
+      "Two direct readings leave one intersection."
+    ][probes.length];
+    get("decoded").textContent = count === 1 ? "Recovered inputs " + possible[matches.indexOf(true)].join(" · ") : "";
+    showScrollHint();
+  }
+
+  get("board").addEventListener("change", reset);
+  get("new").addEventListener("click", () => {
+    inputs = inputs.map(() => Math.floor(Math.random() * prime));
+    render();
+  });
+  get("hide").addEventListener("click", () => {
+    probes = [];
+    render();
+  });
+  get("matrix").addEventListener("click", event => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    const kind = button.hasAttribute("data-probe") ? "probe" : "missing";
+    const index = Number(button.dataset[kind]);
+    if (kind === "probe") probes = toggle(probes, index);
+    else missing = toggle(missing, index);
+    render();
+    get("matrix").querySelector('[data-' + kind + '="' + index + '"]').focus();
+  });
+  window.addEventListener("resize", showScrollHint);
+  reset();
+}
+</script>
+</body>
+</html>

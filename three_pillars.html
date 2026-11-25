@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three Pillars</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; cursor: pointer; touch-action: manipulation; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 860px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 76px; overflow: auto; font-size: 14.5px;
+    line-height: 1.38; color: var(--ink); }
+  #state b { color: var(--accent); font-weight: normal; }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p { font-size: 12px; }
+    #state { height: 104px; bottom: 92px; font-size: 13px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Three stone pillars labelled ETH, 3SUM and APSP, each carrying stones that stand for problems whose hardness was proved from that belief. Knocking a pillar lowers it: some stones ride down with it, others are left hanging in the air."></canvas>
+<div id="hud">
+  <h1>Three pillars</h1>
+  <p>Much of computer science stands on three unproven beliefs: three simple problems cannot be solved much faster than the obvious way.
+  Each stone is a related problem. In autumn 2026 all three beliefs were claimed false. Knock on a pillar.
+  <span class="teal">Teal stones ride down with it</span>: a known reduction turns the faster method into a faster method for them.
+  <span class="gold">Gold stones are left hanging</span>: they were only ever shown hard <em>assuming</em> the belief, so that argument is gone, and nobody has made them fast. Height is difficulty. Tap any stone.</p>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button id="bEth" aria-pressed="false">Knock ETH</button>
+  <button id="bSum" aria-pressed="false">Knock 3SUM</button>
+  <button id="bApsp" aria-pressed="false">Knock APSP</button>
+  <button id="bAll">Knock all three</button>
+  <button id="bReset">Rebuild</button>
+  <button id="bStep">Next stone</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const MODEL = (function () {
+  const fail = [];
+  // The three claims, as read on 2026-11-24. Exponents are the sources' own numbers.
+  const PILLARS = [
+    { id: "eth", name: "ETH", need: "needs 2^(δn)", now: "claimed 2^o(n)",
+      what: "the belief that 3-SAT, the standard hard puzzle on n yes/no variables, cannot be solved in much fewer than 2^n steps",
+      claim: "Claimed false twice on 26 Oct 2026: the exponent grows more slowly than n",
+      src: "openai/math family 378; anthropics/formal-math eth (its Lean states that ETH fails)" },
+    { id: "sum", name: "3SUM", need: "needs n²", now: "claimed n^1.9992",
+      what: "given n integers, negative ones included, do any three add up to zero? Believed to need about n² steps",
+      claim: "Claimed: n^1.9992 steps, for integers of polynomial size on a word RAM",
+      src: "Alman and Vassilevska Williams, arXiv:2610.06783; Lean in anthropics/formal-math 11b6c7e, 3sum-apsp, Theorem 22" },
+    { id: "apsp", name: "APSP", need: "needs n³", now: "claimed n^2.99942",
+      what: "the shortest route between every pair of n places. Believed to need about n³ steps",
+      claim: "Claimed: n^2.99942 steps, for integer road lengths of polynomial size with no round trip of negative length, on a word RAM",
+      src: "the same paper and Lean project (11b6c7e), Theorem 22" }
+  ];
+  // kind "down": the problem reduces to the pillar's problem, so a faster pillar makes it faster.
+  // kind "hang": its lower bound ASSUMED the belief; without the belief the bound is unproved, and no fast method follows.
+  // Standard results, named with their year, recalled from the literature and not re-checked for this page.
+  const STONES = [
+    { p: "eth", lvl: "eth", kind: "down", short: "3-Colouring", tiny: "3-Colour",
+      plain: "Colouring a map with three colours, with its cousins Independent Set and Vertex Cover. These stand or fall together with 3-SAT.",
+      cite: "Impagliazzo, Paturi and Zane, 2001" },
+    { p: "eth", lvl: "eth", kind: "hang", short: "k-Clique", tiny: "k-Clique",
+      plain: "Finding k people who all know each other. ETH was used to rule out any method whose exponent grows more slowly than k.",
+      cite: "Chen, Huang, Kanj and Xia, 2006" },
+    { p: "eth", lvl: "slab", kind: "hang", short: "SETH: the same belief, stronger", tiny: "SETH", wide: true,
+      plain: "SETH says SAT with long clauses is as slow as trying every answer. It is a stronger belief than ETH, so if ETH is false, SETH is false too. The five stones above rest on it.",
+      cite: "Impagliazzo and Paturi, 2001" },
+    { p: "eth", lvl: "seth", kind: "hang", short: "Edit distance", tiny: "Edit dist.",
+      plain: "How many edits turn one text into another. The proof that this needs about n² steps assumed SETH.",
+      cite: "Backurs and Indyk, 2015" },
+    { p: "eth", lvl: "seth", kind: "hang", short: "Common subsequence", tiny: "LCS",
+      plain: "The longest sequence two texts share, the heart of file comparison. Its n² barrier assumed SETH.",
+      cite: "Abboud, Backurs and Vassilevska Williams; Bringmann and Künnemann, 2015" },
+    { p: "eth", lvl: "seth", kind: "hang", short: "Orthogonal vectors", tiny: "Orth. vec.",
+      plain: "Among n lists of 0s and 1s, find two that never both have a 1. Its n² barrier assumed SETH.",
+      cite: "Williams, 2005" },
+    { p: "eth", lvl: "seth", kind: "hang", short: "Network diameter", tiny: "Diameter",
+      plain: "The longest shortest route in a sparse network. The proof that it cannot be estimated well in near-linear time assumed SETH.",
+      cite: "Roditty and Vassilevska Williams, 2013" },
+    { p: "eth", lvl: "seth", kind: "hang", short: "Fréchet distance", tiny: "Fréchet",
+      plain: "How far apart two curves are, as a walker and a dog on a lead. Its n² barrier assumed SETH.",
+      cite: "Bringmann, 2014" },
+
+    { p: "sum", lvl: "base", kind: "down", short: "Convolution 3SUM", tiny: "Conv. 3SUM",
+      plain: "3SUM where the positions must add up too. Pack each position into its number and it becomes ordinary 3SUM, so it gets the same speed-up.",
+      cite: "Pătraşcu, 2010" },
+    { p: "sum", lvl: "base", kind: "hang", short: "3 points on a line", tiny: "3 on a line",
+      plain: "Are any three of n points exactly in a line? The proof that this needs about n² steps assumed the 3SUM belief.",
+      cite: "Gajentaan and Overmars, 1995" },
+    { p: "sum", lvl: "base", kind: "hang", short: "Listing triangles", tiny: "Triangles",
+      plain: "Listing the triangles of a network. Its barrier assumed the 3SUM belief.",
+      cite: "Pătraşcu, 2010" },
+    { p: "sum", lvl: "base", kind: "hang", short: "Changing networks", tiny: "Dynamic",
+      plain: "Keeping answers up to date while a network changes. Several barriers here assumed the 3SUM belief.",
+      cite: "Pătraşcu, 2010; Abboud and Vassilevska Williams, 2014" },
+
+    { p: "apsp", lvl: "base", kind: "down", short: "(min,+) product", tiny: "(min,+)",
+      plain: "The matrix product behind shortest routes. The Lean file states this bound directly.",
+      cite: "Alman and Vassilevska Williams, 2026" },
+    { p: "apsp", lvl: "base", kind: "down", short: "Negative triangle", tiny: "Neg. tri.",
+      plain: "Is there a three-step loop that costs less than nothing? It is equivalent to APSP for breaking the n³ barrier, so it gets faster too.",
+      cite: "Vassilevska Williams and Williams, 2010" },
+    { p: "apsp", lvl: "base", kind: "down", short: "Radius and median", tiny: "Radius",
+      plain: "The most central place in a network. Equivalent to APSP for breaking the n³ barrier, so it gets faster too.",
+      cite: "Abboud, Grandoni and Vassilevska Williams, 2015" },
+    { p: "apsp", lvl: "base", kind: "down", short: "Lightest cycle", tiny: "Min cycle",
+      plain: "The cheapest round trip in a network. Equivalent to APSP for breaking the n³ barrier, so it gets faster too.",
+      cite: "Vassilevska Williams and Williams, 2010" },
+    { p: "apsp", lvl: "base", kind: "down", short: "Second-shortest path", tiny: "2nd path",
+      plain: "The second-shortest route between two places that never visits a place twice. Equivalent to APSP for breaking the n³ barrier, so it gets faster too.",
+      cite: "Vassilevska Williams and Williams, 2010" },
+    { p: "apsp", lvl: "base", kind: "hang", short: "Tree edit distance", tiny: "Tree edit",
+      plain: "How many edits turn one family tree into another. The proof that this needs about n³ steps assumed the APSP belief.",
+      cite: "Bringmann, Gawrychowski, Mozes and Weimann, 2018" }
+  ];
+
+  // structure checks
+  const ids = PILLARS.map(p => p.id);
+  if (new Set(ids).size !== 3) fail.push("pillar ids are not three distinct names");
+  for (const s of STONES) {
+    if (!ids.includes(s.p)) fail.push("stone '" + s.short + "' names no pillar");
+    if (s.kind !== "down" && s.kind !== "hang") fail.push("stone '" + s.short + "' has no kind");
+    if (s.lvl === "seth" && s.kind !== "hang") fail.push("a SETH stone cannot ride down: SETH is only assumed, never solved");
+  }
+  if (new Set(STONES.map(s => s.short)).size !== STONES.length) fail.push("two stones share a name");
+  const slabs = STONES.filter(s => s.lvl === "slab");
+  if (slabs.length !== 1 || slabs[0].p !== "eth") fail.push("SETH must sit on the ETH pillar, once");
+  for (const id of ids) {
+    const mine = STONES.filter(s => s.p === id), firstHang = mine.findIndex(s => s.kind === "hang");
+    if (mine.slice(firstHang).some(s => s.kind === "down")) fail.push("on " + id + ", a stone that rides down sits above one that hangs");
+  }
+
+  // the exponents, as the Lean statement writes them (fractions, because core Lean has no fractional powers)
+  const close = (a, b) => Math.abs(a - b) < 1e-12;
+  if (!close(2499 / 1250, 1.9992)) fail.push("1.9992 is not 2499/1250");
+  if (!close(149971 / 50000, 2.99942)) fail.push("2.99942 is not 149971/50000");
+  if (!(1.9992 < 2 && 2.99942 < 3)) fail.push("a claimed exponent is not below the old one");
+  const save3 = 2 - 1.9992, saveA = 3 - 2.99942;
+
+  // honest scale, constants set to 1:
+  //  3SUM: n^save3 first exceeds (ln n)^2 where  save3 * x = 2 ln x,  x = ln n   (the older savings were powers of log n)
+  let x = 1e4; for (let i = 0; i < 400; i++) x = (2 / save3) * Math.log(x);
+  if (Math.abs(save3 * x - 2 * Math.log(x)) > 1e-9) fail.push("the 3SUM crossover did not converge");
+  const lg3 = x / Math.LN10;
+  if (!(lg3 > 11000 && lg3 < 11020)) fail.push("3SUM crossover out of range: 10^" + lg3.toFixed(0));
+  //  APSP: n^saveA first exceeds 2^sqrt(log2 n) where saveA * L = sqrt(L), L = log2 n  (the older saving was 2^(c sqrt(log n)))
+  const L = Math.pow(1 / saveA, 2), lgA = L * Math.log10(2);
+  if (Math.abs(saveA * L - Math.sqrt(L)) > 1e-6) fail.push("the APSP crossover is wrong");
+  if (!(lgA > 894000 && lgA < 896000)) fail.push("APSP crossover out of range: 10^" + lgA.toFixed(0));
+  const fmt = v => Math.round(v).toLocaleString("en-US");
+  const SCALE = {
+    eth: "In principle only: with the constants in OpenAI's own proof, the new method wins beyond about n = 10^(9.25 billion) (card 378).",
+    sum: "In principle only: with constants set to 1, a saving of n^" + save3.toFixed(4) + " passes a saving of (log n)² at about n = 10^" + fmt(lg3) + ".",
+    apsp: "In principle only: with constants set to 1, a saving of n^" + saveA.toFixed(5) + " passes the older 2^√(log n) saving at about n = 10^" + fmt(lgA) + "."
+  };
+  return { PILLARS, STONES, SCALE, fail };
+})();
+
+/* ---------- the drawing ---------- */
+(function () {
+  const errBox = document.getElementById("err");
+  if (MODEL.fail.length) { errBox.style.display = "block"; errBox.textContent = "Checks failed, nothing drawn: " + MODEL.fail.join("; "); return; }
+  const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  if (!ctx) { errBox.style.display = "block"; errBox.textContent = "This browser gave no 2D canvas."; return; }
+  const stateEl = document.getElementById("state");
+  const still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const COL = { bg: "#0d1020", ink: "#e8e6f2", dim: "#9a98b4", gold: "#f2c14e", teal: "#4fd1c5", stone: "#1c2140", edge: "#39406e", shaft: "#2a3060", shaftHi: "#3a4285", ground: "#39406e" };
+  const P = MODEL.PILLARS, S = MODEL.STONES;
+  const anim = { eth: { k: false, t: 0 }, sum: { k: false, t: 0 }, apsp: { k: false, t: 0 } };
+  let W = 0, H = 0, G = null, sel = null, dust = [], last = 0, clock = 0;
+
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  function bounce(t) { const n = 7.5625, d = 2.75; if (t < 1 / d) return n * t * t; if (t < 2 / d) { t -= 1.5 / d; return n * t * t + 0.75; } if (t < 2.5 / d) { t -= 2.25 / d; return n * t * t + 0.9375; } t -= 2.625 / d; return n * t * t + 0.984375; }
+  const fallOf = id => bounce(clamp01((anim[id].t - 0.25) / 0.75));   // 0 standing .. 1 fully down
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1; W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const hud = document.getElementById("hud").getBoundingClientRect(), stR = stateEl.getBoundingClientRect();
+    const top = hud.bottom + 12, bottom = stR.top - 12, Hs = Math.max(220, bottom - top);
+    const narrow = W < 620, cols = narrow ? 1 : 2, zoneW = W / 3, padX = narrow ? 5 : 16, gap = 6;
+    const groundY = bottom - 10, pillarH = Hs * (narrow ? 0.28 : 0.34), platY = groundY - pillarH, drop = pillarH * 0.62;
+    // rows per pillar: a new row starts whenever the group (kind + level) changes, so groups move as whole rows
+    const rowsOf = {}; let rowsMax = 1;
+    for (const p of P) { let r = -1, c = cols, key = ""; for (const s of S) { if (s.p !== p.id) continue; const k = s.kind + s.lvl; if (k !== key || c >= cols || s.wide) { r++; c = 0; key = k; } s._r = r; s._c = c; c += s.wide ? cols : 1; } rowsOf[p.id] = r + 1; rowsMax = Math.max(rowsMax, r + 1); }
+    const rowH = Math.min(narrow ? 30 : 44, (platY - top - 4) / rowsMax), sH = rowH - 5, sW = (zoneW - 2 * padX - (cols - 1) * gap) / cols;
+    const stackW = cols * sW + (cols - 1) * gap, inRow = {};
+    for (const s of S) if (!s.wide) inRow[s.p + s._r] = (inRow[s.p + s._r] || 0) + 1;
+    P.forEach((p, i) => { p._cx = zoneW * (i + 0.5); p._sw = stackW; p._w = Math.min(stackW * 0.5, 132); });
+    for (const s of S) { const p = P.find(q => q.id === s.p), x0 = p._cx - (cols * sW + (cols - 1) * gap) / 2;
+      s._x = x0 + s._c * (sW + gap) + (s.wide ? 0 : (cols - inRow[s.p + s._r]) * (sW + gap) / 2); s._w = s.wide ? stackW : sW; s._y = platY - (s._r + 1) * rowH; s._h = sH; }
+    G = { top, bottom, groundY, pillarH, platY, drop, zoneW, narrow, sH };
+  }
+
+  function stoneRect(s) {
+    const a = anim[s.p], f = fallOf(s.p);
+    let y = s._y; if (s.kind === "down") y += G.drop * f;
+    else if (f > 0 && !still) y += Math.sin(clock * 1.7 + s._x * 0.05 + s._r) * 2.5 * f - 3 * f;
+    const shake = (a.k && a.t < 0.25 && !still) ? Math.sin(a.t * 110) * 3 * (1 - a.t / 0.25) : 0;
+    return { x: s._x + shake, y, w: s._w, h: s._h };
+  }
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function fitText(txt, alt, w, px) { ctx.font = px + "px Georgia, serif"; if (ctx.measureText(txt).width <= w) return [txt, px]; if (ctx.measureText(alt).width <= w) return [alt, px]; let q = px; while (q > 8 && ctx.measureText(alt).width > w) { q -= 0.5; ctx.font = q + "px Georgia, serif"; } return [alt, q]; }
+
+  function draw() {
+    ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+    // ground
+    ctx.strokeStyle = COL.ground; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(8, G.groundY); ctx.lineTo(W - 8, G.groundY); ctx.stroke();
+    ctx.fillStyle = COL.dim; ctx.font = "11px Georgia, serif"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText("lower = solved faster", 10, G.groundY + 3);
+    for (const p of P) {
+      const a = anim[p.id], f = fallOf(p.id), shake = (a.k && a.t < 0.25 && !still) ? Math.sin(a.t * 110) * 3 * (1 - a.t / 0.25) : 0;
+      const platTop = G.platY + G.drop * f, slabH = Math.max(16, G.sH * 0.8), shaftTop = platTop + slabH, shaftH = Math.max(0, G.groundY - shaftTop), x = p._cx - p._w / 2 + shake;
+      // ghost of where the pillar stood
+      if (f > 0) { ctx.save(); ctx.setLineDash([4, 5]); ctx.strokeStyle = "rgba(154,152,180," + (0.5 * f) + ")"; ctx.lineWidth = 1; ctx.strokeRect(p._cx - p._w / 2, G.platY, p._w, G.groundY - G.platY); ctx.restore(); }
+      // shaft with flutes
+      const g = ctx.createLinearGradient(x, 0, x + p._w, 0); g.addColorStop(0, COL.shaft); g.addColorStop(0.5, COL.shaftHi); g.addColorStop(1, COL.shaft);
+      ctx.fillStyle = g; ctx.fillRect(x + p._w * 0.1, shaftTop, p._w * 0.8, shaftH);
+      ctx.strokeStyle = "rgba(13,16,32,0.55)"; ctx.lineWidth = 1; for (let i = 1; i < 5; i++) { const fx = x + p._w * 0.1 + p._w * 0.8 * i / 5; ctx.beginPath(); ctx.moveTo(fx, shaftTop); ctx.lineTo(fx, G.groundY); ctx.stroke(); }
+      // crack while it is being knocked
+      if (a.k && a.t > 0 && a.t < 0.3) { const k = clamp01(a.t / 0.25); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.beginPath(); let cy = shaftTop, cx = p._cx + shake; ctx.moveTo(cx, cy); for (let i = 1; i <= 8 * k; i++) { cy = shaftTop + shaftH * i / 8; cx = p._cx + shake + ((i % 2) ? 9 : -7); ctx.lineTo(cx, cy); } ctx.stroke(); }
+      // rubble at the foot
+      if (f > 0) { ctx.fillStyle = COL.shaft; for (let i = 0; i < 7; i++) { const rx = p._cx - p._w * 0.62 + i * p._w * 0.2, rh = (6 + (i * 37 % 9)) * f; ctx.beginPath(); ctx.moveTo(rx, G.groundY); ctx.lineTo(rx + 7, G.groundY - rh); ctx.lineTo(rx + 16, G.groundY); ctx.closePath(); ctx.fill(); } }
+      // the slab on top: what is believed, or what is now claimed
+      rr(p._cx - p._sw / 2 + shake, platTop, p._sw, slabH, 3); ctx.fillStyle = f > 0.5 ? "#17393f" : COL.edge; ctx.fill(); ctx.strokeStyle = f > 0.5 ? COL.teal : COL.dim; ctx.lineWidth = 1; ctx.stroke();
+      const lab = fitText(f > 0.5 ? p.now : p.need, f > 0.5 ? p.now.replace("claimed ", "") : p.need.replace("needs ", ""), p._sw - 8, Math.min(13, slabH * 0.62));
+      ctx.fillStyle = f > 0.5 ? COL.teal : COL.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(lab[0], p._cx + shake, platTop + slabH / 2 + 0.5);
+      // the name on the shaft
+      if (shaftH > 18) { ctx.font = Math.min(22, Math.max(12, p._w * 0.2)) + "px Georgia, serif"; ctx.fillStyle = sel === p.id ? COL.gold : COL.ink; ctx.fillText(p.name, p._cx + shake, shaftTop + shaftH / 2); }
+      if (f > 0.9 && shaftH > 40) { ctx.font = "10.5px Georgia, serif"; ctx.fillStyle = COL.gold; ctx.fillText("claimed false", p._cx, shaftTop + shaftH / 2 + 16); }
+      p._hit = { x: p._cx - p._sw / 2, y: platTop, w: p._sw, h: G.groundY - platTop };
+    }
+    // stones
+    S.forEach((s, i) => {
+      const r = stoneRect(s), f = fallOf(s.p), down = s.kind === "down";
+      rr(r.x, r.y, r.w, r.h, 4);
+      if (f <= 0.02) { ctx.fillStyle = s.lvl === "slab" ? COL.edge : COL.stone; ctx.fill(); ctx.setLineDash([]); ctx.strokeStyle = COL.edge; }
+      else if (down) { ctx.fillStyle = "rgba(79,209,197," + (0.10 + 0.10 * f) + ")"; ctx.fill(); ctx.setLineDash([]); ctx.strokeStyle = COL.teal; }
+      else { ctx.fillStyle = "rgba(242,193,78," + (0.07 * f) + ")"; ctx.fill(); ctx.setLineDash([5, 4]); ctx.strokeStyle = COL.gold; }
+      ctx.lineWidth = sel === i ? 2.5 : 1.2; if (sel === i) ctx.strokeStyle = COL.ink; ctx.stroke(); ctx.setLineDash([]);
+      const mark = f > 0.5 ? (down ? "↓ " : "? ") : "";
+      const t = fitText(mark + s.short, mark + s.tiny, r.w - 8, Math.min(14, Math.max(9, r.h * 0.5)));
+      ctx.fillStyle = f > 0.5 ? (down ? COL.teal : COL.gold) : COL.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(t[0], r.x + r.w / 2, r.y + r.h / 2 + 0.5);
+      s._hit = r;
+    });
+    // dust
+    for (const d of dust) { ctx.fillStyle = "rgba(154,152,180," + clamp01(d.life) * 0.6 + ")"; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 6.283); ctx.fill(); }
+  }
+
+  function tick(now) {
+    const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; clock += dt; let moving = dust.length > 0;
+    for (const p of P) { const a = anim[p.id], target = a.k ? 1 : 0;
+      if (a.t !== target) { const before = a.t; a.t = still ? target : (a.k ? Math.min(1, a.t + dt / 1.5) : Math.max(0, a.t - dt / 0.7)); moving = true;
+        if (a.k && before < 0.25 && a.t >= 0.25 && !still) for (let i = 0; i < 26; i++) dust.push({ x: p._cx + (Math.random() - 0.5) * p._w * 1.4, y: G.groundY - Math.random() * 10, vx: (Math.random() - 0.5) * 70, vy: -20 - Math.random() * 60, r: 1.5 + Math.random() * 2.5, life: 1 }); }
+      if (a.k && !still) moving = true;   // hanging stones keep bobbing
+    }
+    for (const d of dust) { d.x += d.vx * dt; d.y += d.vy * dt; d.vy += 60 * dt; d.life -= dt * 0.9; } dust = dust.filter(d => d.life > 0);
+    draw(); if (moving) requestAnimationFrame(tick); else running = false;
+  }
+  let running = false; function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(tick); } }
+
+  function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function say() {
+    if (sel === null) { stateEl.innerHTML = "<i>Knock on a pillar, or tap a stone to read what it is. What each citation covers: every stone names one exact variant and the paper that tied it to the belief. Those are standard results recalled from the literature, not re-checked for this page. The three claims are read from the sources shown when you tap a pillar, for integers of polynomial size.</i>"; return; }
+    if (typeof sel === "string") { const p = P.find(q => q.id === sel);
+      stateEl.innerHTML = "<b>" + esc(p.name) + "</b>: " + esc(p.what) + ". " + (anim[p.id].k ? esc(p.claim) + ". " + esc(MODEL.SCALE[p.id]) : "Still standing here: knock it to see the claim.") + " <i>" + esc(p.src) + ".</i>"; return; }
+    const s = S[sel], p = P.find(q => q.id === s.p), k = anim[s.p].k;
+    const status = !k ? "With " + p.name + " standing, this is believed slow."
+      : s.kind === "down" ? "It rides down: it gets faster too."
+      : "Left hanging: the proof that it must be slow is gone, and no faster method follows.";
+    stateEl.innerHTML = "<b>" + esc(s.short) + ".</b> " + esc(s.plain) + " " + status + " <i>(" + esc(s.cite) + ")</i>";
+  }
+  function setKnock(id, k) { anim[id].k = k; document.getElementById({ eth: "bEth", sum: "bSum", apsp: "bApsp" }[id]).setAttribute("aria-pressed", k ? "true" : "false"); }
+  function toggle(id) { setKnock(id, !anim[id].k); sel = id; say(); kick(); }
+  document.getElementById("bEth").addEventListener("click", () => toggle("eth"));
+  document.getElementById("bSum").addEventListener("click", () => toggle("sum"));
+  document.getElementById("bApsp").addEventListener("click", () => toggle("apsp"));
+  document.getElementById("bAll").addEventListener("click", () => { P.forEach(p => setKnock(p.id, true)); sel = null; stateEl.innerHTML = "<b>All three claimed false.</b> Count the colours: 7 stones ride down and get faster; 11 are left hanging, with no proof they are slow and no method that makes them fast. Every one of these speed-ups is in principle only."; kick(); });
+  document.getElementById("bReset").addEventListener("click", () => { P.forEach(p => setKnock(p.id, false)); sel = null; say(); kick(); });
+  document.getElementById("bStep").addEventListener("click", () => { sel = (typeof sel === "number") ? (sel + 1) % S.length : 0; say(); kick(); });
+  cv.addEventListener("click", ev => {
+    const x = ev.clientX, y = ev.clientY, inR = r => r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    const si = S.findIndex(s => inR(s._hit)); if (si >= 0) { sel = si; say(); kick(); return; }
+    const p = P.find(q => inR(q._hit)); if (p) { toggle(p.id); return; }
+    sel = null; say(); kick();
+  });
+  window.addEventListener("resize", () => { layout(); kick(); });
+  // a self-check of the two counts the "all three" sentence states
+  if (S.filter(s => s.kind === "down").length !== 7 || S.filter(s => s.kind === "hang").length !== 11) { errBox.style.display = "block"; errBox.textContent = "The stone counts in the text (7 down, 11 hanging) no longer match the data."; return; }
+  layout(); say(); kick();
+  if (location.hash === "#all") { P.forEach(p => { setKnock(p.id, true); anim[p.id].t = 1; }); kick(); }   // #all opens with every pillar already down
+})();
+</script>
+</body>
+</html>

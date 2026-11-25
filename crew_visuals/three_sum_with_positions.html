@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3SUM with positions · Packing two tests into one</title>
+  <style>
+    :root {
+      color-scheme: light; background: #eaf0f6; color: #20273f;
+      font: 100% system-ui, sans-serif;
+      --muted: #4c5571; --line: #adb5ce; --blue: #3543a0; --blue-pale: #dce3f9;
+      --green: #16623f; --green-pale: #d8eee0; --red: #842c45; --red-pale: #f5dce2;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 60rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, p, dl { margin: 0; }
+    a { color: var(--blue); text-underline-offset: .2em; }
+    h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2.65rem, 7.7vw, 5.6rem); line-height: .99; letter-spacing: -.06em; margin: .55rem 0 .85rem; text-wrap: balance; }
+    .topic { color: var(--blue); font-size: .86rem; font-weight: 700; letter-spacing: .07em; }
+    .intro, details, .explain { max-width: 68ch; color: var(--muted); line-height: 1.55; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    .pick-key { margin: 1.25rem 0 .45rem; color: var(--muted); font-size: .86rem; }
+    .selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin: 0 0 .65rem; }
+    label { display: grid; gap: .25rem; min-width: 0; }
+    select, button { width: fit-content; max-width: 100%; min-height: 2.7rem; border: 1px solid var(--line); background: transparent; border-radius: .35rem; padding: .45rem .6rem; font: inherit; color: inherit; cursor: pointer; }
+    select { width: 100%; background: #f7f9fe; }
+    button:hover { color: var(--blue); border-color: var(--blue); }
+    .presets { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: right; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; font: clamp(1.4rem, 4vw, 2rem) Georgia, serif; padding: 0 0 .6rem; }
+    th, td { padding: .52rem .4rem; border-bottom: 1px solid var(--line); }
+    th { font-weight: 550; color: var(--muted); }
+    th:first-child { text-align: left; }
+    .encoding { color: var(--blue); background: var(--blue-pale); font-weight: 700; }
+    tfoot { font-weight: 700; }
+    .balance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin: .85rem 0; }
+    .balance > div { background: #f7f9fe; border: 1px solid var(--line); border-radius: .4rem; padding: .65rem .5rem; }
+    .balance dt { font-size: .86rem; color: var(--muted); }
+    .balance dd { margin: .2rem 0 0; font: clamp(1.35rem, 3.8vw, 2.15rem)/1 Georgia, serif; font-variant-numeric: tabular-nums; }
+    .balance [data-matches="true"] { color: var(--green); background: var(--green-pale); }
+    .balance [data-matches="false"] { color: var(--red); background: var(--red-pale); }
+    details { margin-top: 1.25rem; border-top: 1px solid var(--line); padding-top: .65rem; }
+    summary { color: #20273f; cursor: pointer; }
+    details p { margin-top: .6rem; }
+    @media (max-width: 27rem) {
+      .selects { gap: .35rem; }
+      select { padding-inline: .25rem; }
+      th, td { font-size: .82rem; padding-inline: .2rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">Convolution 3SUM · A reduction you can try</p>
+      <h1>Make the positions add up too</h1>
+      <p class="intro">Here 2 + 3 = 5 is only half the puzzle. The positions of those numbers also have to add up. Pack the position and value into each number to check both with one ordinary sum.</p>
+    </header>
+
+    <p class="pick-key" id="pick-key">Position → value</p>
+    <div class="selects" role="group" aria-label="Pick one entry from each list" aria-describedby="pick-key">
+      <label for="a">First list <select id="a"></select></label>
+      <label for="b">Second list <select id="b"></select></label>
+      <label for="c">Target list <select id="c"></select></label>
+    </div>
+    <div class="presets" role="group" aria-label="Example picks">
+      <button type="button" id="wrong">Right value, wrong position</button>
+      <button type="button" id="right">Both agree</button>
+    </div>
+
+    <table>
+      <caption>Pack the three picks</caption>
+      <thead><tr><th scope="col">Pick</th><th scope="col">List tag</th><th scope="col">Position × 16</th><th scope="col">Value</th><th scope="col">Packed</th></tr></thead>
+      <tbody id="packing"></tbody>
+    </table>
+
+    <div aria-live="polite" aria-atomic="true">
+      <dl class="balance">
+        <div id="value-result"><dt>Value sum</dt><dd>0</dd></div>
+        <div id="position-result"><dt>Position sum</dt><dd>−1</dd></div>
+        <div id="encoded-result"><dt>Packed sum</dt><dd>−16</dd></div>
+      </dl>
+      <p class="explain" id="why">The values agree, but positions 0 and 0 add to 0. This target sits at position 1.</p>
+    </div>
+
+    <details>
+      <summary>Why one sum can enforce all three checks</summary>
+      <p>First give every entry from the three lists a tag of +112, +224, or −336. Picking one from each list makes the tags cancel. Any other group of three tags leaves at least 112 in absolute value, more than the position and value contributions can cancel.</p>
+      <p>Next give a position change weight 16. The combined value contribution is between −15 and 15, so it cannot cancel a nonzero multiple of 16. Once the positions agree, the values have to agree too. The target list uses minus signs so its position and value get subtracted from the sum of the other lists.</p>
+      <p>For length <var>n</var> and integer magnitudes at most <var>K</var>, take the position weight <var>M</var> = 3<var>K</var> + 1 and the tag unit 3(<var>M</var>(<var>n</var> − 1) + <var>K</var>) + 1. That builds an ordinary 3SUM list of length 3<var>n</var>. The packed integers stay polynomially bounded if the original ones do. <a href="https://par.nsf.gov/servlets/purl/10086590">Williams and Williams on subquadratic equivalences</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/3sum-apsp/EndStatement.lean">Lean word-RAM 3SUM statement</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const values = [[2,-1,4], [3,1,-2], [5,5,0]];
+      const selectors = ['a','b','c'].map(id => document.getElementById(id));
+      const table = document.getElementById('packing');
+      const why = document.getElementById('why');
+      const names = ['First','Second','Target'];
+      const positionWeight = 16;
+      const tags = [112,224,-336];
+      const results = ['value','position','encoded'].map(key => document.getElementById(`${key}-result`));
+      const sum = numbers => numbers.reduce((total, n) => total + n, 0);
+      const sign = n => String(n).replace('-', '−');
+
+      selectors.forEach((selector, i) => {
+        values[i].forEach((value, index) => selector.add(new Option(`${index} → ${sign(value)}`, index)));
+        selector.addEventListener('change', update);
+      });
+
+      function update() {
+        const indices = selectors.map(selector => Number(selector.value));
+        const signedIndices = indices.map((index, i) => i === 2 ? -index : index);
+        const chosen = indices.map((index, i) => i === 2 ? -values[i][index] : values[i][index]);
+        const weighted = signedIndices.map(index => index * positionWeight);
+        const encoded = chosen.map((value, i) => tags[i] + weighted[i] + value);
+        const valueSum = sum(chosen);
+        const positionSum = sum(signedIndices);
+        const encodedSum = sum(encoded);
+        table.replaceChildren(...names.map((name, i) => {
+          const row = document.createElement('tr');
+          const label = document.createElement('th');
+          label.scope = 'row';
+          label.textContent = name;
+          row.append(label);
+          for (const value of [tags[i], weighted[i], chosen[i], encoded[i]]) {
+            const cell = row.insertCell();
+            cell.textContent = sign(value);
+          }
+          row.lastElementChild.className = 'encoding';
+          return row;
+        }));
+        for (const [index, total] of [valueSum, positionSum, encodedSum].entries()) {
+          results[index].dataset.matches = String(total === 0);
+          results[index].querySelector('dd').textContent = sign(total);
+        }
+        if (encodedSum === 0) {
+          why.textContent = 'The values and positions both agree. This triple is a solution.';
+        } else if (valueSum === 0) {
+          why.textContent = `The values agree, but ${indices[0]} + ${indices[1]} is ${indices[0] + indices[1]}. The target sits at position ${indices[2]}.`;
+        } else if (positionSum === 0) {
+          why.textContent = 'The positions agree, but the two values add up to a different number from the target.';
+        } else {
+          why.textContent = 'The positions and values both miss the target.';
+        }
+      }
+
+      function preset(targetIndex) {
+        selectors[0].value = '0';
+        selectors[1].value = '0';
+        selectors[2].value = String(targetIndex);
+        update();
+      }
+      document.getElementById('wrong').addEventListener('click', () => preset(1));
+      document.getElementById('right').addEventListener('click', () => preset(0));
+      preset(1);
+    })();
+  </script>
+</body>
+</html>

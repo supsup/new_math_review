@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A wall at five halves</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf6ec;
+      --ink: #2e3639;
+      --muted: #596367;
+      --teal: #236b67;
+      --purple: #63538a;
+      --rust: #9d5634;
+      --edge: #cbceca;
+      background: #e8ece8;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 55rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .17em; }
+    h1 { font: clamp(2.7rem, 8vw, 4.6rem)/1.01 Georgia, serif; margin: .57rem 0 .73rem; letter-spacing: -.05em; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .control { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem .7rem; margin: .75rem 0 1rem; }
+    .control label { font-weight: 650; }
+    select, button { min-height: 2.65rem; padding: .38rem .55rem; font: inherit; background: #edf2eb;
+      color: var(--teal); border: 1px solid var(--edge); border-radius: .32rem; }
+    button { cursor: pointer; }
+    :focus-visible { outline: .16rem solid var(--rust); outline-offset: .17rem; }
+    figure { margin: 0 0 .86rem; }
+    .bar { background: #fffcf6; border: 1px solid var(--edge); border-radius: .33rem; height: 6.5rem;
+      position: relative; display: flex; align-items: center; }
+    .bar span { display: block; height: 2.15rem; }
+    #unit-bar { background: var(--teal); }
+    #larger-bar { background: var(--purple); }
+    #rest-bar { background: repeating-linear-gradient(135deg, #a36543, #a36543 5px, #c28e68 5px, #c28e68 9px); }
+    .line { position: absolute; width: 2px; height: 4.1rem; background: var(--ink); top: 1.6rem; left: 71.43%; }
+    .line::before { content: '1'; position: absolute; top: -1.4rem; left: -.2rem; font-variant-numeric: tabular-nums; }
+    figcaption { font-size: .85rem; margin-top: .35rem; }
+    dl { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; margin: .6rem 0 .85rem; }
+    dl div { min-width: 7rem; border-top: 3px solid var(--teal); padding: .25rem 0 0; }
+    dl div:nth-child(2) { border-color: var(--purple); }
+    dl div:nth-child(3) { border-color: var(--rust); }
+    dt { font-size: .82rem; color: var(--muted); }
+    dd { margin: 0; font-size: 1.18rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    #result { color: var(--teal); font-weight: 700; }
+    .formula { font: 1.08rem/1.45 Georgia, serif; overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .6rem; margin: .85rem 0 .25rem; }
+    summary { cursor: pointer; font-weight: 650; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="zero_beyond_one.html">Back to the zero beyond one</a>
+    <h1>A wall at five halves</h1>
+    <p class="intro">The mod-5 mixture can have zeros past real part 1. Every angle still obeys a farther wall. At real part 2½ or more, all terms after the leading 1 are too small to cancel it.</p>
+
+    <div class="control">
+      <label for="terms">Sum explicitly through</label>
+      <select id="terms">
+        <option value="2">4</option><option value="3">9</option><option value="blocks">15 · Lean proof</option>
+        <option value="4" selected>16</option>
+        <option value="5">25</option><option value="6">36</option><option value="7">49</option>
+        <option value="8">64</option><option value="9">81</option><option value="10">100</option>
+      </select>
+      <button type="button" id="proof">Use the short proof</button>
+    </div>
+    <figure>
+      <div class="bar" aria-hidden="true">
+        <span id="unit-bar"></span><span id="larger-bar"></span><span id="rest-bar"></span><i class="line"></i>
+      </div>
+      <figcaption>All blocks bound contributions to the tail after the first term. The black line marks the leading 1. The striped part bounds the terms beyond the chosen cutoff.</figcaption>
+    </figure>
+    <dl>
+      <div><dt>Residues ±1</dt><dd id="units"></dd></div>
+      <div><dt>Residues ±2</dt><dd id="larger"></dd></div>
+      <div><dt>Remaining tail</dt><dd id="rest"></dd></div>
+    </dl>
+    <p id="result" role="status"></p>
+    <p>At the cutoff 16, even this deliberately generous bound is less than 0.9984. Each term gets smaller farther right. Reflection gives the other wall at real part −1½ for the completed mixture.</p>
+
+    <details>
+      <summary>Why one estimate covers every angle</summary>
+      <p>Normalize the coefficient of 1 to be 1. The coefficients repeat every five integers, with values 1, <var>a</var>(2), −<var>a</var>(2), −1, 0. Let <var>c</var> be the real part of the root number. Then</p>
+      <p class="formula">|<var>a</var>(2)|² = (1 − <var>c</var> sin(2τ)) / (1 + <var>c</var> sin(2τ)) ≤ (1 + <var>c</var>) / (1 − <var>c</var>) = κ<sup>−2</sup>.</p>
+      <p>The <a href="mod5_gauss_sum.html">Gauss sum</a> gives <var>c</var>² = (5 + √5)/10. Using √5 &lt; 2.2361 gives κ = √((1 − <var>c</var>)/(1 + <var>c</var>)) &gt; 71/250 by a rational comparison. Thus every coefficient on residues ±2 has magnitude less than 250/71, uniformly in τ.</p>
+      <p>At real part 5/2, bound each displayed term <var>n</var><sup>−5/2</sup> by replacing √<var>n</var> in the denominator by a lower rational bound. Beyond a square cutoff <var>N</var>, the sum of these terms is at most the integral from <var>N</var> to infinity, or 2/(3<var>N</var><sup>3/2</sup>). Multiply the remainder by 250/71. The terms through 16 plus the remainder give a rational upper bound below 1.</p>
+      <p><a href="../tools/check_mirror_mix_wall.py">Replay with exact fractions</a> using only Python’s standard library.</p>
+    </details>
+    <details id="lean-proof">
+      <summary>How Lean checks the entire wall</summary>
+      <p>Choose “15 · Lean proof” to see a slightly smaller bound. The Lean file computes the character and its Gauss sum, checks the coefficient limits, and proves that the two analytic <var>L</var>-functions cannot cancel for any real mixing angle at Re <var>s</var> ≥ 5/2.</p>
+      <p>After term 15, group the terms into blocks of five. Each block has one term of weight zero, two of weight 1, and two with weight at most <var>R</var> = 250/71. For a block starting at <var>x</var>, √<var>n</var> ≥ 4 and <var>n</var> ≥ <var>x</var>. The bound per unit of weight is 1/(4<var>x</var>²), below 1/((2<var>x</var>−5)(2<var>x</var>+5)).</p>
+      <p>That last fraction is (1/(2<var>x</var>−5) − 1/(2<var>x</var>+5))/10. The negative term cancels the first term for the next block, leaving at most (2 + 2<var>R</var>)/270 for all the blocks together. The displayed bound, 0.9942, is below the leading 1.</p>
+      <p>Lean reports the three standard axioms of Mathlib. <a href="../tools/mirror_mix_wall.lean">Read and replay the proof by Lattice and Confluence</a>.</p>
+    </details>
+    <p>The triangle inequality leaves the magnitude of the series at least 1 minus the tail bound, which is strictly positive. This applies at every height, including the <a href="zero_beyond_one.html">height-200 crossing</a>.</p>
+    <p>The Euler factors give a sharper limit based on how far they can turn the two <var>L</var>-functions. <a href="mirror_mix_sharp_walls.html">Compare the sharp walls at 45° and 135°</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const terms = byId('terms'), cap = 250/71, axisMax = 1.4;
+      const parts = ['units','larger','rest'].map(byId);
+      const bars = ['unit-bar','larger-bar','rest-bar'].map(byId);
+      function update() {
+        const blocks = terms.value === 'blocks';
+        const side = Number(terms.value), end = blocks ? 15 : side*side;
+        let units = 0, larger = 0;
+        for (let n = 2; n <= end; n++) {
+          const upper = 100/(n*n*Math.floor(Math.sqrt(10000*n)));
+          const residue = n%5;
+          if (residue === 1 || residue === 4) units += upper;
+          if (residue === 2 || residue === 3) larger += cap*upper;
+        }
+        const rest = blocks ? (2+2*cap)/270 : 2*cap/(3*end*side);
+        const total = units+larger+rest;
+        [units,larger,rest].forEach((part,index) => {
+          parts[index].textContent = part.toFixed(4);
+          bars[index].style.width = (100*part/axisMax) + '%';
+        });
+        const bound = (Math.ceil(total*10000)/10000).toFixed(4);
+        byId('result').textContent = total < 1
+          ? 'Tail bound at most ' + bound + '. The leading 1 survives.'
+          : 'Tail bound at most ' + bound + '. Include more terms for a tighter estimate.';
+      }
+      terms.addEventListener('change', update);
+      byId('proof').addEventListener('click', () => { terms.value = 4; update(); });
+      update();
+    })();
+  </script>
+</body>
+</html>

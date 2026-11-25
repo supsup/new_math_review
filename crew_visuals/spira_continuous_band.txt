@@ -1,0 +1,33 @@
+Spira's four pairs in one continuous height band
+
+For the Davenport–Heilbronn mixture at 45 degrees, all off-line zeros at
+heights 76 through 177 belong to Spira's four reflected pairs. The real part
+is unrestricted within this height statement.
+
+The individual windows around the four pairs are described by
+crew_visuals/mirror_mix_all_angles.html and crew_visuals/spira_four_pairs.html.
+The intervening gaps can be checked without pairing any leave with a
+particular return. At angle zero their complete zero counts are 12, 38 and
+7, each matched by just as many disjoint sign brackets on the line. The
+horizontal edges admit at most a simple zero on the line, and the far
+half-planes are uniformly clear. The complete stationary-height checks
+find 6, 16 and 4 contacts in gaps [96,113], [115,166] and [167,176].
+Every contact angle in the gaps is greater than 90 degrees. The gaps
+therefore contribute no off-line zeros at any angle from 0 to 90 degrees.
+
+An independent check of the resulting count at 45 degrees uses one
+rectangle from real part −3 to 4 and height 76 to 177. Its winding is 74,
+with 36,481 certified boundary panels in the recorded run. Sign changes
+give 66 disjoint intervals with a zero on the line. A Rouché test gives one
+zero in each of four disks strictly on the right, and reflection gives
+four more on the left. These 66 + 8 zeros exhaust the winding count.
+The uniform far-half-plane estimate excludes additional zeros outside
+the rectangle. These counts are finite-band results.
+
+Replay from the repository root with python-flint installed
+
+    python3 -B tools/check_spira_gaps.py --fixed-angle
+
+The default run checks the gaps. The optional fixed-angle run checks the
+entire band directly. Both use interval bounds, with the initial scan in
+the gap replay used only to find candidates for certification and exclusion.

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Count by turning · The argument principle</title>
+  <style>
+    :root {
+      color-scheme: dark; background: #161f2c; color: #fff9eb;
+      --muted: #becbd8; --border: #485b72; --panel: #243043; --gold: #ffce84; --mint: #9feeda; --pink: #ffc2cf;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing:border-box; }
+    body { margin:0; }
+    main { width:min(100% - 2rem,61rem); margin:0 auto; padding:clamp(2rem,6vw,4rem) 0; }
+    h1,p,figure { margin:0; }
+    h1 { font:clamp(2.6rem,8vw,5.6rem)/.99 Georgia,serif; letter-spacing:-.055em; margin:.5rem 0 .8rem; }
+    .topic { color:var(--gold); font-size:.87rem; font-weight:700; letter-spacing:.07em; }
+    .intro,.result,details { max-width:65ch; line-height:1.55; color:var(--muted); }
+    :focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+    .choices { display:flex; flex-wrap:wrap; gap:.45rem; margin:1.3rem 0 .8rem; }
+    button { min-height:2.7rem; padding:.45rem .7rem; border:1px solid var(--border); border-radius:.4rem; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+    button[aria-pressed="true"] { color:#1c2836; background:var(--gold); border-color:var(--gold); font-weight:650; }
+    button:hover { border-color:var(--gold); }
+    .plots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(.7rem,3vw,1.45rem); }
+    figure { background:var(--panel); border:1px solid var(--border); border-radius:.5rem; overflow:hidden; }
+    figcaption { padding:.7rem .85rem 0; font:clamp(1.35rem,3vw,1.8rem) Georgia,serif; }
+    svg { display:block; width:100%; height:auto; }
+    .axis { stroke:var(--border); stroke-width:1; }
+    .label { fill:var(--muted); font:14px system-ui,sans-serif; text-anchor:middle; }
+    .root { fill:var(--mint); }
+    .pole { fill:var(--pink); }
+    .trace { fill:none; stroke:var(--mint); stroke-width:2; }
+    .dot { fill:var(--gold); stroke:#161f2c; stroke-width:1.5; }
+    .progress { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.35rem; margin:.9rem 0 0; }
+    .progress output { color:var(--gold); font-variant-numeric:tabular-nums; }
+    input { width:100%; margin:.25rem 0 0; min-height:2.6rem; accent-color:var(--gold); }
+    .result { margin-top:.45rem; }
+    .result strong { color:var(--gold); }
+    details { border-top:1px solid var(--border); padding-top:.7rem; margin-top:1.2rem; }
+    summary { color:#fff9eb; cursor:pointer; }
+    details p { margin-top:.55rem; }
+    @media (max-width:43rem) { .plots { grid-template-columns:1fr; } }
+    @media (max-width:24rem) { .label { font-size:17px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">A companion to the zeta landscape</p>
+      <h1>Count by turning</h1>
+      <p class="intro">Walk once around the circle on the left. Follow where the function sends that walk on the right. The blue-green path turns around zero once per copy of an enclosed zero. A pole makes a turn in the opposite direction.</p>
+    </header>
+
+    <div class="choices" role="group" aria-label="Choose the circle">
+      <button type="button" data-view="single" aria-pressed="true">Single zero</button>
+      <button type="button" data-view="double" aria-pressed="false">Double zero</button>
+      <button type="button" data-view="pole" aria-pressed="false">Pole</button>
+      <button type="button" data-view="all" aria-pressed="false">All three</button>
+      <button type="button" data-view="boundary" aria-pressed="false">Pole on edge</button>
+    </div>
+
+    <div class="plots">
+      <figure>
+        <figcaption>One counterclockwise walk</figcaption>
+        <svg viewBox="0 0 420 250" role="img" aria-labelledby="walk-title">
+          <title id="walk-title">Input circle with two zero locations and a pole</title>
+          <path class="axis" d="M25 115h370M182 18v194"/>
+          <circle class="root" cx="136" cy="115" r="5"/><circle class="root" cx="214.2" cy="115" r="7"/>
+          <circle class="pole" cx="278.6" cy="115" r="6"/>
+          <text class="label" x="136" y="219">Single</text><text class="label" x="214.2" y="219">Double</text><text class="label" x="278.6" y="219">Pole</text>
+          <circle id="walk" cx="136" cy="115" r="18.4" fill="none" stroke="var(--mint)" stroke-width="2"/>
+          <circle id="walk-dot" class="dot" cx="154.4" cy="115" r="5"/>
+        </svg>
+      </figure>
+      <figure>
+        <figcaption>Where the function sends it</figcaption>
+        <svg viewBox="0 0 420 250" role="img" aria-labelledby="image-title image-desc">
+          <title id="image-title">Output path around zero</title>
+          <desc id="image-desc">The selected input circle maps to a path in the complex plane.</desc>
+          <path class="axis" d="M25 120h370M210 18v204"/>
+          <path id="trace" class="trace" d=""/>
+          <circle cx="210" cy="120" r="4" fill="none" stroke="var(--muted)" stroke-width="1.5"/>
+          <text class="label" x="224" y="142">0</text>
+          <circle id="image-dot" class="dot" cx="210" cy="120" r="5"/>
+        </svg>
+      </figure>
+    </div>
+    <div class="progress"><label for="turn">Move the gold dot</label><output id="so-far" for="turn">0.00 turns so far</output></div>
+    <input id="turn" type="range" min="0" max="360" step="1" value="0" aria-valuetext="0 degrees">
+    <p class="result" aria-live="polite"><strong id="count">1 turn counterclockwise.</strong> <span id="why">One simple zero lies inside.</span></p>
+
+    <details>
+      <summary>Why the turns add and subtract</summary>
+      <p>The example is <var>f</var>(<var>z</var>) = (<var>z</var> + 1)(<var>z</var> − 0.7)²/(<var>z</var> − 2.1). Each factor <var>z</var> − <var>a</var> traces a translated circle. That circle goes around zero once if <var>a</var> is inside the input circle. Multiplication adds the turns, a square counts twice, and division subtracts a turn. The total is the number of zeros with multiplicity minus the number of poles with multiplicity.</p>
+      <p>A zero or pole on the edge makes the count undefined for that circle. Here the presets let us check exactly where the special points sit before drawing the output path. The output pane rescales its axes to fit each path.</p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      // Positions and sizes are integer tenths so touching a pole is exact.
+      const views = {single:[-10,4], double:[7,4], pole:[21,4], all:[6,20], boundary:[7,14]};
+      const elements = Object.fromEntries(['walk','walk-dot','trace','image-dot','image-desc','turn','count','why','so-far'].map(id=>[id,document.getElementById(id)]));
+      const buttons = document.querySelectorAll('[data-view]');
+      const targets = [[-10,1],[7,2],[21,-1]];
+      let center = -10, radius = 4, scale = 1, outputReady = false;
+      let turnsByAngle = [];
+
+      function multiply([a,b],[c,d]) { return [a*c-b*d,a*d+b*c]; }
+
+      function value(x,y) {
+        const numerator = multiply([x+1,y],multiply([x-.7,y],[x-.7,y]));
+        const a = x-2.1;
+        const sizeSquared = a*a + y*y;
+        return multiply(numerator,[a/sizeSquared,-y/sizeSquared]);
+      }
+
+      function at(degrees) {
+        const theta = degrees * Math.PI / 180;
+        return [(center + radius*Math.cos(theta))/10, radius*Math.sin(theta)/10];
+      }
+
+      function dot(element,x,y) {
+        element.setAttribute('cx',x);
+        element.setAttribute('cy',y);
+      }
+
+      function position() {
+        const angle = Number(elements.turn.value);
+        const [x,y] = at(angle);
+        elements.turn.setAttribute('aria-valuetext',`${angle} degrees`);
+        dot(elements['walk-dot'],182+46*x,115-46*y);
+        if (!outputReady) { elements['so-far'].textContent = '—'; return; }
+        const [u,v] = value(x,y);
+        dot(elements['image-dot'],210+scale*u,120-scale*v);
+        elements['so-far'].textContent = `${(Math.round(turnsByAngle[angle]*100)/100).toFixed(2)} turns so far`;
+      }
+
+      function show(name) {
+        [center,radius] = views[name];
+        const boundary = targets.some(([x])=>Math.abs(center-x)===radius);
+        const enclosed = targets.filter(([x])=>Math.abs(center-x)<radius);
+        for (const button of buttons) button.setAttribute('aria-pressed',String(button.dataset.view===name));
+        elements.walk.setAttribute('cx',182+4.6*center);
+        elements.walk.setAttribute('r',4.6*radius);
+        elements.turn.value = '0';
+        outputReady = false;
+        elements.trace.setAttribute('d','');
+        elements['image-dot'].style.display = 'none';
+        if (boundary) {
+          elements.count.textContent = 'The pole is on the edge.';
+          elements.why.textContent = 'A crossing like this makes the turn count undefined.';
+          elements['image-desc'].textContent = 'No path is drawn because the input circle crosses a pole.';
+        } else {
+          const turns = enclosed.reduce((total,[,multiplicity])=>total+multiplicity,0);
+          const zeros = enclosed.reduce((total,[,multiplicity])=>total+Math.max(0,multiplicity),0);
+          const poles = zeros-turns;
+          const points = Array.from({length:361},(_,i)=>value(...at(i)));
+          turnsByAngle = [0];
+          for (let i = 1; i < points.length; i++) {
+            const [x,y] = points[i-1];
+            const [u,v] = points[i];
+            turnsByAngle.push(turnsByAngle[i-1] + Math.atan2(x*v-y*u,x*u+y*v)/(2*Math.PI));
+          }
+          const measured = turnsByAngle[points.length-1];
+          if (!Number.isFinite(measured) || Math.abs(measured-turns) > .01) {
+            elements.count.textContent = 'The path check failed.';
+            elements.why.textContent = 'The sampled path and the exact count disagree.';
+            elements['image-desc'].textContent = elements.count.textContent;
+            position();
+            return;
+          }
+          outputReady = true;
+          elements['image-dot'].style.display = '';
+          scale = 97 / Math.max(...points.map(([x,y])=>Math.hypot(x,y)));
+          elements.trace.setAttribute('d',points.map(([x,y],i)=>`${i?'L':'M'}${210+scale*x},${120-scale*y}`).join(' '));
+          elements.count.textContent = `${Math.abs(turns)} ${Math.abs(turns)===1?'turn':'turns'} ${turns>0?'counterclockwise':'clockwise'}.`;
+          elements.why.textContent = `Zero count ${zeros}, pole count ${poles}.`;
+          elements['image-desc'].textContent = elements.count.textContent + ' ' + elements.why.textContent;
+        }
+        position();
+      }
+
+      for (const button of buttons) button.addEventListener('click',()=>show(button.dataset.view));
+      elements.turn.addEventListener('input',position);
+      show('single');
+    })();
+  </script>
+</body>
+</html>

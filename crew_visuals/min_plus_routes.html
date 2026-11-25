@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One more route · Min-plus and shortest paths</title>
+  <style>
+    :root {
+      color-scheme: dark; background: #122026; color: #f3fbf9;
+      --soft: #bbd0d2; --line: #456269; --aqua: #9aead7; --panel: #1b2d34;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 60rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, h2, p, figure, dl { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 400; }
+    h1 { font-size: clamp(2.6rem, 7vw, 5.4rem); letter-spacing: -.055em; line-height: .99; margin: .55rem 0 .85rem; text-wrap: balance; }
+    h2 { font-size: clamp(1.55rem, 4vw, 2rem); }
+    .topic { color: var(--aqua); font-weight: 700; font-size: .86rem; letter-spacing: .07em; }
+    .intro, .description, details { color: var(--soft); line-height: 1.55; max-width: 68ch; }
+    a { color: var(--aqua); text-underline-offset: .23em; }
+    :focus-visible { outline: 2px solid var(--aqua); outline-offset: 4px; }
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; margin: 1.2rem 0 .8rem; max-width: 35rem; }
+    button, select { border: 1px solid var(--line); border-radius: .35rem; background: var(--panel); padding: .45rem .6rem; min-height: 2.75rem; font: inherit; color: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { color: #12312e; background: var(--aqua); border-color: var(--aqua); font-weight: 700; }
+    button:hover { border-color: var(--aqua); }
+    .viewer { display: grid; grid-template-columns: minmax(0, 1.63fr) minmax(0, 1fr); gap: clamp(1rem, 4vw, 2.4rem); align-items: center; }
+    figure { border: 1px solid var(--line); border-radius: .6rem; background: var(--panel); }
+    svg { display: block; width: 100%; height: auto; }
+    .edge { fill: none; stroke: #7f969a; stroke-width: 2.8; marker-end: url(#arrow); }
+    .edge[data-active="true"] { stroke: var(--aqua); stroke-width: 4; marker-end: url(#active-arrow); }
+    .label { fill: #e5f3f1; font: 20px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--panel); stroke-width: 6; stroke-linejoin: round; }
+    .station circle { fill: var(--panel); stroke: #91acaf; stroke-width: 2.4; }
+    .station[data-active="true"] circle { fill: var(--aqua); stroke: var(--aqua); }
+    .station text { fill: #fff; font: 650 22px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
+    .station[data-active="true"] text { fill: #12312e; }
+    .pick { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .8rem 0; }
+    .pick label { display: grid; gap: .25rem; color: var(--soft); }
+    .stats { display: grid; grid-template-columns: minmax(0,2.5fr) minmax(0,1fr); gap: .65rem; padding: .65rem 0; border-block: 1px solid var(--line); }
+    .stats dt { font-size: .85rem; color: var(--soft); }
+    .stats dd { margin: .17rem 0 0; font-size: clamp(1.17rem, 3vw, 1.56rem); color: var(--aqua); }
+    .description { margin-top: .7rem; }
+    details { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+    summary { color: #f3fbf9; cursor: pointer; }
+    details p { margin: .65rem 0; }
+    table { border-collapse: collapse; width: min(100%, 28rem); text-align: center; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; padding-block: .6rem; }
+    th, td { padding: .3rem; border: 1px solid var(--line); }
+    td[data-selected="true"] { color: var(--aqua); font-weight: 700; background: var(--panel); }
+    @media (max-width: 44rem) { .viewer { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { .label { font-size: 23px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">All-pairs shortest paths · Min-plus multiplication</p>
+      <h1>One more route</h1>
+      <p class="intro">The direct road from A to E costs 12. Allow more stops and the cheapest route can change. Add the costs along each route, then keep the smallest total.</p>
+    </header>
+
+    <div class="steps" role="group" aria-label="Number of roads allowed">
+      <button type="button" data-stage="0" aria-pressed="true">1 road</button>
+      <button type="button" data-stage="1" aria-pressed="false">Up to 2 roads</button>
+      <button type="button" data-stage="2" aria-pressed="false">Up to 4 roads</button>
+    </div>
+
+    <div class="viewer">
+      <figure>
+        <svg viewBox="0 0 520 266" role="img" aria-labelledby="map-title map-description">
+          <title id="map-title">Five stops and their directed roads</title>
+          <desc id="map-description">The direct road A to E is highlighted. Each arrow points to the right.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0 0L10 5 0 10Z" fill="#7f969a"/></marker>
+            <marker id="active-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5 0 10Z" fill="#9aead7"/></marker>
+          </defs>
+          <path class="edge" data-edge="0,4" data-active="true" d="M58 181C108 20 417 20 462 181" />
+          <path class="edge" data-edge="0,3" d="M70 190C130 94 300 94 353 190" />
+          <path class="edge" data-edge="0,1" d="M75 202H132" />
+          <path class="edge" data-edge="1,2" d="M180 202H237" />
+          <path class="edge" data-edge="2,3" d="M285 202H342" />
+          <path class="edge" data-edge="3,4" d="M390 202H447" />
+          <text class="label" x="260" y="58">12</text><text class="label" x="212" y="120">8</text>
+          <text class="label" x="104" y="187">6</text><text class="label" x="209" y="187">−3</text>
+          <text class="label" x="314" y="187">2</text><text class="label" x="419" y="187">1</text>
+          <g class="station" data-station="0" data-active="true" transform="translate(52 202)"><circle r="19"/><text>A</text></g>
+          <g class="station" data-station="1" transform="translate(157 202)"><circle r="19"/><text>B</text></g>
+          <g class="station" data-station="2" transform="translate(262 202)"><circle r="19"/><text>C</text></g>
+          <g class="station" data-station="3" transform="translate(367 202)"><circle r="19"/><text>D</text></g>
+          <g class="station" data-station="4" data-active="true" transform="translate(472 202)"><circle r="19"/><text>E</text></g>
+        </svg>
+      </figure>
+
+      <section aria-labelledby="trip-title">
+        <h2 id="trip-title">Pick a trip</h2>
+        <div class="pick">
+          <label for="start">Start <select id="start"></select></label>
+          <label for="finish">Finish <select id="finish"></select></label>
+        </div>
+        <dl class="stats" aria-live="polite" aria-atomic="true">
+          <div><dt>Cheapest route</dt><dd id="route">A → E</dd></div>
+          <div><dt>Total cost</dt><dd id="cost">12</dd></div>
+        </dl>
+        <p class="description" id="explanation">With one road, the direct route costs 12.</p>
+      </section>
+    </div>
+
+    <details>
+      <summary>See all the distances and how min-plus works</summary>
+      <table>
+        <caption id="table-caption">Cheapest distances with at most 1 road</caption>
+        <thead><tr><th scope="col">From / to</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">D</th><th scope="col">E</th></tr></thead>
+        <tbody id="distance-rows"></tbody>
+      </table>
+      <p>Start with the direct-road costs and put 0 on the diagonal for staying in place. To double the road limit, try every intermediate stop. Add the cost to reach it and the cost from it to the finish. Keep the minimum. An empty route stays at the same stop, so the result allows <em>at most</em> the new number of roads.</p>
+      <p>Every road here points to the right, so the negative edge cannot belong to a cycle. Four roads are enough for every possible route in this map. The Lean project gives a general word-RAM result for polynomially bounded integer weights and graphs with no negative cycles. <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/3sum-apsp/EndStatement.lean">Theorem 22 in Lean</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const names = ['A','B','C','D','E'];
+      const roads = [[0,1,6],[1,2,-3],[2,3,2],[3,4,1],[0,3,8],[0,4,12]];
+      const weight = new Map(roads.map(([a,b,cost]) => [`${a},${b}`,cost]));
+      const steps = document.querySelectorAll('[data-stage]');
+      const edges = document.querySelectorAll('[data-edge]');
+      const stations = document.querySelectorAll('[data-station]');
+      const start = document.getElementById('start');
+      const finish = document.getElementById('finish');
+      const route = document.getElementById('route');
+      const cost = document.getElementById('cost');
+      const explanation = document.getElementById('explanation');
+      const description = document.getElementById('map-description');
+      const rows = document.getElementById('distance-rows');
+      const caption = document.getElementById('table-caption');
+      const sign = n => String(n).replace('-', '−');
+      let stage = 0;
+
+      const oneRoad = names.map((_, i) => names.map((_, j) => {
+        if (i === j) return {cost:0, path:[i]};
+        const cost = weight.get(`${i},${j}`);
+        return cost === undefined ? null : {cost, path:[i,j]};
+      }));
+
+      function square(distances) {
+        return names.map((_, i) => names.map((_, j) => {
+          let best = null;
+          for (let k = 0; k < names.length; k++) {
+            const first = distances[i][k];
+            const second = distances[k][j];
+            if (!first || !second) continue;
+            const path = first.path.concat(second.path.slice(1));
+            const cost = first.cost + second.cost;
+            if (best === null || cost < best.cost || (cost === best.cost && path.length < best.path.length)) best = {cost, path};
+          }
+          return best;
+        }));
+      }
+
+      const twoRoads = square(oneRoad);
+      const matrices = [oneRoad, twoRoads, square(twoRoads)];
+      for (const select of [start, finish]) {
+        names.forEach((name, i) => select.add(new Option(name,i)));
+        select.addEventListener('change', show);
+      }
+      finish.value = '4';
+
+      function show() {
+        const i = Number(start.value);
+        const j = Number(finish.value);
+        const limit = 2 ** stage;
+        const matrix = matrices[stage];
+        const shortest = matrix[i][j];
+        const usedEdges = new Set(shortest?.path.slice(1).map((next,k) => `${shortest.path[k]},${next}`));
+        for (const edge of edges) edge.dataset.active = String(usedEdges.has(edge.dataset.edge));
+        for (const station of stations) station.dataset.active = String(shortest?.path.includes(Number(station.dataset.station)) ?? false);
+        for (const step of steps) step.setAttribute('aria-pressed', String(Number(step.dataset.stage) === stage));
+        if (shortest === null) {
+          route.textContent = 'No route';
+          cost.textContent = '—';
+          explanation.textContent = `No route from ${names[i]} to ${names[j]} uses at most ${limit} ${limit === 1 ? 'road' : 'roads'}.`;
+        } else {
+          route.textContent = shortest.path.map(k => names[k]).join(' → ');
+          cost.textContent = sign(shortest.cost);
+          const terms = shortest.path.slice(1).map((next,k) => weight.get(`${shortest.path[k]},${next}`));
+          explanation.textContent = terms.length > 0
+            ? `${terms.map(term => term < 0 ? `(${sign(term)})` : sign(term)).join(' + ')} = ${sign(shortest.cost)}`
+            : 'Staying at the same stop costs 0.';
+        }
+        description.textContent = `Selected trip ${names[i]} to ${names[j]}. ${route.textContent}. ${explanation.textContent}`;
+        caption.textContent = `Cheapest distances with at most ${limit} ${limit === 1 ? 'road' : 'roads'}`;
+        rows.replaceChildren(...matrix.map((row, a) => {
+          const tr = document.createElement('tr');
+          const label = document.createElement('th');
+          label.scope = 'row';
+          label.textContent = names[a];
+          tr.append(label);
+          for (const [b, item] of row.entries()) {
+            const cell = tr.insertCell();
+            cell.textContent = item ? sign(item.cost) : '∞';
+            cell.dataset.selected = String(a === i && b === j);
+          }
+          return tr;
+        }));
+      }
+
+      for (const step of steps) step.addEventListener('click', () => { stage = Number(step.dataset.stage); show(); });
+      show();
+    })();
+  </script>
+</body>
+</html>

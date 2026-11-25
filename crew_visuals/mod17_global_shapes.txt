@@ -1,0 +1,36 @@
+Thirteen ways to get seventeen with 23 ones
+
+The seven-row Fano puzzle needs 24 ones. Across all sizes, the fewest ones is 23, and all the boards that achieve it have eight effective rows and columns. There are 13 shapes once row and column order are ignored. If you also allow turning rows into columns, there are eight.
+
+How the count was made
+
+The eight-row search has 40 qualifying boards in its local lexicographic order. For each one, try every permutation of its columns and sort the resulting rows. The least form is the same for all boards related in this way. Count how many different arrays the column permutations give each form. All counted boards have 23 ones and determinant magnitude 17.
+
+  Shape  Rows                                                               Boards   Transpose shape
+    1    00000011 00000101 00001110 00011001 00110110 01101000 10101000 11010000    10080     1
+    2    00000011 00000101 00001110 00110000 01010000 01101001 10011000 11100110    10080    13
+    3    00000011 00000101 00001110 00110000 01010000 01101001 10011001 11100010    20160     5
+    4    00000011 00000101 00011000 00101010 01010110 01110001 10110000 11001000    40320     9
+    5    00000011 00001100 00010101 00100110 00111001 01010010 10010010 11000001    20160     3
+    6    00000011 00001100 00010101 00100110 01010010 01101000 10111000 11000100    40320    10
+    7    00000011 00001100 00010101 00100110 01010010 01101001 10101000 11000100    40320     8
+    8    00000011 00001100 00010101 00110010 01010010 01101001 10011000 10100100    40320     7
+    9    00000011 00001100 00010101 00110010 01010110 01100001 10011000 10100100    40320     4
+   10    00000011 00001100 00010101 00110010 01011000 01100001 10100001 11000110    40320     6
+   11    00000011 00001100 00010101 00110010 01011000 01100001 10101001 11000010    40320    11
+   12    00000011 00001100 00010101 00110010 01100001 10100001 11000100 11011000    20160    12
+   13    00000011 00001101 00010101 00011010 00100110 01100001 10100001 11000100    10080     2
+
+The board counts keep column labels fixed and ignore row order. There are 372,960 in total. The three self-transpose shapes and five transpose pairs give eight shapes with transposes identified.
+
+Why bigger witnesses add only empty rows or columns
+
+A nonzero minor of maximal ordinary rank must have determinant divisible by 17. The global support bound is 23, so a minimum witness uses every one of its ones in that minor. All rows or columns outside it are zero. Inside the minor every row and column must have at least two ones, since a single 1 would give a smaller witness by expansion. This limits the size to eleven. The seven-row spectrum covers sizes through seven. In sizes nine, ten and eleven the signed-component search at support 23 checks 16,621,768 smaller systems altogether and finds no determinant divisible by 17. Thus the only effective size at the support minimum is eight.
+
+Replay from the repository root
+
+c++ -O3 -std=c++17 tools/check_seven_row_spectrum.cpp -o /tmp/check_seven_row_spectrum
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mod17_global_shapes.py /tmp/check_seven_row_spectrum
+
+crew_visuals/global_rank_minima.txt
+crew_visuals/more_rows_fewer_ones.html

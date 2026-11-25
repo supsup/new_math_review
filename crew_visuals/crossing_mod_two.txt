@@ -1,0 +1,62 @@
+When a crossing loses its signs
+
+In the crossing picture, the four-bit middle piece needs 67 independent directions across either cut over the fractions and 54 modulo 3. Modulo 2 it needs just 46. Mark some positions, then remove the chosen number of marks. Two paths that leave exactly the same set of marks cancel each other out.
+
+Here is the larger pattern for this particular split. If the largest product of the two cut ranks is P(n) for n bits per wire, then the exponential base lim P(n)^(1/n) is 256/27, about 9.48, modulo 2. Over the fractions the same base is 12. This compares one building block from Anthropic’s 3-SAT argument.
+
+Pieces and cuts
+
+Write the crossing of one bit as I − E, where I[a,b,c,d] = [a=c][b=d] and E[a,b,c,d] = u[a,b]u[c,d] for u = e01 − e10. With n bits, the piece O_j is the sum of tensor products with E at exactly j positions and I elsewhere. The two cuts view the four indices as matrices with row and column index pairs (ab,cd) or (ac,bd), respectively. The indices a, b, c, d are n-bit strings. For each cut we can order paired bits position by position, which preserves rank.
+
+Over the fractions, both one-bit pairs of matrices are diagonal in suitable bases. Signs matter there: the sum and difference of 01 and 10 are two separate directions. Modulo 2 they coincide. The one-bit top-from-bottom matrix E becomes the map N = uuᵀ for u = e01 + e10, so N has rank one and N² = 0. There is a basis in which N sends one vector to a second vector and sends every other basis vector to zero. Call the first vector marked and the second unmarked. Either of the remaining two basis vectors makes that position inactive.
+
+Since the top-from-bottom I is the identity, a summand in the piece removes exactly j marks on its selected positions. For a fixed choice of m active positions and a fixed basis vector at each inactive position, the block from k marks to k−j marks is a subset inclusion matrix. Its entry is 1 if the smaller set of marks sits inside the larger set. Every possible output mark set occurs once per input. Different input mark sets can still give the same output, which is where cancellation enters.
+
+For the left-from-right cut, E flips both bits and is invertible. In this cut I = vvᵀ with v = e00 + e11 fixed by the flip, so E⁻¹I = I again has rank one and square zero modulo 2. Factor out the invertible E in every position. Now I rather than E is the term that removes marks, so this cut has the same rank as the top-from-bottom cut with n−j marks removed.
+
+Exact ranks
+
+Write c(m,k) for m choose k, with value zero outside 0 ≤ k ≤ m. Let r(m,t,k) be the rank modulo 2 of the matrix for inclusion of t-subsets in k-subsets of m elements. If t > m−k, replace (t,k) by (m−k,m−t), which takes complements and transposes. Now Wilson’s diagonal form gives r as the sum of c(m,i)−c(m,i−1) over 0 ≤ i ≤ t for which c(k−i,t−i) is odd.
+
+For the first cut the exact rank is
+
+    R(n,j) = Σ over j ≤ m ≤ n of c(n,m) 2^(n−m) × Σ over j ≤ k ≤ m of r(m,k−j,k).
+
+The weight counts the choice of active positions and the two options at each inactive one. Each input layer maps to a separate output layer, so the layer ranks add. The other cut has rank R(n,n−j).
+
+   n    R(n,0), R(n,1), …, R(n,n)
+   1    4, 1
+   2    16, 6, 1
+   3    64, 28, 8, 1
+   4    256, 120, 46, 10, 1
+   5    1024, 496, 232, 66, 12, 1
+
+In the four-bit middle piece, m = 2, 3, 4 give 24, 16, 6 respectively, adding to 46. For comparison, when only one mark is removed, each active block can change variables from x₁ to x₁+⋯+x_m in the algebra where x_i² = 0. The square of the sum is zero in characteristic two. This reduces the block to multiplication by one variable, with rank 2^(m−1) for m > 0. It gives R(n,1) = (4^n−2^n)/2 directly.
+
+Why the base is about 9.48
+
+For a fixed m and j, set t = floor((m−j)/2). Each layer has rank at most c(m,t). Indeed the row and column counts are c(m,k−j) and c(m,k). At least one of k−j and m−k is at most t, so the smaller count is at most c(m,t), by binomial symmetry and monotonicity up to the middle. There are at most n+1 layers. The layer from t+j marks to t marks has rank at least c(m,t)−c(m,t−1), because the i=t term in Wilson’s formula has coefficient 1. This is at least c(m,t)/(n+1).
+
+Now sum the bounds over m with their weights. If m−j is even, c(m,t) is the coefficient of z^j in (z+z⁻¹)^m. If it is odd, it is the coefficient of z^(j+1). Thus the weighted sum is the sum of those two coefficients in
+
+    (2+z+z⁻¹)^n = z^(−n) (1+z)^(2n).
+
+The bigger coefficient is c(2n,n+j), so R(n,j) lies between c(2n,n+j)/(n+1) and 2(n+1)c(2n,n+j). The analogous bounds for the other cut replace j by n−j. The product of the two binomial coefficients is largest at the middle j (two equal choices when n is odd), since the ratio of successive binomial coefficients decreases. At the middle, Stirling’s formula gives c(2n,3n/2)^(2/n) → 256/27, with the index rounded by at most one. The polynomial factors in the bounds disappear when taking nth roots.
+
+At every fixed odd prime the base stays 12. In the companion visual, group t=j on the top–bottom cut and group k=j on the left–right cut each have multiplier 1 up to sign and powers of 2. Their sizes multiply to c(n,j)² 3^n. At the middle j this has base 12, and the fractional rank product bounds it from above by 12^n. Odd-prime cancellations can still change individual ranks, as the visual shows.
+
+Source and companion
+
+Anthropic’s condensed 3-SAT argument, at revision 11b6c7e3c927df2658f513b6b68ea7f8929c62c5
+https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/README.md#the-key-idea-in-condensed-form-interpretable-by-ai-models
+
+Wilson’s diagonal form (1990)
+https://doi.org/10.1016/S0195-6698(13)80046-7
+Readable proof of the form in Corollary 3 of Ghorbani, Khosrovshahi, Maysoori and Mohammad-Noori, Inclusion Matrices and Chains
+https://arxiv.org/abs/0709.3144
+
+Odd-prime crossing visual
+crew_visuals/crossing_mod_primes.html
+
+One small inclusion layer you can click
+crew_visuals/remove_a_mark.html

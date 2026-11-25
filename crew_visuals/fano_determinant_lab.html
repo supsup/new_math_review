@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seven points, one square to flip</title>
+  <style>
+    :root {
+      color-scheme: dark; background: #171c29; color: #f6efe1;
+      --muted: #c2c7d7; --ink: #182824; --line: #53607a; --panel: #222b3c;
+      --mint: #aee5c0; --mint-dark: #375b50; --coral: #ffb5a4; --card: #303b50;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 67rem); margin: auto; padding: clamp(1.8rem, 6vw, 4.2rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.8rem, 8vw, 5.6rem)/.98 Georgia, serif; letter-spacing: -.055em; text-wrap: balance; }
+    h2 { font: 1.55rem/1.12 Georgia, serif; }
+    p { line-height: 1.55; }
+    .intro { max-width: 66ch; margin: .8rem 0 1.15rem; color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+    button { min-height: 2.65rem; padding: .4rem .65rem; background: var(--card); color: inherit; border: 1px solid var(--line); border-radius: .35rem; font: inherit; cursor: pointer; }
+    button[data-board][aria-pressed="true"] { background: var(--mint); color: var(--ink); border-color: var(--mint); font-weight: 650; }
+    button:focus-visible, summary:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+    #restore { margin-left: auto; }
+    .pair { display: grid; grid-template-columns: minmax(0, 30rem) minmax(0, 1fr); gap: .8rem; align-items: stretch; }
+    .panel { padding: .85rem clamp(.5rem, 2vw, 1.1rem); border: 1px solid var(--line); border-radius: .65rem; background: var(--panel); }
+    table { width: 100%; table-layout: fixed; border-spacing: 3px; text-align: center; }
+    caption { text-align: left; margin: 0 0 .45rem; color: var(--muted); }
+    th { font-weight: 600; color: var(--muted); font-size: .83rem; }
+    tbody tr[data-chosen="true"] th { color: var(--mint); }
+    td { padding: 0; }
+    td button { display: grid; place-items: center; width: 100%; min-height: clamp(1.95rem, 4.1vw, 2.75rem); padding: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+    td button[aria-pressed="true"] { background: var(--mint-dark); border-color: var(--mint-dark); color: #eef6ed; font-weight: 700; }
+    td button[data-flipped="true"] { border-color: var(--coral); box-shadow: inset 0 0 0 1px var(--coral); color: var(--coral); }
+    .point-panel { margin: 0; display: grid; align-content: start; justify-items: center; gap: .35rem; }
+    canvas { width: min(100%, 17rem); aspect-ratio: 1; display: block; }
+    figcaption { width: 100%; color: var(--muted); text-align: center; line-height: 1.45; }
+    .readout { display: flex; flex-wrap: wrap; gap: .65rem 1.4rem; align-items: baseline; margin: .9rem 0 .4rem; font-variant-numeric: tabular-nums; }
+    .readout strong { color: var(--mint); display: block; font: 1.8rem Georgia, serif; }
+    .readout span { color: var(--muted); font-size: .83rem; }
+    #change { margin-bottom: 1rem; }
+    details { max-width: 76ch; margin-top: 1rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    details p { margin-top: .65rem; }
+    a { color: var(--mint); text-underline-offset: .18em; }
+    @media (max-width: 43rem) { .pair { grid-template-columns: 1fr; } }
+    @media (max-width: 23rem) { table { border-spacing: 2px; } #restore { margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Seven points, one square to flip</h1>
+    <p class="intro">Start with seven lines of three points each. Every two lines share exactly one point. That pattern makes a determinant of magnitude 24 with only 21 ones. Flip a square to see which determinants a single change can reach.</p>
+
+    <div class="controls" role="group" aria-label="Starting board">
+      <button type="button" data-board="fano" aria-pressed="true">Three points per row</button>
+      <button type="button" data-board="complement" aria-pressed="false">Four points per row</button>
+      <button type="button" id="restore">Undo flip</button>
+    </div>
+
+    <div class="readout" aria-label="Board totals" aria-live="polite">
+      <p><strong id="value"></strong><span>Absolute determinant</span></p>
+      <p><strong id="ones"></strong><span>Ones</span></p>
+      <p><strong id="primes"></strong><span>Primes that change rank</span></p>
+    </div>
+    <p id="change" aria-live="polite"></p>
+
+    <div class="pair">
+      <section class="panel" aria-label="Incidence board">
+        <table id="board">
+          <caption>Flip any square. Each new flip starts from the original board.</caption>
+          <thead><tr><th scope="col">Row</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">D</th><th scope="col">E</th><th scope="col">F</th><th scope="col">G</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+      <figure class="panel point-panel">
+        <h2>Points in the chosen row</h2>
+        <canvas id="points" width="560" height="560" role="img" aria-describedby="point-caption"></canvas>
+        <figcaption id="point-caption"></figcaption>
+      </figure>
+    </div>
+
+    <details>
+      <summary>Why 24 becomes 16 or 20</summary>
+      <p>Start in row 1 with A, B and D. Shift that pattern one point for each new row, wrapping around after G. Among the chosen positions 0, 1, 3, their ordered differences modulo 7 are 1, 2, 3, 4, 5 and 6 exactly once. This means any two different rows meet at one point. The line-and-point pattern is the Fano plane.</p>
+      <p>If the board is <var>A</var>, the matrix of row overlaps is <var>A</var><var>A</var><sup>T</sup> = 2<var>I</var> + <var>J</var>, with <var>J</var> the all-ones matrix. Its eigenvalues are 9 once and 2 six times. Since its determinant is det(<var>A</var>)², the board has absolute determinant √(9 × 2⁶) = 24. Swapping all zeros and ones gives four shared points with itself and two with each other row. The new overlap matrix is 2<var>I</var> + 2<var>J</var>, yielding √(16 × 2⁶) = 32.</p>
+      <p>A one-square edit multiplies the determinant by 1 + δ(<var>A</var>⁻¹)<sub>ji</sub>, where δ is +1 to turn a zero on or −1 to turn a one off. From the overlap matrix, <var>A</var>⁻¹ = ½<var>A</var><sup>T</sup> − ⅙<var>J</var>, giving 20 for an addition and 16 for a deletion. For the four-point complement, the same calculation gives ½<var>A</var><sup>T</sup> − ¼<var>J</var> with <var>A</var> now the complement. Either edit brings the determinant to 24.</p>
+      <p>The seven-row scan independently gives the smallest support for each determinant magnitude. <a href="seven_row_spectrum.txt">Seven-row results and their sources</a> · <a href="prime_rank_drop.html">Explore the prime rank drops</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const letters = 'ABCDEFG';
+      const n = letters.length;
+      const controls = document.querySelectorAll('[data-board]');
+      const body = document.querySelector('#board tbody');
+      const canvas = document.getElementById('points');
+      const ctx = canvas.getContext('2d');
+      const caption = document.getElementById('point-caption');
+      const detLabel = document.getElementById('value');
+      const onesLabel = document.getElementById('ones');
+      const primesLabel = document.getElementById('primes');
+      const explanation = document.getElementById('change');
+      let complement = false;
+      let changed = null;
+      const cells = Array.from({length:n}, (_, row) => {
+        const tr = body.insertRow();
+        const th = document.createElement('th');
+        th.scope = 'row';
+        th.textContent = row + 1;
+        tr.append(th);
+        return Array.from({length:n}, (_, col) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.addEventListener('click', () => {
+            changed = changed && changed.row === row && changed.col === col ? null : {row,col};
+            render();
+          });
+          tr.insertCell().append(button);
+          return button;
+        });
+      });
+
+      function determinant(matrix) {
+        if (matrix.length === 1) return matrix[0][0];
+        return matrix[0].reduce((sum, value, col) => {
+          if (!value) return sum;
+          const minor = matrix.slice(1).map(row => row.filter((_, i) => i !== col));
+          return sum + (-1) ** col * value * determinant(minor);
+        }, 0);
+      }
+
+      function primeDivisors(value) {
+        const divisors = [];
+        for (let p = 2; p <= value; p++) {
+          if (value % p) continue;
+          divisors.push(p);
+          while (value % p === 0) value /= p;
+        }
+        return divisors;
+      }
+
+      function drawPoints(row, bits) {
+        const selected = [...letters].filter((_, i) => bits[i]);
+        caption.textContent = `Row ${row + 1} contains ${selected.join(', ')}.`;
+        canvas.setAttribute('aria-label', `Seven points on a circle. ${caption.textContent}`);
+        if (!ctx) return;
+        ctx.clearRect(0, 0, 560, 560);
+        const points = [...letters].map((letter, i) => {
+          const angle = -Math.PI / 2 + (i / n) * 2 * Math.PI;
+          return {x: 280 + 211 * Math.cos(angle), y: 280 + 211 * Math.sin(angle), selected:bits[i], letter};
+        });
+        ctx.beginPath();
+        ctx.arc(280, 280, 211, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#56647b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        for (const p of points.filter(point => point.selected)) ctx.lineTo(p.x,p.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(174, 229, 192, .14)';
+        ctx.fill();
+        ctx.strokeStyle = '#aee5c0';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.font = 'bold 35px Georgia, serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const p of points) {
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,31,0,2*Math.PI);
+          ctx.fillStyle = p.selected ? '#aee5c0' : '#34405a';
+          ctx.fill();
+          ctx.fillStyle = p.selected ? '#182824' : '#f6efe1';
+          ctx.fillText(p.letter,p.x,p.y + 1);
+        }
+      }
+
+      function render() {
+        const bits = cells.map((row, r) => row.map((button, c) => {
+          const original = [0,1,3].includes((c - r + n) % n);
+          const flipped = changed?.row === r && changed?.col === c;
+          const bit = Number((complement !== original) !== flipped);
+          button.textContent = bit;
+          button.setAttribute('aria-label', `Row ${r + 1}, point ${letters[c]}, ${bit}`);
+          button.setAttribute('aria-pressed', String(Boolean(bit)));
+          button.dataset.flipped = flipped;
+          return bit;
+        }));
+        const active = changed?.row ?? 0;
+        [...body.rows].forEach((row, r) => { row.dataset.chosen = r === active; });
+        drawPoints(active, bits[active]);
+        const value = Math.abs(determinant(bits));
+        detLabel.textContent = value;
+        onesLabel.textContent = bits.flat().filter(Boolean).length;
+        primesLabel.textContent = primeDivisors(value).join(', ');
+        const initial = complement ? 32 : 24;
+        explanation.textContent = changed
+          ? `The flip at row ${changed.row + 1}, point ${letters[changed.col]} changed the determinant from ${initial} to ${value} in magnitude.`
+          : `The original ${complement ? 'four-point' : 'three-point'} pattern gives ${initial}.`;
+      }
+
+      for (const button of controls) {
+        button.addEventListener('click', () => {
+          complement = button.dataset.board === 'complement';
+          changed = null;
+          for (const item of controls) item.setAttribute('aria-pressed', String(item === button));
+          render();
+        });
+      }
+      document.getElementById('restore').addEventListener('click', () => { changed = null; render(); });
+      render();
+    })();
+  </script>
+</body>
+</html>

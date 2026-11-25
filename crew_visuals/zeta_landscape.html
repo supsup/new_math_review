@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunt for a Zero</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; }
+  body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  header { flex: none; padding: 14px 16px 4px; max-height: 40vh; overflow-y: auto; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  header p { margin: 4px 0 0; font-size: 14px; color: var(--dim); max-width: 860px; line-height: 1.45; }
+  details { margin-top: 6px; max-width: 860px; font-size: 13.5px; color: var(--dim); line-height: 1.45; }
+  summary { cursor: pointer; color: var(--ink); }
+  details p { margin: 6px 0 0; }
+  b { color: var(--ink); font-weight: normal; }
+  a { color: var(--teal); }
+  .gold { color: var(--accent); }
+  #wrap { flex: 1; min-height: 260px; position: relative; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+  #state { flex: none; padding: 4px 16px; font-size: 15px; color: var(--accent); min-height: 21px; }
+  #bar { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 14px; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #err { display: none; margin: 12px 16px; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px;
+    font: 14px monospace; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hunt for a zero off the line</h1>
+  <p>This is the critical strip, shaded by the size of zeta (stretched sideways to fit). <b>Dark wells</b> show where
+  zeta is small; white ticks mark the zeros computed on the line. Click a well for a true-shape close-up. <span class="gold">Drag a box anywhere</span> and the page counts the zeros inside it. Try to
+  find one that is not on the dashed centre line.</p>
+  <details>
+    <summary>What am I looking at?</summary>
+    <p><b>The picture.</b> Each point s of the strip (real part across, height up) is shaded by the size of zeta(s):
+    black where it is zero, bright near the pole at s = 1. The strip is only 1 wide but 50 tall, so it is drawn
+    stretched sideways, and each zero's well looks like a flat dash. The close-up is drawn at true shape and also
+    shows the direction of zeta's value as colour: around a zero every colour appears once, with bright rings where
+    the size is 1/2, 1/4 and 1/8.</p>
+    <p><b>Counting.</b> To count the zeros inside a box, the page walks around the box's edge and watches the value
+    of zeta turn. Each zero inside makes it turn around 0 once for each copy of the zero (a double zero twice), and
+    the pole at s = 1 takes one turn away (the argument principle). This counts every zero in the box, on the line
+    or not, without looking for them. If an edge passes through a zero or the pole, there is no clean count: the
+    page says so and asks you to move the edge.</p>
+    <p><b>What you will find.</b> Every zero up to height 100 sits on the line. The Riemann Hypothesis, proved in
+    2026 and checked by computer, says that this holds at every height. This page only computes; it does not prove
+    anything, and its arithmetic is ordinary floating point.</p>
+    <p id="checks"><b>Checks.</b> Running…</p>
+    <p><b>Sources.</b> Zeta off the line is computed by Borwein's alternating series with 120 terms; on the line, the
+    zeros are found by the same code as <a href="zeta_wave.html">the zeta wave</a>. The Riemann Hypothesis: Alpöge
+    with Claude, 2026-11-20; certified by the Lean FRO and the Mathlib Initiative, 2026-11-21. Page by Confluence
+    for Marginalia: crew_visuals/zeta_landscape.html in supsup/new_math_review.</p>
+  </details>
+</header>
+<div id="err"></div>
+<div id="wrap"><canvas id="c" role="img" aria-label="The critical strip coloured by the value of the Riemann zeta function, with every dark point, a zero, on the dashed centre line; boxes drawn by the reader show how many zeros they contain."></canvas></div>
+<div id="state">computing…</div>
+<div id="bar">
+  <button id="bLow" disabled>Heights 0–50</button>
+  <button id="bHigh" disabled>Heights 50–100</button>
+  <button id="bAll" disabled>Whole strip</button>
+  <button id="bRight" disabled>Right of the line</button>
+  <button id="bLeft" disabled>Left of the line</button>
+  <button id="bClear" disabled>Clear</button>
+</div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const ZETA = (function () {
+  const TAU = 2 * Math.PI;
+  const TABLE = 4096, LOGN = new Float64Array(TABLE + 1), ISQ = new Float64Array(TABLE + 1);
+  for (let n = 1; n <= TABLE; n++) { LOGN[n] = Math.log(n); ISQ[n] = 1 / Math.sqrt(n); }
+
+  // Riemann-Siegel theta, asymptotic series (good for t >= 10)
+  function theta(t) {
+    return t / 2 * Math.log(t / TAU) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * t * t * t);
+  }
+  // Hardy's Z(t), real, |Z(t)| = |zeta(1/2 + it)|: Riemann-Siegel main sum plus the first correction term
+  function Z(t, th) {
+    const a = Math.sqrt(t / TAU), N = Math.floor(a), tt = (th || theta)(t);
+    let s = 0;
+    for (let n = 1; n <= N; n++) {
+      s += n <= TABLE ? Math.cos(tt - t * LOGN[n]) * ISQ[n] : Math.cos(tt - t * Math.log(n)) / Math.sqrt(n);
+    }
+    let p = a - N, den = Math.cos(TAU * p);
+    if (Math.abs(den) < 1e-9) { p += 1e-7; den = Math.cos(TAU * p); }   // removable 0/0 at p = 1/4 and 3/4
+    const c0 = Math.cos(TAU * (p * p - p - 1 / 16)) / den;
+    return 2 * s + (N % 2 === 1 ? 1 : -1) * Math.pow(t / TAU, -0.25) * c0;
+  }
+  // zeta(1/2 + it) = exp(-i theta(t)) Z(t): the moving point in the plane
+  function zetaOnLine(t) { const z = Z(t), th = theta(t); return [z * Math.cos(th), -z * Math.sin(th)]; }
+  function slope(t) { return (Z(t + 1e-5) - Z(t - 1e-5)) / 2e-5; }
+  function density(t) { return Math.log(t / TAU) / TAU; }   // zeros per unit of height, on average
+
+  // A second, unrelated formula, used only to check the first: Borwein's accelerated alternating series (1991)
+  const BW_N = 80;
+  const BW_D = (function () {
+    const n = BW_N, d = [];
+    let term = 1 / n, acc = 0;
+    for (let i = 0; i <= n; i++) {
+      if (i > 0) term *= 4 * (n + i - 1) * (n - i + 1) / ((2 * i) * (2 * i - 1));
+      acc += term;
+      d.push(n * acc);
+    }
+    return d;
+  })();
+  function zetaBorwein(sig, t) {
+    const n = BW_N, dn = BW_D[n];
+    let re = 0, im = 0;
+    for (let k = 0; k < n; k++) {
+      const m = k + 1, c = (k % 2 === 0 ? 1 : -1) * (BW_D[k] - dn) / dn * Math.pow(m, -sig), ang = -t * Math.log(m);
+      re += c * Math.cos(ang);
+      im += c * Math.sin(ang);
+    }
+    const gg = Math.pow(2, 1 - sig), ar = 1 - gg * Math.cos(t * Math.LN2), ai = gg * Math.sin(t * Math.LN2);
+    const q = ar * ar + ai * ai;   // zeta = -(re + i im) / (1 - 2^(1-s))
+    return [-(re * ar + im * ai) / q, -(im * ar - re * ai) / q];
+  }
+  // sign changes of Z on [lo, hi], each refined by bisection, appended to out
+  function scan(lo, hi, step, th, out) {
+    let t = lo, z = Z(lo, th);
+    while (t < hi) {
+      const t2 = Math.min(t + step, hi), z2 = Z(t2, th);
+      if (z === 0 || z * z2 < 0) {
+        let a = t, b = t2, za = z;
+        for (let i = 0; i < 50; i++) {
+          const m = (a + b) / 2, zm = Z(m, th);
+          if (za * zm <= 0) b = m; else { a = m; za = zm; }
+        }
+        out.push((a + b) / 2);
+      }
+      t = t2; z = z2;
+    }
+    return out;
+  }
+  // largest |zeros found below T - (theta(T)/pi + 1)| at heights between consecutive zeros, and at hi
+  function countGap(zs, hi, th) {
+    let worst = 0;
+    for (let k = 1; k <= zs.length; k++) {
+      const T = k < zs.length ? (zs[k - 1] + zs[k]) / 2 : hi;
+      worst = Math.max(worst, Math.abs(k - (th(T) / Math.PI + 1)));
+    }
+    return worst;
+  }
+  return { theta, Z, zetaOnLine, slope, density, zetaBorwein, scan, countGap };
+})();
+
+/* ---------- the checks (run before anything is drawn; each one can fail) ---------- */
+function runChecks() {
+  const fail = [], info = {};
+  const z2 = ZETA.zetaBorwein(2, 0);
+  if (!(Math.abs(z2[0] - Math.PI * Math.PI / 6) < 1e-10 && Math.abs(z2[1]) < 1e-12)) {
+    fail.push("Borwein's series does not give zeta(2) = pi^2/6");
+  }
+  let worst = 0, worstMirror = 0;
+  const H = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+  for (const t of H) {
+    const b = ZETA.zetaBorwein(0.5, t), z = ZETA.Z(t), th = ZETA.theta(t);
+    worst = Math.max(worst, Math.hypot(b[0] - z * Math.cos(th), b[1] + z * Math.sin(th)));
+    worstMirror = Math.max(worstMirror, Math.hypot(b[0] - z * Math.cos(th), b[1] - z * Math.sin(th)));
+  }
+  info.heights = H.length; info.agree = worst; info.mirror = worstMirror;
+  if (!(worst < 0.03)) fail.push("the two formulas for zeta disagree by " + worst.toFixed(4));
+  if (!(worstMirror > 0.3)) fail.push("CONTROL: a mirrored spiral was not caught (gap " + worstMirror.toFixed(3) + ")");
+  const zs = ZETA.scan(10, 400, 0.01, ZETA.theta, []);
+  info.n400 = zs.length; info.gap400 = ZETA.countGap(zs, 400, ZETA.theta);
+  if (!(info.gap400 < 1)) fail.push("zeros found up to 400 do not match the counting formula (gap " + info.gap400.toFixed(3) + ")");
+  const wrongTheta = t => ZETA.theta(t) + t / 10;
+  info.wrong = ZETA.countGap(ZETA.scan(10, 60, 0.01, wrongTheta, []), 60, ZETA.theta);
+  if (!(info.wrong >= 1)) fail.push("CONTROL: a wrong angle formula was not caught (gap " + info.wrong.toFixed(3) + ")");
+  let minSlope = Infinity;
+  for (const r of zs) minSlope = Math.min(minSlope, Math.abs(ZETA.slope(r)));
+  info.minSlope = minSlope;
+  if (!(minSlope > 0.1)) fail.push("a zero below 400 is nearly flat (slope " + minSlope.toFixed(3) + "): the captions need rewording");
+  return { fail, info, zeros: zs };
+}
+
+/* ---------- zeta anywhere in the strip, and counting zeros by winding (no drawing) ---------- */
+const STRIP = (function () {
+  function table(n) {
+    const d = [];
+    let term = 1 / n, acc = 0;
+    for (let i = 0; i <= n; i++) {
+      if (i > 0) term *= 4 * (n + i - 1) * (n - i + 1) / ((2 * i) * (2 * i - 1));
+      acc += term;
+      d.push(n * acc);
+    }
+    return d.map((x, k) => k < n ? (k % 2 === 0 ? 1 : -1) * (x - d[n]) / d[n] : 0);
+  }
+  const C120 = table(120), C160 = table(160);
+  const LOG = Float64Array.from({ length: 160 }, (_, k) => Math.log(k + 1));
+  // Borwein's series (algorithm 2): zeta(s) = -(sum c_k (k+1)^-s) / (1 - 2^(1-s)), any s with Re s > 0
+  function zeta(sig, t, C) {
+    C = C || C120;
+    let re = 0, im = 0;
+    for (let k = 0; k < C.length - 1; k++) {
+      const c = C[k] * Math.exp(-sig * LOG[k]), a = -t * LOG[k];
+      re += c * Math.cos(a); im += c * Math.sin(a);
+    }
+    const gg = Math.pow(2, 1 - sig), ar = 1 - gg * Math.cos(t * Math.LN2), ai = gg * Math.sin(t * Math.LN2), q = ar * ar + ai * ai;
+    return [-(re * ar + im * ai) / q, -(im * ar - re * ai) / q];
+  }
+  // how many times zeta turns around 0 along the edge of a box, counter-clockwise: zeros inside minus poles inside
+  function winding(s0, s1, t0, t1) {
+    const corners = [[s0, t0], [s1, t0], [s1, t1], [s0, t1], [s0, t0]];
+    let total = 0, tiny = false;
+    for (let e = 0; e < 4; e++) {
+      const [x0, y0] = corners[e], [x1, y1] = corners[e + 1];
+      let u = 0, z = zeta(x0, y0), h = 0.01;
+      while (u < 1) {
+        let un, zn, da;
+        for (;;) {
+          un = Math.min(1, u + h);
+          zn = zeta(x0 + (x1 - x0) * un, y0 + (y1 - y0) * un);
+          da = Math.atan2(z[0] * zn[1] - z[1] * zn[0], z[0] * zn[0] + z[1] * zn[1]);
+          if (Math.abs(da) <= 0.3) break;
+          if (h < 1e-9) { tiny = true; break; }
+          h /= 2;
+        }
+        total += da; u = un; z = zn;
+        if (Math.abs(da) < 0.1) h = Math.min(0.02, h * 1.5);
+      }
+    }
+    return { count: Math.round(total / (2 * Math.PI)), raw: total / (2 * Math.PI), tiny };
+  }
+  return { zeta, winding, C120, C160 };
+})();
+
+function stripChecks(lineZeros) {
+  const fail = [], info = {};
+  let worst = 0;
+  for (const sig of [0.05, 0.25, 0.5, 0.75, 0.95, 1.4]) for (const t of [0, 5, 30, 60, 90, 100]) {
+    const a = STRIP.zeta(sig, t), b = STRIP.zeta(sig, t, STRIP.C160);
+    worst = Math.max(worst, Math.hypot(a[0] - b[0], a[1] - b[1]));
+  }
+  info.converge = worst;
+  if (!(worst < 1e-8)) fail.push("Borwein's series has not converged in the strip (" + worst.toExponential(1) + ")");
+  const z2 = STRIP.zeta(2, 0);
+  if (!(Math.abs(z2[0] - Math.PI * Math.PI / 6) < 1e-10)) fail.push("the series does not give zeta(2) = pi^2/6");
+  info.pole = STRIP.winding(0.9, 1.1, -0.1, 0.1);
+  if (info.pole.count !== -1) fail.push("a box around the pole at s = 1 should count -1, it counts " + info.pole.raw.toFixed(3));
+  info.first = STRIP.winding(0.4, 0.6, 13.9, 14.4);
+  if (info.first.count !== 1) fail.push("a box around the first zero should count 1, it counts " + info.first.raw.toFixed(3));
+  info.empty = STRIP.winding(0.4, 0.6, 15, 20);
+  if (info.empty.count !== 0) fail.push("a box with no zero should count 0, it counts " + info.empty.raw.toFixed(3));
+  info.onLine = lineZeros.filter(z => z <= 100).length;
+  info.whole = STRIP.winding(0.02, 0.98, 0, 100);
+  info.left = STRIP.winding(0.02, 0.49, 0, 100);
+  info.right = STRIP.winding(0.51, 0.98, 0, 100);
+  if (info.whole.count !== info.onLine) fail.push("the strip holds " + info.whole.count + " zeros but " + info.onLine + " were found on the line");
+  if (info.left.count !== 0 || info.right.count !== 0) fail.push("a zero was counted off the line");
+  for (const k of ["pole", "first", "empty", "whole", "left", "right"]) {
+    if (info[k].tiny || Math.abs(info[k].raw - info[k].count) > 0.05) fail.push("the count for the '" + k + "' box is not clean (" + info[k].raw.toFixed(3) + ")");
+  }
+  return { fail, info };
+}
+
+/* ---------- the drawing ---------- */
+const BG = "#0d1020", INK = "#e8e6f2", DIM = "#9a98b4", GOLD = "#f2c14e", LINE = "#39406e";
+const $ = id => document.getElementById(id);
+const wrap = $("wrap"), cv = $("c"), g = cv.getContext("2d"), state = $("state");
+const buttons = [$("bLow"), $("bHigh"), $("bAll"), $("bRight"), $("bLeft"), $("bClear")];
+const S0 = 0.02, S1 = 1.25;
+let T0 = 0, T1 = 50;
+let W = 0, H = 0, dead = false, lineZeros = [], img = null, box = null, drag = null, plot = null, info = null;
+
+function showError(msg) {
+  if (dead) return;
+  dead = true;
+  const e = $("err");
+  e.textContent = "This page stopped: a check failed, so it will not draw.\n" + msg;
+  e.style.display = "block";
+  wrap.style.display = "none";
+  for (const b of buttons) b.disabled = true;
+  state.textContent = "";
+}
+window.addEventListener("error", e => showError(String(e.message || e)));
+
+function colour(re, im) {   // hue from the direction of the value, brightness from its size, faint rings by size
+  const r = Math.hypot(re, im), hue = (Math.atan2(im, re) / (2 * Math.PI) + 1) % 1;
+  const p = Math.pow(r, 0.7);
+  let L = 0.05 + 0.8 * p / (1 + p);
+  if (r < 0.9) {   // bright rings where the size is 1/2, 1/4, 1/8, ...: a bullseye around every zero
+    const lg = Math.log2(r + 1e-300), d = lg - Math.round(lg);
+    L += 0.55 * Math.exp(-(d * d) / 0.004) * (1 - L);
+  }
+  const Sat = 0.5;
+  const q = L < 0.5 ? L * (1 + Sat) : L + Sat - L * Sat, pp = 2 * L - q;
+  const f = tt => { tt = (tt + 1) % 1; return tt < 1 / 6 ? pp + (q - pp) * 6 * tt : tt < 1 / 2 ? q : tt < 2 / 3 ? pp + (q - pp) * (2 / 3 - tt) * 6 : pp; };
+  return [255 * f(hue + 1 / 3), 255 * f(hue), 255 * f(hue - 1 / 3)];
+}
+const STOPS = [[0, [5, 7, 15]], [0.3, [29, 42, 90]], [0.55, [42, 138, 138]], [0.8, [224, 176, 74]], [1, [255, 247, 224]]];
+function shade(re, im) {     // the overview: brightness from the size of zeta only (black at zeros, white near the pole)
+  const v = Math.max(0, Math.min(1, (Math.log10(Math.hypot(re, im) + 1e-300) + 1.5) / 2.5));
+  for (let i = 1; i < STOPS.length; i++) if (v <= STOPS[i][0]) {
+    const [a, ca] = STOPS[i - 1], [b, cb] = STOPS[i], f = (v - a) / (b - a);
+    return [ca[0] + (cb[0] - ca[0]) * f, ca[1] + (cb[1] - ca[1]) * f, ca[2] + (cb[2] - ca[2]) * f];
+  }
+  return STOPS[STOPS.length - 1][1];
+}
+let lens = null, lensImg = null;
+function renderLens() {      // a true-shape close-up, one unit square, with the full colour wheel
+  const n = 120, off = document.createElement("canvas"); off.width = n; off.height = n;
+  const oc = off.getContext("2d"), data = oc.createImageData(n, n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const z = STRIP.zeta(lens.s - 0.5 + (x + 0.5) / n, lens.t + 0.5 - (y + 0.5) / n), c = colour(z[0], z[1]), o = 4 * (y * n + x);
+    data.data[o] = c[0]; data.data[o + 1] = c[1]; data.data[o + 2] = c[2]; data.data[o + 3] = 255;
+  }
+  oc.putImageData(data, 0, 0); lensImg = off;
+}
+function render() {          // the overview strip, computed once per size at about two pixels per cell
+  const w = Math.max(40, Math.round(plot.w / 2)), h = Math.max(80, Math.round(plot.h / 2));
+  const off = document.createElement("canvas"); off.width = w; off.height = h;
+  const oc = off.getContext("2d"), data = oc.createImageData(w, h);
+  const C = STRIP.C120, n = C.length - 1, LOGK = [], cosT = new Float64Array(n), sinT = new Float64Array(n);
+  for (let k = 0; k < n; k++) LOGK.push(Math.log(k + 1));
+  const colPow = [];
+  for (let x = 0; x < w; x++) {
+    const sig = S0 + (S1 - S0) * (x + 0.5) / w, row = new Float64Array(n + 2);
+    for (let k = 0; k < n; k++) row[k] = C[k] * Math.exp(-sig * LOGK[k]);
+    row[n] = Math.pow(2, 1 - sig); row[n + 1] = sig;
+    colPow.push(row);
+  }
+  for (let y = 0; y < h; y++) {
+    const t = T1 - (T1 - T0) * (y + 0.5) / h;
+    for (let k = 0; k < n; k++) { cosT[k] = Math.cos(t * LOGK[k]); sinT[k] = -Math.sin(t * LOGK[k]); }
+    const c2 = Math.cos(t * Math.LN2), s2 = Math.sin(t * Math.LN2);
+    for (let x = 0; x < w; x++) {
+      const row = colPow[x];
+      let re = 0, im = 0;
+      for (let k = 0; k < n; k++) { re += row[k] * cosT[k]; im += row[k] * sinT[k]; }
+      const ar = 1 - row[n] * c2, ai = row[n] * s2, q = ar * ar + ai * ai;
+      const rgb = shade(-(re * ar + im * ai) / q, -(im * ar - re * ai) / q), o = 4 * (y * w + x);
+      data.data[o] = rgb[0]; data.data[o + 1] = rgb[1]; data.data[o + 2] = rgb[2]; data.data[o + 3] = 255;
+    }
+  }
+  oc.putImageData(data, 0, 0);
+  img = off;
+}
+
+function resize() {
+  const r = wrap.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const pw = Math.min(W - 70, Math.max(220, Math.min(460, W * 0.42))), ph = H - 42;
+  plot = { x: 46, y: 10, w: pw, h: ph };
+  if (info) { render(); draw(); }
+}
+const SX = s => plot.x + plot.w * (s - S0) / (S1 - S0), TY = t => plot.y + plot.h * (T1 - t) / (T1 - T0);
+const XS = x => S0 + (S1 - S0) * (x - plot.x) / plot.w, YT = y => T1 - (T1 - T0) * (y - plot.y) / plot.h;
+
+function draw() {
+  g.fillStyle = BG; g.fillRect(0, 0, W, H);
+  g.imageSmoothingEnabled = true;
+  g.drawImage(img, plot.x, plot.y, plot.w, plot.h);
+  g.font = "12px Georgia, serif"; g.fillStyle = DIM; g.textAlign = "right";
+  for (let t = T0; t <= T1; t += 10) g.fillText(String(t), plot.x - 6, TY(t) + 4);
+  g.save(); g.translate(14, plot.y + plot.h / 2); g.rotate(-Math.PI / 2); g.textAlign = "center"; g.fillText("height", 0, 0); g.restore();
+  g.textAlign = "center";
+  for (const [s, lab] of [[0, "0"], [0.5, "1/2"], [1, "1"]]) if (s >= S0) g.fillText(lab, SX(s), plot.y + plot.h + 16);
+  g.fillText("real part", plot.x + plot.w / 2, plot.y + plot.h + 29);
+  g.strokeStyle = "rgba(255, 255, 255, 0.85)"; g.setLineDash([6, 5]); g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(SX(0.5), plot.y); g.lineTo(SX(0.5), plot.y + plot.h); g.stroke();
+  g.strokeStyle = "rgba(255, 255, 255, 0.35)"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(SX(1), plot.y); g.lineTo(SX(1), plot.y + plot.h); g.stroke();
+  g.setLineDash([]);
+  for (const z of lineZeros) if (z >= T0 && z <= T1) {
+    g.strokeStyle = "rgba(255, 255, 255, 0.9)"; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(SX(0.5) - 12, TY(z)); g.lineTo(SX(0.5) - 6, TY(z)); g.stroke();
+  }
+  const b = drag || box;
+  if (b) {
+    const x0 = SX(Math.min(b.s0, b.s1)), x1 = SX(Math.max(b.s0, b.s1)), y0 = TY(Math.max(b.t0, b.t1)), y1 = TY(Math.min(b.t0, b.t1));
+    g.strokeStyle = GOLD; g.lineWidth = 2; g.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    if (box && !drag) {
+      g.font = "bold 15px Georgia, serif"; g.fillStyle = GOLD; g.textAlign = "left";
+      const label = box.count === null ? "move the edge" : box.count === 1 ? "1 zero" : box.count + " zeros", tx = x1 + 8 + g.measureText(label).width > W ? x0 - 8 - g.measureText(label).width : x1 + 8;
+      g.fillText(label, tx, Math.max(plot.y + 14, y0 + 16));
+    }
+  }
+  const side = W - (plot.x + plot.w) > 230, ls = side ? Math.min(240, W - plot.x - plot.w - 48, plot.h - 150) : Math.min(150, plot.w * 0.55);
+  if (lensImg && ls > 80) {
+    const lx0 = side ? plot.x + plot.w + 24 : plot.x + plot.w - ls - 6, ly0 = side ? plot.y + 150 : plot.y + 6;
+    g.fillStyle = BG; g.fillRect(lx0 - 3, ly0 - 3, ls + 6, ls + 22);
+    g.imageSmoothingEnabled = true; g.drawImage(lensImg, lx0, ly0, ls, ls);
+    g.strokeStyle = GOLD; g.lineWidth = 1.5; g.strokeRect(lx0, ly0, ls, ls);
+    g.strokeStyle = "rgba(255, 255, 255, 0.8)"; g.setLineDash([4, 4]);
+    const lineX = lx0 + ls * (0.5 - (lens.s - 0.5));
+    if (lineX > lx0 && lineX < lx0 + ls) { g.beginPath(); g.moveTo(lineX, ly0); g.lineTo(lineX, ly0 + ls); g.stroke(); }
+    g.setLineDash([]);
+    g.font = "12px Georgia, serif"; g.fillStyle = INK; g.textAlign = "left";
+    g.fillText((side ? "close-up, true shape: s = " : "s = ") + lens.s.toFixed(2) + " + " + lens.t.toFixed(2) + "i", lx0, ly0 + ls + 15);
+    g.strokeStyle = GOLD; g.lineWidth = 1; g.strokeRect(SX(lens.s - 0.5), TY(lens.t + 0.5), SX(lens.s + 0.5) - SX(lens.s - 0.5), TY(lens.t - 0.5) - TY(lens.t + 0.5));
+  }
+  if (side) {
+    const lx = plot.x + plot.w + 24;
+    g.font = "13px Georgia, serif"; g.textAlign = "left"; g.fillStyle = INK;
+    const lines = ["dark wells: zeta is small there (stretched sideways)", "bright, at the bottom near 1: the pole at s = 1", "dashed line: real part 1/2; white ticks: zeros found on it", "drag a box to count the zeros in it", "click anywhere for a true-shape close-up:", "at a zero, every colour meets"];
+    lines.forEach((s, i) => { g.fillStyle = i === 3 || i === 4 ? GOLD : INK; g.fillText(s, lx, plot.y + 20 + 20 * i); });
+  }
+}
+
+function setBox(s0, s1, t0, t1) {
+  const a = Math.max(S0, Math.min(s0, s1)), bb = Math.min(S1, Math.max(s0, s1));
+  const c = Math.max(T0, Math.min(t0, t1)), d = Math.min(T1, Math.max(t0, t1));
+  if (bb - a < 0.01 || d - c < 0.05) { box = null; draw(); return; }
+  const w = STRIP.winding(a, bb, c, d);
+  const clean = !w.tiny && isFinite(w.raw) && Math.abs(w.raw - w.count) < 0.05;
+  box = { s0: a, s1: bb, t0: c, t1: d, count: clean ? w.count : null };
+  const onLine = a < 0.5 && bb > 0.5 ? lineZeros.filter(z => z > c && z < d).length : 0;
+  state.textContent = !clean
+    ? "your box: an edge passes through or too close to a zero or the pole, so there is no clean count; move the edge a little"
+    : "your box: real part " + a.toFixed(2) + " to " + bb.toFixed(2) + ", height " + c.toFixed(1) + " to " + d.toFixed(1) +
+      "  ·  zeros inside, counted by turning: " + w.count + "  ·  found on the line inside it: " + onLine;
+  draw();
+}
+cv.addEventListener("pointerdown", e => {
+  if (!info) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (x < plot.x || x > plot.x + plot.w || y < plot.y || y > plot.y + plot.h) return;
+  drag = { s0: XS(x), s1: XS(x), t0: YT(y), t1: YT(y) };
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const r = cv.getBoundingClientRect();
+  drag.s1 = XS(Math.max(plot.x, Math.min(plot.x + plot.w, e.clientX - r.left)));
+  drag.t1 = YT(Math.max(plot.y, Math.min(plot.y + plot.h, e.clientY - r.top)));
+  draw();
+});
+cv.addEventListener("pointerup", () => {
+  if (!drag) return;
+  const d = drag; drag = null;
+  if (Math.abs(SX(d.s1) - SX(d.s0)) < 4 && Math.abs(TY(d.t1) - TY(d.t0)) < 4) {
+    let best = null;
+    for (const z of lineZeros) if (Math.abs(z - d.t0) < 1.5 && Math.abs(d.s0 - 0.5) < 0.3 && (!best || Math.abs(z - d.t0) < Math.abs(best - d.t0))) best = z;
+    lens = best ? { s: 0.5, t: best } : { s: Math.max(0.5, Math.min(S1 - 0.5, d.s0)), t: Math.max(T0 + 0.5, Math.min(T1 - 0.5, d.t0)) };
+    renderLens(); draw(); return;
+  }
+  setBox(d.s0, d.s1, d.t0, d.t1);
+});
+function view(a, b) {
+  T0 = a; T1 = b; box = null; state.textContent = defaultState();
+  const first = lineZeros.find(z => z > T0 + 0.5 && z < T1 - 0.5);
+  lens = { s: 0.5, t: first !== undefined ? first : (T0 + T1) / 2 }; renderLens();
+  render(); draw();
+}
+$("bLow").onclick = () => view(0, 50);
+$("bHigh").onclick = () => view(50, 100);
+$("bAll").onclick = () => setBox(S0, 0.98, T0, T1);
+$("bRight").onclick = () => setBox(0.51, 0.98, T0, T1);
+$("bLeft").onclick = () => setBox(S0, 0.49, T0, T1);
+$("bClear").onclick = () => { box = null; state.textContent = defaultState(); draw(); };
+function defaultState() {
+  return info.onLine + " zeros found on the line up to height 100, and the strip holds no others  ·  drag a box to count";
+}
+
+(function start() {
+  const R = runChecks();
+  if (R.fail.length) { showError(R.fail.join("\n")); return; }
+  lineZeros = R.zeros;
+  const P = stripChecks(lineZeros);
+  if (P.fail.length) { showError(P.fail.join("\n")); return; }
+  info = P.info;
+  $("checks").innerHTML = "<b>Checks.</b> Before drawing, the page runs the zeta wave's checks, then checks its " +
+    "off-line formula: Borwein's series with 120 terms agrees with 160 terms at 36 sample points across the strip up to " +
+    "height 100 (largest difference " + info.converge.toExponential(1) + ") and gives ζ(2) = π²/6. The counting walk must get " +
+    "three known answers: −1 for a box around the pole at s = 1 (" + info.pole.raw.toFixed(3) + "), 1 around the first " +
+    "zero (" + info.first.raw.toFixed(3) + "), 0 for a box with none (" + info.empty.raw.toFixed(3) + "). Then the strip " +
+    "from real part 0.02 to 0.98 and height 0 to 100 must hold exactly as many zeros as were found on the line, " + info.onLine + " (it counts " +
+    info.whole.raw.toFixed(3) + "), and boxes from real part 0.02 to 0.49 and from 0.51 to 0.98, the same heights, " +
+    "must hold none (" + info.left.raw.toFixed(3) + " and " + info.right.raw.toFixed(3) + "). If any check fails, you get " +
+    "an error instead of a picture.";
+  for (const b of buttons) b.disabled = false;
+  state.textContent = defaultState();
+  lens = { s: 0.5, t: lineZeros[0] }; renderLens();
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener("resize", resize);
+  const hash = new URLSearchParams(location.hash.slice(1));
+  if (hash.has("box")) { const v = hash.get("box").split(",").map(Number); if (v.length === 4 && v.every(isFinite)) setBox(...v); }
+})();
+</script>
+</body>
+</html>

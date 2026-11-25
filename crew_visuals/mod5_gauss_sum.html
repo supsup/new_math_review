@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Four arrows set the mirror</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf7ee;
+      --ink: #292d3b;
+      --muted: #51586b;
+      --violet: #51487e;
+      --edge: #cbc5d5;
+      background: #eae6f0;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 57rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--violet); text-underline-offset: .17em; }
+    h1 { font: clamp(2.65rem, 8vw, 4.55rem)/1.03 Georgia, serif; letter-spacing: -.046em; margin: .55rem 0 .7rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: flex; gap: .65rem 1.3rem; flex-wrap: wrap; margin: 1rem 0 .7rem; }
+    .controls label { font-weight: 650; }
+    .rotator { flex: 1 1 14rem; display: grid; grid-template-columns: 1fr auto; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.4rem; margin: 0; accent-color: var(--violet); }
+    select { min-height: 2.6rem; margin-left: .28rem; padding: .26rem .48rem; border: 1px solid var(--edge); border-radius: .3rem; background: #f0edf6; color: var(--ink); font: inherit; }
+    :focus-visible { outline: .17rem solid var(--violet); outline-offset: .15rem; }
+    .lab { display: grid; grid-template-columns: minmax(0, 1.33fr) minmax(0, 1fr); gap: .95rem; align-items: start; }
+    figure { margin: 0; }
+    canvas { display: block; height: 18rem; width: 100%; border-radius: .4rem; background: #eeeaf3; }
+    figcaption { font-size: .88rem; margin-top: .47rem; }
+    .numbers { border: 1px solid var(--edge); border-radius: .4rem; padding: .72rem .85rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .89rem; }
+    th, td { text-align: left; padding: .2rem .25rem; border-bottom: 1px solid var(--edge); }
+    output, dd, td { font-variant-numeric: tabular-nums; }
+    dl { margin: .7rem 0 .3rem; }
+    dt { color: var(--muted); font-size: .85rem; }
+    dd { margin: .1rem 0 .52rem; font-weight: 700; }
+    #phase { font-weight: 650; color: var(--violet); }
+    details { border-top: 1px solid var(--edge); margin-top: .95rem; padding-top: .65rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 41rem) { .lab { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="mirror_mix_all_angles.html">Back to the four-loop band</a>
+    <h1>Four arrows set the mirror</h1>
+    <p class="intro">Why do we rotate the mod 5 L-functions before mixing them? The amount comes from adding four arrows. Start with four fifth roots of unity, turn each arrow by its character value, then add them tip to tail.</p>
+    <div class="controls">
+      <div class="rotator">
+        <label for="turn">Apply the character’s turns</label><output id="turn-value" for="turn"></output>
+        <input id="turn" type="range" min="0" max="100" value="100">
+      </div>
+      <label for="sign">Character
+        <select id="sign"><option value="1">χ(2) = i</option><option value="-1">χ(2) = −i</option></select>
+      </label>
+    </div>
+    <div class="lab">
+      <figure>
+        <canvas id="arrows" role="img" aria-label="Four complex arrows added tip to tail, with their sum in violet"></canvas>
+        <figcaption>The thin arrows start at zero and show the original fifth roots. The colored path adds the arrows after turning. Violet shows their sum.</figcaption>
+      </figure>
+      <div class="numbers">
+        <table>
+          <thead><tr><th scope="col">Residue</th><th scope="col">Character</th><th scope="col">Turn</th></tr></thead>
+          <tbody id="characters"></tbody>
+        </table>
+        <dl>
+          <dt id="sum-label">Gauss sum</dt><dd id="sum"></dd>
+          <dt>Root number ε at full turn</dt><dd id="epsilon"></dd>
+        </dl>
+        <p id="phase"></p>
+      </div>
+    </div>
+    <p>At the full turn the sum has length √5. Dividing by i√5 brings it onto the unit circle and turns it a quarter-turn clockwise. This gives the root number ε of the character. Switching to the conjugate character reflects ε across the real axis.</p>
+    <details>
+      <summary>Why the half angle appears</summary>
+      <p>After adding the gamma factor and the conductor factor, the functional equation relates the completed value <var>z</var> on the center line to its conjugate by <var>z</var> = ε <span aria-label="conjugate of z">z̄</span>. If the argument of ε is φ, this says the value lies on the line at angle φ/2 modulo 180°. Rotating by −φ/2 makes the value real. The conjugate character gets the opposite rotation. Now both ingredients are real on the center line, and every real mixture keeps the same reflection. <a href="https://dlmf.nist.gov/25.15.E5">The Dirichlet L-function equation</a></p>
+    </details>
+    <details>
+      <summary>Work out the exact sum</summary>
+      <p>Modulo 5, the powers of 2 run through 1, 2, 4, 3. Multiplicativity gives the four values 1, <var>i</var>, −1, −<var>i</var> in that order. For χ(2) = <var>i</var>, pair the arrows for residues 1 and 4. Their sum is 2<i>i</i> sin 72°. Pair residues 2 and 3 to get −2 sin 144°. The total is therefore 2<i>i</i> sin 72° − 2 sin 144°.</p>
+      <p>The four nontrivial fifth roots sum to −1, so cos 72° + cos 144° = −½. The double-angle identity gives sin² 72° + sin² 144° = 5/4. This makes the squared length of the Gauss sum 5. The replay uses exactly these two sine terms to build ε. <a href="https://dlmf.nist.gov/25.15.E6">The Gauss sum definition</a> · <a href="../tools/check_mirror_mix_contacts.py">The root number in the interval replay</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const turns = byId('turn'), sign = byId('sign'), canvas = byId('arrows');
+      const ctx = canvas.getContext('2d');
+      const residues = [1, 2, 3, 4], angleTurns = [0, 90, -90, 180];
+      const colors = ['#2f6c59', '#a6543a', '#346594', '#8d6427'];
+      const degrees = Math.PI / 180;
+      const vector = angle => [Math.cos(angle * degrees), Math.sin(angle * degrees)];
+      const roots = residues.map(r => vector(72 * r));
+      const format = value => (Math.abs(value) < .000005 ? '0.00000' : value.toFixed(5)).replace('-', '−');
+      const asComplex = ([x, y]) => format(x) + (y < -.000005 ? ' − ' : ' + ') + format(Math.abs(y)) + 'i';
+      const labels = byId('characters');
+      for (const residue of residues) {
+        const row = labels.insertRow();
+        for (const entry of [residue, '', '']) row.insertCell().textContent = entry;
+        row.cells[0].style.color = colors[residue - 1];
+      }
+
+      function draw(vectors, sum) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const path = [[0, 0]];
+        for (const [dx, dy] of vectors) {
+          const [x, y] = path[path.length - 1];
+          path.push([x + dx, y + dy]);
+        }
+        const lower = [0,1].map(i => Math.min(-1.12, ...path.map(p => p[i])));
+        const upper = [0,1].map(i => Math.max(1.12, ...path.map(p => p[i])));
+        const unit = Math.min((w - 34) / (upper[0] - lower[0]), (h - 40) / (upper[1] - lower[1]));
+        const at = ([x, y]) => [w/2 + unit*(x - (lower[0] + upper[0])/2), h/2 - unit*(y - (lower[1] + upper[1])/2)];
+        const [ox, oy] = at([0,0]);
+        ctx.strokeStyle = '#c5bfcf';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(8, oy);
+        ctx.lineTo(w-8, oy);
+        ctx.moveTo(ox, 8);
+        ctx.lineTo(ox, h-8);
+        ctx.stroke();
+
+        function arrow(start, end, color, width) {
+          const [x0, y0] = at(start), [x1, y1] = at(end);
+          const angle = Math.atan2(y1-y0,x1-x0);
+          ctx.strokeStyle = color;
+          ctx.fillStyle = color;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(x0,y0);
+          ctx.lineTo(x1,y1);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x1,y1);
+          for (const side of [-.44,.44]) ctx.lineTo(x1-9*Math.cos(angle+side), y1-9*Math.sin(angle+side));
+          ctx.fill();
+        }
+
+        for (const root of roots) arrow([0,0], root, '#a89eb7', .9);
+        arrow([0,0], sum, '#51487e', 3);
+        for (const [i, color] of colors.entries()) arrow(path[i], path[i+1], color, 2);
+      }
+
+      function update() {
+        const portion = turns.valueAsNumber / 100;
+        const direction = Number(sign.value);
+        const symbols = direction === 1 ? ['1', 'i', '−i', '−1'] : ['1', '−i', 'i', '−1'];
+        const turnsAtFull = angleTurns.map((angle, i) => i === 3 ? 180 : direction * angle);
+        const vectors = residues.map((residue, i) => vector(72*residue + turnsAtFull[i]*portion));
+        const sum = vectors.reduce(([x,y],[dx,dy]) => [x + dx, y + dy], [0,0]);
+        const epsilon = [2*Math.sin(72*degrees)/Math.sqrt(5), direction*2*Math.sin(144*degrees)/Math.sqrt(5)];
+        const rotation = -Math.atan2(epsilon[1],epsilon[0]) / (2*degrees);
+        for (const [i, row] of Array.from(labels.rows).entries()) {
+          row.cells[1].textContent = symbols[i];
+          row.cells[2].textContent = String(turnsAtFull[i]).replace('-', '−') + '°';
+        }
+        byId('turn-value').textContent = Math.round(100*portion) + '%';
+        byId('sum-label').textContent = portion === 1 ? 'Gauss sum' : 'Sum during the turn';
+        byId('sum').textContent = asComplex(sum);
+        byId('epsilon').textContent = asComplex(epsilon);
+        byId('phase').textContent = 'Rotate the completed values by ' + rotation.toFixed(3).replace('-', '−') + '° to make them real on the line.';
+        draw(vectors, sum);
+      }
+
+      turns.addEventListener('input',update);
+      sign.addEventListener('change',update);
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

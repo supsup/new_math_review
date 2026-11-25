@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How many pairs are off the line?</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf8ef;
+      --ink: #263539;
+      --muted: #526260;
+      --teal: #245e61;
+      --clay: #92513a;
+      --edge: #becfc9;
+      background: #e4ebe5;
+      color: var(--ink);
+      font: 100%/1.54 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 59rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .16em; }
+    h1 { font: clamp(2.6rem, 8vw, 4.6rem)/1.04 Georgia, serif; letter-spacing: -.044em; margin: .56rem 0 .7rem; }
+    p { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    .control { display: grid; grid-template-columns: 1fr auto; gap: .08rem .6rem; max-width: 40rem; }
+    label { font-weight: 650; }
+    output, dd { font-variant-numeric: tabular-nums; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.5rem; margin: 0; accent-color: var(--clay); }
+    .quick { display: flex; flex-wrap: wrap; gap: .4rem; margin: .35rem 0 .9rem; }
+    button { font: inherit; color: var(--ink); border: 1px solid var(--edge); background: #edf1e8; border-radius: .3rem; min-height: 2.65rem; padding: .3rem .65rem; cursor: pointer; }
+    button:hover { background: #e1ece1; }
+    :focus-visible { outline: .17rem solid var(--clay); outline-offset: .15rem; }
+    figure { margin: .75rem 0 1rem; }
+    canvas { width: 100%; height: 15rem; display: block; border-radius: .4rem; background: #eef2eb; }
+    figcaption { margin-top: .45rem; font-size: .88rem; }
+    #count { margin: .9rem 0 .12rem; color: var(--teal); font: 1.64rem/1.2 Georgia, serif; }
+    dl { display: flex; flex-wrap: wrap; gap: .42rem; margin: .45rem 0 .9rem; }
+    .band { flex: 0 1 6.6rem; text-align: center; padding: .22rem .32rem; border: 1px solid var(--edge); border-radius: .24rem; color: var(--muted); }
+    .band.out { color: var(--teal); background: #e2eeea; border-color: #a3c1bb; }
+    .band dt { font-size: .82rem; }
+    .band dd { margin: 0; font-weight: 650; }
+    details { border-top: 1px solid var(--edge); margin-top: .95rem; padding-top: .65rem; }
+    summary { font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="spira_four_pairs.html">Back to the four-pair portrait</a>
+    <h1>How many pairs are off the line?</h1>
+    <p class="intro">At 45° the mod 5 mixture is Davenport–Heilbronn, and exactly four pairs are off the center line at heights 76–177. Turn the dial farther and the tally rises to fifteen. Every step in the curve is a certified meeting of two zeros on the center line.</p>
+    <div class="control">
+      <label for="angle">Mixing angle τ</label><output id="angle-value" for="angle"></output>
+      <input id="angle" type="range" min="0" max="180" step=".1" value="45">
+    </div>
+    <div class="quick">
+      <button type="button" data-angle="0">0° · First character</button>
+      <button type="button" data-angle="45">45° · Davenport–Heilbronn</button>
+      <button type="button" data-angle="90">90° · Conjugate character</button>
+      <button type="button" data-angle="135">135° · Fifteen pairs</button>
+    </div>
+    <figure>
+      <canvas id="tally" role="img" aria-label="Step plot of the number of off-line pairs from angle zero to 180 degrees"></canvas>
+      <figcaption>Angles run left to right. A rise is a pair leaving the line, and a fall is a pair returning. The orange marker follows the dial.</figcaption>
+    </figure>
+    <p id="count" aria-live="polite"></p>
+    <dl id="bands" aria-label="Off-line pairs by height"></dl>
+    <p>The highest level lasts from just after 128.113004° to just before 153.475809°. At 135° seven of the fifteen pairs are between heights 115 and 166. Counts include multiplicity.</p>
+    <p>The same dial changes the coefficients of the series. <a href="at_six_the_product_breaks.html">Try the first coefficient where the prime product breaks</a>.</p>
+    <p>Extending the sweep to heights 0–201 raises the maximum to 27 pairs. <a href="spira_through_201.html">See all three height bands together</a>.</p>
+    <details>
+      <summary>Why the forty steps give the complete count</summary>
+      <p>The seven height intervals on this page cover the whole band. At angle zero each starts with all its zeros on the line. The horizontal boundaries permit only simple line zeros, which stay on the line by reflection whenever they cross a boundary. A bound on the original Dirichlet series forces the far half-planes to stay clear for every real mixture. These checks prevent any off-line pair from entering or leaving through the edges.</p>
+      <p>Each double root on the line is a fold. As the angle passes it, one reflected pair either appears off the line or returns to it. The verified folds consist of eight contacts at heights 76–96, six near the three higher Spira pairs, and twenty-six in the intervening gaps. Adding or subtracting one at each contact gives the tally, including in the gaps where individual paths need not be followed. <a href="mirror_mix_all_angles.html">The first height band</a> · <a href="spira_four_pairs.html">The other three Spira bands</a> · <a href="spira_continuous_band.txt">Marlow’s gap and full-band certificates</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      // For each height range, the rounded leave angles and return angles.
+      const bands = [
+        ['76–96', [128.11300406,99.42592712,23.73365740,109.62117944], [157.08063514,161.33062322,84.93064220,167.33002755]],
+        ['96–113', [97.01666810,122.37696898,102.79701592], [175.75163042,173.28530869,164.76069666]],
+        ['113–115', [25.97635574], [61.20255810]],
+        ['115–166', [94.73590217,92.49117087,97.10493272,95.90687073,105.67766311,106.92897289,105.5326035,98.66586303],
+          [176.043929287,163.20655384,164.93746346,168.45979084,175.06856830,153.47580924,108.6873063,175.037322352]],
+        ['166–167', [41.5439850], [70.3340133]],
+        ['167–176', [127.70184613,94.91166610], [157.50471871,154.14432923]],
+        ['176–177', [9.54199095], [65.68904696]]
+      ];
+      const events = bands.flatMap(([, leaves, returns]) => [
+        ...leaves.map(angle => [angle, 1]),
+        ...returns.map(angle => [angle, -1])
+      ]).sort(([a], [b]) => a-b);
+      const byId = id => document.getElementById(id);
+      const slider = byId('angle'), canvas = byId('tally'), ctx = canvas.getContext('2d');
+      const rows = bands.map(([label]) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'band';
+        const title = document.createElement('dt'), value = document.createElement('dd');
+        title.textContent = label;
+        wrapper.append(title, value);
+        byId('bands').appendChild(wrapper);
+        return { wrapper, value };
+      });
+
+      function draw(angle, count) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const left = 35, right = w - 27, top = 21, bottom = h - 35;
+        const x = value => left + (right - left) * value / 180;
+        const y = value => bottom - (bottom - top) * value / 16;
+        ctx.font = '12px system-ui';
+        ctx.fillStyle = '#526260';
+        ctx.textAlign = 'right';
+        ctx.strokeStyle = '#c5d2ca';
+        for (const level of [0,5,10,15]) {
+          const row = y(level);
+          ctx.fillText(String(level), left - 6, row + 4);
+          ctx.beginPath();
+          ctx.moveTo(left, row);
+          ctx.lineTo(right, row);
+          ctx.stroke();
+        }
+        ctx.textAlign = 'center';
+        for (const tick of [0,45,90,135,180]) ctx.fillText(tick + '°', x(tick), bottom + 20);
+
+        let at = 0;
+        ctx.beginPath();
+        ctx.moveTo(x(0), y(0));
+        for (const [eventAngle, change] of events) {
+          ctx.lineTo(x(eventAngle), y(at));
+          at += change;
+          ctx.lineTo(x(eventAngle), y(at));
+        }
+        ctx.lineTo(x(180), y(0));
+        ctx.fillStyle = '#c7ddd6';
+        ctx.fill();
+        ctx.strokeStyle = '#245e61';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.strokeStyle = '#92513a';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(x(angle), top);
+        ctx.lineTo(x(angle), bottom + 4);
+        ctx.stroke();
+        ctx.fillStyle = '#92513a';
+        ctx.beginPath();
+        ctx.arc(x(angle), y(count), 4.8, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      function update() {
+        const angle = slider.valueAsNumber;
+        let count = 0;
+        for (const [i, [, leaves, returns]] of bands.entries()) {
+          const subtotal = leaves.filter(value => value < angle).length - returns.filter(value => value <= angle).length;
+          count += subtotal;
+          const { wrapper, value } = rows[i];
+          wrapper.classList.toggle('out', subtotal > 0);
+          value.textContent = subtotal;
+        }
+        byId('angle-value').textContent = angle + '°';
+        byId('count').textContent = count === 1 ? '1 pair off the line' : count + ' pairs off the line';
+        draw(angle, count);
+      }
+      slider.addEventListener('input', update);
+      for (const button of document.querySelectorAll('[data-angle]')) {
+        button.addEventListener('click', () => {
+          slider.value = button.dataset.angle;
+          update();
+        });
+      }
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

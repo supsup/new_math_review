@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twenty-seven pairs off the line</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ee;
+      --ink: #30343b;
+      --muted: #5b646a;
+      --edge: #c8cfcd;
+      --low: #24746e;
+      --mid: #65528c;
+      --high: #a05230;
+      background: #e8ece9;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 59rem; margin: auto; background: var(--paper); padding: clamp(1rem, 5vw, 3rem); }
+    a { color: #235e5f; text-underline-offset: .17em; }
+    h1 { font: clamp(2.6rem, 7.6vw, 4.65rem)/1.01 Georgia, serif; letter-spacing: -.05em; margin: .55rem 0 .72rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .dial { display: flex; align-items: center; gap: .35rem .65rem; flex-wrap: wrap; }
+    .dial label { font-weight: 650; }
+    .dial output { min-width: 3.6rem; font-variant-numeric: tabular-nums; }
+    input[type="range"] { accent-color: var(--low); flex: 1 1 9rem; min-width: 0; min-height: 2.4rem; }
+    .presets { display: flex; gap: .45rem; flex-wrap: wrap; margin: .28rem 0 .82rem; }
+    button { background: #edf2eb; color: #235e5f; padding: .3rem .6rem; min-height: 2.55rem;
+      border: 1px solid var(--edge); border-radius: .31rem; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: #235e5f; color: white; }
+    :focus-visible { outline: .16rem solid var(--high); outline-offset: .16rem; }
+    figure { margin: 0 0 .85rem; }
+    canvas { width: 100%; height: 16rem; display: block; background: #fffdf7; border: 1px solid var(--edge); border-radius: .4rem; }
+    figcaption { margin-top: .38rem; font-size: .86rem; }
+    #total { color: #235e5f; font-weight: 700; margin: .55rem 0; }
+    .bands { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .36rem; margin: 0 0 .9rem; }
+    .bands > div { background: #fffcf5; padding: .35rem .46rem; border: 1px solid var(--edge); border-radius: .25rem; }
+    .bands > div:nth-child(1) { border-top: .25rem solid var(--low); }
+    .bands > div:nth-child(2) { border-top: .25rem solid var(--mid); }
+    .bands > div:nth-child(3) { border-top: .25rem solid var(--high); }
+    dt { font-size: .79rem; color: var(--muted); }
+    dd { font-size: 1.22rem; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: .94rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    .counts { padding-left: 1.18rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="spira_angle_tally.html">Back to the middle-height count</a>
+    <h1>Twenty-seven pairs off the line</h1>
+    <p class="intro">Turn the same mod-5 dial, now counting all the reflected pairs from height 0 to 201. The Davenport–Heilbronn mix at 45° has four. At 135° there are twenty-seven, spread across all three height bands.</p>
+
+    <div class="dial">
+      <label for="angle">Mixing angle</label>
+      <input id="angle" type="range" min="0" max="180" step=".1" value="135">
+      <output id="angle-value" for="angle"></output>
+    </div>
+    <div class="presets" aria-label="Angles to try">
+      <button type="button" data-angle="0">0° · Unmixed</button>
+      <button type="button" data-angle="45">45° · Four pairs</button>
+      <button type="button" data-angle="135">135° · Twenty-seven pairs</button>
+    </div>
+    <figure>
+      <canvas id="plot" role="img" aria-label="Stacked step plot of reflected pairs at each mixing angle. The three layers count heights 0 to 76, 76 to 177 and 177 to 201. The total peaks twice at 27 pairs."></canvas>
+      <figcaption>The height of the whole curve is the total. Each step adds a pair that left the center line or removes one that returned to it.</figcaption>
+    </figure>
+    <p id="total" role="status"></p>
+    <dl class="bands" aria-label="Pair counts by height">
+      <div><dt>Heights 0–76</dt><dd id="low-count"></dd></div>
+      <div><dt>Heights 76–177</dt><dd id="middle-count"></dd></div>
+      <div><dt>Heights 177–201</dt><dd id="high-count"></dd></div>
+    </dl>
+    <p>The two stretches with 27 pairs are approximately <span id="peaks"></span>. At a meeting angle the merged zero sits on the line.</p>
+    <p>At 135°, independent disks locate every one of the 27 pairs. <a href="spira_peak_pairs.html">See where the pairs go</a>.</p>
+    <p>Height 200 would break the counting rule. At about 122.245°, a pair passes through that boundary at real parts near 1.227 and −0.227. At height 201 every zero that crosses the boundary stays on the center line. <a href="zero_beyond_one.html">See the crossing at 200</a>.</p>
+
+    <details>
+      <summary>Why no pair escapes the count</summary>
+      <p>Start at angle 0 with just one Dirichlet <var>L</var>-function. A winding count on the right half of the contour, doubled by reflection, gives 131 zeros. The signs on the center line change in 131 disjoint intervals, putting all these zeros on the line before the dial moves.</p>
+      <p>We use the two terms <var>A</var> and <var>B</var> of the mixture. A simple zero on the center line stays there under a small change of angle, because its reflected copy must be the same nearby zero. For an off-line pair to appear or disappear inside the band, two zeros must meet on the line. At such a meeting the ratio <var>A</var>/<var>B</var> is stationary. Interval arithmetic finds every stationary point and determines whether a pair leaves or returns.</p>
+      <ul class="counts">
+        <li>From 0 to 76 there are 18 meetings.</li>
+        <li>From 76 to 177 there are 40.</li>
+        <li>From 177 to 201 there are 8.</li>
+      </ul>
+      <p>The sides at real parts −3 and 4 are zero-free for every angle. The upper edge at 201, and the internal split heights 76 and 177, allow only simple line zeros to cross. At height 0 a separate integral argument shows that the single boundary zero is at real part ½ and angle 135°. It is simple too. <a href="spira_real_axis.txt">Marlow’s real-axis proof</a> · <a href="../tools/check_spira_through_201.py">Replay the interval checks</a>.</p>
+    </details>
+    <p>The stability step only needs zeros that are simple and on the line. Those are also the two properties counted in the separate Anthropic zeta23 formalization for the Riemann zeta function itself. <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/README.md">Anthropic’s zeta23 statement</a>.</p>
+  </main>
+  <script>
+    (() => {
+      // Generated from check_spira_through_201.py --plot-data.
+      const data = {
+        events: [
+          [
+            [92.436450594,1], [97.444275778,1], [100.842727307,1], [101.139036513,1], [103.026506376,1], [108.380946939,1],
+            [110.777697369,1], [113.582163879,1], [141.153338522,1], [145.855852767,-1], [156.399237685,-1], [163.78783209,-1],
+            [164.4912814,-1], [166.596314356,-1], [168.676386254,-1], [172.825288291,-1], [173.806655688,-1], [175.405902382,-1]
+          ],
+          [
+            [9.541990951,1], [23.733657397,1], [25.976355739,1], [41.543985034,1], [61.202558086,-1], [65.689046959,-1],
+            [70.334013325,-1], [84.9306422,-1], [92.491170866,1], [94.735902166,1], [94.911666104,1], [95.906870734,1],
+            [97.016668097,1], [97.104932719,1], [98.665863031,1], [99.425927117,1], [102.797015922,1], [105.532603483,1],
+            [105.677663112,1], [106.928972887,1], [108.687306266,-1], [109.621179442,1], [122.376968984,1], [127.701846133,1],
+            [128.11300406,1], [153.47580924,-1], [154.144329235,-1], [157.08063514,-1], [157.504718708,-1], [161.33062322,-1],
+            [163.20655384,-1], [164.760696655,-1], [164.937463459,-1], [167.330027551,-1], [168.459790837,-1], [173.285308691,-1],
+            [175.037322352,-1], [175.068568302,-1], [175.751630418,-1], [176.043929287,-1]
+          ],
+          [
+            [97.746324907,1], [98.618204239,1], [100.588887324,1], [116.385787029,1], [139.520735055,-1], [171.779889691,-1],
+            [176.447036637,-1], [178.451807579,-1]
+          ]
+        ],
+        peaks: [[128.1130040601938,139.52073505458313], [141.1533385217465,145.85585276686885]]
+      };
+      const byId = id => document.getElementById(id);
+      const dial = byId('angle'), canvas = byId('plot'), context = canvas.getContext('2d');
+      const buttons = Array.from(document.querySelectorAll('[data-angle]'));
+      const readouts = ['low-count','middle-count','high-count'].map(byId);
+      const palette = ['#24746e','#65528c','#a05230'];
+      const turns = data.events.flatMap((events, band) => events.map(([angle, step]) => ({angle, step, band})));
+      turns.sort((a,b) => a.angle - b.angle);
+      const levels = [{angle: 0, counts: [0,0,0]}];
+      for (const {angle, step, band} of turns) {
+        const counts = levels[levels.length - 1].counts.slice();
+        counts[band] += step;
+        levels.push({angle, counts});
+      }
+      levels.push({angle: 180, counts: [0,0,0]});
+      const latestFirst = levels.slice().reverse();
+      const levelAt = angle => latestFirst.find(level => level.angle <= angle);
+      const sum = counts => counts.reduce((acc, count) => acc + count, 0);
+      const ranges = data.peaks.map(([a,b]) => a.toFixed(6) + '°–' + b.toFixed(6) + '°');
+      byId('peaks').textContent = ranges.join(' and ');
+
+      function traceCurve(boundary, x, y) {
+        context.moveTo(x(0), y(0));
+        let height = 0;
+        for (const {angle, counts} of levels) {
+          context.lineTo(x(angle), y(height));
+          height = sum(counts.slice(0,boundary+1));
+          context.lineTo(x(angle), y(height));
+        }
+      }
+
+      function draw(angle) {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (!width || !height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width*dpr);
+        canvas.height = Math.round(height*dpr);
+        context.setTransform(dpr,0,0,dpr,0,0);
+        const x = value => 36+(width-58)*value/180;
+        const y = value => height-30-(height-54)*value/27;
+        context.font = '12px system-ui, sans-serif';
+        context.fillStyle = '#5b646a';
+        context.textAlign = 'right';
+        context.lineWidth = 1;
+        context.strokeStyle = '#e0e3de';
+        for (const tick of [0,5,10,15,20,25]) {
+          context.beginPath();
+          context.moveTo(x(0),y(tick));
+          context.lineTo(x(180),y(tick));
+          context.stroke();
+          context.fillText(String(tick),x(0)-7,y(tick)+4);
+        }
+        context.textAlign = 'center';
+        for (const tick of [0,45,90,135,180]) context.fillText(tick+'°',x(tick),height-9);
+        // Paint the cumulative curves from top to bottom, leaving the three
+        // band contributions visible as a single stacked chart.
+        for (let band = 2; band >= 0; band--) {
+          context.beginPath();
+          traceCurve(band,x,y);
+          context.lineTo(x(180),y(0));
+          context.closePath();
+          context.fillStyle = palette[band];
+          context.globalAlpha = .76;
+          context.fill();
+        }
+        context.globalAlpha = 1;
+        context.strokeStyle = '#20393d';
+        context.beginPath();
+        traceCurve(2,x,y);
+        context.lineWidth = 1.4;
+        context.stroke();
+        context.beginPath();
+        context.moveTo(x(angle),y(0));
+        context.lineTo(x(angle),y(27)-6);
+        context.lineWidth = 1;
+        context.stroke();
+        const current = levelAt(angle);
+        context.beginPath();
+        context.arc(x(angle),y(sum(current.counts)),4.7,0,2*Math.PI);
+        context.fillStyle = '#20393d';
+        context.fill();
+      }
+
+      function update() {
+        const angle = Number(dial.value);
+        const {counts} = levelAt(angle);
+        const all = sum(counts);
+        byId('angle-value').textContent = angle.toFixed(1) + '°';
+        dial.setAttribute('aria-valuetext', angle.toFixed(1) + ' degrees');
+        byId('total').textContent = all + (all === 1 ? ' reflected pair' : ' reflected pairs') +
+          ' · ' + 2*all + ' zeros off the line';
+        for (let i = 0; i < readouts.length; i++) readouts[i].textContent = counts[i];
+        for (const button of buttons) button.setAttribute('aria-pressed', Number(button.dataset.angle) === angle);
+        draw(angle);
+      }
+      dial.addEventListener('input',update);
+      for (const button of buttons) button.addEventListener('click', () => {
+        dial.value = button.dataset.angle;
+        update();
+      });
+      new ResizeObserver(() => draw(Number(dial.value))).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

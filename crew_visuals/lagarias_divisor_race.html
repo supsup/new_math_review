@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The divisor race · Lagarias and the Riemann Hypothesis</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      color: #fff7e0;
+      background: #17212b;
+      --soft: #becbd5;
+      --line: #536473;
+      --gold: #ffd181;
+      --panel: #233341;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 55rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, h2, p, dl { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 400; }
+    h1 { font-size: clamp(3.15rem, 8.6vw, 6.3rem); letter-spacing: -.06em; line-height: .98; margin: .55rem 0 .9rem; text-wrap: balance; }
+    h2 { font-size: clamp(1.55rem, 4vw, 2.2rem); }
+    .topic { color: var(--gold); font-size: .84rem; font-weight: 700; letter-spacing: .07em; }
+    .intro, .search-result, details { max-width: 65ch; line-height: 1.55; color: var(--soft); }
+    a { color: var(--gold); text-underline-offset: .22em; }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    .entry { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .65rem; margin: 1.35rem 0 1rem; }
+    label { display: grid; gap: .3rem; }
+    input, button { min-height: 2.75rem; padding: .5rem .85rem; border: 1px solid var(--line); border-radius: .4rem; color: inherit; background: transparent; font: inherit; }
+    input { width: 8rem; font-variant-numeric: tabular-nums; }
+    button { cursor: pointer; }
+    button:hover, button[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); }
+    .primary { color: #19232b; background: var(--gold); border-color: var(--gold); font-weight: 700; }
+    .primary:hover { color: #19232b; background: #ffdfa5; }
+    .entries { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .result { padding: clamp(.9rem, 4vw, 1.75rem); border: 1px solid var(--line); border-radius: .6rem; background: var(--panel); }
+    .divisors { display: flex; flex-wrap: wrap; gap: .4rem; margin: .7rem 0 1.1rem; padding: 0; list-style: none; }
+    .divisors li { padding: .3rem .5rem; color: var(--gold); background: #303d43; border-radius: .22rem; font-variant-numeric: tabular-nums; }
+    .numbers { display: grid; grid-template-columns: repeat(2, 1fr); gap: .7rem; margin-bottom: .9rem; }
+    .numbers dt { color: var(--soft); font-size: .86rem; }
+    .numbers dd { margin: .12rem 0 0; font-size: clamp(1.25rem, 4vw, 2.35rem); line-height: 1; font-variant-numeric: tabular-nums; }
+    #sum { color: var(--gold); }
+    meter { display: block; width: 100%; height: 1.4rem; accent-color: var(--gold); background: transparent; border: none; }
+    meter::-webkit-meter-bar { border: 0; background: #3b4e5e; border-radius: .25rem; }
+    meter::-webkit-meter-optimum-value { background: var(--gold); }
+    meter::-moz-meter-bar { background: var(--gold); }
+    .meter-label { display: flex; justify-content: space-between; gap: .5rem; color: var(--soft); margin-top: .3rem; font-size: .88rem; }
+    .meter-label output { color: var(--gold); font-variant-numeric: tabular-nums; }
+    .search { margin: 1.1rem 0; }
+    .search-result { margin-top: .5rem; }
+    .search-result:empty { display: none; }
+    details { border-top: 1px solid var(--line); padding-top: .85rem; }
+    summary { color: #fff7e0; cursor: pointer; }
+    details p { margin-top: .6rem; }
+    @media (max-width: 26rem) { .entry .entries { flex-basis: 100%; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">Riemann Hypothesis · Lagarias’s inequality</p>
+      <h1>The divisor race</h1>
+      <p class="intro">Choose a number and add all its positive divisors. The sum has a ceiling that depends on your number. How close can you get?</p>
+    </header>
+
+    <form id="entry" class="entry">
+      <label for="number">Integer from 1 to 50,000
+        <input id="number" type="number" min="1" max="50000" step="1" value="6" required>
+      </label>
+      <button type="submit" class="primary">Try it</button>
+      <div class="entries" role="group" aria-label="Example integers">
+        <button type="button" data-n="1" aria-pressed="false">1</button>
+        <button type="button" data-n="6" aria-pressed="true">6</button>
+        <button type="button" data-n="11" aria-pressed="false">11</button>
+        <button type="button" data-n="60" aria-pressed="false">60</button>
+      </div>
+    </form>
+
+    <section class="result" aria-labelledby="divisor-heading">
+      <h2 id="divisor-heading">Divisors of 6</h2>
+      <ul class="divisors" id="divisors" aria-label="Positive divisors"><li>1</li><li>2</li><li>3</li><li>6</li></ul>
+      <div aria-live="polite" aria-atomic="true">
+        <dl class="numbers">
+          <div><dt>Divisor sum</dt><dd id="sum">12</dd></div>
+          <div><dt>Lagarias ceiling</dt><dd id="ceiling">12.834</dd></div>
+        </dl>
+        <meter id="fraction" min="0" max="1" optimum="1" value=".935003" aria-label="Fraction of the ceiling reached">93.50%</meter>
+        <div class="meter-label"><span>Share of ceiling</span><output id="percentage" for="number">93.50%</output></div>
+      </div>
+    </section>
+
+    <div class="search">
+      <button id="scan" type="button">Find the closest after 1</button>
+      <p class="search-result" id="search-result" aria-live="polite"></p>
+    </div>
+
+    <details>
+      <summary>Where the ceiling comes from</summary>
+      <p>Add the fractions 1 + 1/2 + ⋯ + 1/<var>n</var> to get the harmonic number <var>H</var><sub>n</sub>. The ceiling is <var>H</var><sub>n</sub> + exp(<var>H</var><sub>n</sub>) log(<var>H</var><sub>n</sub>), where log is the natural logarithm.</p>
+      <p>Jeffrey Lagarias proved that this inequality for every positive integer is equivalent to the Riemann Hypothesis. Andrew Sutherland’s verification combines the November 20 RH formalization with a separate Lean proof of Lagarias’s equivalence. The search here checks just the first 50,000 integers with exact divisor sums and rounded numerical ceilings. <a href="https://arxiv.org/abs/math/0008177">Lagarias’s paper</a> · <a href="https://math.mit.edu/~drew/grh/#arithmetic-consequences">Verified arithmetic consequences</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const input = document.getElementById('number');
+      const form = document.getElementById('entry');
+      const list = document.getElementById('divisors');
+      const heading = document.getElementById('divisor-heading');
+      const sumNode = document.getElementById('sum');
+      const ceilingNode = document.getElementById('ceiling');
+      const fraction = document.getElementById('fraction');
+      const percentage = document.getElementById('percentage');
+      const presets = document.querySelectorAll('[data-n]');
+      const scan = document.getElementById('scan');
+      const result = document.getElementById('search-result');
+      const max = Number(input.max);
+      const integer = new Intl.NumberFormat('en');
+      const decimal = new Intl.NumberFormat('en', {maximumFractionDigits:3});
+      const percent = new Intl.NumberFormat('en', {style:'percent', minimumFractionDigits:2, maximumFractionDigits:2});
+      const ceilings = new Float64Array(max + 1);
+      let harmonic = 0;
+      for (let n = 1; n <= max; n++) {
+        harmonic += 1 / n;
+        ceilings[n] = harmonic + Math.exp(harmonic) * Math.log(harmonic);
+      }
+
+      function divisors(n) {
+        const small = [];
+        const large = [];
+        for (let d = 1; d * d <= n; d++) {
+          if (n % d) continue;
+          small.push(d);
+          if (d * d !== n) large.push(n / d);
+        }
+        return small.concat(large.reverse());
+      }
+
+      function show(n) {
+        input.value = String(n);
+        const terms = divisors(n);
+        const sum = terms.reduce((total, d) => total + d, 0);
+        const ceiling = ceilings[n];
+        const share = sum / ceiling;
+        heading.textContent = `Divisors of ${integer.format(n)}`;
+        list.replaceChildren(...terms.map(d => {
+          const item = document.createElement('li');
+          item.textContent = integer.format(d);
+          return item;
+        }));
+        sumNode.textContent = integer.format(sum);
+        ceilingNode.textContent = decimal.format(ceiling);
+        fraction.value = share;
+        percentage.textContent = percent.format(share);
+        for (const preset of presets) preset.setAttribute('aria-pressed', String(Number(preset.dataset.n) === n));
+      }
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        if (input.checkValidity()) show(input.valueAsNumber);
+      });
+      for (const preset of presets) preset.addEventListener('click', () => show(Number(preset.dataset.n)));
+      scan.addEventListener('click', () => {
+        const sums = new Uint32Array(max + 1);
+        for (let d = 1; d <= max; d++) {
+          for (let multiple = d; multiple <= max; multiple += d) sums[multiple] += d;
+        }
+        let best = 2;
+        for (let n = 3; n <= max; n++) {
+          if (sums[n] / ceilings[n] > sums[best] / ceilings[best]) best = n;
+        }
+        show(best);
+        result.textContent = `From 2 through ${integer.format(max)}, ${integer.format(best)} came closest at ${percent.format(sums[best] / ceilings[best])}. At 1 the divisor sum exactly meets the ceiling.`;
+      });
+      show(Number(input.value));
+    })();
+  </script>
+</body>
+</html>

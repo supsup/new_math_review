@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How a derivative sees one window</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf9f1;
+      --ink: #182924;
+      --muted: #4b5d55;
+      --curve: #23664f;
+      --tail: #a34632;
+      --line: #adbbb2;
+      --window: #dcebe0;
+      font: 100%/1.57 system-ui, sans-serif;
+      color: var(--ink);
+      background: #e9eee8;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main {
+      width: min(100%, 55rem);
+      margin: auto;
+      padding: clamp(1rem, 5vw, 3rem);
+      background: var(--paper);
+    }
+    h1, h2 { font-family: Georgia, serif; line-height: 1.08; }
+    h1 { font-size: clamp(2.4rem, 6.8vw, 4.7rem); letter-spacing: -.05em; margin: .7rem 0; }
+    p { max-width: 66ch; }
+    .intro, figcaption, .axis { color: var(--muted); }
+    .controls { display: flex; align-items: end; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    label { flex: 1 1 17rem; min-width: 0; font-weight: 650; }
+    input { display: block; width: 100%; accent-color: var(--curve); min-height: 2rem; margin: .1rem 0 0; }
+    button {
+      min-height: 2.75rem; border: 1px solid var(--line); border-radius: .3rem;
+      background: #f7faf7; color: var(--ink); padding: .25rem .65rem; font: inherit;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] { color: white; background: var(--curve); border-color: var(--curve); }
+    .presets { display: flex; gap: .35rem; flex-wrap: wrap; }
+    figure { margin: 1.35rem 0 .9rem; }
+    canvas { display: block; width: 100%; height: clamp(10rem, 32vw, 17rem); }
+    .ticks, .key { display: flex; justify-content: space-between; gap: .5rem; }
+    .ticks { font-variant-numeric: tabular-nums; font-size: .86rem; }
+    .axis { text-align: center; font-size: .9rem; margin: .15rem 0 .55rem; }
+    .key { flex-wrap: wrap; justify-content: flex-start; gap: .4rem 1rem; }
+    .key span::before { content: ""; display: inline-block; margin-right: .38em; width: .8em; height: .8em; background: currentColor; }
+    .in { color: var(--curve); }
+    .out { color: var(--tail); }
+    .shares {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      border: 1px solid var(--line); border-radius: .35rem; margin: 1rem 0;
+    }
+    .shares div { padding: .45rem clamp(.45rem, 2vw, 1.1rem); }
+    .shares div + div { border-left: 1px solid var(--line); }
+    dt { font-size: .87rem; }
+    dd { margin: 0; font-size: clamp(1rem, 3.2vw, 1.6rem); font-variant-numeric: tabular-nums; font-weight: 650; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: 1.15rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--curve); text-underline-offset: .15em; }
+    code { overflow-wrap: anywhere; }
+    :focus-visible { outline: 3px solid var(--tail); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>How a derivative sees one window</h1>
+    <p class="intro">In the zeta proof, an upper bound holds on certain intervals. The proof aims the weight of a transform at one interval by choosing how many times to differentiate. Move the slider to see the weight concentrate as the derivative order rises.</p>
+
+    <div class="controls">
+      <label for="order">Number of derivatives <output id="order-value" for="order">8</output>
+        <input id="order" type="range" min="1" max="512" value="8">
+      </label>
+      <div class="presets" aria-label="Preset derivative orders">
+        <button type="button" data-order="8" aria-pressed="true">8</button>
+        <button type="button" data-order="64" aria-pressed="false">64</button>
+        <button type="button" data-order="512" aria-pressed="false">512</button>
+      </div>
+    </div>
+
+    <figure>
+      <canvas id="chart" role="img" aria-label="Weight centered in a shaded interval from 0.8 to 1.2"></canvas>
+      <div class="ticks" aria-hidden="true"><span>0</span><span>0.5</span><span>1</span><span>1.5</span><span>2</span></div>
+      <p class="axis">Position on the rescaled log scale</p>
+      <figcaption class="key"><span class="in">Inside the window, 0.8–1.2</span><span class="out">Outside the window</span></figcaption>
+    </figure>
+    <dl class="shares" aria-live="polite" aria-atomic="true">
+      <div class="in"><dt>Weight inside</dt><dd id="inside"></dd></div>
+      <div class="out"><dt>Weight outside</dt><dd id="outside"></dd></div>
+    </dl>
+    <p>On a log scale, the interval from <var>Y</var> to <var>Y</var><sup>3/2</sup> has endpoints log <var>Y</var> and 1.5 log <var>Y</var>. Divide by its midpoint, 1.25 log <var>Y</var>, and the endpoints become 0.8 and 1.2. At the midpoint the curve stays at its peak. Everywhere else its height shrinks each time you add a derivative.</p>
+
+    <details>
+      <summary>Why taking derivatives changes the weight</summary>
+      <p>The Mellin transform weights <var>G</var>(<var>x</var>) by <var>x</var><sup>−<var>s</var>−1</sup>. Each derivative brings down another −log <var>x</var>. Write <var>u</var> = log <var>x</var> and take the absolute bound |<var>G</var>(<var>x</var>)| ≪ <var>x</var><sup>2</sup> outside the good interval. At real part σ &gt; 2, the resulting weight has shape <var>u</var><sup><var>j</var></sup> exp(−(σ − 2)<var>u</var>), where <var>j</var> is the number of derivatives.</p>
+      <p>This weight peaks at <var>j</var>/(σ − 2). The proof chooses <var>j</var> close to (σ − 2) times the midpoint of the log interval. The plot centers it exactly and shows relative height (<var>v</var> exp(1 − <var>v</var>))<sup><var>j</var></sup> at rescaled position <var>v</var>. The percentages integrate that curve over the entire positive axis, including the part beyond the right edge. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=31">Rubinstein, Part II §1</a></p>
+    </details>
+    <details>
+      <summary>How this helps rule out a zero</summary>
+      <p>A zeta zero produces a pole in the transform. If it is the unique nearest pole at distance <var>d</var>, it contributes to the <var>j</var>th Taylor coefficient on the scale of <var>d</var><sup>−<var>j</var>−1</sup>. The proof bounds a combination of two coefficients, the absolute size from a complex center plus the signed coefficient from a real center. On the window this only needs an upper bound on <var>g</var>, since |<var>g</var>| + <var>g</var> = 2 max(<var>g</var>, 0). The small tails control the contribution from outside. A pole to the right of the proposed boundary would let the proof choose a complex center where the combination exceeds that bound. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=31">Rubinstein’s coefficient estimate</a></p>
+      <p>The corresponding Lean criterion is <code>FormBAt</code>. Its weighted statistic <code>Gm</code> starts with the zeta remainder and adds weighted real parts of remainders for other Dirichlet characters. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/RamificationFrobenius/TotientGaloisClasses/Window.lean#L30">Window criterion</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/RamificationFrobenius/TotientGaloisClasses/ExplicitFormulaErrorOfHostConditions.lean#L38">Combined remainder</a></p>
+    </details>
+    <p><a href="rh_window_spike.html">Try fitting a spike into the window’s area budget</a> · <a href="rh_nearest_pole.html">See when a nearby pole exceeds the budget</a></p>
+  </main>
+  <script>
+    (() => {
+      const order = document.getElementById('order');
+      const orderValue = document.getElementById('order-value');
+      const inside = document.getElementById('inside');
+      const outside = document.getElementById('outside');
+      const canvas = document.getElementById('chart');
+      const context = canvas.getContext('2d');
+      const buttons = [...document.querySelectorAll('[data-order]')];
+      const low = 0.8;
+      const high = 1.2;
+
+      function draw(j) {
+        if (!context) return;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width * density);
+        canvas.height = Math.round(height * density);
+        context.setTransform(density, 0, 0, density, 0, 0);
+        const floor = height - 2;
+        const x = v => width * v / 2;
+        const y = v => floor - (floor - 8) * Math.pow(v * Math.exp(1 - v), j);
+
+        context.fillStyle = '#dcebe0';
+        context.fillRect(x(low), 0, x(high) - x(low), floor);
+        context.strokeStyle = '#adbbb2';
+        context.beginPath();
+        context.moveTo(0, floor);
+        context.lineTo(width, floor);
+        context.stroke();
+        context.setLineDash([4, 5]);
+        context.beginPath();
+        context.moveTo(x(1), 0);
+        context.lineTo(x(1), floor);
+        context.stroke();
+        context.setLineDash([]);
+
+        for (const [a, b, ink, fill] of [
+          [0, low, '#a34632', '#a3463233'],
+          [low, high, '#23664f', '#23664f44'],
+          [high, 2, '#a34632', '#a3463233']
+        ]) {
+          const segment = new Path2D();
+          segment.moveTo(x(a), y(a));
+          for (let step = 1; step <= 180; step++) {
+            const v = a + (b - a) * step / 180;
+            segment.lineTo(x(v), y(v));
+          }
+          context.strokeStyle = ink;
+          context.lineWidth = 2;
+          context.stroke(segment);
+          segment.lineTo(x(b), floor);
+          segment.lineTo(x(a), floor);
+          segment.closePath();
+          context.fillStyle = fill;
+          context.fill(segment);
+        }
+      }
+
+      // Under z = j*v the normalized area is Gamma(j+1, 1).
+      // For integer j its right tail is the finite sum from repeated integration by parts.
+      function rightTail(z, j, logFactorial) {
+        let term = Math.exp(j * Math.log(z) - z - logFactorial);
+        let sum = term;
+        for (let k = j; k >= 1; k--) {
+          term *= k / z;
+          sum += term;
+        }
+        return Math.min(sum, 1);
+      }
+
+      function render() {
+        const j = Number(order.value);
+        let logFactorial = 0;
+        for (let k = 2; k <= j; k++) logFactorial += Math.log(k);
+        const spill = 1 - rightTail(low * j, j, logFactorial) + rightTail(high * j, j, logFactorial);
+        const digits = spill < 0.001 ? 4 : 2;
+        const format = value => (100 * value).toFixed(digits) + '%';
+        orderValue.textContent = j;
+        outside.textContent = format(spill);
+        inside.textContent = format(1 - spill);
+        canvas.setAttribute('aria-label', `Weight after ${j} derivatives, with ${format(1 - spill)} inside the shaded interval from 0.8 to 1.2`);
+        for (const button of buttons) button.setAttribute('aria-pressed', button.dataset.order === order.value);
+        draw(j);
+      }
+
+      order.addEventListener('input', render);
+      for (const button of buttons) button.addEventListener('click', () => {
+        order.value = button.dataset.order;
+        render();
+      });
+      new ResizeObserver(() => draw(Number(order.value))).observe(canvas);
+      render();
+    })();
+  </script>
+</body>
+</html>

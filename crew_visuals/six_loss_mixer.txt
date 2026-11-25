@@ -1,0 +1,108 @@
+A quintic recovers six missing readings
+
+At prime 110909, take 110908 inputs arranged on a circle. Each mixed
+reading adds seven inputs. Their offsets from the reading are
+
+    0, 1583, 55273, 58490, 73564, 94050, 94848.
+
+The mixer is invertible over the rationals and has rank 110902 modulo
+110909. From any six missing mixed readings and any six direct input
+observations, all the original inputs can be recovered. Seven connections
+per reading attain the lower bound. A nonzero row of six or fewer entries
+would impose a relation among six or fewer coordinates that must be free
+to vary on the kernel.
+
+Why the exponential gives the taps
+
+Take E(t) = sum of t^j/j! for j from 0 through 7. Modulo 110909 it splits
+as the product of (1 + x_i t) for these seven distinct addresses.
+
+    110822, 11495, 36194, 13987, 29685, 58083, 72462.
+
+The logarithm agrees with t through degree seven. In the product form,
+coefficient k of the logarithm is (−1)^(k−1) times the sum of the k-th
+powers of the addresses, divided by k. The power sums from 2 through 7
+therefore vanish. Take the base-2 logarithms of the addresses and subtract
+the smallest exponent to get the offsets above. Subtracting the exponent
+rotates the taps and keeps the modular root set unchanged.
+
+Why this gives recovery
+
+The six roots of the wiring polynomial among the nonzero residues are
+exactly 4, 8, 16, 32, 64 and 128. The right kernel is spanned by the six
+geometric sequences with those ratios. Every invisible change at input j
+therefore has the form 4^j P(2^j), with P of degree at most five. The
+addresses 2^j are all distinct. Any six direct inputs determine P, after
+subtracting a consistent base and dividing by the corresponding powers
+of 4. Reversing the circular order gives the left kernel. A relation
+among the surviving rows would give a left-kernel vector zero at all
+six missing positions, which forces its polynomial to vanish.
+
+A common rational factor of the integer wiring polynomial and
+T^110908 − 1 would lift to a monic integral factor. Reducing it modulo
+an auxiliary prime would then leave a nonconstant common factor. The
+replay finds gcd 1 at two auxiliary primes, establishing ordinary
+invertibility without constructing the dense matrix.
+
+Replay with python-flint installed
+
+    python3 -B tools/check_seven_tap_mixer.py
+
+This is an exact witness at the stated prime and board size.
+
+When three readings are wrong and their locations are unknown
+
+Each check uses one of the six left-kernel rows. A clean set of readings
+gives six zeros. An error of size e at index i contributes w times the
+first six powers of its address x, where x = 2^(−i) and w = x² e.
+
+Think of the checks as a short sequence made by adding up to three
+geometric sequences. The geometric ratios are the addresses we need.
+If a polynomial Q vanishes at the addresses, applying its coefficients to
+successive checks gives zero. For example, with one error Q(T) = T − x,
+and the recurrence just says the next check is x times the current check.
+With three errors, a monic cubic gives three linear equations for its
+three unknown coefficients. Its roots give the three addresses. Once we
+know the addresses, the first three checks give the three weights.
+
+For the exact count, form the 1×1, 2×2 and 3×3 matrices whose (i,j)-entry
+is check i+j, with indices starting at zero. When there are t errors,
+the order-t matrix is V diag(w) Vᵀ, where column j of V consists of the
+first t powers of address j. Distinct addresses and nonzero weights make
+this matrix invertible. Each larger matrix has rank at most t. So choose
+the largest invertible matrix, even when the earliest checks are zero.
+
+This repairs the mixed readings. Six direct input values still determine
+the part of the original input erased by the modular mixer. Three is the
+sharp guarantee for unknown output errors. The replay also shows four
+wrong readings with the same checks as a different set of three. Those
+two corrections give two distinct valid mixed vectors.
+
+    python3 -B tools/check_three_wrong_readings.py
+
+When some readings are missing and others are wrong
+
+A missing reading costs one check because we know its address. A wrong
+reading at an unknown address costs two, one to find the address and one
+to find the amount. With six checks, any combination costing six or fewer
+is guaranteed recoverable. That includes two missing and two wrong, or
+four missing and one wrong.
+
+Fill the missing readings with zero for the calculation. Form the monic
+polynomial F(T) with the missing addresses as roots. Apply its coefficients
+to successive checks as above. An error at address x now contributes the
+same geometric sequence as before, with weight multiplied by F(x). That
+kills the missing addresses, leaving the unknown errors and 6 − r checks
+when r readings are missing. Decode and remove those errors first, then
+use the remaining checks to solve for the values at the known addresses.
+
+The limit is sharp for every number of missing readings from zero to six.
+Choose a nonzero valid difference supported on seven positions. To find
+one, solve the six check equations on those positions. Every coordinate
+of the difference must be nonzero because any six columns are independent.
+Erase r of those positions from both valid sets of readings and split the
+remaining positions into two nearly equal groups. An observation that
+takes one group from each set is consistent with either original, one
+unknown error past the guarantee.
+
+    python3 -B tools/check_mixed_damage.py

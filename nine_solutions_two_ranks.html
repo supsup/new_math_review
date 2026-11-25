@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Nine solutions, two ranks</title>
+  <style>
+    :root {
+      --ink: #f5f0e4;
+      --muted: #b4b9c7;
+      --edge: #3c465a;
+      --panel: #141e2d;
+      --floor: #0c1420;
+      --amber: #ffd48b;
+      --mint: #a8e6d2;
+      --amber-panel: #302820;
+      --mint-panel: #183931;
+      --mono: ui-monospace, "SF Mono", Consolas, monospace;
+      color: var(--ink);
+      font: 16px/1.55 system-ui, sans-serif;
+      background: var(--floor);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 22% 0, #192a43 0, transparent 55%), var(--floor);
+      min-height: 100svh;
+    }
+    main { width: min(100% - 2rem, 61rem); margin-inline: auto; padding-block: 3rem; }
+    h1, h2, p { margin: 0; }
+    h1, h2, .rank-number {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: normal;
+      line-height: 1.05;
+    }
+    h1 { font-size: clamp(2.4rem, 7vw, 4.7rem); letter-spacing: -.055em; }
+    h2 { font-size: 1.6rem; }
+    .intro { margin-top: .8rem; max-width: 42rem; color: var(--muted); }
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .workbench[hidden] { display: none; }
+    .panel { padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid var(--edge); border-radius: 1rem; background: var(--panel); }
+    label, legend, .small, .caption { color: var(--muted); font-size: .875rem; }
+    label { display: block; }
+    select, button { font: inherit; color: inherit; }
+    select {
+      display: block;
+      width: 100%;
+      margin: .3rem 0 1rem;
+      padding: .45rem .65rem;
+      border: 1px solid var(--edge);
+      border-radius: .45rem;
+      background: var(--floor);
+    }
+    table { width: 100%; table-layout: fixed; border-spacing: .35rem; }
+    caption { text-align: left; padding: 0 0 .15rem .35rem; }
+    th { font: normal .875rem var(--mono); color: var(--muted); text-align: center; }
+    th[scope="col"] { height: 1.5rem; }
+    th[scope="row"][data-witness="true"] { color: var(--amber); text-decoration: underline; text-underline-offset: .24em; }
+    td { padding: 0; }
+    .cell {
+      width: 100%;
+      min-height: 2.75rem;
+      display: grid;
+      place-content: center;
+      border-radius: .5rem;
+      border: 1px solid var(--edge);
+      background: var(--floor);
+      font: 1rem var(--mono);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .cell[data-pass="true"] { color: var(--mint); background: var(--mint-panel); }
+    .cell:hover { border-color: var(--muted); }
+    .cell[aria-pressed="true"] { outline: 2px solid var(--amber); outline-offset: 1px; }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+    .cell[aria-pressed="true"]:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+    .assignment { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--edge); }
+    #assignment-bits { font: .875rem var(--mono); }
+    #assignment-result { margin-top: .25rem; color: var(--muted); font-size: .875rem; }
+    .rank-summary { display: flex; align-items: baseline; gap: .75rem; margin: .35rem 0 .3rem; }
+    .rank-number { color: var(--mint); font-size: 4rem; letter-spacing: -.06em; }
+    .rank-summary span:last-child { color: var(--muted); line-height: 1.25; }
+    .rank-definition { margin-bottom: .8rem; }
+    fieldset { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+    legend { padding: 0; margin-bottom: .4rem; }
+    .fields { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .fields label { display: flex; align-items: center; gap: .35rem; padding: .4rem .55rem; border: 1px solid var(--edge); border-radius: .45rem; color: var(--ink); cursor: pointer; }
+    .fields label:has(:checked) { background: var(--mint-panel); border-color: var(--mint); }
+    .field-guide { margin-top: .45rem; }
+    input[type="radio"] { accent-color: var(--mint); margin: 0; }
+    .witness { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--edge); }
+    #row-expression { font: .875rem/1.6 var(--mono); color: var(--amber); }
+    .vector { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin-top: .5rem; }
+    .vector span { min-height: 2.4rem; display: grid; place-content: center; border-radius: .45rem; background: var(--amber-panel); color: var(--amber); font: 1.1rem var(--mono); }
+    #rank-explanation { margin-top: .65rem; font-size: .9rem; }
+    details { margin-top: 1rem; padding-block: .85rem; border-block-start: 1px solid var(--edge); }
+    summary { cursor: pointer; }
+    details ol { padding-inline-start: 1.65rem; font: .95rem/1.8 var(--mono); }
+    details p { max-width: 53rem; color: var(--muted); font-size: .9rem; }
+    #error { color: var(--amber); }
+    @media (max-width: 44rem) {
+      main { padding-block: 1.75rem; }
+      .workbench { grid-template-columns: minmax(0, 1fr); margin-top: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Nine solutions, two ranks</h1>
+      <p class="intro">Each square tries one assignment of four true-or-false variables. A 1 means it solves the puzzle. Switch arithmetic to see whether the highlighted rows cancel.</p>
+    </header>
+    <noscript><p>This experiment uses JavaScript to enumerate the assignments and check their ranks.</p></noscript>
+    <p id="error" role="alert" hidden></p>
+    <div class="workbench" id="workbench" hidden>
+      <section class="panel" aria-labelledby="table-title">
+        <h2 id="table-title">The solution table</h2>
+        <label for="split">Group the variables</label>
+        <select id="split">
+          <option value="0">Rows x, y · Columns z, w</option>
+          <option value="1">Rows x, z · Columns y, w</option>
+          <option value="2">Rows x, w · Columns y, z</option>
+        </select>
+        <table id="table">
+          <caption class="caption" id="table-caption"></caption>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+        <div class="assignment" aria-live="polite">
+          <p id="assignment-bits"></p>
+          <p id="assignment-result"></p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="rank-title">
+        <h2 id="rank-title">The row rank</h2>
+        <div class="rank-summary">
+          <span class="rank-number" id="rank" aria-live="polite"></span>
+          <span>independent rows</span>
+        </div>
+        <p class="small rank-definition">Rank counts how many rows you need to make all the others by combining them.</p>
+        <fieldset>
+          <legend>Arithmetic for adding rows</legend>
+          <div class="fields">
+            <label><input type="radio" name="field" value="rational" checked> Ordinary (ℚ)</label>
+            <label><input type="radio" name="field" value="binary"> Mod 2 (𝔽₂)</label>
+          </div>
+          <p class="small field-guide">In mod 2, 1 + 1 becomes 0.</p>
+        </fieldset>
+        <div class="witness">
+          <p id="row-expression"></p>
+          <div class="vector" id="result-vector" aria-live="polite"></div>
+          <p id="rank-explanation"></p>
+        </div>
+      </section>
+    </div>
+    <details>
+      <summary>See the puzzle and how the page checks it</summary>
+      <ol id="clauses"></ol>
+      <p>A clause passes when at least one of its options is true. To find the rank, the page chooses rows and columns and looks for the largest square subtable with a nonzero determinant in the selected arithmetic. It also recomputes the highlighted row sum. The four-clause example came from Lattice’s finite experiment in the Marginalia discussion.</p>
+    </details>
+  </main>
+  <script>
+    "use strict";
+
+    const variables = ["x", "y", "z", "w"];
+    const clauses = [[1, 2, 3], [1, -2, 4], [-1, -3, -4], [2, 3, 4]];
+    const pairs = ["00", "01", "10", "11"];
+    const groups = [[0, 1, 2, 3], [0, 2, 1, 3], [0, 3, 1, 2]];
+    const indices = [0, 1, 2, 3];
+    const identity = value => value;
+    const mod2 = value => ((value % 2) + 2) % 2;
+
+    function assignment(group, row, column) {
+      const result = [];
+      const bits = pairs[row] + pairs[column];
+      group.forEach((variable, index) => { result[variable] = Number(bits[index]); });
+      return result;
+    }
+
+    function clausePasses(clause, bits) {
+      return clause.some(literal => bits[Math.abs(literal) - 1] === Number(literal > 0));
+    }
+
+    function solutionTable(group) {
+      return indices.map(row => indices.map(column => {
+        const bits = assignment(group, row, column);
+        return Number(clauses.every(clause => clausePasses(clause, bits)));
+      }));
+    }
+
+    function determinant(matrix) {
+      if (matrix.length === 1) return matrix[0][0];
+      return matrix[0].reduce((sum, value, column) => {
+        if (!value) return sum;
+        const block = matrix.slice(1).map(row => row.filter((_, index) => index !== column));
+        return sum + (column % 2 === 0 ? value : -value) * determinant(block);
+      }, 0);
+    }
+
+    function subsets(size) {
+      return Array.from({ length: 15 }, (_, index) => index + 1)
+        .map(mask => indices.filter(index => mask & (1 << index)))
+        .filter(subset => subset.length === size);
+    }
+
+    function rankCertificate(table, reduce) {
+      for (let size = 4; size > 0; size--) {
+        const choices = subsets(size);
+        for (const rows of choices) {
+          for (const columns of choices) {
+            const minor = determinant(rows.map(row => columns.map(column => table[row][column])));
+            if (reduce(minor)) return { size, minor };
+          }
+        }
+      }
+      return { size: 0, minor: 0 };
+    }
+
+    function combineRows(table, terms, reduce) {
+      return indices.map(column => reduce(terms.reduce(
+        (sum, [row, sign]) => sum + sign * table[row][column], 0
+      )));
+    }
+
+    function cancellation(table) {
+      for (const [first, second] of subsets(2)) {
+        if (table[first].every((cell, column) => cell === table[second][column])) {
+          return [[first, 1], [second, -1]];
+        }
+      }
+      for (let size = 2; size <= 4; size++) {
+        for (const rows of subsets(size)) {
+          const terms = rows.map(row => [row, 1]);
+          if (combineRows(table, terms, mod2).every(value => value === 0)) return terms;
+        }
+      }
+      throw new Error("The expected mod-2 row relation is missing.");
+    }
+
+    const byId = id => document.getElementById(id);
+    const split = byId("split");
+    const matrix = byId("table");
+    const fieldInputs = [...document.querySelectorAll('input[name="field"]')];
+    let selected = [0, 2];
+
+    function renderAssignment(group, row, column) {
+      const bits = assignment(group, row, column);
+      const failed = clauses.flatMap((clause, index) => clausePasses(clause, bits) ? [] : [index + 1]);
+      byId("assignment-bits").textContent = variables.map((name, index) => name + " = " + bits[index]).join(" · ");
+      byId("assignment-result").textContent = failed.length
+        ? "Fails " + (failed.length === 1 ? "clause " : "clauses ") + failed.join(", ") + "."
+        : "Passes all four clauses.";
+    }
+
+    function renderTable(table, group, terms) {
+      const satisfied = table.flat().reduce((sum, value) => sum + value, 0);
+      const head = matrix.tHead;
+      const body = matrix.tBodies[0];
+      byId("table-caption").textContent = satisfied + " satisfying assignments out of 16";
+      head.replaceChildren();
+      body.replaceChildren();
+      const header = head.insertRow();
+      const corner = document.createElement("th");
+      corner.textContent = group.slice(0, 2).map(index => variables[index]).join("") + "/" +
+        group.slice(2).map(index => variables[index]).join("");
+      header.append(corner);
+      for (const bits of pairs) {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.textContent = bits;
+        header.append(cell);
+      }
+      table.forEach((row, rowIndex) => {
+        const tr = body.insertRow();
+        const label = document.createElement("th");
+        label.scope = "row";
+        label.dataset.witness = String(terms.some(([index]) => index === rowIndex));
+        label.textContent = pairs[rowIndex];
+        tr.append(label);
+        row.forEach((value, columnIndex) => {
+          const button = document.createElement("button");
+          button.className = "cell";
+          button.type = "button";
+          button.dataset.pass = String(Boolean(value));
+          button.textContent = value;
+          button.setAttribute("aria-label", "Row " + pairs[rowIndex] + ", column " + pairs[columnIndex] +
+            (value ? ", satisfies the puzzle" : ", fails the puzzle"));
+          button.setAttribute("aria-pressed", String(selected[0] === rowIndex && selected[1] === columnIndex));
+          button.addEventListener("click", () => {
+            matrix.querySelector('[aria-pressed="true"]').setAttribute("aria-pressed", "false");
+            selected = [rowIndex, columnIndex];
+            button.setAttribute("aria-pressed", "true");
+            renderAssignment(group, ...selected);
+          });
+          tr.insertCell().append(button);
+        });
+      });
+      renderAssignment(group, ...selected);
+    }
+
+    function renderRank(example) {
+      const binary = fieldInputs[1].checked;
+      const reduce = binary ? mod2 : identity;
+      const { table, rational, modulo, terms } = example;
+      const rank = binary ? modulo : rational;
+      const vector = combineRows(table, terms, reduce);
+      byId("rank").textContent = rank.size;
+      byId("row-expression").textContent = terms.map(([index, sign], term) =>
+        (term ? (sign < 0 ? " − " : " + ") : "") + "row " + pairs[index]).join("");
+      byId("result-vector").replaceChildren(...vector.map(value => {
+        const entry = document.createElement("span");
+        entry.textContent = value;
+        return entry;
+      }));
+
+      let explanation;
+      if (rational.size === 3) {
+        explanation = "Two rows are identical in this grouping. A 3 × 3 block has determinant " +
+          rank.minor + ", so three independent rows remain in either arithmetic.";
+      } else if (binary) {
+        explanation = "Here 2 counts as 0. The highlighted rows cancel, and an odd 3 × 3 determinant shows that three independent rows remain.";
+      } else {
+        explanation = "These rows don’t cancel in ordinary arithmetic. The 4 × 4 determinant is " +
+          rational.minor.toString().replace("-", "−") + ", so all four rows are independent.";
+      }
+      byId("rank-explanation").textContent = explanation;
+    }
+
+    function start() {
+      const expected = [[4, 3], [4, 3], [3, 3]];
+      const examples = groups.map((group, index) => {
+        const table = solutionTable(group);
+        const rational = rankCertificate(table, identity);
+        const modulo = rankCertificate(table, mod2);
+        if (table.flat().filter(Boolean).length !== 9 ||
+            rational.size !== expected[index][0] || modulo.size !== expected[index][1]) {
+          throw new Error("The solution count or rank did not match the checked example.");
+        }
+        return { group, table, rational, modulo, terms: cancellation(table) };
+      });
+      for (const clause of clauses) {
+        const line = document.createElement("li");
+        line.textContent = clause.map(literal =>
+          (literal < 0 ? "not " : "") + variables[Math.abs(literal) - 1]).join(" or ");
+        byId("clauses").append(line);
+      }
+      function current() { return examples[Number(split.value)]; }
+      function render() {
+        const example = current();
+        renderTable(example.table, example.group, example.terms);
+        renderRank(example);
+      }
+      split.addEventListener("change", render);
+      fieldInputs.forEach(input => input.addEventListener("change", () => renderRank(current())));
+      render();
+      byId("workbench").hidden = false;
+    }
+
+    try {
+      start();
+    } catch (error) {
+      byId("error").textContent = "The exhibit could not verify the example. " + error.message;
+      byId("error").hidden = false;
+    }
+  </script>
+</body>
+</html>

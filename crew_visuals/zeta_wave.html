@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Zeta Wave</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; }
+  body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  header { flex: none; padding: 14px 16px 4px; max-height: 42vh; overflow-y: auto; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  header p { margin: 4px 0 0; font-size: 14px; color: var(--dim); max-width: 860px; line-height: 1.45; }
+  details { margin-top: 6px; max-width: 860px; font-size: 13.5px; color: var(--dim); line-height: 1.45; }
+  summary { cursor: pointer; color: var(--ink); }
+  details p { margin: 6px 0 0; }
+  b { color: var(--ink); font-weight: normal; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); }
+  #wrap { flex: 1; min-height: 200px; position: relative; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #state { flex: none; padding: 4px 16px; font-size: 15px; color: var(--accent); min-height: 21px; }
+  #bar { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 14px; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--line); border-color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #err { display: none; margin: 12px 16px; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px;
+    font: 14px monospace; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Every zero is a crossing</h1>
+  <p>The Riemann zeta function, computed live in your browser on the line where all its nontrivial zeros lie.
+  <span id="wa" class="teal">Left</span>: zeta as a point moving in the plane; it passes through the centre at every zero.
+  <span id="wb" class="teal">Right</span>: the same motion unwound into a wave; every zero is a <span class="gold">crossing</span>.</p>
+  <details>
+    <summary>What am I looking at?</summary>
+    <p><b>Zeta</b> takes a height t and gives back a point in the plane. As t climbs, that point draws the curve.
+    Each time the curve passes through the centre, zeta is zero there.</p>
+    <p><b>The wave.</b> Turn that point by the right angle at each height and it always lands on one straight line.
+    How far along that line it sits, ahead or behind, is the wave (called Hardy's Z). Same zeros, easier to see.
+    The dashed segment from the centre and the height of the dot on the wave are the same length.</p>
+    <p><b>Single or repeated.</b> At a single zero the wave cuts through with a slope: the short gold tick.
+    A repeated zero would sit flat at zero. Every crossing this page finds has a clearly nonzero estimated slope
+    (a numerical picture: a sign change alone could also be a triple zero). It is proved that, counting far enough
+    up, at least 67% of the zeros counted are single (Alpöge and Furman, 2026), and that every nontrivial zero lies
+    on this line (the Riemann Hypothesis, proved in 2026 and checked by computer; a write-up for people to read is
+    still to come). Whether every zero is single is still open.</p>
+    <p><b>A near miss.</b> Sometimes two zeros come very close, and the wave only just gets across between them
+    (a "Lehmer pair"). That is the nearest thing to a repeated zero, and it is still two crossings: a close-up
+    appears whenever one is on screen. The button jumps to the closest pair the page finds below height 7,010.</p>
+    <p><b>The counter</b> compares the zeros found so far with a separate formula for how many there should be,
+    θ(t)/π + 1. They stay within 1 of each other: a quick sign that no zero has been missed. This is a picture,
+    not a proof.</p>
+    <p><b>Hear it</b> plays the wave as sound, height 10 to 20,000 in ten seconds. Every zero is a moment the
+    sound crosses silence; the zeros crowd closer as it climbs, so the pitch rises.</p>
+    <p id="checks"><b>Checks.</b> Running…</p>
+    <p><b>Sources.</b> Alpöge and Furman, arXiv:2608.13637 (Lean: anthropics/formal-math, zeta23). The Riemann
+    Hypothesis: Alpöge with Claude, 2026-11-20; certified by the Lean FRO and the Mathlib Initiative, 2026-11-21.
+    Page by Confluence for Marginalia: crew_visuals/zeta_wave.html in supsup/new_math_review.</p>
+  </details>
+</header>
+<div id="err"></div>
+<div id="wrap"><canvas id="c" role="img" aria-label="Animated view of the Riemann zeta function on its critical line: a curve in the plane that passes through the centre at each zero, and the same motion as a wave that crosses zero at each zero"></canvas></div>
+<div id="state"></div>
+<div id="bar">
+  <button id="bPlay" aria-pressed="true">Pause</button>
+  <button id="bSpeed">Speed 1×</button>
+  <button id="bNear" disabled>A near miss (checking…)</button>
+  <button id="bHear" aria-pressed="false">Hear it</button>
+  <button id="bReset">Start over</button>
+</div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const ZETA = (function () {
+  const TAU = 2 * Math.PI;
+  const TABLE = 4096, LOGN = new Float64Array(TABLE + 1), ISQ = new Float64Array(TABLE + 1);
+  for (let n = 1; n <= TABLE; n++) { LOGN[n] = Math.log(n); ISQ[n] = 1 / Math.sqrt(n); }
+
+  // Riemann-Siegel theta, asymptotic series (good for t >= 10)
+  function theta(t) {
+    return t / 2 * Math.log(t / TAU) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * t * t * t);
+  }
+  // Hardy's Z(t), real, |Z(t)| = |zeta(1/2 + it)|: Riemann-Siegel main sum plus the first correction term
+  function Z(t, th) {
+    const a = Math.sqrt(t / TAU), N = Math.floor(a), tt = (th || theta)(t);
+    let s = 0;
+    for (let n = 1; n <= N; n++) {
+      s += n <= TABLE ? Math.cos(tt - t * LOGN[n]) * ISQ[n] : Math.cos(tt - t * Math.log(n)) / Math.sqrt(n);
+    }
+    let p = a - N, den = Math.cos(TAU * p);
+    if (Math.abs(den) < 1e-9) { p += 1e-7; den = Math.cos(TAU * p); }   // removable 0/0 at p = 1/4 and 3/4
+    const c0 = Math.cos(TAU * (p * p - p - 1 / 16)) / den;
+    return 2 * s + (N % 2 === 1 ? 1 : -1) * Math.pow(t / TAU, -0.25) * c0;
+  }
+  // zeta(1/2 + it) = exp(-i theta(t)) Z(t): the moving point in the plane
+  function zetaOnLine(t) { const z = Z(t), th = theta(t); return [z * Math.cos(th), -z * Math.sin(th)]; }
+  function slope(t) { return (Z(t + 1e-5) - Z(t - 1e-5)) / 2e-5; }
+  function density(t) { return Math.log(t / TAU) / TAU; }   // zeros per unit of height, on average
+
+  // A second, unrelated formula, used only to check the first: Borwein's accelerated alternating series (1991)
+  const BW_N = 80;
+  const BW_D = (function () {
+    const n = BW_N, d = [];
+    let term = 1 / n, acc = 0;
+    for (let i = 0; i <= n; i++) {
+      if (i > 0) term *= 4 * (n + i - 1) * (n - i + 1) / ((2 * i) * (2 * i - 1));
+      acc += term;
+      d.push(n * acc);
+    }
+    return d;
+  })();
+  function zetaBorwein(sig, t) {
+    const n = BW_N, dn = BW_D[n];
+    let re = 0, im = 0;
+    for (let k = 0; k < n; k++) {
+      const m = k + 1, c = (k % 2 === 0 ? 1 : -1) * (BW_D[k] - dn) / dn * Math.pow(m, -sig), ang = -t * Math.log(m);
+      re += c * Math.cos(ang);
+      im += c * Math.sin(ang);
+    }
+    const gg = Math.pow(2, 1 - sig), ar = 1 - gg * Math.cos(t * Math.LN2), ai = gg * Math.sin(t * Math.LN2);
+    const q = ar * ar + ai * ai;   // zeta = -(re + i im) / (1 - 2^(1-s))
+    return [-(re * ar + im * ai) / q, -(im * ar - re * ai) / q];
+  }
+  // sign changes of Z on [lo, hi], each refined by bisection, appended to out
+  function scan(lo, hi, step, th, out) {
+    let t = lo, z = Z(lo, th);
+    while (t < hi) {
+      const t2 = Math.min(t + step, hi), z2 = Z(t2, th);
+      if (z === 0 || z * z2 < 0) {
+        let a = t, b = t2, za = z;
+        for (let i = 0; i < 50; i++) {
+          const m = (a + b) / 2, zm = Z(m, th);
+          if (za * zm <= 0) b = m; else { a = m; za = zm; }
+        }
+        out.push((a + b) / 2);
+      }
+      t = t2; z = z2;
+    }
+    return out;
+  }
+  // largest |zeros found below T - (theta(T)/pi + 1)| at heights between consecutive zeros, and at hi
+  function countGap(zs, hi, th) {
+    let worst = 0;
+    for (let k = 1; k <= zs.length; k++) {
+      const T = k < zs.length ? (zs[k - 1] + zs[k]) / 2 : hi;
+      worst = Math.max(worst, Math.abs(k - (th(T) / Math.PI + 1)));
+    }
+    return worst;
+  }
+  return { theta, Z, zetaOnLine, slope, density, zetaBorwein, scan, countGap };
+})();
+
+/* ---------- the checks (run before anything is drawn; each one can fail) ---------- */
+function runChecks() {
+  const fail = [], info = {};
+  const z2 = ZETA.zetaBorwein(2, 0);
+  if (!(Math.abs(z2[0] - Math.PI * Math.PI / 6) < 1e-10 && Math.abs(z2[1]) < 1e-12)) {
+    fail.push("Borwein's series does not give zeta(2) = pi^2/6");
+  }
+  let worst = 0, worstMirror = 0;
+  const H = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+  for (const t of H) {
+    const b = ZETA.zetaBorwein(0.5, t), z = ZETA.Z(t), th = ZETA.theta(t);
+    worst = Math.max(worst, Math.hypot(b[0] - z * Math.cos(th), b[1] + z * Math.sin(th)));
+    worstMirror = Math.max(worstMirror, Math.hypot(b[0] - z * Math.cos(th), b[1] - z * Math.sin(th)));
+  }
+  info.heights = H.length; info.agree = worst; info.mirror = worstMirror;
+  if (!(worst < 0.03)) fail.push("the two formulas for zeta disagree by " + worst.toFixed(4));
+  if (!(worstMirror > 0.3)) fail.push("CONTROL: a mirrored spiral was not caught (gap " + worstMirror.toFixed(3) + ")");
+  const zs = ZETA.scan(10, 400, 0.01, ZETA.theta, []);
+  info.n400 = zs.length; info.gap400 = ZETA.countGap(zs, 400, ZETA.theta);
+  if (!(info.gap400 < 1)) fail.push("zeros found up to 400 do not match the counting formula (gap " + info.gap400.toFixed(3) + ")");
+  const wrongTheta = t => ZETA.theta(t) + t / 10;
+  info.wrong = ZETA.countGap(ZETA.scan(10, 60, 0.01, wrongTheta, []), 60, ZETA.theta);
+  if (!(info.wrong >= 1)) fail.push("CONTROL: a wrong angle formula was not caught (gap " + info.wrong.toFixed(3) + ")");
+  let minSlope = Infinity;
+  for (const r of zs) minSlope = Math.min(minSlope, Math.abs(ZETA.slope(r)));
+  info.minSlope = minSlope;
+  if (!(minSlope > 0.1)) fail.push("a zero below 400 is nearly flat (slope " + minSlope.toFixed(3) + "): the captions need rewording");
+  return { fail, info, zeros: zs };
+}
+
+/* ---------- the drawing ---------- */
+const BG = "#0d1020", INK = "#e8e6f2", DIM = "#9a98b4", GOLD = "#f2c14e", LINE = "#39406e", FAINT = "#252b4d";
+const teal = a => "rgba(79, 209, 197, " + a + ")", gold = a => "rgba(242, 193, 78, " + a + ")";
+const $ = id => document.getElementById(id);
+const wrap = $("wrap"), cv = $("c"), g = cv.getContext("2d");
+const state = $("state"), bPlay = $("bPlay"), bSpeed = $("bSpeed"), bNear = $("bNear"), bHear = $("bHear"), bReset = $("bReset");
+const SPEEDS = [1, 4, 16, 64], NEAR_HI = 7010, CLOSE = 0.25;
+const reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+const fmt = (x, d) => x.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+let W = 0, H = 0, L = null, dead = false;
+let t = 10, playing = !reduced, speedIx = 0, last = null, flashAt = -1e9, passed = 0, spScale = null, wvScale = null;
+let audio = null, note = null, near = null, lastText = 0;
+const Z0 = { zeros: [], known: 400, worstGap: 0, worstAt: 0 };
+
+function showError(msg) {
+  if (dead) return;
+  dead = true;
+  const e = $("err");
+  e.textContent = "This page stopped: a check failed, so it will not draw.\n" + msg;
+  e.style.display = "block";
+  wrap.style.display = "none";
+  for (const b of [bPlay, bSpeed, bNear, bHear, bReset]) b.disabled = true;
+  if (audio) stopAudio();
+}
+window.addEventListener("error", e => showError(String(e.message || e)));
+
+function countBelow(x) {   // number of found zeros <= x
+  const a = Z0.zeros;
+  let lo = 0, hi = a.length;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (a[m] <= x) lo = m + 1; else hi = m; }
+  return lo;
+}
+function extendTo(T) {     // find more zeros, checking the count at every gap between consecutive zeros
+  while (Z0.known < T) {
+    const lo = Z0.known, hi = lo + 20, before = Z0.zeros.length;
+    ZETA.scan(lo, hi, 0.01, ZETA.theta, Z0.zeros);
+    for (let k = Math.max(1, before); k < Z0.zeros.length; k++) {
+      const m = (Z0.zeros[k - 1] + Z0.zeros[k]) / 2, gap = Math.abs(k - (ZETA.theta(m) / Math.PI + 1));
+      if (gap > Z0.worstGap) { Z0.worstGap = gap; Z0.worstAt = m; }
+    }
+    Z0.known = hi;
+    if (Z0.worstGap >= 1) {
+      showError("zeros found do not match the counting formula near height " + fmt(Z0.worstAt, 1) +
+        " (gap " + Z0.worstGap.toFixed(2) + "): a zero was missed");
+      return;
+    }
+  }
+}
+function background() {    // keep finding zeros up to NEAR_HI, then locate the closest pair
+  if (dead) return;
+  if (Z0.known < NEAR_HI) {
+    extendTo(Math.min(NEAR_HI, Z0.known + 200));
+    bNear.textContent = "A near miss (checking " + Math.floor(100 * (Z0.known - 400) / (NEAR_HI - 400)) + "%)";
+    $("bgGap").textContent = Z0.worstGap.toFixed(2) + " up to height " + fmt(Z0.known, 0);
+    setTimeout(background, 0);
+    return;
+  }
+  const a = Z0.zeros;
+  let best = null;
+  for (let k = 1; k < a.length && a[k] <= NEAR_HI; k++) {
+    const rel = (a[k] - a[k - 1]) * ZETA.density((a[k] + a[k - 1]) / 2);
+    if (!best || rel < best.rel) best = { a: a[k - 1], b: a[k], rel };
+  }
+  near = best;
+  $("bgGap").textContent = Z0.worstGap.toFixed(2) + " up to height " + fmt(NEAR_HI, 0) + ", over " +
+    fmt(countBelow(NEAR_HI), 0) + " zeros";
+  $("nearAt").textContent = "; the closest pair below " + fmt(NEAR_HI, 0) + " is at height " + fmt(near.a, 2) +
+    ", " + (near.b - near.a).toFixed(3) + " apart, " + Math.round(1 / near.rel) + " times closer than usual";
+  bNear.textContent = "A near miss";
+  bNear.disabled = false;
+}
+
+function resize() {
+  const r = wrap.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const side = W >= 1.25 * H;
+  if (side) {
+    const s = Math.min(H - 16, W * 0.4);
+    L = { side, sp: { x: 16, y: (H - s) / 2, w: s, h: s }, wv: { x: s + 44, y: 8, w: W - s - 64, h: H - 16 } };
+  } else {
+    const s = Math.min(W - 32, H * 0.46);
+    L = { side, sp: { x: (W - s) / 2, y: 4, w: s, h: s }, wv: { x: 16, y: s + 12, w: W - 32, h: H - s - 16 } };
+  }
+  $("wa").textContent = side ? "Left" : "Top";
+  $("wb").textContent = side ? "Right" : "Bottom";
+}
+const ease = (cur, target, dt) => cur === null ? target : cur + (target - cur) * Math.min(1, 4 * dt);
+const windowWidth = x => clamp(9 / ZETA.density(x), 14, 36);
+const trailLength = x => clamp(3 / ZETA.density(x), 4, 12);
+function niceStep(x) { for (const s of [1, 2, 5, 10, 20, 50, 100]) if (s >= x) return s; return 200; }
+
+function drawSpiral(p, now, dt) {
+  const top = p.y + 22, cx = p.x + p.w / 2, cy = top + (p.h - 22) / 2, R = Math.min(p.w, p.h - 22) / 2 - 8;
+  g.font = "13px Georgia, serif"; g.textAlign = "center"; g.fillStyle = DIM;
+  g.fillText("zeta, as a point in the plane", cx, p.y + 14);
+  g.strokeStyle = FAINT; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(cx - R, cy); g.lineTo(cx + R, cy); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke();
+  const tr = trailLength(t), u0 = Math.max(10, t - tr), pts = [];
+  let mx = 0.5;
+  for (let i = 0; i <= 360; i++) {
+    const u = u0 + (t - u0) * i / 360, z = ZETA.zetaOnLine(u);
+    pts.push(z); mx = Math.max(mx, Math.hypot(z[0], z[1]));
+  }
+  spScale = ease(spScale, 0.92 * R / mx, dt);
+  const P = z => [cx + z[0] * spScale, cy - z[1] * spScale];
+  g.lineWidth = 2; g.lineCap = "round"; g.lineJoin = "round";
+  const bands = 24;
+  for (let b = 0; b < bands; b++) {
+    const i0 = Math.floor(b * 360 / bands), i1 = Math.floor((b + 1) * 360 / bands);
+    g.strokeStyle = teal((0.06 + 0.94 * (b + 1) / bands).toFixed(3));
+    g.beginPath();
+    for (let i = i0; i <= i1; i++) { const q = P(pts[i]); if (i === i0) g.moveTo(q[0], q[1]); else g.lineTo(q[0], q[1]); }
+    g.stroke();
+  }
+  const age = (now - flashAt) / 1000, cur = P(pts[360]);
+  if (age < 0.9) {
+    g.strokeStyle = gold((1 - age / 0.9).toFixed(3)); g.lineWidth = 2;
+    g.beginPath(); g.arc(cx, cy, 5 + 40 * age, 0, 2 * Math.PI); g.stroke();
+  }
+  g.strokeStyle = DIM; g.lineWidth = 1.2;
+  g.beginPath(); g.arc(cx, cy, 4, 0, 2 * Math.PI); g.stroke();
+  g.fillStyle = DIM; g.textAlign = "left"; g.fillText("0", cx + 7, cy + 15);
+  g.setLineDash([4, 4]); g.strokeStyle = "rgba(232, 230, 242, 0.45)";
+  g.beginPath(); g.moveTo(cx, cy); g.lineTo(cur[0], cur[1]); g.stroke(); g.setLineDash([]);
+  g.fillStyle = age < 0.35 ? GOLD : teal(1); g.shadowColor = g.fillStyle; g.shadowBlur = 12;
+  g.beginPath(); g.arc(cur[0], cur[1], 5.5, 0, 2 * Math.PI); g.fill(); g.shadowBlur = 0;
+}
+
+function drawWave(p, now, dt) {
+  const legend = p.w >= 520 && p.h >= 300;
+  const top = p.y + 26, bot = p.y + p.h - (legend ? 62 : 28), mid = (top + bot) / 2, half = (bot - top) / 2;
+  const win = windowWidth(t), tL = Math.max(t - 0.72 * win, 10 - 0.02 * win), tR = tL + win, xs = p.w / (tR - tL);
+  const X = u => p.x + (u - tL) * xs;
+  g.font = "13px Georgia, serif"; g.textAlign = "left"; g.fillStyle = DIM;
+  g.fillText("the same, unwound into a wave (Hardy's Z)", p.x, p.y + 14);
+  const n = Math.max(120, Math.floor(p.w / 1.5)), us = [], zs = [];
+  let mx = 0.5;
+  for (let i = 0; i <= n; i++) {
+    const u = tL + (tR - tL) * i / n;
+    if (u < 10) continue;
+    const z = ZETA.Z(u); us.push(u); zs.push(z); mx = Math.max(mx, Math.abs(z));
+  }
+  wvScale = ease(wvScale, 0.9 * half / mx, dt);
+  const Y = z => mid - clamp(z * wvScale, -1.1 * half, 1.1 * half);
+  g.strokeStyle = LINE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(p.x, mid); g.lineTo(p.x + p.w, mid); g.stroke();
+  const st = niceStep(win / 5);
+  g.fillStyle = DIM; g.textAlign = "center";
+  for (let k = Math.ceil(tL / st) * st; k <= tR; k += st) {
+    if (k < 10) continue;
+    g.beginPath(); g.moveTo(X(k), mid - 4); g.lineTo(X(k), mid + 4); g.stroke();
+    if (X(k) < p.x + p.w - 70) g.fillText(fmt(k, 0), X(k), bot + 18);
+  }
+  g.textAlign = "right"; g.fillText("height t", p.x + p.w, bot + 18);
+  g.lineWidth = 2; g.lineJoin = "round";
+  for (const past of [true, false]) {
+    g.strokeStyle = teal(past ? 1 : 0.3);
+    g.beginPath();
+    let started = false;
+    for (let i = 0; i < us.length; i++) {
+      if (past ? us[i] > t + (tR - tL) / n : us[i] < t - (tR - tL) / n) continue;
+      if (!started) { g.moveTo(X(us[i]), Y(zs[i])); started = true; } else g.lineTo(X(us[i]), Y(zs[i]));
+    }
+    g.stroke();
+  }
+  const a = Z0.zeros, i0 = countBelow(tL), i1 = countBelow(tR);
+  for (let i = i0; i < i1; i++) {
+    const r = a[i], x = X(r);
+    if (r <= t) {
+      const room = Math.min(i > 0 ? r - a[i - 1] : Infinity, i + 1 < a.length ? a[i + 1] - r : Infinity) * xs;
+      const m = -ZETA.slope(r) * wvScale / xs, len = Math.min(18, 0.45 * room) / Math.hypot(1, m);
+      g.strokeStyle = GOLD; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(x - len, mid - m * len); g.lineTo(x + len, mid + m * len); g.stroke();
+      g.fillStyle = GOLD; g.beginPath(); g.arc(x, mid, 4.5, 0, 2 * Math.PI); g.fill();
+    } else {
+      g.strokeStyle = gold(0.5); g.lineWidth = 1.5;
+      g.beginPath(); g.arc(x, mid, 4, 0, 2 * Math.PI); g.stroke();
+    }
+  }
+  g.strokeStyle = "rgba(232, 230, 242, 0.25)"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(X(t), top); g.lineTo(X(t), bot); g.stroke();
+  const age = (now - flashAt) / 1000;
+  g.fillStyle = age < 0.35 ? GOLD : teal(1); g.shadowColor = g.fillStyle; g.shadowBlur = 12;
+  g.beginPath(); g.arc(X(t), Y(ZETA.Z(t)), 5.5, 0, 2 * Math.PI); g.fill(); g.shadowBlur = 0;
+  drawClosePair(p, i0, i1, X, mid, top);
+  if (legend) drawLegend(p.x, bot + 44);
+}
+
+function drawClosePair(p, i0, i1, X, mid, top) {   // a close-up whenever a close pair of zeros is on screen
+  const a = Z0.zeros;
+  let best = null;
+  for (let i = Math.max(1, i0); i < i1; i++) {
+    const rel = (a[i] - a[i - 1]) * ZETA.density((a[i] + a[i - 1]) / 2);
+    if (rel < CLOSE && (!best || rel < best.rel)) best = { a: a[i - 1], b: a[i], rel };
+  }
+  if (!best) return;
+  const gap = best.b - best.a, lo = best.a - 0.9 * gap, hi = best.b + 0.9 * gap;
+  g.font = "12px Georgia, serif";
+  const w = Math.min(280, p.w * 0.6), bx = p.x + p.w - w, by = top - 4;
+  const caption = wrapText("(usually " + (1 / ZETA.density(best.a)).toFixed(2) + " apart); between them the wave rises only ", w - 16);
+  const h = 30 + 15 * caption.length + 80;
+  const zs = [];
+  let mx = 1e-12, peak = 0;
+  for (let i = 0; i <= 160; i++) {
+    const u = lo + (hi - lo) * i / 160, z = ZETA.Z(u); zs.push(z); mx = Math.max(mx, Math.abs(z));
+    if (u > best.a && u < best.b) peak = Math.max(peak, Math.abs(z));
+  }
+  g.strokeStyle = gold(0.7); g.lineWidth = 1;
+  g.strokeRect(X(best.a) - 5, mid - 9, X(best.b) - X(best.a) + 10, 18);
+  g.beginPath(); g.moveTo(X(best.b) + 5, mid - 9); g.lineTo(bx, by + h); g.stroke();
+  g.fillStyle = BG; g.fillRect(bx, by, w, h); g.strokeRect(bx, by, w, h);
+  g.font = "12px Georgia, serif"; g.textAlign = "left"; g.fillStyle = INK;
+  g.fillText("close-up: two crossings " + gap.toFixed(3) + " apart", bx + 8, by + 16);
+  g.fillStyle = DIM;
+  const lines = wrapText("(usually " + (1 / ZETA.density(best.a)).toFixed(2) + " apart); between them the wave rises only about " + peak.toPrecision(1), w - 16);
+  lines.forEach((s, j) => g.fillText(s, bx + 8, by + 31 + 15 * j));
+  const py0 = by + 24 + 15 * lines.length, ph = h - (30 + 15 * lines.length), pm = py0 + ph / 2, sx = (w - 16) / (hi - lo), sy = (ph / 2) * 0.85 / mx;
+  g.strokeStyle = LINE; g.beginPath(); g.moveTo(bx + 8, pm); g.lineTo(bx + w - 8, pm); g.stroke();
+  g.strokeStyle = teal(1); g.lineWidth = 2; g.beginPath();
+  for (let i = 0; i <= 160; i++) {
+    const x = bx + 8 + (hi - lo) * i / 160 * sx, y = pm - zs[i] * sy;
+    if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+  }
+  g.stroke();
+  g.fillStyle = GOLD;
+  for (const r of [best.a, best.b]) { g.beginPath(); g.arc(bx + 8 + (r - lo) * sx, pm, 4, 0, 2 * Math.PI); g.fill(); }
+}
+
+function wrapText(s, maxW) {       // split a caption into lines that fit maxW at the current font
+  const out = [];
+  let line = "";
+  for (const word of s.split(" ")) {
+    const next = line ? line + " " + word : word;
+    if (line && g.measureText(next).width > maxW) { out.push(line); line = word; } else line = next;
+  }
+  if (line) out.push(line);
+  return out;
+}
+
+function drawLegend(x, y) {
+  g.strokeStyle = LINE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x, y); g.lineTo(x + 40, y); g.stroke();
+  g.strokeStyle = teal(1); g.lineWidth = 2;
+  g.beginPath(); g.moveTo(x + 6, y + 13); g.lineTo(x + 34, y - 13); g.stroke();
+  g.fillStyle = GOLD; g.beginPath(); g.arc(x + 20, y, 4, 0, 2 * Math.PI); g.fill();
+  g.font = "13px Georgia, serif"; g.textAlign = "left"; g.fillStyle = INK;
+  g.fillText("single zero: the wave cuts through", x + 50, y + 4);
+  const x2 = x + 300;
+  g.strokeStyle = LINE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x2, y); g.lineTo(x2 + 40, y); g.stroke();
+  g.strokeStyle = teal(0.8); g.lineWidth = 2; g.setLineDash([4, 3]);
+  g.beginPath(); g.moveTo(x2 + 4, y - 14); g.quadraticCurveTo(x2 + 20, y + 14, x2 + 36, y - 14); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = GOLD; g.lineWidth = 1.5; g.beginPath(); g.arc(x2 + 20, y, 4, 0, 2 * Math.PI); g.stroke();
+  g.fillStyle = INK; g.fillText("repeated zero: it would sit flat", x2 + 50, y + 4);
+}
+
+function updateState(now) {
+  if (now - lastText < 100) return;
+  lastText = now;
+  if (audio) {
+    const h = 10 + (20000 - 10) * clamp((audio.ctx.currentTime - audio.start) / 10, 0, 1);
+    state.textContent = "playing the wave as sound: height " + fmt(h, 0) +
+      " of 20,000; the zeros crowd closer as it climbs, so the pitch rises";
+    return;
+  }
+  if (note && now < note.until) { state.textContent = note.text; return; }
+  const expect = Math.max(0, ZETA.theta(t) / Math.PI + 1);
+  state.textContent = "height " + fmt(t, 1) + "  ·  zeros found so far: " + fmt(passed, 0) +
+    "  ·  the counting formula expects about " + fmt(expect, 1);
+}
+
+function frame(now) {
+  if (dead) return;
+  const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000);
+  last = now;
+  if (playing) t += SPEEDS[speedIx] * 0.5 / Math.max(0.074, ZETA.density(t)) * dt;
+  extendTo(t + 0.3 * windowWidth(t) + 1);
+  if (dead) return;
+  const k = countBelow(t);
+  if (k > passed && k - passed <= 2) flashAt = now;
+  passed = k;
+  g.fillStyle = BG; g.fillRect(0, 0, W, H);
+  drawSpiral(L.sp, now, dt);
+  drawWave(L.wv, now, dt);
+  updateState(now);
+  requestAnimationFrame(frame);
+}
+
+function jump(to) { t = to; passed = countBelow(t); spScale = null; wvScale = null; }
+bPlay.onclick = () => {
+  playing = !playing;
+  bPlay.textContent = playing ? "Pause" : "Play";
+  bPlay.setAttribute("aria-pressed", String(playing));
+};
+bSpeed.onclick = () => { speedIx = (speedIx + 1) % SPEEDS.length; bSpeed.textContent = "Speed " + SPEEDS[speedIx] + "×"; };
+bReset.onclick = () => jump(10);
+bNear.onclick = () => {
+  if (!near) return;
+  jump(near.a - 4 / ZETA.density(near.a));
+  speedIx = 0; bSpeed.textContent = "Speed 1×";
+  if (!playing) bPlay.onclick();
+};
+function stopAudio() {
+  if (!audio) return;
+  try { audio.src.onended = null; audio.src.stop(); } catch (e) { /* already stopped */ }
+  audio.ctx.close();
+  note = { text: "played " + fmt(audio.cross, 0) + " zero crossings in ten seconds; the counting formula expected about " +
+    fmt(audio.expected, 0), until: performance.now() + 6000 };
+  audio = null;
+  bHear.textContent = "Hear it"; bHear.setAttribute("aria-pressed", "false");
+}
+bHear.onclick = () => {
+  if (audio) { stopAudio(); return; }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { note = { text: "this browser cannot play generated sound", until: performance.now() + 4000 }; return; }
+  const ctx = new AC();   // created inside the click, so the browser lets it play
+  bHear.textContent = "Preparing…"; bHear.disabled = true;
+  setTimeout(() => {
+    const RATE = 22050, SEC = 10, T0 = 10, T1 = 20000, n = RATE * SEC, step = (T1 - T0) / n;
+    const buf = ctx.createBuffer(1, n, RATE), data = buf.getChannelData(0);
+    let prev = null, cross = 0;
+    for (let i = 0; i < n; i++) {
+      const u = T0 + i * step, z = ZETA.Z(u);
+      if (prev !== null && prev * z < 0) cross++;
+      prev = z;
+      const fade = Math.min(1, i / (0.05 * RATE), (n - 1 - i) / (0.3 * RATE));
+      data[i] = Math.tanh(0.6 * z / Math.log(u)) * fade;
+    }
+    const expected = (ZETA.theta(T1) - ZETA.theta(T0)) / Math.PI;
+    bHear.disabled = false;
+    if (!(Math.abs(cross - expected) < 0.01 * expected)) {
+      ctx.close();
+      showError("the sound crossed zero " + cross + " times, far from the expected " + expected.toFixed(0));
+      return;
+    }
+    const src = ctx.createBufferSource(), gain = ctx.createGain();
+    src.buffer = buf; gain.gain.value = 0.3;
+    src.connect(gain); gain.connect(ctx.destination);
+    src.onended = () => stopAudio();
+    if (ctx.state === "suspended") ctx.resume();
+    src.start();
+    audio = { ctx, src, start: ctx.currentTime, cross, expected };
+    bHear.textContent = "Stop sound"; bHear.setAttribute("aria-pressed", "true");
+  }, 30);
+};
+
+(function start() {
+  const R = runChecks();
+  if (R.fail.length) { showError(R.fail.join("\n")); return; }
+  const I = R.info;
+  Z0.zeros = R.zeros; Z0.worstGap = I.gap400;
+  $("checks").innerHTML = "<b>Checks.</b> Before drawing anything, the page (1) computes zeta two unrelated ways, " +
+    "the Riemann–Siegel formula and Borwein's alternating series (which matches ζ(2) = π²/6 to 10 decimal places), " +
+    "and requires them to agree at " + I.heights + " heights: worst gap " + I.agree.toFixed(4) + "; (2) finds every zero " +
+    "up to height 400, " + I.n400 + " of them, and requires the count to match the formula: worst gap " +
+    I.gap400.toFixed(3) + "; the flattest of those crossings still has slope " + I.minSlope.toFixed(2) + "; (3) requires " +
+    "two deliberate mistakes to be caught: a wrong angle formula breaks the count (gap " + I.wrong.toFixed(2) + "), " +
+    "and a mirrored spiral breaks the agreement (gap " + I.mirror.toFixed(2) + "). Then it keeps finding zeros in the " +
+    "background, checking the count as it goes (worst gap <span id=\"bgGap\">…</span><span id=\"nearAt\"></span>). " +
+    "If any check fails, you get an error instead of a picture.";
+  // shareable links: #t=7005 opens at that height, #paused starts still (e.g. zeta_wave.html#t=7005.3&paused)
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const h0 = parseFloat(hash.get("t"));
+  if (isFinite(h0)) jump(clamp(h0, 10, 1e6));
+  if (hash.has("paused")) playing = false;
+  bPlay.textContent = playing ? "Pause" : "Play";
+  bPlay.setAttribute("aria-pressed", String(playing));
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener("resize", resize);
+  requestAnimationFrame(frame);
+  setTimeout(background, 50);
+})();
+</script>
+</body>
+</html>

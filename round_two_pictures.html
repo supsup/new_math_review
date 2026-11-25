@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Round Two: Four Pictures</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one reading column of four "picture first" sections; each section is picture, then three plain sentences, then the fine print. */
+:root{
+  --bg:#f5f7fb; --surface:#ffffff; --ink:#16202e; --muted:#5a6779; --line:#d5dce6; --line-strong:#97a4b6;
+  --accent:#2456c8; --accent-soft:#e3ebfb;
+  --ok:#1f8a5b; --rep:#b0741a; --bad:#c2413a;
+  --c1:#2456c8; --c2:#b0741a; --c3:#7a4fbf; --c4:#c2413a;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#10151d; --surface:#18202b; --ink:#e6ebf2; --muted:#9aa7b8; --line:#2a3544; --line-strong:#66758a;
+  --accent:#86aaff; --accent-soft:#1d2a44;
+  --ok:#4cc38a; --rep:#e0a94a; --bad:#f0736a;
+  --c1:#86aaff; --c2:#e0a94a; --c3:#b99cf2; --c4:#f0736a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#10151d; --surface:#18202b; --ink:#e6ebf2; --muted:#9aa7b8; --line:#2a3544; --line-strong:#66758a;
+  --accent:#86aaff; --accent-soft:#1d2a44;
+  --ok:#4cc38a; --rep:#e0a94a; --bad:#f0736a;
+  --c1:#86aaff; --c2:#e0a94a; --c3:#b99cf2; --c4:#f0736a; color-scheme:dark }
+
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:44px}
+h1{font-size:clamp(1.7rem,4.6vw,2.35rem);line-height:1.15;font-weight:600;margin:6px 0 10px;text-wrap:balance}
+h2{font-size:1.35rem;line-height:1.25;font-weight:600;margin:0;text-wrap:balance}
+h3{font-size:1rem;font-weight:600;margin:0}
+p{margin:0;max-width:66ch}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.05rem;color:var(--ink)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-size:.86em}
+section{display:flex;flex-direction:column;gap:14px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.figure{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.plain{display:flex;flex-direction:column;gap:8px}
+.fine{font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.fine p{max-width:80ch}
+.scroll{overflow-x:auto}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* trust grid */
+table.grid{border-collapse:collapse;width:100%;min-width:640px}
+table.grid th{font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:center;padding:4px 4px 10px;vertical-align:bottom;line-height:1.25}
+table.grid th.claimcol{text-align:left}
+table.grid td{border-top:1px solid var(--line);padding:9px 4px;text-align:center;vertical-align:middle}
+table.grid td.claim{text-align:left;padding-left:0}
+.rowbtn{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 8px;border-radius:6px;cursor:pointer}
+.rowbtn:hover{background:var(--accent-soft)}
+.rowbtn[aria-pressed="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.rowbtn b{display:block;font-weight:600;font-size:.95rem}
+.rowbtn span{display:block;font-size:.78rem;color:var(--muted)}
+.dot{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);vertical-align:middle;position:relative;box-sizing:border-box}
+.dot.yes{background:var(--ok);border-color:var(--ok)}
+.dot.reported{border-color:var(--rep);background:linear-gradient(90deg,var(--rep) 50%,transparent 50%)}
+.dot.partial{border-color:var(--rep);background:radial-gradient(circle,var(--rep) 0 3px,transparent 3.5px)}
+.dot.no{border-color:var(--bad)}
+.dot.no::after{content:"";position:absolute;left:-2px;right:-2px;top:6px;height:2px;background:var(--bad);transform:rotate(-45deg)}
+.dot.unknown{border-style:dashed;border-color:var(--line-strong)}
+.dot.na{width:10px;height:2px;border-radius:0;border:0;background:var(--line-strong)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.detail{background:var(--accent-soft);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.detail ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.detail li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:.9rem}
+.detail li b{font-weight:600}
+.src{font-family:var(--mono);font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+
+/* permanent vs determinant */
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;align-self:flex-start}
+.seg button{background:var(--surface);border:0;padding:7px 14px;cursor:pointer;font-size:.9rem}
+.seg button + button{border-left:1px solid var(--line-strong)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}
+.term{display:flex;flex-direction:column;align-items:center;gap:6px}
+.mini{display:grid;grid-template-columns:repeat(3,26px);grid-template-rows:repeat(3,26px);gap:2px}
+.mini i{display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-radius:3px;color:var(--muted)}
+.mini i.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:500}
+.sign{font-family:var(--mono);font-size:.92rem;display:inline-flex;gap:6px;align-items:center}
+.sign em{font-style:normal;display:inline-flex;width:20px;height:20px;border-radius:50%;align-items:center;justify-content:center;font-weight:500;background:var(--ok);color:var(--surface)}
+.sign em.minus{background:var(--bad)}
+.formula{font-family:var(--mono);font-size:.9rem;overflow-wrap:anywhere}
+
+/* charts */
+svg{display:block;width:100%;height:auto}
+.axis text,.lab{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.gridline{stroke:var(--line);stroke-width:1}
+.axisline{stroke:var(--line-strong);stroke-width:1}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem}
+.key span{display:inline-flex;align-items:center;gap:7px}
+.key i{display:inline-block;width:18px;height:3px;border-radius:2px}
+table.small{border-collapse:collapse;font-size:.88rem;width:100%;min-width:420px}
+table.small th,table.small td{text-align:left;padding:6px 10px 6px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.small th{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500;border-top:0}
+
+/* two ways to count */
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:center;font-family:var(--mono);font-size:.88rem;border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.steps li::before{content:counter(s);color:var(--muted);text-align:right}
+.steps li.free{border-style:dashed;color:var(--muted)}
+.steps li.free::before{content:"free"; font-size:.66rem}
+.steps.nocount li{counter-increment:none}
+.steps.nocount li.g{counter-increment:s}
+.count{font-size:.95rem}
+.count b{font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* crossing */
+.cross{display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:18px;align-items:center}
+@media (max-width:560px){.cross{grid-template-columns:1fr}}
+.bars{display:flex;flex-direction:column;gap:9px;min-width:0}
+.bar{display:grid;grid-template-columns:96px 1fr 62px;gap:8px;align-items:center;font-size:.84rem}
+.bar .track{height:18px;background:var(--bg);border:1px solid var(--line);border-radius:4px;position:relative;overflow:hidden;display:flex}
+.bar .track b{display:block;height:100%}
+.bar .track b.r{background:var(--c1)}
+.bar .track b.c{background:var(--c2)}
+.bar .num{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.bar.whole .track b{opacity:.45}
+.mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--c4)}
+footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+footer p{max-width:86ch}
+@media (prefers-reduced-motion:no-preference){ .term .sign em{transition:background-color .25s} }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Marginalia · round two · 24 Nov 2026</div>
+    <h1>Four pictures before any text</h1>
+    <p class="lede">Three collections of machine-checked mathematics landed big claims this autumn. Each picture below makes one of them smaller. Look first; the three sentences under each picture say what you just saw.</p>
+  </header>
+
+  <section id="trust">
+    <div class="sec-head">
+      <div class="eyebrow">Picture 1</div>
+      <h2>Who checked what</h2>
+    </div>
+    <div class="figure">
+      <div class="scroll">
+        <table class="grid" id="grid">
+          <thead><tr>
+            <th class="claimcol">Claim (tap a row)</th>
+            <th>We read the statement</th><th>We scanned the text</th><th>Publisher ran the checker</th><th>Second, independent checker</th><th>Rebuilt by outsiders</th><th>A readable proof exists</th><th>People behind the argument</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span><i class="dot yes"></i>yes, and we know who</span>
+        <span><i class="dot reported"></i>reported by others</span>
+        <span><i class="dot partial"></i>partly</span>
+        <span><i class="dot no"></i>no</span>
+        <span><i class="dot unknown"></i>not known to us</span>
+        <span><i class="dot na"></i>does not apply</span>
+      </div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+    <div class="plain">
+      <p><b>Read it left to right.</b> The left columns are things a computer can settle: does the formal statement say what the headline says, and does the proof check. The right columns are things only people can settle: is there a proof a person can read, who wrote the argument, and has a mathematician read it.</p>
+      <p><b>The pattern.</b> The biggest claim, the Riemann Hypothesis, is the most machine-checked and the least human-read: a readable guide exists, but it is unfinished. The two results that came from human papers fill the right-hand columns first.</p>
+      <p><b>Same headline, different sentence.</b> Two labs each claim "ETH is false" and "VP ≠ VNP", but their formal statements differ, and in both pairs Anthropic's Lean file covers more of its paper than OpenAI's does.</p>
+    </div>
+  </section>
+
+  <section id="perm">
+    <div class="sec-head">
+      <div class="eyebrow">Picture 2</div>
+      <h2>Change the signs and the problem changes</h2>
+    </div>
+    <div class="figure">
+      <div class="seg" role="group" aria-label="Choose polynomial">
+        <button id="b-perm" aria-pressed="true">Permanent</button><button id="b-det" aria-pressed="false">Determinant</button>
+      </div>
+      <div class="terms" id="terms"></div>
+      <div class="formula" id="formula"></div>
+    </div>
+    <div class="plain">
+      <p><b>Six ways to pick one cell from every row and column.</b> Multiply the three cells in each picture and add up the six products. That sum is the <b>permanent</b>.</p>
+      <p><b>Flip three signs and you get the determinant.</b> The determinant has a recipe of polynomial size, with no division needed. For the permanent nothing like that is known: Ryser's exact recipe from 1963 takes about m·2<sup>m</sup> operations.</p>
+      <p><b>"VP ≠ VNP" says the permanent really is hard</b> for any circuit built from + and ×, however clever, over fields where 1 + 1 is not 0. Both labs claim it. It is the arithmetic cousin of P ≠ NP and does not settle P ≠ NP.</p>
+    </div>
+
+    <div class="figure">
+      <h3>How high is the floor? Every bound written as "m to the power …"</h3>
+      <div class="seg" role="group" aria-label="Unknown constant c">
+        <button data-c="0.25" aria-pressed="false">c = ¼</button><button data-c="1" aria-pressed="true">c = 1</button><button data-c="4" aria-pressed="false">c = 4</button>
+      </div>
+      <svg id="expchart" viewBox="0 0 760 360" role="img" aria-label="Exponent of each bound against matrix size"></svg>
+      <div class="key">
+        <span><i style="background:var(--muted)"></i>old proven floor (about m²·log m)</span>
+        <span><i style="background:var(--c1)"></i>Anthropic's claimed floor, in Lean</span>
+        <span><i style="background:var(--c3)"></i>OpenAI's claimed floor, paper only</span>
+        <span><i style="background:var(--c4)"></i>ceiling: the 1963 method</span>
+      </div>
+      <div class="scroll"><table class="small" id="passes"></table></div>
+    </div>
+    <div class="plain">
+      <p><b>A flat line would mean "polynomial".</b> The old floor is flat at about power 2. The two new floors keep rising forever, and that is all "superpolynomial" means.</p>
+      <p><b>They rise very slowly.</b> With the unknown constant set to 1, Anthropic's floor does not pass m³ until the grid is about 10<sup>8</sup> wide, and does not pass m<sup>10</sup> until about 10<sup>301</sup>. The ceiling leaves the chart before m = 100.</p>
+      <p><b>So the truth is somewhere in a very tall gap.</b> The claims move the floor from "flat" to "rising". They do not say the permanent needs anything like 2<sup>m</sup>.</p>
+    </div>
+    <div class="fine"><p>The theorems say "for some constant c &gt; 0 and all large enough m"; nobody states c, so the buttons show how much it matters. Anthropic: more than m<sup>c·(log₂ m)^(1/3)</sup> gates (vp-vnp/Statement.lean). OpenAI: exp(Ω((log n)^(5/4))) for approximating circuits, stated in the paper, not in its Lean file (lean/docs/379.md). Old floor: Baur and Strassen. Ceiling: Ryser.</p></div>
+  </section>
+
+  <section id="count">
+    <div class="sec-head">
+      <div class="eyebrow">Picture 3</div>
+      <h2>One circuit, counted two ways</h2>
+    </div>
+    <div class="figure">
+      <p class="mono">target: x² − y² = (x + y) · (x − y)</p>
+      <div class="two">
+        <div class="col">
+          <h3>OpenAI's rule: count the operations</h3>
+          <ol class="steps nocount">
+            <li class="free">x</li>
+            <li class="free">y</li>
+            <li class="g">x + y</li>
+            <li class="g">x − y</li>
+            <li class="g">(x + y) · (x − y)</li>
+          </ol>
+          <div class="count">size <b>3</b> &nbsp;<span class="muted">inputs and numbers are free; +, − and × each cost 1</span></div>
+        </div>
+        <div class="col">
+          <h3>Anthropic's rule: count every line</h3>
+          <ol class="steps">
+            <li>x</li>
+            <li>y</li>
+            <li>x + y</li>
+            <li>−1</li>
+            <li>(−1) · y</li>
+            <li>x + (−1)·y</li>
+            <li>(x + y) · (x − y)</li>
+          </ol>
+          <div class="count">size <b>7</b> &nbsp;<span class="muted">no minus sign: subtract by multiplying with −1</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="plain">
+      <p><b>Same computation, different bill.</b> The two labs do not measure circuit size the same way, so their numbers cannot be compared directly.</p>
+      <p><b>The bills can never be far apart.</b> Anthropic's count is at most 5 times OpenAI's, plus 1. OpenAI's count is never more than Anthropic's. Here: 3 and 7.</p>
+      <p><b>So "small circuit" means the same thing in both.</b> A factor of 5 cannot turn a polynomial into something bigger, so each lab's bare "VP ≠ VNP" follows from the other's.</p>
+    </div>
+    <div class="fine"><p>This is Fixpoint's paper derivation from the two statement files, not a machine check. Three more wording differences needed care: OpenAI's size bounds hold "from some point on" and Anthropic's at every size; OpenAI fixes 2n variables at step n and Anthropic allows any number; OpenAI says the two classes are "not equal" and Anthropic says one sits strictly inside the other. What does <b>not</b> carry over from Anthropic's file to OpenAI's: the growth rate, the approximate-circuit version, and the permanent by name.</p></div>
+  </section>
+
+  <section id="cross">
+    <div class="sec-head">
+      <div class="eyebrow">Picture 4</div>
+      <h2>A crossing, paid for in four cheaper pieces</h2>
+    </div>
+    <div class="figure">
+      <div class="seg" role="group" aria-label="Bits per wire">
+        <button data-l="1" aria-pressed="false">1 bit per wire</button><button data-l="2" aria-pressed="false">2 bits</button><button data-l="3" aria-pressed="true">3 bits</button><button data-l="4" aria-pressed="false">4 bits</button>
+      </div>
+      <div class="cross">
+        <svg id="crosspic" viewBox="0 0 210 190" role="img" aria-label="Four corners joined by two crossing wires"></svg>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="key">
+        <span><i style="background:var(--c1)"></i>bits paid if you cut between the rows</span>
+        <span><i style="background:var(--c2)"></i>bits paid if you cut between the columns</span>
+        <span><i style="background:var(--c4)"></i>the README's promised limit</span>
+      </div>
+    </div>
+    <div class="plain">
+      <p><b>Two wires cross.</b> Cut the picture in half either way, between the rows or between the columns, and you cut both wires. A crossing is expensive in both directions at once.</p>
+      <p><b>Rewrite the crossing as a short sum.</b> Each piece is cheaper than the crossing when you add its two directions together, and the pieces at the ends cost almost nothing in one of them.</p>
+      <p><b>That saving is the engine of Anthropic's 3-SAT algorithm.</b> Its one-paragraph summary promises about 10% per round, and the rounds repeat at ever larger scales. Both VP ≠ VNP papers then use the same trade: either such savings exist and you can out-run any small circuit, or they do not and the circuit is stuck.</p>
+    </div>
+    <div class="fine"><p>Fixpoint computed the first three tables by exact elimination over fractions (tools/check_swap_singlet_ranks.py). For four bits, modular elimination (tools/check_swap_ranks_kron.py) and the closed formula certify the rank. All stay under the README's bound of 12 to the power of the wire length. A fresh model, given only the README's paragraph and the definitions, derived the same formula and tables in about six minutes, and showed that 12 cannot be made smaller for this way of splitting (<a href="crew_visuals/swap_ranks_rederived.md">the experiment and its limits</a>). In bits, the limit for long wires is log₂ 12 out of 4 per bit, a ratio of 0.896. The paper itself uses a different expansion and gets 11/12. The last sentence above is Fixpoint's reading of the two proof overviews, not a checked equivalence.</p></div>
+  </section>
+
+  <footer>
+    <p><b>Sources, as read on 24 Nov 2026.</b> <span class="mono">openai/math f57028540</span> · <span class="mono">anthropics/formal-math 11b6c7e</span> · <span class="mono">1337isnot1337/riemann-hypothesis-solved 6193bb5</span> · the Lean FRO and Mathlib Initiative statement of 21 Nov · Andrew Sutherland's verification page (updated 24 Nov 05:25 UTC).</p>
+    <p>Outside checks cited in picture 1: Carlos Toledo's rebuild of both ETH projects (carlostoledo.co/eth) and Michael Rubinstein's working guide to the Riemann Hypothesis proof. None of the full proofs was rebuilt or re-proved by us. "Scanned" means a word search over every Lean file, with a control to prove the search works; lines are counted the way wc -l counts them. Other cards in this round: the critical strip (Confluence), the two ETH encodings (Marlow), a model table with two ranks (Lattice).</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,text){var e=document.createElement(tag);if(attrs){for(var k in attrs){e.setAttribute(k,attrs[k]);}}if(text!==undefined){e.textContent=text;}return e;}
+function sv(tag,attrs,text){var e=document.createElementNS(NS,tag);if(attrs){for(var k in attrs){e.setAttribute(k,attrs[k]);}}if(text!==undefined){e.textContent=text;}return e;}
+
+/* ---------- Picture 1: trust grid ---------- */
+var COLS=["Statement read by us","Text scan by us","Publisher's checker","Second, independent checker","Rebuilt by outsiders","Readable proof","People behind the argument"];
+var WORD={yes:"Yes",reported:"Reported",partial:"Partly",no:"No",unknown:"Not known",na:"Does not apply"};
+var ROWS=[
+ {claim:"The Riemann Hypothesis",sub:"Alpöge with Claude · 20 Nov",
+  plain:"Every nontrivial zero of the zeta function sits on one vertical line. Since 1859 this was the most famous open problem in mathematics; it controls how evenly the primes are spread. The release covers every Dirichlet L-function too: their nontrivial zeros sit on the same line.",
+  src:"riemann-hypothesis-solved @ 6193bb5 · Statements.lean, Main.lean",
+  cells:[["yes","Fixpoint read both statement files. Statements.lean is 783 bytes and imports only Mathlib; the first of the five theorems is Mathlib's own definition of the Riemann Hypothesis."],
+         ["yes","Fixpoint's search of all 175,187 Lean files (17,374,215 lines) finds no file with the word sorry, admit, axiom, native_decide, unsafe, implemented_by, extern or opaque. Control: 'theorem' is found in 165,298 files."],
+         ["na","The author released a source archive, not a build record."],
+         ["reported","Andrew Sutherland reports that nanoda, con-leche, con-ron and lean4lean all accept it. One long comparator run was still going on 24 Nov."],
+         ["reported","Sutherland reports a full build and a sandboxed rebuild. The Lean FRO and Mathlib Initiative statement says dozens of people reproduced the compilation."],
+         ["partial","The release is Lean only. Michael Rubinstein's working guide (265 pages, 22 Nov, written with AI help) reduces the zeta case to thirteen stated hypotheses that it does not prove. The author says a proper write-up will follow."],
+         ["unknown","Written by: Alpöge with Claude. Read by a mathematician: no page we read says so; Rubinstein's guide is a study aid in progress."]]},
+ {claim:"VP ≠ VNP",sub:"Anthropic (a Claude model) · 23 Nov",
+  plain:"No small circuit of additions and multiplications computes the Hamiltonian cycle polynomial, over any field, or the permanent, over any field where 1 + 1 is not 0. The file also gives a growth rate and covers circuits that only approximate the answer.",
+  src:"anthropics/formal-math @ 11b6c7e · vp-vnp/Statement.lean",
+  cells:[["yes","Fixpoint read Statement.lean: five targets, including the growth rate and the approximate version. Marlow traced each target to its theorem in the paper."],
+         ["yes","324 Lean files, 72,932 lines. The only 'sorry' words are the five expected ones in Challenge.lean."],
+         ["yes","Publisher CI: the run on the merge (23 Nov) concluded success. Fixpoint read the run's result, not its logs."],
+         ["yes","The second kernel, nanoda, is switched on in the comparator config that CI runs."],
+         ["unknown","None that we know of."],
+         ["yes","A 70-page paper is in the folder."],
+         ["no","Written by: a Claude model. Read by a mathematician: the README says no human mathematician has checked the proof."]]},
+ {claim:"VP ≠ VNP",sub:"OpenAI (family 379) · 23 Nov",
+  plain:"The same headline, the same day. The one statement OpenAI's checker compares is the bare separation. Its Lean also proves exact bounds for the two named polynomials; the stronger bound for approximating circuits is in the paper only.",
+  src:"openai/math @ f57028540 · lean/ComparatorChallenges/VPVNP.lean, lean/docs/379.md",
+  cells:[["yes","Fixpoint read VPVNP.lean: the Comparator selects one target, 'the two classes are not equal'. The scope note says the Lean also proves exact superpolynomial bounds for the Hamiltonian cycle polynomial and the permanent."],
+         ["yes","3,143 Lean files, 440,234 lines: no sorry, axiom or native_decide outside comments."],
+         ["unknown","A comparator config exists. We found no public run record from the publisher."],
+         ["no","The second kernel is switched off in the config (enable_nanoda: false)."],
+         ["unknown","None that we know of."],
+         ["yes","A paper of about 12,400 words is in the collection."],
+         ["unknown","Written by: an OpenAI model, per the collection. Read by a mathematician: not stated."]]},
+ {claim:"ETH is false",sub:"Anthropic (a Claude model) · 26 Oct",
+  plain:"3-SAT, the standard hard puzzle, can be solved faster than anyone believed: the exponent grows more slowly than the number of variables. Not a practical speed-up.",
+  src:"anthropics/formal-math @ 11b6c7e · eth/MainResults.lean",
+  cells:[["yes","Fixpoint read MainResults.lean. It defines the hypothesis itself and states that it fails, plus a counting theorem with the paper's headline bound."],
+         ["yes","1,052 Lean files, 152,420 lines. The only 'sorry' words are the two expected ones in Challenge.lean."],
+         ["yes","Publisher CI: the run on the merge (27 Oct) concluded success."],
+         ["yes","nanoda is switched on in the comparator config."],
+         ["reported","Carlos Toledo reports an independent rebuild at 16a5ce41: Comparator, nanoda and a fresh kernel replay all pass. A different kind of evidence, kept apart: TSavo/eth-bridge states an implication from OpenAI's claim to this file's statement."],
+         ["yes","A 49-page paper is in the folder."],
+         ["unknown","Written by: AI models, per the README. Read by a mathematician: not stated. Toledo's page says the papers were not checked."]]},
+ {claim:"ETH is false",sub:"OpenAI (family 378) · 26 Oct",
+  plain:"The same headline, the same day. OpenAI's Lean file proves a weaker bound than its paper's headline, on a custom machine model, and does not state the hypothesis itself.",
+  src:"openai/math @ 7ef5c0cc5 (card 378) · SubexponentialSAT.lean",
+  cells:[["yes","Fixpoint read it for card 378 in October."],
+         ["yes","3,977 Lean files, 710,320 lines: no sorry, admit, axiom or native_decide outside comments (October scan)."],
+         ["unknown","We found no public run record from the publisher."],
+         ["reported","Toledo switched the second kernel on (it ships off) and reports that it accepts, with a patch and a larger stack."],
+         ["reported","Toledo reports an independent rebuild at 7ef5c0cc: Comparator says the solution is okay, only the three standard axioms, and a fresh kernel replay passes."],
+         ["yes","The paper is in the collection."],
+         ["unknown","Written by: an OpenAI model, per the collection. Read by a mathematician: not stated."]]},
+ {claim:"3SUM and APSP are faster than believed",sub:"Alman and Vassilevska Williams · Lean by Anthropic",
+  plain:"Two textbook problems thought to need n² and n³ steps can be done in n to the 1.9992 and n to the 2.99942, for integers of polynomial size, negative ones included, on a word RAM (a standard model of a computer). A human paper; Anthropic formalized it.",
+  src:"anthropics/formal-math @ 11b6c7e · 3sum-apsp/EndStatement.lean",
+  cells:[["yes","Fixpoint read EndStatement.lean: 139 lines, imports nothing, defines its own small machine and states the five headline claims."],
+         ["yes","434 Lean files, 102,310 lines. 'sorry' appears only in the Challenge statement files, as designed."],
+         ["yes","Publisher CI: the run on the merge (6 Oct) concluded success. Marlow read its build and Comparator steps."],
+         ["yes","nanoda is switched on in both comparator configs."],
+         ["unknown","None that we know of."],
+         ["yes","arXiv:2610.06783."],
+         ["yes","Written by: two human researchers. Read by a mathematician: we did not check its review status."]]},
+ {claim:"Most of zeta's zeros are single: at least two thirds of the count",sub:"Alpöge and Furman · Lean by Claude",
+  plain:"Before the full Riemann Hypothesis release. Count the nontrivial zeros up to a large height, a repeated zero counting as many times as it repeats. At least two thirds of that count is single zeros on the line. That is a statement about the whole count, not about every group of three. The 'single' part is still not implied by the Riemann Hypothesis.",
+  src:"anthropics/formal-math @ 11b6c7e · zeta23/Challenge.lean",
+  cells:[["yes","Confluence and Marlow both read the selected statements. The project's own record says a paper author read the statement file against the paper."],
+         ["yes","326 Lean files, 103,032 lines. 'sorry' appears only in the Challenge statement files; 'axiom' only inside comments."],
+         ["yes","Publisher CI: the folder's own run at 2bafb8c concluded success."],
+         ["yes","nanoda is switched on in both comparator configs."],
+         ["unknown","None that we know of."],
+         ["yes","arXiv:2608.13637."],
+         ["yes","Written by: two human mathematicians, who directed the Lean work; nobody wrote the Lean by hand."]]}
+];
+var tbody=document.querySelector("#grid tbody"),detail=document.getElementById("detail"),rowBtns=[];
+function showRow(i){
+  rowBtns.forEach(function(b,j){b.setAttribute("aria-pressed",j===i?"true":"false");});
+  var r=ROWS[i];detail.textContent="";
+  detail.appendChild(el("h3",null,r.claim+" · "+r.sub));
+  detail.appendChild(el("p",null,r.plain));
+  var ul=el("ul");
+  r.cells.forEach(function(c,k){var li=el("li");li.appendChild(el("i",{class:"dot "+c[0],"aria-hidden":"true"}));var d=el("div");d.appendChild(el("b",null,COLS[k]+": "+WORD[c[0]]+". "));d.appendChild(document.createTextNode(c[1]));li.appendChild(d);ul.appendChild(li);});
+  detail.appendChild(ul);
+  detail.appendChild(el("div",{class:"src"},r.src));
+}
+ROWS.forEach(function(r,i){
+  var tr=el("tr"),td=el("td",{class:"claim"}),b=el("button",{class:"rowbtn",type:"button","aria-pressed":"false"});
+  b.appendChild(el("b",null,r.claim));b.appendChild(el("span",null,r.sub));
+  b.addEventListener("click",function(){showRow(i);});rowBtns.push(b);td.appendChild(b);tr.appendChild(td);
+  r.cells.forEach(function(c,k){var t=el("td");t.appendChild(el("i",{class:"dot "+c[0],role:"img","aria-label":COLS[k]+": "+WORD[c[0]],title:WORD[c[0]]}));tr.appendChild(t);});
+  tbody.appendChild(tr);
+});
+showRow(0);
+
+/* ---------- Picture 2a: permanent against determinant ---------- */
+var L=["a","b","c","d","e","f","g","h","i"];
+var PERMS=[[0,1,2,1],[1,2,0,1],[2,0,1,1],[2,1,0,-1],[1,0,2,-1],[0,2,1,-1]];
+var terms=document.getElementById("terms"),formula=document.getElementById("formula"),signEls=[];
+PERMS.forEach(function(p){
+  var t=el("div",{class:"term"}),g=el("div",{class:"mini","aria-hidden":"true"}),name="";
+  for(var r=0;r<3;r++){for(var c=0;c<3;c++){g.appendChild(el("i",p[r]===c?{class:"on"}:null,L[r*3+c]));}name+=L[r*3+p[r]];}
+  var s=el("div",{class:"sign"}),badge=el("em",null,"+");s.appendChild(badge);s.appendChild(el("span",null,name.split("").join("·")));
+  signEls.push([badge,p[3],name]);t.appendChild(g);t.appendChild(s);terms.appendChild(t);
+});
+function setMode(det){
+  document.getElementById("b-perm").setAttribute("aria-pressed",det?"false":"true");
+  document.getElementById("b-det").setAttribute("aria-pressed",det?"true":"false");
+  var f=det?"determinant = ":"permanent = ";
+  signEls.forEach(function(x,i){var neg=det&&x[1]<0;x[0].textContent=neg?"−":"+";x[0].className=neg?"minus":"";f+=(i===0?"":(neg?" − ":" + "))+x[2];});
+  formula.textContent=f+(det?"   (three signs flipped: easy)":"   (all plus: hard, if the claims hold)");
+}
+document.getElementById("b-perm").addEventListener("click",function(){setMode(false);});
+document.getElementById("b-det").addEventListener("click",function(){setMode(true);});
+setMode(false);
+
+/* ---------- Picture 2b: exponent chart ---------- */
+var chart=document.getElementById("expchart"),passes=document.getElementById("passes");
+var W=760,H=360,ML=46,MR=16,MT=14,MB=44,YMAX=16,UMAX=3; /* u = log10(log10 m), from m = 10 (u=0) to m = 10^1000 (u=3) */
+function X(u){return ML+(W-ML-MR)*u/UMAX;}
+function Y(e){return H-MB-(H-MT-MB)*Math.min(e,YMAX)/YMAX;}
+var LN10=Math.LN10,LOG2_10=Math.log(10)/Math.log(2);
+function curves(c){return {
+  old:function(lg){var lnm=lg*LN10;return 2+Math.log(lg*LOG2_10)/lnm;},            /* m^2 * log2 m */
+  ant:function(lg){return c*Math.pow(lg*LOG2_10,1/3);},                             /* m^(c (log2 m)^(1/3)) */
+  oai:function(lg){return c*Math.pow(lg*LN10,1/4);},                                /* exp(c (ln m)^(5/4)) = m^(c (ln m)^(1/4)) */
+  top:function(lg){var m=Math.pow(10,lg);return 1+m/(lg*LOG2_10);}                  /* m * 2^m */
+};}
+function pathFor(fn,clipTop){var d="",started=false;for(var i=0;i<=300;i++){var u=UMAX*i/300,lg=Math.pow(10,u),e=fn(lg);if(!isFinite(e)||e>YMAX*1.02){if(clipTop&&started){d+=" L"+X(u).toFixed(1)+" "+Y(YMAX).toFixed(1);}break;}d+=(started?" L":"M")+X(u).toFixed(1)+" "+Y(e).toFixed(1);started=true;}return d;}
+function fmtPow(lg){if(lg<3){return "m ≈ "+Math.round(Math.pow(10,lg)).toLocaleString("en-US");}if(lg<1e6){return "m ≈ 10^"+(lg<100?lg.toFixed(1):Math.round(lg).toLocaleString("en-US"));}return "m ≈ 10^("+lg.toExponential(1)+")";}
+function drawChart(c){
+  chart.textContent="";var f=curves(c),g=sv("g",{class:"axis"});
+  for(var e=0;e<=YMAX;e+=2){g.appendChild(sv("line",{class:"gridline",x1:ML,x2:W-MR,y1:Y(e),y2:Y(e)}));g.appendChild(sv("text",{x:ML-8,y:Y(e)+4,"text-anchor":"end"},"m^"+e));}
+  [[1,"10"],[2,"100"],[3,"1000"],[6,"10^6"],[10,"10^10"],[30,"10^30"],[100,"10^100"],[300,"10^300"],[1000,"10^1000"]].forEach(function(t){var u=Math.log(t[0])/LN10;g.appendChild(sv("line",{class:"gridline",x1:X(u),x2:X(u),y1:MT,y2:H-MB}));g.appendChild(sv("text",{x:X(u),y:H-MB+16,"text-anchor":u>2.9?"end":"middle"},t[1]));});
+  g.appendChild(sv("line",{class:"axisline",x1:ML,x2:W-MR,y1:H-MB,y2:H-MB}));g.appendChild(sv("line",{class:"axisline",x1:ML,x2:ML,y1:MT,y2:H-MB}));
+  g.appendChild(sv("text",{x:(ML+W-MR)/2,y:H-8,"text-anchor":"middle"},"m = width of the grid (each step right is a much bigger grid)"));
+  chart.appendChild(g);
+  [["old","var(--muted)","5 4"],["oai","var(--c3)",""],["ant","var(--c1)",""],["top","var(--c4)",""]].forEach(function(s){chart.appendChild(sv("path",{d:pathFor(f[s[0]],s[0]==="top"),style:"fill:none;stroke:"+s[1],"stroke-width":s[0]==="old"?2:2.6,"stroke-dasharray":s[2],"stroke-linejoin":"round"}));});
+  chart.appendChild(sv("text",{class:"lab",x:X(Math.log(1.9)/LN10)+8,y:MT+12},"ceiling leaves the chart near m = 100"));
+  /* table: where each floor passes m^3 and m^10 */
+  passes.textContent="";var hr=el("tr");["Floor","passes m³ at","passes m¹⁰ at"].forEach(function(h){hr.appendChild(el("th",null,h));});passes.appendChild(hr);
+  [["Anthropic (in Lean)",function(k){return Math.pow(k/c,3)/LOG2_10;}],["OpenAI (paper only)",function(k){return Math.pow(k/c,4)/LN10;}]].forEach(function(r){var tr=el("tr");tr.appendChild(el("td",null,r[0]));[3,10].forEach(function(k){tr.appendChild(el("td",null,fmtPow(r[1](k))));});passes.appendChild(tr);});
+  var tr=el("tr");tr.appendChild(el("td",null,"Ceiling (1963 method)"));tr.appendChild(el("td",null,"m = 4"));tr.appendChild(el("td",null,"m ≈ 51"));passes.appendChild(tr);
+}
+var cBtns=document.querySelectorAll("button[data-c]");
+cBtns.forEach(function(b){b.addEventListener("click",function(){cBtns.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");});drawChart(parseFloat(b.getAttribute("data-c")));});});
+drawChart(1);
+
+/* ---------- Picture 4: the crossing ---------- */
+var RANKS={1:[[4,1],[1,4]],2:[[16,1],[7,7],[1,16]],3:[[64,1],[37,10],[10,37],[1,64]],4:[[256,1],[175,13],[67,67],[13,175],[1,256]]}; /* exact (row rank, column rank) of each grouped piece, computed 24 Nov */
+var pic=document.getElementById("crosspic"),bars=document.getElementById("bars");
+(function(){
+  var P={a:[40,40],b:[170,40],c:[40,150],d:[170,150]};
+  pic.appendChild(sv("line",{x1:20,x2:190,y1:95,y2:95,style:"stroke:var(--c1)","stroke-width":1.5,"stroke-dasharray":"4 4"}));
+  pic.appendChild(sv("line",{x1:105,x2:105,y1:20,y2:170,style:"stroke:var(--c2)","stroke-width":1.5,"stroke-dasharray":"4 4"}));
+  pic.appendChild(sv("line",{x1:P.a[0],y1:P.a[1],x2:P.d[0],y2:P.d[1],style:"stroke:var(--ink)","stroke-width":3}));
+  pic.appendChild(sv("line",{x1:P.b[0],y1:P.b[1],x2:P.c[0],y2:P.c[1],style:"stroke:var(--ink)","stroke-width":3}));
+  Object.keys(P).forEach(function(k){pic.appendChild(sv("circle",{cx:P[k][0],cy:P[k][1],r:13,style:"fill:var(--surface);stroke:var(--ink)","stroke-width":2}));pic.appendChild(sv("text",{x:P[k][0],y:P[k][1]+4,"text-anchor":"middle",style:"font-family:var(--mono);font-size:12px;fill:var(--ink)"},k));});
+  pic.appendChild(sv("text",{class:"lab",x:192,y:91,"text-anchor":"end"},"row cut"));
+  pic.appendChild(sv("text",{class:"lab",x:109,y:184},"column cut"));
+})();
+function bit(x){return Math.log(x)/Math.LN2;}
+function drawBars(l){
+  bars.textContent="";var full=4*l,limit=l*bit(12);
+  function row(label,rb,cb,whole){
+    var d=el("div",{class:"bar"+(whole?" whole":"")});d.appendChild(el("div",null,label));
+    var t=el("div",{class:"track"});t.appendChild(el("b",{class:"r",style:"width:"+(100*rb/full)+"%"}));t.appendChild(el("b",{class:"c",style:"width:"+(100*cb/full)+"%"}));
+    t.appendChild(el("i",{class:"mark",style:"left:"+(100*limit/full)+"%",title:"README limit"}));d.appendChild(t);
+    d.appendChild(el("div",{class:"num"},(rb+cb).toFixed(1)+" bits"));bars.appendChild(d);
+  }
+  row("the crossing",2*l,2*l,true);
+  RANKS[l].forEach(function(p,j){row("piece "+(j+1),bit(p[0]),bit(p[1]),false);});
+  var worst=Math.max.apply(null,RANKS[l].map(function(p){return bit(p[0])+bit(p[1]);}));
+  bars.appendChild(el("div",{class:"muted",style:"font-size:.84rem"},"Crossing: "+full+" bits. Worst piece: "+worst.toFixed(1)+" bits ("+Math.round(100*worst/full)+"% of the crossing). Promised limit: "+limit.toFixed(1)+" bits."));
+}
+var lBtns=document.querySelectorAll("button[data-l]");
+lBtns.forEach(function(b){b.addEventListener("click",function(){lBtns.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");});drawBars(parseInt(b.getAttribute("data-l"),10));});});
+drawBars(3);
+})();
+</script>
+</body>
+</html>

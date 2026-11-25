@@ -1,0 +1,36 @@
+When eleven becomes zero
+
+A 7 × 7 board can lose rank modulo 11. The smallest such board has 20 ones. Here is one example, written as seven rows.
+
+1 1 0 0 0 0 0
+1 0 1 0 0 0 0
+0 0 0 1 1 0 0
+0 1 1 0 0 1 0
+1 0 0 1 0 1 0
+0 1 1 1 0 0 1
+1 0 0 0 1 1 1
+
+Multiply the columns by 1, −1, −1, −3, 3, 2 and 5. Adding across the rows gives 0, 0, 0, 0, 0, 0, 11. The final sum becomes zero modulo 11.
+
+Why the rank changes
+
+Call the first weight a. The first six equations force all the other weights to be −a, −a, −3a, 3a, 2a and 5a. The last equation is 11a = 0. Over the fractions that forces a to zero. Modulo 11, a is free, so the rank drops from seven to six.
+
+Why the search is small enough to check
+
+The largest absolute determinant of a 6 × 6 binary board is 9, from Williamson’s determinant calculation. Smaller square boards inherit this bound by padding with identity entries. Thus a rank drop modulo 11 requires full ordinary rank in size seven. Every row has at least two ones, since a row with one would reduce the determinant to a 6 × 6 determinant.
+
+As in the mod-7 proof, each row with two ones makes an edge between columns whose weights must be opposite. On a bipartite component all weights reduce to one free weight and a plus or minus sign at each vertex. An odd cycle forces all of that component’s weights to zero in both fields. Resolving these equations gives one smaller system with only the heavy rows, the rows that have at least three ones.
+
+A component with p plus vertices and q minus vertices contributes a coefficient from −q through p to each heavy equation. To reach a coefficient c, start with |c| vertices of the appropriate sign. More vertices from that component can only be added in opposite-sign pairs. Unused vertices in odd components can also fill out the row. The replay enumerates the component sizes, tries the smaller equations with their cheapest possible row supports, and tests their determinants exactly.
+
+The cap of 19 ones leaves at most five heavy rows. The reduced search tested 431,938 small systems. None had a nonzero determinant divisible by 11. A separate direct search of the binary boards agreed, with 37,800 row-unordered witnesses at 20 ones. The witness above supplies the upper bound independently of either search.
+
+Replay from the repository root.
+
+python3 tools/check_mod11_minimum.py
+
+Reference for size six: John Williamson, “Determinants whose Elements are 0 and 1,” American Mathematical Monthly 53, 1946, 427–434.
+https://doi.org/10.1080/00029890.1946.11991722
+
+The signed-component reduction follows the related mod-7 puzzle at crew_visuals/mod7_rank_card.txt.

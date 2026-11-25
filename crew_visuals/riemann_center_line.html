@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why only the center line remains · Riemann Hypothesis</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1719;
+      --panel: #172326;
+      --ink: #fff7e7;
+      --soft: #b5c4c0;
+      --line: #34474a;
+      --mint: #9befce;
+      --sand: #f4ce91;
+      --coral: #ffae9d;
+      font-family: system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--bg); }
+    main { width: min(100% - 2.5rem, 68rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4.5rem) 0; }
+    h1, h2, p, figure, dl { margin: 0; }
+    a { color: var(--mint); text-underline-offset: .2em; }
+    button, input { font: inherit; }
+    :focus-visible { outline: 2px solid var(--sand); outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .topic { color: var(--mint); font-size: .86rem; font-weight: 650; letter-spacing: .07em; }
+    h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2.35rem, 7vw, 5rem); letter-spacing: -.045em; line-height: 1.02; margin: .5rem 0 .8rem; }
+    .intro { max-width: 54ch; color: var(--soft); line-height: 1.55; }
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin: 1.85rem 0 .85rem; max-width: 39rem; }
+    .steps button { min-height: 3rem; padding: .5rem; border: 1px solid var(--line); border-radius: .45rem; background: var(--bg); color: var(--soft); cursor: pointer; }
+    .steps button[aria-pressed="true"] { background: var(--mint); border-color: var(--mint); color: #102423; font-weight: 650; }
+    .steps button[aria-pressed="false"]:hover { border-color: var(--mint); color: var(--ink); }
+    .explorer { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(1.25rem, 4vw, 3rem); align-items: center; }
+    figure { min-width: 0; border-radius: .7rem; overflow: hidden; background: var(--panel); border: 1px solid var(--line); }
+    svg { display: block; width: 100%; height: auto; }
+    .plot-interior { cursor: crosshair; }
+    .plot-label { fill: var(--soft); font-size: 18px; text-anchor: middle; }
+    .center-label { fill: var(--mint); font-weight: 650; }
+    .ruled-label { fill: var(--coral); }
+    .rule-overlay, .partner, .reflection, .crosses { opacity: 0; transition: opacity .22s ease; }
+    svg[data-stage="reflect"] .partner, svg[data-stage="reflect"] .reflection,
+    svg[data-stage="conclude"] .partner, svg[data-stage="conclude"] .reflection,
+    svg[data-stage="conclude"] .rule-overlay, svg[data-stage="conclude"] .crosses { opacity: 1; }
+    svg[data-middle="true"] .partner, svg[data-middle="true"] .reflection,
+    svg[data-middle="true"] .crosses, svg[data-near="true"] .reflection { opacity: 0; }
+    svg[data-near="true"][data-middle="false"] circle { r: 4px; }
+    svg[data-stage="conclude"][data-middle="false"] .candidate, svg[data-stage="conclude"][data-middle="false"] .partner { opacity: .4; }
+    .readout { min-width: 0; }
+    .readout h2 { font-family: Georgia, serif; font-size: clamp(1.6rem, 3.1vw, 2.1rem); font-weight: 400; line-height: 1.08; margin-bottom: .65rem; }
+    .readout p { line-height: 1.55; color: var(--soft); min-height: 5em; }
+    .coordinates { display: grid; grid-template-columns: repeat(2, 1fr); gap: .7rem; margin: 1.1rem 0 1rem; padding: .85rem 0; border-block: 1px solid var(--line); }
+    .coordinates dt { color: var(--soft); font-size: .84rem; }
+    .coordinates dd { margin: .18em 0 0; font-size: 1.72rem; line-height: 1; font-variant-numeric: tabular-nums; }
+    #real-part { color: var(--mint); }
+    #reflected-part { color: var(--sand); }
+    .position { display: block; font-size: .9rem; color: var(--soft); }
+    input[type="range"] { display: block; width: 100%; margin: .15rem 0 0; min-height: 2.6rem; accent-color: var(--mint); cursor: ew-resize; }
+    .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; }
+    .presets button { min-height: 2.5rem; padding: .2rem; border: 1px solid var(--line); border-radius: .4rem; background: transparent; color: var(--ink); cursor: pointer; }
+    .presets button:hover, .presets button[aria-pressed="true"] { border-color: var(--mint); color: var(--mint); }
+    details { max-width: 63ch; margin-top: 1.5rem; color: var(--soft); line-height: 1.6; }
+    details summary { width: fit-content; color: var(--ink); cursor: pointer; }
+    details p { margin-top: .65rem; }
+    @media (max-width: 48rem) {
+      .explorer { grid-template-columns: 1fr; }
+      .readout p { min-height: 0; }
+    }
+    @media (max-width: 24rem) {
+      main { width: calc(100% - 1.5rem); }
+      .steps button { font-size: .9rem; }
+      .plot-label { font-size: 21px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .rule-overlay, .partner, .reflection, .crosses { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">Riemann Hypothesis</p>
+      <h1>Why only the center line remains</h1>
+      <p class="intro">Place a hypothetical zero in the strip. Watch where symmetry puts its partner, then apply the theorem that rules out the right half.</p>
+    </header>
+
+    <div class="steps" role="group" aria-label="Walkthrough steps">
+      <button type="button" data-step="place" aria-pressed="false">Place a zero</button>
+      <button type="button" data-step="reflect" aria-pressed="true">Reflect it</button>
+      <button type="button" data-step="conclude" aria-pressed="false">Rule out a half</button>
+    </div>
+
+    <div class="explorer">
+      <figure>
+        <svg id="strip" viewBox="0 0 560 364" role="img" aria-labelledby="plot-title plot-description" data-stage="reflect" data-middle="false" data-near="false">
+          <title id="plot-title">Reflection across the critical line</title>
+          <desc id="plot-description">A hypothetical zero at real part 0.25 reflects to real part 0.75 at the same height.</desc>
+          <defs>
+            <pattern id="right-hatching" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+              <line x1="0" y1="0" x2="0" y2="12" stroke="var(--coral)" stroke-opacity=".32" stroke-width="2" />
+            </pattern>
+          </defs>
+          <text class="plot-label" x="280" y="38">Critical strip</text>
+          <rect class="plot-interior" x="56" y="62" width="448" height="214" fill="#131e20" />
+          <g pointer-events="none">
+            <path d="M56 117 H504 M56 169 H504 M56 221 H504" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 7" />
+            <rect x="56" y="62" width="448" height="214" rx="2" fill="none" stroke="var(--line)" />
+            <g class="rule-overlay">
+              <rect x="280" y="62" width="224" height="214" fill="url(#right-hatching)" />
+              <text class="plot-label ruled-label" x="392" y="92">Right half ruled out</text>
+            </g>
+            <line x1="280" y1="62" x2="280" y2="285" stroke="var(--mint)" stroke-width="2" />
+            <line id="reflection" class="reflection" x1="168" y1="169" x2="392" y2="169" stroke="var(--sand)" stroke-width="2" stroke-dasharray="5 5" />
+            <circle id="candidate" class="candidate" cx="168" cy="169" r="9" fill="var(--mint)" stroke="var(--bg)" stroke-width="2" />
+            <circle id="partner" class="partner" cx="392" cy="169" r="9" fill="var(--panel)" stroke="var(--sand)" stroke-width="3" />
+            <g class="crosses" stroke="var(--coral)" stroke-width="3" stroke-linecap="round" fill="none">
+              <path id="candidate-cross" d="M-6 -6 L6 6 M6 -6 L-6 6" />
+              <path id="partner-cross" d="M-6 -6 L6 6 M6 -6 L-6 6" />
+            </g>
+          </g>
+          <text class="plot-label" x="56" y="305">0</text>
+          <text class="plot-label center-label" x="280" y="305">½</text>
+          <text class="plot-label" x="504" y="305">1</text>
+          <text class="plot-label" x="280" y="339">Real part</text>
+        </svg>
+      </figure>
+
+      <section class="readout" aria-labelledby="step-title">
+        <div aria-live="polite">
+          <h2 id="step-title">The zero would have a partner</h2>
+          <p id="step-copy">A candidate one quarter of the way across the strip would have a partner three quarters of the way across, at the same height.</p>
+        </div>
+        <dl class="coordinates">
+          <div><dt>Candidate</dt><dd id="real-part">0.25</dd></div>
+          <div id="partner-readout"><dt>Reflected partner</dt><dd id="reflected-part">0.75</dd></div>
+        </dl>
+        <label class="position" for="position">Move the candidate</label>
+        <input id="position" type="range" min="1" max="99" step="1" value="25" aria-valuetext="Real part 0.25">
+        <div class="presets" role="group" aria-label="Example positions">
+          <button type="button" data-position="25" aria-pressed="true" aria-label="Put the candidate at one quarter">¼</button>
+          <button type="button" data-position="50" aria-pressed="false" aria-label="Put the candidate on the center line">½</button>
+          <button type="button" data-position="75" aria-pressed="false" aria-label="Put the candidate at three quarters">¾</button>
+        </div>
+      </section>
+    </div>
+
+    <details>
+      <summary>The symmetry and the Lean sources</summary>
+      <p>For the Riemann zeta function, the functional equation and complex conjugation pair a zero <var>σ</var> + <var>it</var> in the open strip with a zero (1 − <var>σ</var>) + <var>it</var> at the same height. The Lean reduction uses the functional equation directly, sending <var>s</var> to 1 − <var>s</var>. Conjugation brings that point back to the same height in the picture.</p>
+      <p>Alpöge’s November 20, 2026 release, written with Claude, includes Mathlib’s Riemann Hypothesis and a right-half nonvanishing theorem for all Dirichlet characters, with an exception at the principal-character pole. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GammaFactorNonvanishing/RhOfRight.lean">Lean reduction</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Main.lean">Pinned Lean statements</a> · <a href="https://math.mit.edu/~drew/grh/#what-was-verified">Independent verification</a> · <a href="https://alpo.ge/remark.pdf">Alpöge’s announcement</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const strip = document.getElementById('strip');
+      const slider = document.getElementById('position');
+      const steps = document.querySelectorAll('[data-step]');
+      const presets = document.querySelectorAll('[data-position]');
+      const candidate = document.getElementById('candidate');
+      const partner = document.getElementById('partner');
+      const reflection = document.getElementById('reflection');
+      const candidateCross = document.getElementById('candidate-cross');
+      const partnerCross = document.getElementById('partner-cross');
+      const title = document.getElementById('step-title');
+      const copy = document.getElementById('step-copy');
+      const description = document.getElementById('plot-description');
+      const realPart = document.getElementById('real-part');
+      const reflectedPart = document.getElementById('reflected-part');
+      const partnerReadout = document.getElementById('partner-readout');
+      const board = { left: 56, width: 448, top: 62, bottom: 276, heightOfCandidate: 169 };
+      let stage = 'reflect';
+
+      function explain(value, left, right) {
+        if (stage === 'place') {
+          return ['Pick a place in the strip', `The dot is a hypothetical zero at real part ${left}. The question is whether a zero could sit there.`];
+        }
+        if (stage === 'reflect') {
+          return value === 50
+            ? ['The reflection lands on the same point', 'A point on the center line is its own reflection. The two markers coincide.']
+            : ['The zero would have a partner', `A zero at ${left} would give another at ${right}, at exactly the same height.`];
+        }
+        if (value === 50) {
+          return ['The center line remains', 'The two halves have been ruled out. The center line is where the nontrivial zeros can lie.'];
+        }
+        const rightmost = value > 50 ? left : right;
+        return ['The pair is ruled out', `The right-hand point at ${rightmost} is in the zero-free half. A pair would require zeros at both points, so the left-hand point is ruled out too.`];
+      }
+
+      function update() {
+        const value = Number(slider.value);
+        const left = (value / 100).toFixed(2);
+        const right = ((100 - value) / 100).toFixed(2);
+        const candidateX = board.left + board.width * value / 100;
+        const partnerX = board.left + board.width * (100 - value) / 100;
+        const nearCenter = Math.abs(value - 50) < 3;
+        const crossScale = nearCenter ? 0.5 : 1;
+        candidate.setAttribute('cx', candidateX);
+        partner.setAttribute('cx', partnerX);
+        reflection.setAttribute('x1', candidateX);
+        reflection.setAttribute('x2', partnerX);
+        candidateCross.setAttribute('transform', `translate(${candidateX} ${board.heightOfCandidate}) scale(${crossScale})`);
+        partnerCross.setAttribute('transform', `translate(${partnerX} ${board.heightOfCandidate}) scale(${crossScale})`);
+        strip.dataset.stage = stage;
+        strip.dataset.middle = String(value === 50);
+        strip.dataset.near = String(nearCenter);
+        slider.setAttribute('aria-valuetext', `Real part ${left}`);
+        realPart.textContent = left;
+        reflectedPart.textContent = right;
+        partnerReadout.hidden = stage === 'place';
+        for (const step of steps) step.setAttribute('aria-pressed', String(step.dataset.step === stage));
+        for (const preset of presets) preset.setAttribute('aria-pressed', String(Number(preset.dataset.position) === value));
+        const [heading, detail] = explain(value, left, right);
+        title.textContent = heading;
+        copy.textContent = detail;
+        description.textContent = detail;
+      }
+
+      for (const step of steps) step.addEventListener('click', () => { stage = step.dataset.step; update(); });
+      for (const preset of presets) preset.addEventListener('click', () => { slider.value = preset.dataset.position; update(); });
+      slider.addEventListener('input', update);
+      strip.addEventListener('click', event => {
+        const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(strip.getScreenCTM().inverse());
+        if (point.x < board.left || point.x > board.left + board.width || point.y < board.top || point.y > board.bottom) return;
+        slider.value = Math.max(1, Math.min(99, Math.round(100 * (point.x - board.left) / board.width)));
+        update();
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Count the points on a tiny curve</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f5eee0; color: #2b2618;
+      --muted: #61584a; --line: #bcb098; --orange: #852e1b; --pale: #f6d6c6; --grid: #ede1cb; --blue: #165f6a;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 58rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, h2, p, figure, dl { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 400; }
+    h1 { font-size: clamp(2.65rem, 7vw, 5rem); line-height: 1; letter-spacing: -.055em; margin: .5rem 0 .8rem; text-wrap: balance; }
+    h2 { font-size: 1.6rem; }
+    .topic { color: var(--orange); font-size: .86rem; letter-spacing: .07em; font-weight: 700; }
+    .intro, .tip, details { max-width: 63ch; line-height: 1.55; color: var(--muted); }
+    a { color: var(--blue); text-underline-offset: .2em; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    .controls { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1.2rem 0 .8rem; }
+    button { min-height: 2.65rem; padding: .35rem .86rem; border: 1px solid var(--line); border-radius: .4rem; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { color: #fff9f2; background: var(--orange); border-color: var(--orange); font-weight: 650; }
+    button:hover { border-color: var(--orange); }
+    .display { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: clamp(1rem, 4.5vw, 2.7rem); align-items: center; }
+    figure { border: 1px solid var(--line); border-radius: .55rem; background: #fcf7ed; }
+    figure svg { display: block; width: 100%; height: auto; }
+    .axis { fill: var(--muted); font: 15px system-ui, sans-serif; }
+    .grid-line { stroke: #d3c5ac; stroke-width: 1; }
+    .dot { fill: var(--blue); }
+    .dot[data-selected="true"] { fill: var(--orange); }
+    .high { fill: var(--pale); }
+    .readout { padding: .3rem 0; }
+    .slider { display: block; margin: .7rem 0 .45rem; }
+    input[type="range"] { display: block; width: 100%; min-height: 2.65rem; margin: 0; accent-color: var(--orange); }
+    .column-result { font-size: 1.04rem; line-height: 1.55; margin: .5rem 0 1rem; }
+    .count { border-block: 1px solid var(--line); padding: .6rem 0; }
+    .count dt { color: var(--muted); font-size: .86rem; }
+    .count dd { margin: .2rem 0 0; font: 1.62rem Georgia, serif; }
+    .tip { margin-top: .6rem; }
+    details { border-top: 1px solid var(--line); margin-top: 1.25rem; padding-top: .75rem; }
+    summary { color: #2b2618; cursor: pointer; }
+    details p { margin-top: .55rem; }
+    @media (max-width: 44rem) { .display { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { .axis { font-size: 17px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">Elliptic curves · Hasse’s point count</p>
+      <h1>Count the points on a tiny curve</h1>
+      <p class="intro">A point passes when <var>y</var>² and <var>x</var>³ − <var>x</var> + 1 leave the same remainder after division by the prime. Scan one column at a time to see which points pass.</p>
+    </header>
+
+    <div class="controls" role="group" aria-label="Prime modulus">
+      <button type="button" data-prime="5" aria-pressed="true">5</button>
+      <button type="button" data-prime="7" aria-pressed="false">7</button>
+      <button type="button" data-prime="11" aria-pressed="false">11</button>
+      <button type="button" data-prime="23" aria-pressed="false">23</button>
+    </div>
+
+    <div class="display">
+      <figure>
+        <svg viewBox="0 0 420 410" role="img" aria-labelledby="title description">
+          <title id="title">Solutions on a grid of remainders</title>
+          <desc id="description">Each filled dot marks a point that satisfies the equation.</desc>
+          <g id="grid"></g>
+        </svg>
+      </figure>
+      <section class="readout" aria-labelledby="readout-title">
+        <h2 id="readout-title">Look at one x</h2>
+        <label class="slider" for="column">Column <var>x</var> = <output id="column-value" for="column">0</output></label>
+        <input type="range" id="column" min="0" max="4" value="0" step="1">
+        <p class="column-result" id="column-result" aria-live="polite"></p>
+        <dl class="count" aria-live="polite">
+          <div><dt>Count including the point at infinity</dt><dd id="total">7 on the grid + 1 = 8</dd></div>
+        </dl>
+        <p class="tip" id="trace">For prime 5, there are 2 more points than 5 + 1.</p>
+      </section>
+    </div>
+
+    <details>
+      <summary>From counting points to two roots</summary>
+      <p>A nonsingular elliptic curve has one point at infinity that sits outside the grid. For a good prime <var>p</var>, let <var>N</var> be the grid count plus one and <var>t</var> = <var>p</var> + 1 − <var>N</var>. Hasse’s bound is |<var>t</var>| ≤ 2√<var>p</var>.</p>
+      <p>At 5 there are 8 points, so <var>t</var> = −2. The quadratic <var>u</var>² − <var>t u</var> + <var>p</var> is <var>u</var>² + 2<var>u</var> + 5, with roots −1 ± 2<var>i</var>. Both have absolute value √5. Hasse’s bound gives roots of absolute value √<var>p</var> at every good prime. Write <var>u</var> = <var>p</var><sup><var>s</var></sup> and absolute value √<var>p</var> means the real part of <var>s</var> is ½. That is the elliptic-curve version of RH over the finite field.</p>
+      <p>Prime 23 shows why good reduction matters. The point (13,0) is singular in this model. The grid still counts solutions, and the elliptic-curve theorem uses the good primes. <a href="https://geodesic.mathdoc.fr/item/JRAM_1936__175_149968/">Hasse’s original paper</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const primeButtons = document.querySelectorAll('[data-prime]');
+      const columns = document.getElementById('column');
+      const columnValue = document.getElementById('column-value');
+      const columnResult = document.getElementById('column-result');
+      const totalNode = document.getElementById('total');
+      const traceNode = document.getElementById('trace');
+      const description = document.getElementById('description');
+      const grid = document.getElementById('grid');
+      const namespace = 'http://www.w3.org/2000/svg';
+      const left = 44;
+      const bottom = 365;
+      const width = 350;
+      let p = 5;
+
+      function element(tagName, attributes, label) {
+        const node = document.createElementNS(namespace, tagName);
+        for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
+        if (label) node.textContent = label;
+        return node;
+      }
+
+      function show() {
+        const x = Number(columns.value);
+        const all = Array.from({length:p}, (_, i) => i);
+        const square = y => y * y % p;
+        const right = i => (i * i * i - i + 1) % p;
+        const solutions = all.map(i => all.filter(y => square(y) === right(i)));
+        const cell = width / p;
+        const gx = i => left + (i + .5) * cell;
+        const gy = i => bottom - (i + .5) * cell;
+        grid.replaceChildren(element('rect',{class:'high',x:left+x*cell,y:bottom-width,width:cell,height:width}));
+        for (let i = 0; i <= p; i++) {
+          grid.append(element('line',{class:'grid-line',x1:left+i*cell,y1:bottom-width,x2:left+i*cell,y2:bottom}));
+          grid.append(element('line',{class:'grid-line',x1:left,y1:bottom-i*cell,x2:left+width,y2:bottom-i*cell}));
+        }
+        for (const i of all) {
+          for (const y of solutions[i]) grid.append(element('circle',{class:'dot','data-selected':i===x,cx:gx(i),cy:gy(y),r:Math.min(9,cell*.3)}));
+          if (p > 11 && i % 5 !== 0 && i !== p-1) continue;
+          grid.append(element('text',{class:'axis',x:gx(i),y:bottom+23,'text-anchor':'middle'},String(i)));
+          grid.append(element('text',{class:'axis',x:left-10,y:gy(i)+5,'text-anchor':'end'},String(i)));
+        }
+        grid.append(element('text',{class:'axis',x:left+width/2,y:bottom+41,'text-anchor':'middle'},'x'));
+        grid.append(element('text',{class:'axis',x:14,y:bottom-width/2,'text-anchor':'middle'},'y'));
+        for (const button of primeButtons) button.setAttribute('aria-pressed',String(Number(button.dataset.prime)===p));
+        columnValue.textContent = String(x);
+        const selected = solutions[x];
+        const yText = selected.length ? `Matching y: ${selected.join(', ')}.` : 'No y has that square.';
+        columnResult.textContent = `The right side leaves remainder ${right(x)}. ${yText}`;
+        const affine = solutions.reduce((sum, row) => sum + row.length,0);
+        totalNode.textContent = `${affine} on the grid + 1 = ${affine+1}`;
+        const difference = affine - p;
+        const howMany = difference === 0 ? `exactly ${p} + 1` : `${Math.abs(difference)} ${difference > 0 ? 'more' : 'fewer'} than ${p} + 1`;
+        traceNode.textContent = p === 23
+          ? 'At 23, the point (13,0) makes the curve singular. The Hasse comparison uses the good primes.'
+          : `For prime ${p}, there are ${howMany} points.`;
+        description.textContent = `Grid modulo ${p}, with ${affine} solutions. Column ${x} is highlighted. ${yText}`;
+      }
+
+      for (const button of primeButtons) button.addEventListener('click',() => {
+        p = Number(button.dataset.prime);
+        columns.max = String(p-1);
+        columns.value = '0';
+        show();
+      });
+      columns.addEventListener('input',show);
+      show();
+    })();
+  </script>
+</body>
+</html>

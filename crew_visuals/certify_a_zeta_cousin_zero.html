@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One zero inside the circle</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #24362f;
+      --paper: #fcf9ee;
+      --muted: #536359;
+      --green: #23664d;
+      --gold: #97501f;
+      --orange: #b36d3a;
+      --plum: #775776;
+      --line: #b4bfb3;
+      background: #e6ece5;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 57rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    h1 { font: clamp(2.55rem, 7.5vw, 4.8rem)/1.05 Georgia, serif; letter-spacing: -.052em; margin: .65rem 0; text-wrap: balance; }
+    p { max-width: 67ch; }
+    a { color: var(--green); text-underline-offset: .16em; }
+    .intro, .context { color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; margin: 1.25rem 0; }
+    label { display: grid; gap: .2rem; font-weight: 650; font-size: .92rem; }
+    select {
+      min-height: 2.75rem; padding: .2rem .6rem; font: inherit; color: var(--ink);
+      border: 1px solid var(--line); border-radius: .3rem; background: #f6f8ee;
+    }
+    .size { flex: 1 1 11rem; }
+    input { width: 100%; min-height: 2.5rem; accent-color: var(--green); margin: 0; }
+    output { color: var(--green); font-variant-numeric: tabular-nums; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    figure { padding: clamp(.75rem, 3vw, 1.35rem); border: 1px solid var(--line); margin: 0; border-radius: .45rem; }
+    .axis { position: relative; height: 3.5rem; margin: .75rem .3rem 0; border-top: 1px solid var(--line); }
+    .axis span { position: absolute; transform: translateX(-50%); font-size: .82rem; color: var(--muted); }
+    .axis .edge-left { left: 0; transform: none; }
+    .axis .edge-right { right: 0; transform: none; }
+    .axis .middle { left: 50%; }
+    .axis .middle::before { content: ""; display: block; width: 0; height: .55rem; margin: -.05rem auto 0; border-left: 1px solid var(--line); }
+    .mark { top: -.48rem; width: .9rem; height: .9rem; border: 2px solid var(--paper); border-radius: 50%; background: #92a797; }
+    .mark.current { background: var(--green); }
+    figcaption { font-variant-numeric: tabular-nums; font-weight: 650; }
+    .line-label { margin: .6rem 0 .2rem; display: flex; flex-wrap: wrap; gap: .3rem .7rem; justify-content: space-between; font-variant-numeric: tabular-nums; }
+    .bar { height: .85rem; background: #ecebe1; border-radius: .16rem; overflow: hidden; display: flex; }
+    .bar span { display: block; height: 100%; }
+    #linear { background: var(--green); }
+    #offset { background: var(--orange); }
+    #variation { background: var(--plum); }
+    .key { display: flex; flex-wrap: wrap; gap: .35rem 1rem; font-size: .87rem; }
+    .key span::before { content: ""; display: inline-block; width: .7em; height: .7em; margin-right: .35em; background: currentColor; }
+    .offset { color: var(--gold); }
+    .variation { color: var(--plum); }
+    #verdict { margin: .6rem 0 0; font-weight: 700; color: var(--green); }
+    #verdict[data-pass="false"] { color: var(--gold); }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: 1rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>One zero inside the circle</h1>
+    <p class="intro">Zeta’s Davenport–Heilbronn cousin has zeros off the center line. Pick a reported location and a radius. A bound for the whole circle can certify that the disk contains exactly one zero.</p>
+    <div class="controls">
+      <label for="pair">Height of the pair
+        <select id="pair">
+          <option value="0">85.699348485</option><option value="1">114.163343</option>
+          <option value="2">166.479306</option><option value="3">176.702461</option>
+        </select>
+      </label>
+      <label for="side">Side of the center line
+        <select id="side"><option value="right">Right</option><option value="left">Left</option></select>
+      </label>
+      <label for="radius" class="size"><span>Disk radius <output id="radius-value" for="radius"></output></span>
+        <input id="radius" type="range" min="0" max="8" value="4">
+      </label>
+    </div>
+    <figure>
+      <figcaption id="center"></figcaption>
+      <div class="axis" aria-hidden="true">
+        <span class="edge-left">Re = 0</span><span class="middle">½</span><span class="edge-right">1</span>
+        <span class="mark" id="left-mark"></span><span class="mark" id="right-mark"></span>
+      </div>
+      <p class="line-label"><strong>Linear term, at least</strong><span id="linear-value"></span></p>
+      <div class="bar" aria-hidden="true"><span id="linear"></span></div>
+      <p class="line-label"><strong>Combined error, at most</strong><span id="error-value"></span></p>
+      <div class="bar" aria-hidden="true"><span id="offset"></span><span id="variation"></span></div>
+      <p class="key"><span class="offset">Value at the center</span><span class="variation">Change in slope</span></p>
+      <p id="verdict" aria-live="polite"></p>
+    </figure>
+    <p>The closer the center is to a zero, the smaller the first error. A smaller radius also reduces the size of the linear term. Try shrinking the circle until the inequality can no longer decide.</p>
+
+    <details>
+      <summary>Why the two bars suffice</summary>
+      <p>The cousin is 5<sup>−<var>s</var></sup><var>H</var>(<var>s</var>), where <var>H</var>(<var>s</var>) = ζ(<var>s</var>, 1/5) + κ[ζ(<var>s</var>, 2/5) − ζ(<var>s</var>, 3/5)] − ζ(<var>s</var>, 4/5) and κ ≈ 0.284079. The factor 5<sup>−<var>s</var></sup> never vanishes, so we can work with <var>H</var>.</p>
+      <p>Around the center <var>c</var>, compare <var>H</var>(<var>s</var>) with the straight-line approximation <var>H′</var>(<var>c</var>)(<var>s</var> − <var>c</var>). The error is at most |<var>H</var>(<var>c</var>)| plus the radius times the largest change in <var>H′</var> across the disk. The straight-line expression has one zero. If the error is strictly smaller than its magnitude around the entire rim, Rouché’s theorem gives the same count for <var>H</var>.</p>
+      <p>The replay encloses the derivative over a square that covers the disk, using FLINT ball arithmetic. It does this separately for the two sides of each pair. The plot uses the calculated bounds, rounded outwards, for nine radii. The circles are too small to show at the scale of the strip. <a href="../tools/check_davenport_heilbronn_disks.py">Replay the interval calculation</a> · <a href="https://flintlib.org/doc/acb_dirichlet.html">FLINT’s zeta and Hurwitz zeta routines</a></p>
+    </details>
+    <details>
+      <summary>Where the locations came from</summary>
+      <p>Davenport and Heilbronn published this example in 1936. Robert Spira reported the four pairs in 1994. A later note challenged the off-line zeros, and its authors subsequently corrected the claim after finding a wrong character in their calculation. These eight disks verify zeros at all four pairs. <a href="https://doi.org/10.1112/jlms/s1-11.3.181">Davenport and Heilbronn</a> · <a href="https://doi.org/10.1090/S0025-5718-1994-1254148-8">Spira’s locations</a> · <a href="https://arxiv.org/abs/1602.06328">The 2016 correction</a></p>
+    </details>
+    <details>
+      <summary>Does the rest of the window agree?</summary>
+      <p>Between heights 76 and 96, with real part between −0.5 and 1.5, a separate interval check counts 13 zeros of the cousin and 9 of zeta. It subdivides the boundary until the image of each segment lies in a rectangle that excludes zero. Each turn of the image around zero therefore contributes to a certified count. The completed cousin changes sign in 11 disjoint intervals on the center line, and the two off-line disks at height 85.7 give the other two zeros. The completed zeta changes sign in 9 disjoint intervals, accounting for all its zeros in that window. <a href="../tools/check_davenport_heilbronn_window.py">Replay the boundary count and sign checks</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const samples = [
+        {
+          right: [
+            [2.7336641442791245e-9,2.5865294072595694e-18,4.6135340533098245e-10,false],
+            [2.7336641442791245e-9,6.46805069114519e-17,2.306767026654912e-9,false],
+            [2.7336641442791245e-9,1.0348882078287596e-15,9.227068106619648e-9,true],
+            [2.7336641442791245e-9,6.468356362936294e-15,2.306767026654912e-8,true],
+            [2.7336641442791245e-9,2.6127531234725863e-14,4.613534053309824e-8,true],
+            [2.7336641442791245e-9,1.0416725544286016e-13,9.227068106619649e-8,true],
+            [2.7336641442791245e-9,2.580439845277239e-12,4.613534053309824e-7,true],
+            [2.7336641442791245e-9,6.4461284292879e-11,0.000002306767026654912,true],
+            [2.7336641442791245e-9,1.0300779734738764e-9,0.000009227068106619648,true]
+          ],
+          left: [
+            [3.7256753067981455e-9,2.163211882726122e-17,6.287725552372649e-10,false],
+            [3.7256753067981455e-9,5.409290990753577e-16,3.1438627761863242e-9,false],
+            [3.7256753067981455e-9,8.654865758008645e-15,1.2575451104745297e-8,true],
+            [3.7256753067981455e-9,5.409003271549809e-14,3.143862776186324e-8,true],
+            [3.7256753067981455e-9,2.189641529185229e-13,6.287725552372648e-8,true],
+            [3.7256753067981455e-9,8.697723611832169e-13,1.2575451104745296e-7,true],
+            [3.7256753067981455e-9,2.1569507124377503e-11,6.287725552372648e-7,true],
+            [3.7256753067981455e-9,5.386656284260956e-10,0.0000031438627761863245,true],
+            [3.7256753067981455e-9,8.61200888334736e-9,0.000012575451104745298,true]
+          ]
+        },
+        {
+          right: [
+            [7.330460777490756e-7,4.708333991101732e-14,2.6082299682726705e-8,false],
+            [7.330460777490756e-7,1.1638505064843018e-12,1.3041149841363353e-7,false],
+            [7.330460777490756e-7,1.855800210698253e-11,5.216459936545341e-7,false],
+            [7.330460777490756e-7,1.1605219935879056e-10,0.0000013041149841363353,true],
+            [7.330460777490756e-7,4.638309311504467e-10,0.0000026082299682726706,true],
+            [7.330460777490756e-7,1.8545037285838947e-9,0.000005216459936545341,true],
+            [7.330460777490756e-7,4.634569100828804e-8,0.000026082299682726706,true],
+            [7.330460777490756e-7,0.0000011586388165055088,0.0001304114984136335,true],
+            [7.330460777490756e-7,0.00001854283249690737,0.000521645993654534,true]
+          ],
+          left: [
+            [8.905385363405741e-7,1.3831665862362276e-13,3.168598984600238e-8,false],
+            [8.905385363405741e-7,3.4144431025575745e-12,1.5842994923001193e-7,false],
+            [8.905385363405741e-7,5.446001777658368e-11,6.337197969200477e-7,false],
+            [8.905385363405741e-7,3.4043660630091836e-10,0.0000015842994923001193,true],
+            [8.905385363405741e-7,1.3609289670304426e-9,0.0000031685989846002386,true],
+            [8.905385363405741e-7,5.44197862739328e-9,0.000006337197969200477,true],
+            [8.905385363405741e-7,1.3601624279027943e-7,0.000031685989846002384,true],
+            [8.905385363405741e-7,0.0000034004844826208444,0.00015842994923001192,true],
+            [8.905385363405741e-7,0.000054422306632047575,0.0006337197969200477,true]
+          ]
+        },
+        {
+          right: [
+            [1.6365966550584487e-7,7.029078664179203e-14,1.629680349676216e-8,false],
+            [1.6365966550584487e-7,1.7365246957381561e-12,8.148401748381079e-8,false],
+            [1.6365966550584487e-7,2.769570033396631e-11,3.2593606993524317e-7,true],
+            [1.6365966550584487e-7,1.731855585248238e-10,8.14840174838108e-7,true],
+            [1.6365966550584487e-7,6.922195662429369e-10,0.000001629680349676216,true],
+            [1.6365966550584487e-7,2.767713416308997e-9,0.000003259360699352432,true],
+            [1.6365966550584487e-7,6.917066451562625e-8,0.000016296803496762158,true],
+            [1.6365966550584487e-7,0.000001729278676108626,0.0000814840174838108,true],
+            [1.6365966550584487e-7,0.0000276757183365617,0.0003259360699352432,true]
+          ],
+          left: [
+            [1.852639839901999e-7,1.2150816587301267e-13,1.844810374563794e-8,false],
+            [1.852639839901999e-7,3.0001556298819254e-12,9.22405187281897e-8,false],
+            [1.852639839901999e-7,4.7855074238299674e-11,3.689620749127588e-7,true],
+            [1.852639839901999e-7,2.991532303923911e-10,9.22405187281897e-7,true],
+            [1.852639839901999e-7,1.1959003515423536e-9,0.000001844810374563794,true],
+            [1.852639839901999e-7,4.782079700952908e-9,0.000003689620749127588,true],
+            [1.852639839901999e-7,1.1952244435993516e-7,0.00001844810374563794,true],
+            [1.852639839901999e-7,0.000002988133115769472,0.0000922405187281897,true],
+            [1.852639839901999e-7,0.000047823169043709036,0.0003689620749127588,true]
+          ]
+        },
+        {
+          right: [
+            [0.0000015101819470146365,4.2775683153433594e-14,3.8705877586465376e-8,false],
+            [0.0000015101819470146365,1.0577021605553514e-12,1.9352938793232688e-7,false],
+            [0.0000015101819470146365,1.686662746411762e-11,7.741175517293075e-7,false],
+            [0.0000015101819470146365,1.0547411845618254e-10,0.0000019352938793232687,true],
+            [0.0000015101819470146365,4.215644037467501e-10,0.000003870587758646537,true],
+            [0.0000015101819470146365,1.6855100231352858e-9,0.000007741175517293075,true],
+            [0.0000015101819470146365,4.212262255719553e-8,0.000038705877586465374,true],
+            [0.0000015101819470146365,0.0000010530643413760319,0.00019352938793232687,true],
+            [0.0000015101819470146365,0.00001685332167494965,0.0007741175517293075,true]
+          ],
+          left: [
+            [0.000002224556624733102,2.2654003481267114e-13,5.70152900833668e-8,false],
+            [0.000002224556624733102,5.59160181271077e-12,2.8507645041683396e-7,false],
+            [0.000002224556624733102,8.920262201131077e-11,0.0000011403058016673358,false],
+            [0.000002224556624733102,5.576118478544577e-10,0.00000285076450416834,true],
+            [0.000002224556624733102,2.229167020239129e-9,0.00000570152900833668,true],
+            [0.000002224556624733102,8.91406109796371e-9,0.00001140305801667336,true],
+            [0.000002224556624733102,2.2280125892151178e-7,0.0000570152900833668,true],
+            [0.000002224556624733102,0.000005570201953450628,0.000285076450416834,true],
+            [0.000002224556624733102,0.00008914838983747592,0.001140305801667336,true]
+          ]
+        }
+      ];
+      const pairs = [
+        {right: '0.808517182', left: '0.191482818', height: '85.699348485', radius: 1e-8},
+        {right: '0.650830', left: '0.349170', height: '114.163343', radius: 1e-6},
+        {right: '0.574356', left: '0.425644', height: '166.479306', radius: 1e-6},
+        {right: '0.724258', left: '0.275742', height: '176.702461', radius: 1e-6}
+      ];
+      const multiplier = [.01, .05, .2, .5, 1, 2, 10, 50, 200];
+      const byId = id => document.getElementById(id);
+      const pair = byId('pair');
+      const side = byId('side');
+      const radius = byId('radius');
+      const verdict = byId('verdict');
+      function number(n, upper) {
+        const scale = 10 ** (4 - Math.floor(Math.log10(n)));
+        const outward = n * scale * (upper ? 1 + 1e-14 : 1 - 1e-14);
+        return ((upper ? Math.ceil(outward) : Math.floor(outward)) / scale).toExponential(4);
+      }
+
+      function render() {
+        const i = Number(pair.value);
+        const j = Number(radius.value);
+        const p = pairs[i];
+        const r = multiplier[j] * p.radius;
+        const [offset, variation, linear, pass] = samples[i][side.value][j];
+        const max = Math.max(linear, offset + variation);
+        byId('center').textContent = `Disk centered at ${p[side.value]} + ${p.height}i`;
+        byId('radius-value').textContent = r.toExponential(1);
+        radius.setAttribute('aria-valuetext', `Radius ${r.toExponential(1)}`);
+        byId('linear-value').textContent = number(linear, false);
+        byId('error-value').textContent = number(offset + variation, true);
+        for (const [id, n] of [['linear', linear], ['offset', offset], ['variation', variation]]) {
+          byId(id).style.width = `${100*n/max}%`;
+        }
+        for (const s of ['left', 'right']) {
+          const mark = byId(`${s}-mark`);
+          mark.style.left = `${100 * Number(p[s])}%`;
+          mark.classList.toggle('current', s === side.value);
+        }
+        verdict.dataset.pass = pass;
+        verdict.textContent = pass ? 'Exactly one zero in the disk.' : 'The error bound reaches the linear bound. This radius gives no count.';
+      }
+      pair.addEventListener('change', render);
+      side.addEventListener('change', render);
+      radius.addEventListener('input', render);
+      render();
+    })();
+  </script>
+</body>
+</html>

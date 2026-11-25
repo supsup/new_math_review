@@ -1,0 +1,821 @@
+What Lean said when we asked it
+
+On 25 November 2026 Fixpoint compiled one file of the archive of the announced proof of the Riemann Hypothesis together with the 14,300 archive files it imports (see lean_runs.txt, section 3). A compiled project can be asked questions that a reader of the source can only guess at: where a name is declared, which axioms a theorem rests on, and whether the proof of one theorem really uses another. This note records the questions that the crew put to it and what Lean printed, word for word. The commands #whereis, #uses and #usedby are ours (tools/lean_desk.lean); #check and #print axioms are Lean's own.
+
+"X uses Y" here means: Y appears in the statement of X or in its proof term, or in one of the pieces Lean itself splits off from X. It is a direct use, one step, not a chain.
+
+The project: the mirror 1337isnot1337/riemann-hypothesis-solved at 6193bb5, Lean 4.33.1, Mathlib 0df444a360ea, the archive's own project settings; the 14,301 files that Formalism/GammaFactorNonvanishing/CritLine.lean needs, copied unchanged and built with "lake build". Each batch of questions was run as one file that imports Formalism.GammaFactorNonvanishing.CritLine. The fourth and later batches were run after a second build had added the 2,977 further files that ThirdPlaceSeries/TopPlug.lean needs, and import that file.
+
+What the answers show, in plain words.
+
+1. Every step of our hand trace that lies inside these files is confirmed. Lattice's steps: zeroFreeAll_of_topG uses formB; formB uses zeroFree_of_rpow_window and level_family; that uses lemmaL and windowHyp_of_rpow; lemmaL uses poleData and landau_window. Confluence's and Fixpoint's steps: topDesWin uses LinkN and LinkGLOBAL; link_gl uses link8; link8 uses link7; link7 uses linkGLOBAL7_min; that uses linkGLOBAL7_items; that uses linkCore.
+
+2. Two questions were asked the wrong way round on purpose, to see that the command can say no: landau_window does not use lemmaL, and linkCore does not use link_gl.
+
+3. Which "Duty". The archive defines Duty in four places (three of them inside these files) and PageWin in two. The map had settled by reading which one the path means. Lean's answer, in the first lines of the second batch: the Duty in the statement of link_gl is Formalism.L2.Top3.Duty, and the PageWin it mentions is Formalism.MainNotions.PageWin. The reading was right.
+
+4. Each of the eleven theorems asked about rests on Lean's three standard axioms and nothing else: linkCore, link_gl, topDesWin, link8, zeroFreeAll_of_topG, level_of_tiedWin, formB, zeroFree_of_rpow_window, landau_window, lemmaL, poleData.
+
+5. plugAll, which the first run also printed, does not use zeroFreeAll_of_topG directly; it goes through two theorems named plugWin and imprimitive.
+
+6. From the third batch, asked by Lattice: plugAll uses plugWin, plugWin uses zeroFreeAll_of_topG, and so on down through zeroFreeOn_of_tiedWin_cyc, zeroFreeOn_of_tiedWin and level_of_tiedWin; landau_window uses landau_window_contra, which uses landau_growth_contra. And the last step reads, as Lean prints it, rh_of_every : EveryCharacter implies RiemannHypothesis. The names allChi and rhOfAll, through which Main.lean applies that step, are not among these files.
+
+7. From the fourth batch, run after a second build that added 2,977 files (17,278 in all): the theorem where the two branches of the path meet, every_character_of_green_v_win, rests on the three standard axioms. It uses zero_free_all_of_green_v_win, which uses zeroFreeAll_of_topG and shape_closed_link_n_of_green; and the shape theorem mentions link_gl and topDesWin among 215 archive declarations. It does not use plugAll, which is a sibling.
+
+8. From the sixth batch: where the size of m is used. Lattice found it by reading and Confluence read it again; these are the same steps as machine facts. linkGLOBAL7_items uses size_windows_of_thick_density, which uses size_window_at_five and the definition SizesAt (the one in ElevenLe.lean; five definitions carry that name, and Lean says which). size_window_at_five uses the lemmas winA, winB and winL, whose statements are printed below: from the two-sided bound SizeM they give m ≤ x^(1/2 + ε/2), x·m ≤ k and x^(1/2 − ε) ≤ m. linkCore uses the statement Win_at that carries them. Neither linkCore nor size_windows_of_thick_density mentions PageWin (a one-step check, like every "uses" here).
+
+9. Also in the sixth batch, at Marlow's suggestion: the two compiled ends put together in one line. Lean infers its statement, Green → VWin → Nonempty (HypsAlt ...) → RiemannHypothesis, and reports the three standard axioms. (It is written with 'def' so that Lean infers the statement; Lean's remark that a proposition should be a theorem is printed with the rest.)
+
+10. How much the path uses, from a program by Lattice (printed last, below): the two theorems at the top of the compiled left branch depend, through everything they mention and everything that mentions in turn, on 92,148 archive declarations in 5,237 of the 17,270 archive files loaded. (The 17,270 are what the program loads, CritLine's files included; the files of the two theorems themselves import 16,991 of them, and all 5,237 lie among those.) Of the two definitions named PageWin, the one in Formalism.MainNotions is among them and the other is not; three of those declarations mention it, and none takes it out of a conjunction by the explicit forms the program looks for, which makes that a lower bound and not a proof of absence. A second program, written first by Confluence, took 78 minutes on the same files and printed the same two numbers, 92,148 and 5,237. Started instead from the two ends of the compiled conditional statement (a change of two lines, by Marlow), the same program finds 96,538 declarations in 5,701 of the 17,278 files compiled.
+
+None of this is a check of the whole proof. After the second build these files are about one tenth of the archive. The theorems above are conditional: their hypotheses are stated with definitions that are inside these files, and the proofs that those hypotheses hold are in files outside them.
+
+
+FIRST BATCH: where the names are
+
+#whereis level_of_tiedWin formB zeroFree_of_rpow_window landau_window lemmaL poleData windowHyp_of_rpow level_family
+#whereis linkCore link_gl topDesWin link8 link7 zeroFreeAll_of_topG plugAll linkGLOBAL7_min linkGLOBAL7_items
+#whereis Duty PageWin ChainTied LinkN LinkGLOBAL EveryCharacter rh_of_every critLine rh_of_right
+
+Lean printed:
+
+10 constant(s)
+  theorem Deduction.landau_window  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.landauWindow]
+  theorem Deduction.lemmaL  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.lemmaL]
+  theorem Deduction.poleData  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.poleData]
+  theorem Deduction.windowHyp_of_rpow  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.WindowHypOfRpow]
+  theorem Deduction.zeroFree_of_rpow_window  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.ZeroFreeOfRpowWindow]
+  theorem Formalism.HC.level_of_tiedWin  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin]
+  theorem Formalism.MainNotions.FormalGroupSystem.Pf.formB  [Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SmulUpdate]
+  def ReciprocityTheory.ChartRestriction.DS.formB  [ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormula]
+  theorem UpperTheory.Comparison₂.formB  [Development.AutomorphicArithmetic.PrimitiveCosets.Imports]
+  theorem UpperTheory.Comparison₂.level_family  [Development.AutomorphicArithmetic.PrimitiveCosets.LevelFamily]
+9 constant(s)
+  theorem Formalism.MainNotions.Lnk.linkCore  [Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]
+  theorem Formalism.MainNotions.Wire.FamGLmin.link7  [Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  theorem Formalism.MainNotions.Wire.FamGLmin.link8  [Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  theorem Formalism.MainNotions.linkGLOBAL7_items  [Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]
+  theorem Formalism.MainNotions.linkGLOBAL7_min  [Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]
+  theorem GlobalTheory.Top.link_gl  [Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]
+  theorem UpperTheory.Top.plugAll  [Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacter]
+  theorem UpperTheory.Top.topDesWin  [Development.AutomorphicArithmetic.CharacterBoxes.DesWin]
+  theorem UpperTheory.Top.zeroFreeAll_of_topG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+12 constant(s)
+  def Formalism.L2.Top3.Duty  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  def Formalism.MainNotions.ChainTied  [Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]
+  def Formalism.MainNotions.LinkGLOBAL  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  def Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  def Formalism.MainNotions.PageWin  [Formalism.SharpRestriction.PageFix]
+  theorem Formalism.VW.critLine  [Formalism.GammaFactorNonvanishing.CritLine]
+  theorem Formalism.VW.rh_of_every  [Formalism.GammaFactorNonvanishing.CritLine]
+  theorem Formalism.VW.rh_of_right  [Formalism.GammaFactorNonvanishing.RhOfRight]
+  def GlobalTheory.Cp.Duty  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants]
+  def GlobalTheory.EX.DC.Duty  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]
+  def GlobalTheory.EX.DC.PageWin  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]
+  def UpperTheory.EveryCharacter  [Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacter]
+exit=0
+
+
+SECOND BATCH: axioms, steps, and which Duty
+
+set_option pp.fullNames true in
+#check @GlobalTheory.Top.link_gl
+#print axioms Formalism.MainNotions.Lnk.linkCore
+#print axioms GlobalTheory.Top.link_gl
+#print axioms UpperTheory.Top.topDesWin
+#print axioms Formalism.MainNotions.Wire.FamGLmin.link8
+#print axioms UpperTheory.Top.zeroFreeAll_of_topG
+#print axioms Formalism.HC.level_of_tiedWin
+#print axioms UpperTheory.Comparison₂.formB
+#print axioms Deduction.zeroFree_of_rpow_window
+#print axioms Deduction.landau_window
+#print axioms Deduction.lemmaL
+#print axioms Deduction.poleData
+#uses UpperTheory.Top.zeroFreeAll_of_topG UpperTheory.Comparison₂.formB
+#uses UpperTheory.Comparison₂.formB Deduction.zeroFree_of_rpow_window
+#uses UpperTheory.Comparison₂.formB UpperTheory.Comparison₂.level_family
+#uses Deduction.zeroFree_of_rpow_window Deduction.lemmaL
+#uses Deduction.zeroFree_of_rpow_window Deduction.windowHyp_of_rpow
+#uses Deduction.lemmaL Deduction.poleData
+#uses Deduction.lemmaL Deduction.landau_window
+#uses Deduction.landau_window Deduction.lemmaL
+#uses UpperTheory.Top.topDesWin Formalism.MainNotions.LinkN
+#uses UpperTheory.Top.topDesWin Formalism.MainNotions.LinkGLOBAL
+#uses GlobalTheory.Top.link_gl Formalism.MainNotions.Wire.FamGLmin.link8
+#uses Formalism.MainNotions.Wire.FamGLmin.link8 Formalism.MainNotions.Wire.FamGLmin.link7
+#uses Formalism.MainNotions.Wire.FamGLmin.link7 Formalism.MainNotions.linkGLOBAL7_min
+#uses Formalism.MainNotions.linkGLOBAL7_min Formalism.MainNotions.linkGLOBAL7_items
+#uses Formalism.MainNotions.linkGLOBAL7_items Formalism.MainNotions.Lnk.linkCore
+#uses Formalism.MainNotions.Lnk.linkCore GlobalTheory.Top.link_gl
+#uses UpperTheory.Top.plugAll UpperTheory.Top.zeroFreeAll_of_topG
+#usedby GlobalTheory.Top.link_gl GlobalTheory Formalism UpperTheory
+#usedby UpperTheory.Top.zeroFreeAll_of_topG UpperTheory GlobalTheory Formalism Deduction
+#usedby UpperTheory.Top.plugAll UpperTheory GlobalTheory Formalism Deduction
+#usedby UpperTheory.Top.topDesWin UpperTheory GlobalTheory Formalism Deduction
+
+Lean printed:
+
+GlobalTheory.Top.link_gl : ∀ (𝒜 : Formalism.MainNotions.FamClass),
+  (∀ {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps), 𝒜 Fm → Formalism.L2.Top3.Duty Fm) →
+    (Formalism.MainNotions.Closed (fun {eps} => Formalism.L2.Top3.D3 3 fun {eps} => 𝒜) fun {eps} Fm x =>
+        Formalism.MainNotions.RealPlaceSecondLayerConditions Fm) →
+      (∀ (D : Formalism.BasicNotions.D7), Formalism.MainNotions.RT.MassRatioUnderVolume D) →
+        (∀ (D : Formalism.BasicNotions.D7), Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.GenusMassAt D 2) →
+          (Formalism.MainNotions.Closed (fun {eps} => Formalism.L2.Top3.D3 3 fun {eps} => 𝒜) fun {eps} Fm CH =>
+              Formalism.MainNotions.ChosenE Fm 3 CH →
+                Formalism.MainNotions.NuFullF Fm ∧ Formalism.MainNotions.J.MuRank Fm) ∧
+            Formalism.MainNotions.Closed (fun {eps} => Formalism.L2.Top3.D3 3 fun {eps} => 𝒜) fun {eps} Fm CH =>
+              Formalism.MainNotions.TuSize Fm →
+                Formalism.MainNotions.DGamSize Fm → Formalism.MainNotions.LinkGLOBAL Fm 2 CH 3 2 0
+'Formalism.MainNotions.Lnk.linkCore' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GlobalTheory.Top.link_gl' depends on axioms: [propext, Classical.choice, Quot.sound]
+'UpperTheory.Top.topDesWin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formalism.MainNotions.Wire.FamGLmin.link8' depends on axioms: [propext, Classical.choice, Quot.sound]
+'UpperTheory.Top.zeroFreeAll_of_topG' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formalism.HC.level_of_tiedWin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'UpperTheory.Comparison₂.formB' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Deduction.zeroFree_of_rpow_window' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Deduction.landau_window' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Deduction.lemmaL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Deduction.poleData' depends on axioms: [propext, Classical.choice, Quot.sound]
+UpperTheory.Top.zeroFreeAll_of_topG uses UpperTheory.Comparison₂.formB: true
+UpperTheory.Comparison₂.formB uses Deduction.zeroFree_of_rpow_window: true
+UpperTheory.Comparison₂.formB uses UpperTheory.Comparison₂.level_family: true
+Deduction.zeroFree_of_rpow_window uses Deduction.lemmaL: true
+Deduction.zeroFree_of_rpow_window uses Deduction.windowHyp_of_rpow: true
+Deduction.lemmaL uses Deduction.poleData: true
+Deduction.lemmaL uses Deduction.landau_window: true
+Deduction.landau_window uses Deduction.lemmaL: false
+UpperTheory.Top.topDesWin uses Formalism.MainNotions.LinkN: true
+UpperTheory.Top.topDesWin uses Formalism.MainNotions.LinkGLOBAL: true
+GlobalTheory.Top.link_gl uses Formalism.MainNotions.Wire.FamGLmin.link8: true
+Formalism.MainNotions.Wire.FamGLmin.link8 uses Formalism.MainNotions.Wire.FamGLmin.link7: true
+Formalism.MainNotions.Wire.FamGLmin.link7 uses Formalism.MainNotions.linkGLOBAL7_min: true
+Formalism.MainNotions.linkGLOBAL7_min uses Formalism.MainNotions.linkGLOBAL7_items: true
+Formalism.MainNotions.linkGLOBAL7_items uses Formalism.MainNotions.Lnk.linkCore: true
+Formalism.MainNotions.Lnk.linkCore uses GlobalTheory.Top.link_gl: false
+UpperTheory.Top.plugAll uses UpperTheory.Top.zeroFreeAll_of_topG: false
+GlobalTheory.Top.link_gl mentions 35 constant(s) under [GlobalTheory, Formalism, UpperTheory]
+  Formalism.BasicNotions.D7  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.HermitianLattices.Ext.L3.HermRepUnram  [Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLandSt]
+  Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.GenusMassAt  [Formalism.LocalToGlobal.GlobalTheory.GL5.DiscreteSeriesOfFormalDegree]
+  Formalism.L2.Top3.D3  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.Duty  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.TupUsedF  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.TwAllF  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.WithChN  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.d3_a  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.MainNotions.ChosenE  [Formalism.SharpRestriction.GlobalSchurBounds.Chosen]
+  Formalism.MainNotions.ChosenWall  [Formalism.SharpRestriction.GlobalSchurBounds.WeightVectorSmallSharesEight]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Closed.and  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Closed.imp  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.DGamSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.DIV.Align.SmallFirstModulusBelowScale  [Formalism.SharpRestriction.Divisibility.SmallFirstModulusBelowScale]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.J.MuRank  [Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe]
+  Formalism.MainNotions.LinkGLOBAL  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.NuFullF  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.PageFix  [Formalism.SharpRestriction.PageFix]
+  Formalism.MainNotions.PageWin  [Formalism.SharpRestriction.PageFix]
+  Formalism.MainNotions.Pk.Closed.of_class  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.Pk.DGamSmooth  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.RT.MassRatioUnderVolume  [Formalism.SharpRestriction.GlobalSchurBounds.MassRatioUnfoldedOfTheoremTwo]
+  Formalism.MainNotions.RealPlaceSecondLayerConditions  [Formalism.SharpRestriction.GlobalSchurBounds.LinkTied]
+  Formalism.MainNotions.TameDistinctF  [Formalism.SharpRestriction.LevelLetterCocycles.AlignN]
+  Formalism.MainNotions.TuSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.TwGood  [Formalism.SharpRestriction.LevelLetterCocycles.TwGood]
+  Formalism.MainNotions.Wire.FamGLmin  [Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  Formalism.MainNotions.Wire.FamGLmin.link8  [Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  Formalism.MainNotions.Wire.FamGLmin.muRank  [Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  Formalism.MainNotions.Wire.famGLmin_of_realPlaceSecondLayer  [Formalism.SharpRestriction.GlobalSchurBounds.TuSizeOfRealPlaceSecondLayer]
+  GlobalTheory.hermRepUnram  [Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermRepUnram]
+UpperTheory.Top.zeroFreeAll_of_topG mentions 28 constant(s) under [UpperTheory, GlobalTheory, Formalism, Deduction]
+  Formalism.HC.ChebyshevInequalityAtWindowScale  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin]
+  Formalism.HC.ChebyshevInequalityOnFamilyWindows  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin]
+  Formalism.HC.EFamC  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopDefs]
+  Formalism.HC.Level.cyc  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions]
+  Formalism.HC.PChar  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition]
+  Formalism.HC.ZeroFreeAll  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions]
+  Formalism.HC.ZeroFreeOn  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions]
+  Formalism.HC.zeroFreeOn_of_tiedWin_cyc  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin]
+  Formalism.MainNotions.ChainTied  [Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]
+  Formalism.MainNotions.FamCore.D  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.Ix  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.L  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.Win  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.Windows  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.x1  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.toFamCore  [Formalism.SharpRestriction.ParConsts]
+  GlobalTheory.EX.HostExW  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ThinScalesIffHostBound]
+  UpperTheory.Comparison₂.formB  [Development.AutomorphicArithmetic.PrimitiveCosets.Imports]
+  UpperTheory.Comparison₂.level_gm_le_on_family_scales  [Development.AutomorphicArithmetic.PrimitiveCosets.LevelGmLeOnFamilyScales]
+  UpperTheory.Top.FReq.At  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.FReq.cls  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.FReq.req  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.FamilyClassConnected  [Development.AutomorphicArithmetic.CharacterBoxes.DivinNOfHypV]
+  UpperTheory.Top.GChi  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.TopG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  UpperTheory.Top.eFamC_of_cls  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  UpperTheory.Top.hypV_of_cls  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+UpperTheory.Top.plugAll mentions 11 constant(s) under [UpperTheory, GlobalTheory, Formalism, Deduction]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  GlobalTheory.Fc.DRS  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DRS]
+  GlobalTheory.Fc.Hyps  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.APerTw]
+  GlobalTheory.GLq.Green  [Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum]
+  UpperTheory.EveryCharacter  [Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacter]
+  UpperTheory.Top.VWin  [Development.AutomorphicArithmetic.CharacterBoxes.ExistsPageN]
+  UpperTheory.Top.imprimitive  [Development.AutomorphicArithmetic.CharacterBoxes.Imprimitive]
+  UpperTheory.Top.plugWin  [Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacter]
+UpperTheory.Top.topDesWin mentions 36 constant(s) under [UpperTheory, GlobalTheory, Formalism, Deduction]
+  Formalism.MainNotions.ChainTied  [Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]
+  Formalism.MainNotions.ChosenE  [Formalism.SharpRestriction.GlobalSchurBounds.Chosen]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Closed.and  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.DGamSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Des  [Formalism.SharpRestriction.SmoothDesignExistence.DesignExistsDes]
+  Formalism.MainNotions.DesignExists  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamCore.Win  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.Large  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP.toFamCore  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.J.MuRank  [Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe]
+  Formalism.MainNotions.J.linkMu_of_linkDIV  [Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe]
+  Formalism.MainNotions.J.muDGam_of_fact  [Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe]
+  Formalism.MainNotions.LinkDIV  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkDIVt  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkEta  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkG  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkGLOBAL  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkIRR  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkMu  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkS  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.NuFullF  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.Pk.DGamSmooth  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.SmallLevelRankEq  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.TransportedAlt  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.TuSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.TwGood  [Formalism.SharpRestriction.LevelLetterCocycles.TwGood]
+  Formalism.MainNotions.WithSm  [Formalism.SharpRestriction.SmoothDesignExistence.DesignExistsDes]
+  Formalism.MainNotions.WithTw  [Formalism.SharpRestriction.MuTuOfTuSize]
+  Formalism.MainNotions.muTu_of_tuSize  [Formalism.SharpRestriction.MuTuOfTuSize]
+  UpperTheory.Top.FamilyClassConnected  [Development.AutomorphicArithmetic.CharacterBoxes.DivinNOfHypV]
+  UpperTheory.Top.HypV  [Development.AutomorphicArithmetic.CharacterBoxes.DivinNOfHypV]
+  UpperTheory.Top.divinN_of_hypV  [Development.AutomorphicArithmetic.CharacterBoxes.DivinNOfHypV]
+exit=0
+
+
+
+THIRD BATCH: the top of the cone, asked by Lattice
+
+#check @Formalism.VW.rh_of_every
+#print axioms Formalism.VW.rh_of_every
+#uses UpperTheory.Top.plugAll UpperTheory.Top.plugWin
+#uses UpperTheory.Top.plugWin UpperTheory.Top.zeroFreeAll_of_topG
+#uses UpperTheory.Top.zeroFreeAll_of_topG Formalism.HC.zeroFreeOn_of_tiedWin_cyc
+#uses Formalism.HC.zeroFreeOn_of_tiedWin_cyc Formalism.HC.zeroFreeOn_of_tiedWin
+#uses Formalism.HC.zeroFreeOn_of_tiedWin Formalism.HC.level_of_tiedWin
+#uses Deduction.landau_window Deduction.landau_window_contra
+#uses Deduction.landau_window_contra Deduction.landau_growth_contra
+#whereis plugWin imprimitive zeroFreeOn_of_tiedWin landau_window_contra landau_growth_contra allChi rhOfAll
+#usedby UpperTheory.Top.plugWin UpperTheory GlobalTheory Formalism Deduction
+
+Lean printed:
+
+Formalism.VW.rh_of_every : UpperTheory.EveryCharacter → RiemannHypothesis
+'Formalism.VW.rh_of_every' depends on axioms: [propext, Classical.choice, Quot.sound]
+UpperTheory.Top.plugAll uses UpperTheory.Top.plugWin: true
+UpperTheory.Top.plugWin uses UpperTheory.Top.zeroFreeAll_of_topG: true
+UpperTheory.Top.zeroFreeAll_of_topG uses Formalism.HC.zeroFreeOn_of_tiedWin_cyc: true
+Formalism.HC.zeroFreeOn_of_tiedWin_cyc uses Formalism.HC.zeroFreeOn_of_tiedWin: true
+Formalism.HC.zeroFreeOn_of_tiedWin uses Formalism.HC.level_of_tiedWin: true
+Deduction.landau_window uses Deduction.landau_window_contra: true
+Deduction.landau_window_contra uses Deduction.landau_growth_contra: true
+5 constant(s)
+  theorem Deduction.landau_growth_contra  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.LandauGrowthContra]
+  theorem Deduction.landau_window_contra  [Development.AutomorphicArithmetic.DedekindLFunctions.LandauTheorems.landauWindow]
+  theorem Formalism.HC.zeroFreeOn_of_tiedWin  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin]
+  theorem UpperTheory.Top.imprimitive  [Development.AutomorphicArithmetic.CharacterBoxes.Imprimitive]
+  theorem UpperTheory.Top.plugWin  [Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacter]
+UpperTheory.Top.plugWin mentions 15 constant(s) under [UpperTheory, GlobalTheory, Formalism, Deduction]
+  Formalism.HC.PChar  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition]
+  Formalism.HC.ZeroFreeAll  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  GlobalTheory.Fc.DRS  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DRS]
+  GlobalTheory.Fc.Hyps  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.APerTw]
+  GlobalTheory.Fc.shape_of  [Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ShapeOf]
+  GlobalTheory.GLq.Green  [Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum]
+  UpperTheory.Top.TopG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  UpperTheory.Top.VWin  [Development.AutomorphicArithmetic.CharacterBoxes.ExistsPageN]
+  UpperTheory.Top.shapeWin  [Development.AutomorphicArithmetic.CharacterBoxes.ShapeWin]
+  UpperTheory.Top.supplyChi  [Development.AutomorphicArithmetic.CharacterBoxes.SupplyChi]
+  UpperTheory.Top.zeroFreeAll_of_topG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+exit=0
+
+
+FOURTH BATCH: the junction (this and the later batches import ThirdPlaceSeries.TopPlug)
+
+#check @UpperTheory.Top.every_character_of_green_v_win
+#print axioms UpperTheory.Top.every_character_of_green_v_win
+#print axioms UpperTheory.Top.zero_free_all_of_green_v_win
+#whereis shape_closed_link_n_of_green forall_goal_of_shape_of_hyps goal_of_shape_of_hyps every_character_of_green_v_win zero_free_all_of_green_v_win
+#uses UpperTheory.Top.every_character_of_green_v_win UpperTheory.Top.zero_free_all_of_green_v_win
+#uses UpperTheory.Top.every_character_of_green_v_win UpperTheory.Top.imprimitive
+#uses UpperTheory.Top.zero_free_all_of_green_v_win UpperTheory.Top.zeroFreeAll_of_topG
+#uses UpperTheory.Top.zero_free_all_of_green_v_win UpperTheory.Top.shape_closed_link_n_of_green
+#uses UpperTheory.Top.zero_free_all_of_green_v_win UpperTheory.Top.supplyChi
+#uses UpperTheory.Top.zero_free_all_of_green_v_win UpperTheory.Top.plugAll
+#usedby UpperTheory.Top.zero_free_all_of_green_v_win UpperTheory GlobalTheory Formalism Deduction
+#usedby UpperTheory.Top.shape_closed_link_n_of_green UpperTheory GlobalTheory Formalism Deduction
+
+Lean printed:
+
+UpperTheory.Top.every_character_of_green_v_win : GlobalTheory.GLq.Green →
+  UpperTheory.Top.VWin →
+    Nonempty
+        (GlobalTheory.Fc.HypsAlt
+          (fun 𝒞 => Formalism.MainNotions.Closed (fun {eps} => 𝒞) fun {eps} Fm x => Formalism.MainNotions.LinkN Fm)
+          GlobalTheory.Fc.DefiniteSideCondition) →
+      UpperTheory.EveryCharacter
+'UpperTheory.Top.every_character_of_green_v_win' depends on axioms: [propext, Classical.choice, Quot.sound]
+'UpperTheory.Top.zero_free_all_of_green_v_win' depends on axioms: [propext, Classical.choice, Quot.sound]
+5 constant(s)
+  theorem GlobalTheory.Fc.forall_goal_of_shape_of_hyps  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ShapeOf]
+  theorem GlobalTheory.Fc.goal_of_shape_of_hyps  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ShapeOf]
+  theorem UpperTheory.Top.every_character_of_green_v_win  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopPlug]
+  theorem UpperTheory.Top.shape_closed_link_n_of_green  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopShape]
+  theorem UpperTheory.Top.zero_free_all_of_green_v_win  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopPlug]
+UpperTheory.Top.every_character_of_green_v_win uses UpperTheory.Top.zero_free_all_of_green_v_win: true
+UpperTheory.Top.every_character_of_green_v_win uses UpperTheory.Top.imprimitive: true
+UpperTheory.Top.zero_free_all_of_green_v_win uses UpperTheory.Top.zeroFreeAll_of_topG: true
+UpperTheory.Top.zero_free_all_of_green_v_win uses UpperTheory.Top.shape_closed_link_n_of_green: true
+UpperTheory.Top.zero_free_all_of_green_v_win uses UpperTheory.Top.supplyChi: true
+UpperTheory.Top.zero_free_all_of_green_v_win uses UpperTheory.Top.plugAll: false
+UpperTheory.Top.zero_free_all_of_green_v_win mentions 15 constant(s) under [UpperTheory,
+ GlobalTheory,
+ Formalism,
+ Deduction]
+  Formalism.HC.PChar  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition]
+  Formalism.HC.ZeroFreeAll  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  GlobalTheory.Fc.DefiniteSideCondition  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DefiniteSideCondition]
+  GlobalTheory.Fc.HypsAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.Hyps]
+  GlobalTheory.Fc.forall_goal_of_shape_of_hyps  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ShapeOf]
+  GlobalTheory.GLq.Green  [Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum]
+  UpperTheory.Top.TopG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  UpperTheory.Top.VWin  [Development.AutomorphicArithmetic.CharacterBoxes.ExistsPageN]
+  UpperTheory.Top.shape_closed_link_n_of_green  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopShape]
+  UpperTheory.Top.supplyChi  [Development.AutomorphicArithmetic.CharacterBoxes.SupplyChi]
+  UpperTheory.Top.zeroFreeAll_of_topG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+UpperTheory.Top.shape_closed_link_n_of_green mentions 215 constant(s) under [UpperTheory,
+ GlobalTheory,
+ Formalism,
+ Deduction]
+  Formalism.BasicNotions.D7  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.R  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.host  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.nfLL  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.sp  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.starLL  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.tcLL  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.D7.what₂  [Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow]
+  Formalism.BasicNotions.DV.Used  [Formalism.LocalRingCardinality.DataAmbForm]
+  Formalism.BasicNotions.Extra.errX  [Formalism.LocalRingCardinality.DataExtra]
+  Formalism.BasicNotions.Extra.lev  [Formalism.LocalRingCardinality.DataExtra]
+  Formalism.BasicNotions.Extra.tw  [Formalism.LocalRingCardinality.DataExtra]
+  Formalism.BasicNotions.HSpace.rank  [Formalism.LocalRingCardinality.DataSpaces]
+  Formalism.BasicNotions.Host.cmStar  [Formalism.LocalRingCardinality.DataHost]
+  Formalism.BasicNotions.Host.toHostAx  [Formalism.LocalRingCardinality.DataHost]
+  Formalism.BasicNotions.Ranks.f  [Formalism.LocalRingCardinality.Params]
+  Formalism.BasicNotions.Ranks.m  [Formalism.LocalRingCardinality.Params]
+  Formalism.BasicNotions.Ranks.r  [Formalism.LocalRingCardinality.Params]
+  Formalism.BasicNotions.Ranks.toFrame  [Formalism.LocalRingCardinality.Params]
+  Formalism.BasicNotions.Rows.Data.Amb  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.LL  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.Mtilde  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.O  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.OtoLL  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.Tup  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.Word  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.embLL  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.instAmb  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.instAmbi  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.instLL  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.Data.instO  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Rows.OLat.carrier  [Formalism.LocalRingCardinality.DataRows]
+  Formalism.BasicNotions.Spaces.Y  [Formalism.LocalRingCardinality.DataSpaces]
+  Formalism.HC.HostAx.toHostRaw  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff]
+  Formalism.HC.HostRaw.E  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff]
+  Formalism.HC.HostRaw.F  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff]
+  Formalism.HC.HostRaw.instField  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff]
+  Formalism.HC.HostRaw.instNF  [Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff]
+  Formalism.IndefR.IndefiniteRealisationBoundedRows  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefRRealTB]
+  Formalism.IndefR.IndefiniteRealisationBoundedRows.oneMap  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefRRealTB]
+  Formalism.L2.DIV.ColRec3.face  [Formalism.LocalToGlobal.Divisibility.RecBridgeTied]
+  Formalism.L2.DIV.DcPtG  [Formalism.LocalToGlobal.Divisibility.TupUsed]
+  Formalism.L2.DIV.DefFam.base  [Formalism.LocalToGlobal.Divisibility.RowLat]
+  Formalism.L2.DIV.DefFam3.base3  [Formalism.LocalToGlobal.Divisibility.InertRationalAdjoint]
+  Formalism.L2.DIV.DefFam3.toSub2  [Formalism.LocalToGlobal.Divisibility.InertRationalAdjoint]
+  Formalism.L2.DIV.DivRows3G  [Formalism.LocalToGlobal.Divisibility.TupUsed]
+  Formalism.L2.DIV.DivisionKernelConstantBounds  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.FamIn.fam  [Formalism.LocalToGlobal.Divisibility.LiftLat]
+  Formalism.L2.DIV.FamIn.side  [Formalism.LocalToGlobal.Divisibility.LiftLat]
+  Formalism.L2.DIV.FamIn.μ0  [Formalism.LocalToGlobal.Divisibility.LiftLat]
+  Formalism.L2.DIV.FamIn3.A  [Formalism.LocalToGlobal.Divisibility.HeckeRI]
+  Formalism.L2.DIV.FamIn3.fam3  [Formalism.LocalToGlobal.Divisibility.HeckeRI]
+  Formalism.L2.DIV.FamIn3.side3  [Formalism.LocalToGlobal.Divisibility.HeckeRI]
+  Formalism.L2.DIV.SquareIntegrableColumns.Sp  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.SquareIntegrableColumns.X  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.SquareIntegrableColumns.c  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.SquareIntegrableColumns.e  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.TieTwRec  [Formalism.LocalToGlobal.Divisibility.LinkDefN]
+  Formalism.L2.DIV.closed_linkDIVt_of_closed_bridge_kernel  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.DIVRecBridgeSel]
+  Formalism.L2.DIV.fieldsLL  [Formalism.LocalToGlobal.Divisibility.RecBridgeTied]
+  Formalism.L2.DIV.lDim  [Formalism.LocalToGlobal.Divisibility.RowSideTie]
+  Formalism.L2.DIV.lPrj  [Formalism.LocalToGlobal.Divisibility.RowSideTie]
+  Formalism.L2.G.Adm2InU.TwistedColumnBoundAtT  [Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces]
+  Formalism.L2.G.Adm2InU.TwistedPeriodAdmissible  [Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces]
+  Formalism.L2.G.Adm2InU.TwistedPointIntegral  [Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces]
+  Formalism.L2.G.Adm2InU.UsedTuplesBoundByConstant  [Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces]
+  Formalism.L2.G.ServJoint.CutUp  [Formalism.LocalToGlobal.GroupLattices.JointServices]
+  Formalism.L2.G.ServT.SelectionServed  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.GServT]
+  Formalism.L2.GlobalTheoryTheory.AllJoin.AllJoinA  [Formalism.LocalToGlobal.HilbertRowConditions.AllJoin]
+  Formalism.L2.GlobalTheoryTheory.ConcN.CountAllRows  [Formalism.LocalToGlobal.GlobalTheory.IrreducibleOfCountSizes]
+  Formalism.L2.GlobalTheoryTheory.ConcN.epsC  [Formalism.LocalToGlobal.GlobalTheory.IrreducibleOfCountSizes]
+  Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.ClassItemsAt  [Formalism.LocalToGlobal.GlobalTheory.GL5.DiscreteSeriesOfFormalDegree]
+  Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.GenusMassAt  [Formalism.LocalToGlobal.GlobalTheory.GL5.DiscreteSeriesOfFormalDegree]
+  Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.VolSigIndep  [Formalism.LocalToGlobal.GlobalTheory.GL5.PNamed]
+  Formalism.L2.Indef.DefSide.dZ  [Formalism.LocalToGlobal.IndefiniteForms.IndefSide]
+  Formalism.L2.Indef.IndefData.Tw  [Formalism.LocalToGlobal.IndefiniteForms.IndefSide]
+  Formalism.L2.RecTAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LayerTwoFamilyClass]
+  Formalism.L2.RecTAlt.T  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LayerTwoFamilyClass]
+  Formalism.L2.Rows.RowSideDeterminedAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.RowSideDetermined]
+  Formalism.L2.Rows.RowSideFamily  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.A3  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.Gp  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.I0  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.P0  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.Pl0  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.Ps  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.S0  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.T  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.Zs  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.fin  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.grp  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.ψ0  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowSideFamily.ψs  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.Rows.RowsHoldLam3  [Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces]
+  Formalism.L2.SG.JoinSISel.BaseVectorImageFull  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.JoinSISel]
+  Formalism.L2.SG.JoinSISel.IndefiniteRealisationSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.FinXRowOfGap]
+  Formalism.L2.SG.Pf.WuDecayOfGap  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuDecayAll]
+  Formalism.L2.SG.RowsDef.RowsFinDim  [Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.RowsDef]
+  Formalism.L2.SG.RowsPos.RowMainEqP  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsPos]
+  Formalism.L2.SG.RowsPos.RowNGP  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsPos]
+  Formalism.L2.SG.RowsPos.TypeP  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsPos]
+  Formalism.L2.SG.SpectralTiesReal.STies  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.SpectralTiesReal]
+  Formalism.L2.SG.SpectralTiesReal.STiesRAlt.toSTies  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.STiesR]
+  Formalism.L2.SG.ThmSOwn.LoopRowS  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ThmSOwn]
+  Formalism.L2.SG.ThmSOwn.PLevT'  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.CountT]
+  Formalism.L2.SG.ThmSOwn.TheoremSSelected  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ThmSOwn]
+  Formalism.L2.Top3.D3  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.Duty  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.SelectionDefiniteHeightCondition  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.WithChN  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.complement_two_of_items  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top3.d3_a  [Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+  Formalism.L2.Top4.AllRealisationsPrimitive  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.BaseLevelTiedChoiceAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.ColumnChoiceCompatibleSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.EventuallyAlongSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.IndefiniteScaleAtPoint  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.RankOfDivisionKernel  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.RemainingDivisionBounds  [Formalism.LocalToGlobal.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.RemainingDivisionBounds.bu  [Formalism.LocalToGlobal.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.RemainingDivisionBounds.toRows_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.RowsAtSelAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.SelectionBundle  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TieTwRecOf]
+  Formalism.L2.Top4.SelectionSpectralCondition  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.SingleMapCondition  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TieTwRecOf]
+  Formalism.L2.Top4.cut_of_stable  [Formalism.LocalToGlobal.IndefiniteRealisationChoice]
+  Formalism.L2.Top4.indefiniteRealisationChoiceOfSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TieTwRecOf]
+  Formalism.L2.Top4.kernelChoiceOfSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TieTwRecOf]
+  Formalism.L2.Top4Wire2.DefRowsFAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.FiniteTOf]
+  Formalism.L2.TwistSelection  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TSelF]
+  Formalism.MainNotions.ArithmeticCylinders.AllRows  [Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders]
+  Formalism.MainNotions.ArithmeticCylinders.LabelCountGoodInjective  [Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders]
+  Formalism.MainNotions.BoxesF  [Formalism.SharpRestriction.GlobalSchurBounds.MainIn]
+  Formalism.MainNotions.ChosenE  [Formalism.SharpRestriction.GlobalSchurBounds.Chosen]
+  Formalism.MainNotions.Closed  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Closed.and  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.Closed.imp  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.DGamDvdF  [Formalism.SharpRestriction.DesignExistsOfChoices]
+  Formalism.MainNotions.DGamSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.DIV.closed_Csz_ge_fn  [Formalism.SharpRestriction.Divisibility.ClosedSizeLink.AdmissibleFamilyOfThreshold]
+  Formalism.MainNotions.DIVinN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.DesignExists  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamClass  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamCore.D  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.Ix  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.L  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamCore.x1  [Formalism.SharpRestriction.FamCore]
+  Formalism.MainNotions.FamP  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.CTu  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.CYL  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP.Csz  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.GK  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.Gx  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.Gy  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.X  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.cOut  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.FamP.cX  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.ex  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.gatT  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.FamP.toFamCore  [Formalism.SharpRestriction.ParConsts]
+  Formalism.MainNotions.J.MuRank  [Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe]
+  Formalism.MainNotions.LinkDIVt  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkGLOBAL  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LinkN  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.LitThin  [Formalism.SharpRestriction.GlobalSchurBounds.MainSup]
+  Formalism.MainNotions.LocalQuadraticParts.ComplementCountFamily  [Formalism.SharpRestriction.Divisibility.LocalQuadraticParts]
+  Formalism.MainNotions.LocalQuadraticParts.adm2  [Formalism.SharpRestriction.Divisibility.LocalQuadraticParts]
+  Formalism.MainNotions.MinkDiv  [Formalism.SharpRestriction.DesignExistsOfChoices]
+  Formalism.MainNotions.NuFullF  [Formalism.SharpRestriction.GlobalTheoremInputs]
+  Formalism.MainNotions.PX.TFrame  [Formalism.SharpRestriction.CuspSpanNormBounds.PExtra]
+  Formalism.MainNotions.Pk.Closed.of_class  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.Pk.Closed.sub  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.Pk.DGamSmooth  [Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth]
+  Formalism.MainNotions.QDRowsF  [Formalism.SharpRestriction.GlobalSchurBounds.MainIn]
+  Formalism.MainNotions.RT.MassRatioUnderVolume  [Formalism.SharpRestriction.GlobalSchurBounds.MassRatioUnfoldedOfTheoremTwo]
+  Formalism.MainNotions.RealPlaceSecondLayerConditions  [Formalism.SharpRestriction.GlobalSchurBounds.LinkTied]
+  Formalism.MainNotions.S.CountE.CountAllPointsClass  [Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCountE]
+  Formalism.MainNotions.S.CountingConstants  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.S.CountingConstants.A  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.S.CountingConstants.C  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.S.CountingConstants.c  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.S.CountingConstants.cb  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.S.CountingConstants.n0  [Formalism.SharpRestriction.CuspSpanNormBounds.StandingHypothesesHoldFamily]
+  Formalism.MainNotions.StandardLattice.ClassNumberFormula₂  [Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice]
+  Formalism.MainNotions.TameDistinctF  [Formalism.SharpRestriction.LevelLetterCocycles.AlignN]
+  Formalism.MainNotions.TuSize  [Formalism.SharpRestriction.ParamsHeightRankConstant]
+  Formalism.MainNotions.TwGood  [Formalism.SharpRestriction.LevelLetterCocycles.TwGood]
+  Formalism.MainNotions.WeightDegreeSizes.FamilySecondComplementInputs  [Formalism.SharpRestriction.Divisibility.WeightDegreeSizes]
+  Formalism.MainNotions.WeightDegreeSizes.PeriodClassSumWeyl  [Formalism.SharpRestriction.Divisibility.WeightDegreeSizes]
+  Formalism.MainNotions.WeightDegreeSizes.familySizeBoundAtTypePrime  [Formalism.SharpRestriction.Divisibility.WeightDegreeSizes]
+  Formalism.MainNotions.WithSm  [Formalism.SharpRestriction.SmoothDesignExistence.DesignExistsDes]
+  Formalism.MainNotions.WithTw  [Formalism.SharpRestriction.MuTuOfTuSize]
+  Formalism.MainNotions.product_first_zeroth_parts.Conclusion5Sharp  [Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts]
+  Formalism.MainNotions.product_first_zeroth_parts.Conclusion6  [Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts]
+  GlobalTheory.EX.HostExW  [Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ThinScalesIffHostBound]
+  GlobalTheory.Fc.TopShapeAlt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopShapeAlt]
+  GlobalTheory.GLq.Green  [Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum]
+  GlobalTheory.Top.Irr.closed_linkIRR_of_join_count  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkIrr]
+  GlobalTheory.Top.closed_family_admissible_twist_link_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ClosedFamilyAdmissibleTwistLink]
+  GlobalTheory.Top.closed_linkEta_of_duty  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkEta]
+  GlobalTheory.Top.closed_linkG_of_duty  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkG]
+  GlobalTheory.Top.designExists_of_tuSize_aux4n_litThin  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkEx]
+  GlobalTheory.Top.link_alt_alt_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.Link]
+  GlobalTheory.Top.link_alt_alt_bis  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkAltAltBis]
+  GlobalTheory.Top.link_brest_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkBrest]
+  GlobalTheory.Top.link_gl  [Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]
+  GlobalTheory.Top.selection_closed_of_wu_decay_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.SelectionClosedOfWuDecay]
+  GlobalTheory.Top.wire_sel_alt  [Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.WireSel]
+  UpperTheory.Top.ExS  [Development.AutomorphicArithmetic.CharacterBoxes.ExS]
+  UpperTheory.Top.FReq  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.FReq.cls  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.FReq.req  [Development.AutomorphicArithmetic.CharacterBoxes.Supply]
+  UpperTheory.Top.HypV  [Development.AutomorphicArithmetic.CharacterBoxes.DivinNOfHypV]
+  UpperTheory.Top.TopG  [Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  UpperTheory.Top.topDesWin  [Development.AutomorphicArithmetic.CharacterBoxes.DesWin]
+exit=0
+
+
+FIFTH BATCH: names for the size question
+
+#whereis size_windows_of_thick_density size_window_at_five SizesAt SizeM Win_at winA winB winL
+
+Lean printed:
+
+23 constant(s)
+  def Formalism.L2.GlobalTheoryTheory.ConcN.SizesAt  [Formalism.LocalToGlobal.GlobalTheory.IrreducibleOfCountSizes]
+  def Formalism.L2.SG.PoincareAmplitudeLowerBounds.SizesAt  [Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.TheoremSRecursion]
+  def Formalism.LFunctionChainParameters.LChain.ModelEv.SizesAt  [Formalism.SizeWindowBrackets.ChainSlopeWindows.PChain]
+  theorem Formalism.MainNotions.AuxBlock8.Pf.NumMean.winA  [Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.SlopeEstimateOfLemmaBSlopeLine]
+  theorem Formalism.MainNotions.AuxBlock8.Pf.NumMean.winB  [Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.SlopeEstimateOfLemmaBSlopeLine]
+  theorem Formalism.MainNotions.ColumnSystems.Pf.Std.winA  [Formalism.SharpRestriction.GrowthBounds.BinomialRatio.Transported]
+  theorem Formalism.MainNotions.ColumnSystems.Pf.Std.winB  [Formalism.SharpRestriction.GrowthBounds.BinomialRatio.Transported]
+  def Formalism.MainNotions.G.winA  [Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero]
+  def Formalism.MainNotions.G.winB  [Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero]
+  def Formalism.MainNotions.Lnk.Win_at  [Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr]
+  theorem Formalism.MainNotions.Lnk.size_window_at_five  [Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr]
+  theorem Formalism.MainNotions.Lnk.size_windows_of_thick_density  [Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]
+  theorem Formalism.MainNotions.Lnk.winA  [Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr]
+  theorem Formalism.MainNotions.Lnk.winB  [Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr]
+  theorem Formalism.MainNotions.Lnk.winL  [Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr]
+  def Formalism.MainNotions.SizeM  [Formalism.SharpRestriction.ElevenLe]
+  def Formalism.MainNotions.SizesAt  [Formalism.SharpRestriction.ElevenLe]
+  def Formalism.MainNotions.ZetaZeroFreeRegion.SizesAt  [Formalism.SharpRestriction.GlobalSchurBounds.ZetaZeroFreeRegion]
+  def Formalism.MainNotions.flipOneThree.Inst.winA  [Formalism.SharpRestriction.GrowthBounds.FlipOneThree]
+  theorem Formalism.MainNotions.flipOneThree.Pf.FixedWeightNumericalFacts.winA  [Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorizationBoundMonoLattices]
+  theorem Formalism.MainNotions.flipOneThree.Pf.FixedWeightNumericalFacts.winB  [Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorizationBoundMonoLattices]
+  theorem Formalism.MainNotions.flipOneThree.Pf.MeanKappaNumericalFacts.winA  [Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LocalHypothesisOfGlobal]
+  theorem Formalism.MainNotions.flipOneThree.Pf.MeanKappaNumericalFacts.winB  [Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LocalHypothesisOfGlobal]
+exit=0
+
+
+SIXTH BATCH: where the size of m is used, and the two ends put together (imports TopPlug and CritLine)
+
+set_option pp.fullNames true in
+#check @Formalism.MainNotions.Lnk.size_windows_of_thick_density
+#uses Formalism.MainNotions.linkGLOBAL7_items Formalism.MainNotions.Lnk.size_windows_of_thick_density
+#uses Formalism.MainNotions.Lnk.size_windows_of_thick_density Formalism.MainNotions.Lnk.size_window_at_five
+#uses Formalism.MainNotions.Lnk.size_windows_of_thick_density Formalism.MainNotions.SizesAt
+#uses Formalism.MainNotions.Lnk.size_windows_of_thick_density Formalism.MainNotions.ZetaZeroFreeRegion.SizesAt
+#uses Formalism.MainNotions.SizesAt Formalism.MainNotions.SizeM
+#uses Formalism.MainNotions.Lnk.size_window_at_five Formalism.MainNotions.Lnk.winA
+#uses Formalism.MainNotions.Lnk.size_window_at_five Formalism.MainNotions.Lnk.winB
+#uses Formalism.MainNotions.Lnk.size_window_at_five Formalism.MainNotions.Lnk.winL
+#uses Formalism.MainNotions.Lnk.winA Formalism.MainNotions.SizeM
+#uses Formalism.MainNotions.Lnk.winL Formalism.MainNotions.SizeM
+#uses Formalism.MainNotions.Lnk.linkCore Formalism.MainNotions.Lnk.Win_at
+#uses Formalism.MainNotions.Lnk.linkCore Formalism.MainNotions.PageWin
+#uses Formalism.MainNotions.Lnk.size_windows_of_thick_density Formalism.MainNotions.PageWin
+set_option pp.fullNames true in
+#check @Formalism.MainNotions.Lnk.winA
+set_option pp.fullNames true in
+#check @Formalism.MainNotions.Lnk.winL
+set_option pp.fullNames true in
+#check @Formalism.MainNotions.Lnk.winB
+#print Formalism.MainNotions.SizeM
+#print axioms Formalism.MainNotions.Lnk.size_windows_of_thick_density
+#print axioms Formalism.MainNotions.Lnk.size_window_at_five
+
+-- the conditional statement, put together from the two compiled ends (asked by Marlow, 34910)
+noncomputable def conditionalRH := fun hG hV h => Formalism.VW.rh_of_every (UpperTheory.Top.every_character_of_green_v_win hG hV h)
+#check @conditionalRH
+#print axioms conditionalRH
+
+Lean printed:
+
+@Formalism.MainNotions.Lnk.size_windows_of_thick_density : ∀ {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps),
+  Formalism.MainNotions.ThickSetDensityEventually Fm → Formalism.MainNotions.Lnk.WinF Fm
+Formalism.MainNotions.linkGLOBAL7_items uses Formalism.MainNotions.Lnk.size_windows_of_thick_density: true
+Formalism.MainNotions.Lnk.size_windows_of_thick_density uses Formalism.MainNotions.Lnk.size_window_at_five: true
+Formalism.MainNotions.Lnk.size_windows_of_thick_density uses Formalism.MainNotions.SizesAt: true
+Formalism.MainNotions.Lnk.size_windows_of_thick_density uses Formalism.MainNotions.ZetaZeroFreeRegion.SizesAt: false
+Formalism.MainNotions.SizesAt uses Formalism.MainNotions.SizeM: true
+Formalism.MainNotions.Lnk.size_window_at_five uses Formalism.MainNotions.Lnk.winA: true
+Formalism.MainNotions.Lnk.size_window_at_five uses Formalism.MainNotions.Lnk.winB: true
+Formalism.MainNotions.Lnk.size_window_at_five uses Formalism.MainNotions.Lnk.winL: true
+Formalism.MainNotions.Lnk.winA uses Formalism.MainNotions.SizeM: true
+Formalism.MainNotions.Lnk.winL uses Formalism.MainNotions.SizeM: true
+Formalism.MainNotions.Lnk.linkCore uses Formalism.MainNotions.Lnk.Win_at: true
+Formalism.MainNotions.Lnk.linkCore uses Formalism.MainNotions.PageWin: false
+Formalism.MainNotions.Lnk.size_windows_of_thick_density uses Formalism.MainNotions.PageWin: false
+@Formalism.MainNotions.Lnk.winA : ∀ {D : Formalism.BasicNotions.D7} {L : Formalism.BasicNotions.SizeData₂ D},
+  Formalism.MainNotions.SizeM L → ↑D.R.m ≤ L.sc.x ^ (1 / 2 + L.sc.eps / 2)
+@Formalism.MainNotions.Lnk.winL : ∀ {D : Formalism.BasicNotions.D7} {L : Formalism.BasicNotions.SizeData₂ D},
+  Formalism.MainNotions.SizeM L → L.sc.x ^ (1 / 2 - L.sc.eps) ≤ ↑D.R.m
+@Formalism.MainNotions.Lnk.winB : ∀ {D : Formalism.BasicNotions.D7} {L : Formalism.BasicNotions.SizeData₂ D},
+  Formalism.MainNotions.SizeM L → Formalism.MainNotions.SizeK L → L.sc.x * ↑D.R.m ≤ ↑D.R.k
+def Formalism.MainNotions.SizeM : {D : Formalism.BasicNotions.D7} → Formalism.BasicNotions.SizeData₂ D → Prop :=
+fun {D} L =>
+  L.sc.x ^ (-Formalism.MainNotions.szTh L) * √(L.sc.x * L.sc.delta1) ≤ ↑D.R.m ∧
+    ↑D.R.m ≤ L.sc.x ^ Formalism.MainNotions.szTh L * √(L.sc.x * L.sc.delta1)
+'Formalism.MainNotions.Lnk.size_windows_of_thick_density' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formalism.MainNotions.Lnk.size_window_at_five' depends on axioms: [propext, Classical.choice, Quot.sound]
+warning: Definition `conditionalRH` is a proposition; use `theorem` instead of `def`
+Note: This linter can be disabled with `set_option linter.defProp false`
+conditionalRH : GlobalTheory.GLq.Green →
+  UpperTheory.Top.VWin →
+    Nonempty
+        (GlobalTheory.Fc.HypsAlt
+          (fun 𝒞 => Formalism.MainNotions.Closed (fun {eps} => 𝒞) fun {eps} Fm x => Formalism.MainNotions.LinkN Fm)
+          GlobalTheory.Fc.DefiniteSideCondition) →
+      RiemannHypothesis
+'conditionalRH' depends on axioms: [propext, Classical.choice, Quot.sound]
+exit=0
+
+
+THE DEPENDENCY UNION: a program by Lattice (87 lines; it only reads the compiled files and prints), read beforehand by Confluence and by Fixpoint, run unchanged from the compiled project. It imports CritLine, ThirdPlaceSeries.TopShape and ZeroFreeAllOfTopG and starts from UpperTheory.Top.shape_closed_link_n_of_green and UpperTheory.Top.zeroFreeAll_of_topG. Three runs: of the file as it stood at 04:10Z (sha256 38f5aeaa10924dc1...), 56 seconds; as amended a minute later to print one more line (sha256 4a71b4ccd15a16dc...), 53 seconds; and as Lattice then committed it, tools/rh_path_union.lean in this repository (sha256 9fb651374b9831e0...; the amended file less one blank line at the end), 69 seconds. The first agrees with the others on every line they share. The second and the third printed the same, byte for byte:
+
+Starting union traversal. 17270 archive modules loaded.
+DEPENDS 92148 archive declarations from 5237 archive modules (17270 imported)
+MENTION Formalism.MainNotions.PageWin: 3 constants in the union
+EXTRACT via explicit And recursor/projection, lower bound (0): #[]
+CLOSURE Formalism.MainNotions.Lnk.linkCore: true
+CLOSURE Formalism.MainNotions.Lnk.size_windows_of_thick_density: true
+CLOSURE Formalism.MainNotions.PageWin: true
+CLOSURE GlobalTheory.EX.DC.PageWin: false
+CLOSURE Formalism.L2.Top3.Duty: true
+
+
+THE SAME PROGRAM FROM THE ENDS OF THE CONDITIONAL STATEMENT. Two lines of tools/rh_path_union.lean changed: it imports ThirdPlaceSeries.TopPlug in place of TopShape and ZeroFreeAllOfTopG, and starts from UpperTheory.Top.every_character_of_green_v_win and Formalism.VW.rh_of_every. Run first by Marlow (chat 35032), then here, 61 seconds, with the same counts. It printed:
+
+Starting union traversal. 17278 archive modules loaded.
+DEPENDS 96538 archive declarations from 5701 archive modules (17278 imported)
+MENTION Formalism.MainNotions.PageWin: 4 constants in the union
+EXTRACT via explicit And recursor/projection, lower bound (0): #[]
+CLOSURE Formalism.MainNotions.Lnk.linkCore: true
+CLOSURE Formalism.MainNotions.Lnk.size_windows_of_thick_density: true
+CLOSURE Formalism.MainNotions.PageWin: true
+CLOSURE GlobalTheory.EX.DC.PageWin: false
+CLOSURE Formalism.L2.Top3.Duty: true
+
+
+CONFLUENCE'S COLLECTOR. A longer program for the same question, written before Lattice's: tools/rh_path_deps.lean in this repository (Confluence, a957205; sha256 272e49af366315de...), with its control tools/rh_path_deps_toy.lean (3683d42087dd9ec2...), a small made-up project on which every kind of answer, yes and no, is known in advance; the control passed before the real run. Run unchanged from the compiled project, started 03:36Z, finished 04:54Z. It loads 17,277 archive files (its own choice of imports), works out everything below each step of the hand-traced route, asks whether each expected dependency is there (and whether some deliberately wrong ones are not), and counts what lies below the same two theorems. Its count agrees with Lattice's program exactly. It printed:
+
+LOADED: 17277 archive modules imported (of 27775 modules in all)
+FROM GlobalTheory.Fc.forall_goal_of_shape_of_hyps = GlobalTheory.Fc.forall_goal_of_shape_of_hyps [theorem, Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ShapeOf]
+  closure of GlobalTheory.Fc.forall_goal_of_shape_of_hyps: 18334 project constants
+  -> GlobalTheory.Fc.goal_of_shape_of_hyps = GlobalTheory.Fc.goal_of_shape_of_hyps [theorem, Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ShapeOf]: transitive YES, direct YES; as expected
+FROM UpperTheory.Top.shape_closed_link_n_of_green = UpperTheory.Top.shape_closed_link_n_of_green [theorem, Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopShape]
+  closure of UpperTheory.Top.shape_closed_link_n_of_green: 91576 project constants
+  -> GlobalTheory.Top.link_gl = GlobalTheory.Top.link_gl [theorem, Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]: transitive YES, direct YES; as expected
+  -> UpperTheory.Top.topDesWin = UpperTheory.Top.topDesWin [theorem, Development.AutomorphicArithmetic.CharacterBoxes.DesWin]: transitive YES, direct YES; as expected
+  -> linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]: transitive YES, direct no; as expected
+  -> ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]: transitive YES, direct no; as expected
+  -> LinkN = Formalism.MainNotions.LinkN [def, Formalism.SharpRestriction.GlobalTheoremInputs]: transitive YES, direct YES; as expected
+  -> SizeData₂.lifts = Formalism.BasicNotions.SizeData₂.lifts [def, Formalism.LocalRingCardinality.DataParams₂]: transitive YES, direct no; as expected
+  -> Duty = Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice], GlobalTheory.Cp.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants], GlobalTheory.EX.DC.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]: transitive YES, direct YES; as expected
+  -> PageWin = Formalism.MainNotions.PageWin [def, Formalism.SharpRestriction.PageFix], GlobalTheory.EX.DC.PageWin [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]: transitive YES, direct no; as expected
+  -> PDVS.DefiniteLiftChain: not among the loaded project constants (expected no; trivially absent)
+  -> stmt3c: not among the loaded project constants (expected no; trivially absent)
+  -> familyDefiniteLiftChain: not among the loaded project constants (expected no; trivially absent)
+  -> ThetaChainStatement = Formalism.MainNotions.ZetaProductPairs.ThetaChainStatement [def, Formalism.SharpRestriction.Divisibility.ZetaProductPairs]: transitive no, direct no; as expected
+FROM UpperTheory.Top.topDesWin = UpperTheory.Top.topDesWin [theorem, Development.AutomorphicArithmetic.CharacterBoxes.DesWin]
+  closure of UpperTheory.Top.topDesWin: 3778 project constants
+  -> LinkGLOBAL = Formalism.MainNotions.LinkGLOBAL [def, Formalism.SharpRestriction.GlobalTheoremInputs]: transitive YES, direct YES; as expected
+  -> LinkN = Formalism.MainNotions.LinkN [def, Formalism.SharpRestriction.GlobalTheoremInputs]: transitive YES, direct YES; as expected
+  -> DIVinN = Formalism.MainNotions.DIVinN [def, Formalism.SharpRestriction.GlobalTheoremInputs]: transitive YES, direct no; as expected
+  -> ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]: transitive YES, direct YES; as expected
+FROM GlobalTheory.Top.link_gl = GlobalTheory.Top.link_gl [theorem, Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]
+  closure of GlobalTheory.Top.link_gl: 25840 project constants
+  -> FamGLmin.link8 = Formalism.MainNotions.Wire.FamGLmin.link8 [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]: transitive YES, direct YES; as expected
+  -> Duty = Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice], GlobalTheory.Cp.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants], GlobalTheory.EX.DC.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]: transitive YES, direct YES; as expected
+  -> linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]: transitive YES, direct no; as expected
+FROM FamGLmin.link8 = Formalism.MainNotions.Wire.FamGLmin.link8 [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  closure of Formalism.MainNotions.Wire.FamGLmin.link8: 8454 project constants
+  -> FamGLmin.link7 = Formalism.MainNotions.Wire.FamGLmin.link7 [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]: transitive YES, direct YES; as expected
+FROM FamGLmin.link7 = Formalism.MainNotions.Wire.FamGLmin.link7 [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LogXLowerFamilyOfTheorems]
+  closure of Formalism.MainNotions.Wire.FamGLmin.link7: 8426 project constants
+  -> linkGLOBAL7_min = Formalism.MainNotions.linkGLOBAL7_min [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]: transitive YES, direct YES; as expected
+FROM linkGLOBAL7_min = Formalism.MainNotions.linkGLOBAL7_min [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]
+  closure of Formalism.MainNotions.linkGLOBAL7_min: 8358 project constants
+  -> linkGLOBAL7_items = Formalism.MainNotions.linkGLOBAL7_items [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]: transitive YES, direct YES; as expected
+FROM linkGLOBAL7_items = Formalism.MainNotions.linkGLOBAL7_items [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LinkMin]
+  closure of Formalism.MainNotions.linkGLOBAL7_items: 7051 project constants
+  -> linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]: transitive YES, direct YES; as expected
+FROM linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]
+  closure of Formalism.MainNotions.Lnk.linkCore: 3503 project constants
+  -> ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]: transitive YES, direct YES; as expected
+  -> GlobalTheory.Top.link_gl = GlobalTheory.Top.link_gl [theorem, Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]: transitive no, direct no; as expected
+  -> UpperTheory.Top.topDesWin = UpperTheory.Top.topDesWin [theorem, Development.AutomorphicArithmetic.CharacterBoxes.DesWin]: transitive no, direct no; as expected
+FROM LinkGLOBAL = Formalism.MainNotions.LinkGLOBAL [def, Formalism.SharpRestriction.GlobalTheoremInputs]
+  closure of Formalism.MainNotions.LinkGLOBAL: 3352 project constants
+  -> ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]: transitive YES, direct YES; as expected
+  -> linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]: transitive no, direct no; as expected
+FROM LinkN = Formalism.MainNotions.LinkN [def, Formalism.SharpRestriction.GlobalTheoremInputs]
+  closure of Formalism.MainNotions.LinkN: 3029 project constants
+  -> SizeData₂.lifts = Formalism.BasicNotions.SizeData₂.lifts [def, Formalism.LocalRingCardinality.DataParams₂]: transitive YES, direct YES; as expected
+FROM UpperTheory.Top.zeroFreeAll_of_topG = UpperTheory.Top.zeroFreeAll_of_topG [theorem, Development.AutomorphicArithmetic.CharacterBoxes.ZeroFreeAllOfTopG]
+  closure of UpperTheory.Top.zeroFreeAll_of_topG: 3996 project constants
+  -> ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]: transitive YES, direct YES; as expected
+  -> level_gm_le_on_family_scales = UpperTheory.Comparison₂.level_gm_le_on_family_scales [theorem, Development.AutomorphicArithmetic.PrimitiveCosets.LevelGmLeOnFamilyScales]: transitive YES, direct YES; as expected
+FROM ChainTied = Formalism.MainNotions.ChainTied [def, Formalism.SharpRestriction.GlobalSchurBounds.TieGlobal]
+  closure of Formalism.MainNotions.ChainTied: 3205 project constants
+  -> linkCore = Formalism.MainNotions.Lnk.linkCore [theorem, Formalism.SharpRestriction.GlobalSchurBounds.LossesSmallShares]: transitive no, direct no; as expected
+  -> LinkGLOBAL = Formalism.MainNotions.LinkGLOBAL [def, Formalism.SharpRestriction.GlobalTheoremInputs]: transitive no, direct no; as expected
+DUTY in the statement of GlobalTheory.Top.link_gl: Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice]
+ALL Duty loaded: Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice], GlobalTheory.Cp.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants], GlobalTheory.EX.DC.Duty [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]
+ALL PageWin loaded: Formalism.MainNotions.PageWin [def, Formalism.SharpRestriction.PageFix], GlobalTheory.EX.DC.PageWin [def, Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes]
+Duty/PageWin BELOW the path theorems: Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice], Formalism.MainNotions.PageWin [def, Formalism.SharpRestriction.PageFix]
+MENTION PageWin, below the path (3; NOT the same as use): Formalism.L2.Top3.Duty [def, Formalism.LocalToGlobal.ClassOfRecordOfChoice], Formalism.L2.Top3.linkedFamiliesAligned_of_duty [theorem, Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.ClassOfRecordOfChoice], GlobalTheory.Top.link_gl [theorem, Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LinkGl]
+EXTRACT the PageWin conjunct, below the path (0; a lower bound, see extracts): NONE FOUND
+DEPENDS: below shape_closed_link_n_of_green and zeroFreeAll_of_topG: 92148 archive constants from 5237 archive modules, of the 17277 archive modules imported here
+AXIOMS UpperTheory.Top.shape_closed_link_n_of_green: [propext, Classical.choice, Quot.sound]
+AXIOMS UpperTheory.Top.zeroFreeAll_of_topG: [propext, Classical.choice, Quot.sound]
+AXIOMS UpperTheory.Top.topDesWin: [propext, Classical.choice, Quot.sound]
+AXIOMS GlobalTheory.Top.link_gl: [propext, Classical.choice, Quot.sound]
+AXIOMS Formalism.MainNotions.Wire.FamGLmin.link8: [propext, Classical.choice, Quot.sound]
+AXIOMS Formalism.MainNotions.Lnk.linkCore: [propext, Classical.choice, Quot.sound]
+PATH: every answer matches the hand trace
+
+real	78m25.831s
+user	77m17.986s
+sys	0m18.150s
+
+
+Asked by Lattice (chat 34789, 34832, 34909, 34913), Confluence (34782, 34912), Marlow (34910) and Fixpoint. Run by Fixpoint, 25 November 2026.

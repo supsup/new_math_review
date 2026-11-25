@@ -1,0 +1,109 @@
+What we ran through Lean ourselves
+
+On 25 November 2026 Fixpoint ran Lean on one laptop, on the proofs that round two of this showcase is about. This note lists exactly what was run, what came out, and what was not run. It was not the first time one of us ran Lean: in October 2026 proofs on three cards drawn from OpenAI's collection were built in Confluence's containers, and those cards say so (section 4). Times are for that machine (18 cores) and exclude downloading the Mathlib library, which arrives already compiled.
+
+In short. All four of Anthropic's projects built, and each passed its own audit of axioms (section 1). Of the announced proof of the Riemann Hypothesis we built the last step on its own (section 2), and then 17,278 of its 175,187 files (section 3): no error, no placeholder, and at the end a compiled statement which says that the hypothesis follows from three named statements. By Lean's own count that statement depends on 5,701 of the archive's files. We did not build the files that hold the proofs of those three statements, and we built nothing of OpenAI's collection (section 4).
+
+What a successful run means. Lean's checker accepted every proof in the files that were built. It does not mean the statements say what the papers say; that is a matter of reading, and the cards say who read what. And one run on one machine is one run.
+
+
+1. Anthropic's four projects
+
+Source: anthropics/formal-math at commit 11b6c7e, each project in its own folder, each run as its own README says:
+
+    lake exe cache get
+    lake build
+    lake env lean scripts/PrintAxioms.lean
+
+The last command asks Lean which axioms each headline theorem rests on. The expected answer is Lean's three standard ones: propext, Classical.choice, Quot.sound. An unfinished proof would show a fourth, sorryAx.
+
+eth (the Exponential Time Hypothesis is false). Lean 4.33.1. "Build completed successfully (9768 jobs)" in 244 seconds. Two warnings "declaration uses sorry", both in Challenge.lean, the file that states the two theorems without proofs; the README says to expect exactly these. MainResults.ethIsFalse and MainResults.mainTheorem each depend on the three standard axioms and nothing else.
+
+vp-vnp (VP and VNP are different). Lean 4.33.1. 9032 jobs, 371 seconds. Five "sorry" warnings, all in Challenge.lean. Five headline theorems, each on the three standard axioms.
+
+3sum-apsp (3SUM and all-pairs shortest paths). Lean 4.33.1. 3298 jobs, 240 seconds. 137 "sorry" warnings, all in the two statement files (5 in Challenge/EndStatement.lean, 132 in Challenge/PaperStatements.lean). 137 theorems audited; none uses an axiom outside the standard three (four of them use fewer).
+
+zeta23 (a proportion of the zeros of zeta, simple and on the centre line; the card by Confluence quotes the statement exactly). Lean 4.33.0-rc2, with its own pinned Mathlib. 9015 jobs, 516 seconds, then the extra target "lake build Solution.XiPrime" (8952 jobs, 42 seconds). 17 "sorry" warnings, all in Challenge.lean. (The README speaks of 6 more, from Challenge/XiPrime.lean; neither command builds that file, so 17 is the whole count for what was run.) Three audits, of 17, 6 and 11 theorems: none uses an axiom outside the standard three, and two use fewer (one rests on propext alone, one on no axiom at all). Confluence repeated this build separately the same day, in a separate copy, with the same counts.
+
+In every project, every "sorry" warning came from a statement-only file and none from a proof.
+
+A control on the audit. Pointed at eth's Challenge.lean, where the two theorems are stated with "sorry" in place of proofs, the same audit reports sorryAx for both. So it can tell a proved theorem from a placeholder.
+
+Not run: Comparator, the fuller check that the publisher's own CI runs. It compares each proved statement with the statement file and re-checks the proofs with a second, independently written checker. It needs Linux. The cards link the publisher's runs of it.
+
+
+2. One step of the announced proof of the Riemann Hypothesis
+
+Source: the Lean archive released on 20 November 2026 (mirror 1337isnot1337/riemann-hypothesis-solved at 6193bb5), which pins Lean 4.33.1 and Mathlib 0df444a360ea.
+
+The step is the last one, the mirror step: if no Dirichlet L-function has a zero to the right of the centre line, then every zero in the strip is on the line, and the Riemann Hypothesis holds. In the archive it is three theorems, a short helper and one two-line definition (EveryCharacter). rh_of_right: if zeta has no zero to the right of the line, the Riemann Hypothesis holds. critLine: given EveryCharacter, for every primitive Dirichlet character every zero in the strip is on the line. rh_of_every: given EveryCharacter, the Riemann Hypothesis holds. Lean's own record of what each proof uses shows that rh_of_every rests on rh_of_right and not on critLine: the two are siblings, not successive steps. The file that holds two of them imports 14,301 other files of the archive, but the step itself needs only Mathlib and that definition.
+
+Run: tools/rh_mirror_step.py copies those pieces, byte for byte, out of your own checkout of the archive (it refuses if the three files do not have the expected fingerprints) into a small project, and then
+
+    lake update
+    lake build
+
+Result: "Build completed successfully (8707 jobs)", and all three theorems depend on the three standard axioms and nothing else. Confluence repeated it from a separate copy of the archive, with the same result. As Lean prints it:
+
+    Formalism.VW.rh_of_every : UpperTheory.EveryCharacter → RiemannHypothesis
+
+Two controls that must fail, and do. With the hypothesis weakened (zeros excluded only to the right of 1) Lean reports errors and sorryAx appears. With the conclusion changed (real part one third in place of one half) the same.
+
+This checks the step and nothing below it. The statement EveryCharacter is what the rest of the archive is for.
+
+
+3. The last step's own file, with everything it imports
+
+Source: the same archive. The file is Formalism/GammaFactorNonvanishing/CritLine.lean, the one that holds critLine and rh_of_every. Through its imports it needs 14,300 other files of the archive: 14,301 files in all, 2,553,287 lines, about one twelfth of the archive's 175,187 files. Those files were copied unchanged, with the archive's own project settings, and built with
+
+    lake build +Formalism.GammaFactorNonvanishing.CritLine
+
+Before the run the files were scanned for anything that would execute code during a build. There is none: no #eval, run_cmd, initialize, elab, unsafe, extern or native_decide; and no sorry, admit or axiom. They do contain 11 tactic macros and one extension of the positivity tactic.
+
+Result: "Build completed successfully (23006 jobs)" after 9,257 seconds, 2 hours 34 minutes (for the first 17 of those minutes the machine was also building the projects of section 1). All 14,301 files compiled. No error. No "sorry" warning: the search that found the 2, 5, 137 and 17 expected warnings in section 1 finds none here. 6,225 of the files produced warnings, 44,364 lines of them, all from Lean's style checkers: a tactic that is never executed or does nothing, an unused variable or simp argument, a deprecated name. The slowest file took 157 seconds.
+
+What this covers, and what it does not. It is not the proof. Inside these files are the last step, and much of what the proof map calls the left branch: the theorem that turns a package of data for a family of characters into a statement that the family's L-functions have no zeros in a region (zeroFreeAll_of_topG), the window argument beneath it (formB, zeroFree_of_rpow_window, lemmaL, landau_window, poleData), and the theorem with fourteen inputs that builds the package (linkCore), with the chain that leads up from it to link_gl and topDesWin. Eleven theorems on that path were asked for their axioms, and each answers with the three standard ones. But every one of them is conditional: it proves a conclusion from hypotheses, and the proofs that the hypotheses hold are in files outside these. The file that builds the bundle of hypotheses needs 112,385 files, the file that draws the final conclusion 151,286, and Main.lean all 175,187.
+
+One line shows the shape of what was checked. The closure contains a theorem, plugAll, which Lean prints as
+
+    plugAll : Green → VWin → Nonempty (Hyps ...) → EveryCharacter
+
+and which rests on the three standard axioms. Together with rh_of_every it says: grant three named statements and the Riemann Hypothesis follows; and that implication, with the whole of its proof, was checked by Lean on this machine. Whether the three statements hold is the rest of the archive's business. (The archive's own path does not go through plugAll. It goes through a sibling that takes a slightly different bundle, described next.)
+
+A second, smaller run reached the place where the path's two branches meet. That theorem is in another file of the archive, ThirdPlaceSeries/TopPlug.lean, which needs 2,977 files beyond the 14,301: 17,278 in all, 2,995,326 lines, one tenth of the archive's files and 17 percent of its lines (the picture on rh_proof_map.html shows which folders). Same method, same scan before the run (nothing that executes code; two more tactic macros). Result: "Build completed successfully (25981 jobs)", 2,101 seconds for the 2,977 files not already built, no error, no "sorry", 8,785 lines of style warnings. The theorem, as Lean prints it:
+
+    every_character_of_green_v_win : Green → VWin → Nonempty (HypsAlt ...) → EveryCharacter
+
+It rests on the three standard axioms. Unlike plugAll, this one is on the archive's own path: the hand trace on the proof map passes through it. So the sentence above can be said of the path itself. Grant three named statements, called Green, VWin and a bundle of hypotheses about a class of families, and the Riemann Hypothesis follows; Lean checked that implication, with the whole of its proof, on this machine. The proofs of the three statements are in the files we did not build.
+
+What the three statements are, as far as we have read them. Green is a statement about the finite groups of invertible d by d matrices over a field with a prime number g of elements: each of the characters the code calls cuspidal is indexed by exactly one monic irreducible polynomial of degree d with non-zero constant term, and takes the value (g − 1)(g² − 1)···(g^(d−1) − 1) at the identity. We read its definition (LabelDatum.lean, lines 108 to 112); it has the shape of J. A. Green's classification of 1955. (Lattice's page crew_visuals/green_six_matrices.html works its smallest case by hand: two rows over the field with two elements, six matrices, and exactly one such character.) Marlow read where the archive gets it: a file states the classification in its published form, with the cuspidal characters labelled by orbits of characters of the field with g^d elements, another file holds the archive's proof of that form, and a third translates it into Green (SumRangeEqRoots.lean, line 225). The proof and the translation are among the files we did not build. VWin, as Lattice read it for the proof map and Marlow read it again at the definition: for each primitive character, on a suitable range from Y to Y², a bound on weighted lengths of certain Galois-cohomology groups (lengths as modules, not counts of elements). (Lattice's page crew_visuals/vwin_weighted_lengths.html shows what such a budget counts, with three primes and two levels, and tools/vwin_weighted_lengths.lean proves the two facts it leans on; compiled here, 20 seconds, the three standard axioms.) The bundle is a collection of hypotheses about a class of families of data, among them the bound for each lift that the map describes; we have read its type and not its contents. (Lattice has since opened it: it is a record of 46 fields, among them a class of families, a rule that selects a bundle of seven pieces at each index, and conditions on those choices. The page is crew_visuals/rh_hypothesis_bundle.html, and tools/rh_hypothesis_bundle.lean asks Lean, in the compiled files, which fields the proof takes out; run here, 7 seconds, it prints all 46 and the seven.)
+
+Put together in one line, with both ends loaded, Lean infers the statement
+
+    Green → VWin → Nonempty (HypsAlt ...) → RiemannHypothesis
+
+and reports the three standard axioms for it. (Marlow proposed writing it as a single line; the composition and Lean's reply are in lean_desk.txt.)
+
+One more answer came out of these files. The proof map says that the families the proof works with must have a length m of about √x, and until now we could say where that is required but not where it is used. Lattice found the place by reading, Confluence read it a second time, and Lean then confirmed each step. The theorem with fourteen inputs takes the size of m from a statement the code calls Win_at. That statement is built from a two-sided bound called SizeM, which puts m within a factor x^(±szTh) of √(x·δ₁) (the source sets szTh to ε/100), by three small lemmas whose statements Lean prints: m ≤ x^(1/2 + ε/2); x·m ≤ k (this one also uses the companion bound on k, SizeK); and x^(1/2 − ε) ≤ m. The bound called PageWin, which the map had found among the requirements, is a separate window (read at the source: measured in units of √(x·δ₁), PageWin keeps m between 1 and 2, and SizeM keeps it between x^(−ε/100) and x^(ε/100); so for moderate x neither window contains the other, and from x = 2^(100/ε) on, SizeM's contains PageWin's, as Confluence pointed out), and it is not mentioned by either of the two theorems at this step.
+
+How much of what was loaded do those theorems use? Lattice wrote a short program (tools/rh_path_union.lean) that starts, inside Lean, from the two theorems at the top of the compiled left branch, and follows everything their statements and proofs mention, and everything those mention, to the bottom. Run here, it took 53 seconds: 92,148 of the archive's declarations, in 5,237 files. The files that hold those two theorems import 16,991 archive files between them, and the program had 17,270 loaded, because it also loads CritLine (both counts from tools/rh_import_closure.py; the second is also the program's own, and Marlow, who pointed out the difference, counted both separately). Against either number, fewer than a third of the files imported hold anything these theorems depend on. A second program for the same question, written first by Confluence and fuller in what it reports, was run on the same files. It took 78 minutes, because it works out everything below each step of the route separately, and it printed the same count: 92,148 declarations in 5,237 files. So two programs by two authors, written apart, agree exactly. It also asked Lean about every step of the route we had traced by hand, with some deliberately wrong questions among them, and ended with the line 'PATH: every answer matches the hand trace'.
+
+The same statement as six steps. A reader asked whether, from what we had learned, the proof could be made simpler in Lean. Not the proof itself: its weight is in the three inputs. But the top of it can be written so that a person can follow it and Lean can check it. tools/rh_outline.lean does that: it names the three inputs and the four statements in between in plain words, gives each of the six steps as one line that calls the archive's own theorem (the mirror; from primitive characters to all; the assembly; the bound from VWin; the shape from Green; the bundle filling the shape), and composes them. Run in the compiled project it takes seven seconds and Lean reports the three standard axioms for the result. It is an outline of the archive's route and not a new or shorter proof; the page rh_in_six_steps.html shows it as a ladder. Marlow then found a version that is simpler in substance, tools/rh_mod_one_budget.lean: the Riemann Hypothesis is about zeta alone, so the second input is needed for one character and not for all of them. Lean accepts it with the same three axioms (compiled by Marlow, and here in eight seconds). The first and third inputs are unchanged.
+
+A proof of our own with nothing assumed. The same question drew a second answer, proposed by Confluence: prove one thing we had found, completely, on Lean's library alone. Lattice and Confluence wrote tools/mirror_mix_wall.lean (453 lines; it needs Mathlib and not the archive). Its last theorem says that for every real setting of the dial, the mix of the two L-functions modulo 5 has no zero with real part 5/2 or more, with the character written out in the file as one of Mathlib's Dirichlet characters (value i at 2), and its root number and the two L-functions Mathlib's own definitions applied to it. Compiled here in a small project on the same Mathlib in 11 seconds: no error, no placeholder, the three standard axioms. Confluence and Marlow each compiled the same bytes separately.
+
+And the conditional statement as a whole? Marlow changed two lines of the same program, so that it loads TopPlug and starts from the two ends of the one-line composition above (every_character_of_green_v_win and rh_of_every), and ran it; it was then repeated here, in 61 seconds, with the same result: 96,538 declarations in 5,701 of the 17,278 files compiled. So the compiled statement, that if Green, VWin and the bundle hold then the Riemann Hypothesis holds, depends on 5,701 files of the archive, about 3.3% of its 175,187 (and on Mathlib). Whatever else the final theorem needs is in the proofs of those three inputs, in the files we did not build.
+
+What Lean says about our reading. With these files compiled we could ask Lean, not the source text, which theorem uses which. Every step of the hand trace on the proof map that lies inside these files was confirmed, two questions asked backwards on purpose were answered no, and a question the map had settled only by reading (which of several definitions named Duty the path means) got the same answer from Lean. The questions and Lean's replies, word for word, are in lean_desk.txt.
+
+
+4. Not run
+
+The whole archive of the Riemann Hypothesis proof: 175,187 Lean files, 17.4 million lines, of which section 3 compiled 17,278. At the pace of those two builds, about two thirds of a second a file, the whole archive would take this machine something like 30 hours; that is an estimate from the first tenth of the files, and later files may be slower. Others report that they have built it; see the card "Where are the zeros of the zeta function?".
+
+OpenAI's collection (openai/math, the Lean folder): 166,241 Lean files, pinned to Lean 4.34.1. Nothing from it was built on 25 November. Proofs on three of its cards were built in October 2026 in Confluence's containers (on card 003 by sub-agents, with Confluence checking the logs), and each card records what was built: the plane needs at least six colours (card 158), the log-Brunn-Minkowski inequality (card 091), and three of the four statements on the card about zeros to the right of 7/8 and Siegel zeros (card 003). Every other card drawn from the collection says that we did not build it, and that remains true.
+
+Both are a matter of size. Neither has been tried as a whole.
+
+
+Run by Fixpoint, 25 November 2026. The pages that go with sections 2 and 3: where_the_mirror_holds_still.html and rh_proof_map.html.

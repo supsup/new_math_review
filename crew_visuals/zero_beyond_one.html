@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A zero beyond one</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f9f6ed;
+      --ink: #28373a;
+      --muted: #555f63;
+      --teal: #1c6663;
+      --rust: #8a4127;
+      --edge: #c9ceca;
+      background: #e6ebe8;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 57rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--teal); text-underline-offset: .18em; }
+    h1 { font: clamp(2.7rem, 8vw, 4.65rem)/1 Georgia, serif; letter-spacing: -.048em; margin: .55rem 0 .72rem; }
+    p { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    .answer { background: #edf4ed; border: 1px solid var(--edge); border-left: .22rem solid var(--teal);
+      border-radius: .32rem; padding: .7rem .8rem; margin: .9rem 0 1.1rem; }
+    .answer p { margin: .15rem 0; }
+    .coordinates { font: 1.18rem Georgia, serif; color: var(--teal); font-weight: 700; overflow-wrap: anywhere; }
+    figure { margin: .7rem 0 1rem; }
+    canvas { display: block; width: 100%; height: 14rem; background: #fffcf7; border: 1px solid var(--edge); border-radius: .38rem; }
+    figcaption { margin-top: .35rem; font-size: .86rem; }
+    .control { display: flex; align-items: center; gap: .35rem .65rem; flex-wrap: wrap; }
+    .control label { font-weight: 650; }
+    .control output { min-width: 3.2rem; font-variant-numeric: tabular-nums; }
+    input[type="range"] { flex: 1 1 9rem; min-width: 0; min-height: 2.58rem; accent-color: var(--teal); }
+    button { font: inherit; min-height: 2.58rem; color: var(--teal); background: #edf4ed; cursor: pointer;
+      border: 1px solid var(--edge); border-radius: .28rem; padding: .35rem .6rem; }
+    :focus-visible { outline: .16rem solid var(--rust); outline-offset: .15rem; }
+    #readout { color: var(--teal); font-weight: 650; }
+    details { border-top: 1px solid var(--edge); margin-top: .8rem; padding-top: .6rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+    .formula { font: 1.1rem/1.5 Georgia, serif; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="at_six_the_product_breaks.html">Back to the broken prime product</a>
+    <h1>A zero beyond one</h1>
+    <p class="intro">At height exactly 200, a precise turn of the mixing dial cancels two Dirichlet <var>L</var>-functions at real part about 1.227. Each function on its own is nonzero there. Together they make a zero beyond the right edge of the usual critical strip.</p>
+    <div class="answer">
+      <p class="coordinates">1.227061530272348 + 200<var>i</var> at about 122.244614150489°</p>
+      <p>Its partner is at about −0.227061530272348 + 200<var>i</var>. The mirror at ½ keeps them at the same height.</p>
+    </div>
+
+    <div class="control">
+      <label for="real">Real part</label>
+      <input id="real" type="range" min="1" max="1.5" step=".0001" value="1.2271">
+      <output id="real-value" for="real"></output>
+      <button type="button" id="crossing">Show the certified crossing</button>
+    </div>
+    <figure>
+      <canvas id="plot" role="img" aria-label="At height 200, the imaginary part of the ratio of the two phased terms drops through zero at real part 1.227."></canvas>
+      <figcaption>Horizontal position is the real part of the input. The curve shows the imaginary part of the ratio of the two terms. A real mixing angle can cancel them when the curve hits zero.</figcaption>
+    </figure>
+    <p id="readout" aria-live="polite"></p>
+    <p>Call the two phased terms <var>A</var> and <var>B</var>. The mixture is <var>A</var> cos τ + <var>B</var> sin τ. If <var>A</var>/<var>B</var> is real, the two terms point along the same direction or opposite directions. Choose tan τ = −<var>A</var>/<var>B</var> and the weighted lengths cancel. At this crossing the ratio is about 1.585, so the cancelling angle lies between 90° and 180°.</p>
+    <p>As the angle increases past the crossing, both zeros move down through height 200. The <a href="spira_through_201.html">all-angle count</a> uses height 201 so pairs can only appear or disappear by meeting on the line. The <a href="davenport_heilbronn_first_200.html">count at the single angle of 45°</a> can use height 200.</p>
+
+    <details>
+      <summary>How the crossing was certified</summary>
+      <p>On the horizontal line at height 200 we check the sign of <var>H</var> = Im(<var>A</var><span aria-hidden="true"> </span><span aria-label="complex conjugate of B">B̄</span>). The sign is the same as that of Im(<var>A</var>/<var>B</var>) where <var>B</var> is nonzero. The derivative of <var>H</var> is positive just to the right of ½. Interval arithmetic bounds <var>H</var> above zero up to real part 1.226 and below zero from 1.228 to 4. The derivative is strictly negative between 1.226 and 1.228, giving one crossing there. A bound on the Dirichlet series covers real parts from 4 onward.</p>
+      <p>The real part is between <code>1.2270615302723483</code> and <code>1.2270615302723484</code>. In that interval the ratio has a nonzero derivative, so this is a simple zero. The imaginary part of <var>d</var><var>s</var>/<var>d</var>τ is about −2.12154 per radian. We used the ratio of the two phased series with their common factors removed. The graph uses rounded sample values.</p>
+      <p><a href="../tools/check_mirror_mix_height_200.py">Replay the interval arithmetic</a> with Python and python-flint.</p>
+    </details>
+    <p>The Euler product of a single Dirichlet <var>L</var>-function is nonzero for real part greater than 1. This example uses a sum of such functions, and its coefficient of 6 fails the prime product rule. <a href="at_six_the_product_breaks.html">Try the coefficient dial</a>.</p>
+    <p>Even the mixed zeros cannot reach real part 2½. <a href="mirror_mix_wall.html">See the short estimate that proves this for every angle</a>.</p>
+  </main>
+  <script>
+    (() => {
+      // Rounded samples from the replay's --plot-data, spaced by 0.005 in real part.
+      const samples = [
+        [1.776332885,0.402117714], [1.772256433,0.388610397], [1.768141294,0.375394268], [1.763991102,0.362461847], [1.75980931,0.349805884],
+        [1.755599193,0.337419344], [1.75136386,0.325295401], [1.747106261,0.313427433], [1.742829194,0.301809012], [1.738535315,0.290433895],
+        [1.734227143,0.279296024], [1.729907066,0.268389511], [1.725577351,0.257708642], [1.721240145,0.24724786], [1.716897482,0.237001769],
+        [1.712551291,0.226965125], [1.708203399,0.217132828], [1.703855536,0.207499922], [1.699509338,0.198061589], [1.695166355,0.188813142],
+        [1.690828052,0.179750024], [1.686495813,0.170867802], [1.682170949,0.162162162], [1.677854695,0.15362891], [1.673548216,0.14526396],
+        [1.669252615,0.137063341], [1.664968928,0.129023185], [1.660698131,0.121139726], [1.656441145,0.113409301], [1.652198835,0.105828341],
+        [1.647972013,0.09839337], [1.643761441,0.091101007], [1.639567836,0.083947955], [1.635391867,0.076931006], [1.63123416,0.070047032],
+        [1.627095302,0.063292988], [1.622975837,0.056665906], [1.618876276,0.050162895], [1.61479709,0.043781138], [1.610738718,0.037517889],
+        [1.606701567,0.031370473], [1.602686013,0.02533628], [1.5986924,0.019412769], [1.594721047,0.013597461], [1.590772244,0.00788794],
+        [1.586846257,0.00228185], [1.582943327,-0.003223105], [1.579063672,-0.008629165], [1.575207488,-0.013938516], [1.571374949,-0.019153286],
+        [1.567566211,-0.024275553], [1.563781409,-0.029307344], [1.560020661,-0.034250636], [1.556284069,-0.039107358], [1.552571716,-0.043879389],
+        [1.548883671,-0.048568566], [1.545219989,-0.05317668], [1.541580709,-0.057705478], [1.537965859,-0.062156665], [1.534375453,-0.066531905],
+        [1.530809493,-0.070832823], [1.527267971,-0.075061004], [1.523750866,-0.079217994], [1.520258148,-0.083305304], [1.516789779,-0.087324408],
+        [1.51334571,-0.091276745], [1.509925883,-0.095163721], [1.506530234,-0.098986706], [1.503158689,-0.102747042], [1.499811169,-0.106446034],
+        [1.496487586,-0.110084961], [1.493187847,-0.11366507], [1.489911852,-0.117187579], [1.486659498,-0.120653677], [1.483430672,-0.124064526],
+        [1.480225261,-0.127421262], [1.477043144,-0.130724993], [1.473884196,-0.133976801], [1.47074829,-0.137177746], [1.467635292,-0.14032886],
+        [1.464545068,-0.143431153], [1.461477477,-0.146485613], [1.458432379,-0.149493204], [1.455409628,-0.152454867], [1.452409076,-0.155371524],
+        [1.449430574,-0.158244074], [1.44647397,-0.161073397], [1.443539109,-0.163860352], [1.440625836,-0.16660578], [1.437733993,-0.169310502],
+        [1.434863421,-0.17197532], [1.43201396,-0.174601019], [1.429185448,-0.177188368], [1.426377723,-0.179738115], [1.423590622,-0.182250994],
+        [1.42082398,-0.184727723], [1.418077632,-0.187169003], [1.415351414,-0.189575519], [1.412645159,-0.191947942], [1.409958701,-0.194286928],
+        [1.407291874,-0.196593118]
+      ];
+      const crossing = 1.227061530272348, ratioAtCrossing = 1.585234249373214;
+      const range = document.getElementById('real'), output = document.getElementById('real-value');
+      const button = document.getElementById('crossing'), readout = document.getElementById('readout');
+      const canvas = document.getElementById('plot'), context = canvas.getContext('2d');
+      const points = samples.map(([real, imag], index) => [1 + index/200, real, imag]);
+      const crossingIndex = points.findIndex(([x]) => x > crossing);
+      points.splice(crossingIndex, 0, [crossing, ratioAtCrossing, 0]);
+      let showCrossing = true;
+
+      function sample(position) {
+        const upper = points.findIndex(([x]) => x >= position);
+        if (upper < 1) return points[0].slice(1);
+        const [x0, real0, imag0] = points[upper - 1], [x1, real1, imag1] = points[upper];
+        const fraction = (position - x0) / (x1 - x0);
+        return [real0 + fraction*(real1-real0), imag0 + fraction*(imag1-imag0)];
+      }
+
+      function paint(position) {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (!width || !height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(dpr*width);
+        canvas.height = Math.round(dpr*height);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const x = sigma => 42 + (width - 66) * (sigma - 1) / .5;
+        const y = value => 16 + (height - 51) * (.45 - value) / .7;
+        context.font = '12px system-ui, sans-serif';
+        context.fillStyle = '#555f63';
+        context.textAlign = 'right';
+        for (const value of [-.2, 0, .2, .4]) {
+          context.strokeStyle = value === 0 ? '#7b817f' : '#e1e7e2';
+          context.lineWidth = 1;
+          context.beginPath();
+          context.moveTo(x(1), y(value));
+          context.lineTo(x(1.5), y(value));
+          context.stroke();
+          context.fillText(String(value).replace('-', '−'), x(1) - 6, y(value) + 4);
+        }
+        context.textAlign = 'center';
+        for (const tick of [1, 1.1, 1.2, 1.3, 1.4, 1.5]) {
+          context.fillText(tick.toFixed(1), x(tick), height - 9);
+        }
+        context.strokeStyle = '#1c6663';
+        context.lineWidth = 2.4;
+        context.beginPath();
+        context.moveTo(x(1), y(points[0][2]));
+        for (const [sigma, , imag] of points) context.lineTo(x(sigma), y(imag));
+        context.stroke();
+        const [, imag] = sample(position);
+        context.strokeStyle = '#8a4127';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(x(position), y(0));
+        context.lineTo(x(position), y(imag));
+        context.stroke();
+        context.fillStyle = '#8a4127';
+        context.beginPath();
+        context.arc(x(position), y(imag), 5, 0, 2*Math.PI);
+        context.fill();
+      }
+
+      function update() {
+        const position = showCrossing ? crossing : Number(range.value);
+        output.textContent = (showCrossing ? '≈ ' : '') + position.toFixed(4);
+        range.setAttribute('aria-valuetext', position.toFixed(4));
+        if (showCrossing) {
+          readout.textContent = 'At the certified crossing, A/B ≈ 1.5852 is real. The angle is about 122.2446°.';
+        } else {
+          const [real, imag] = sample(position);
+          const sign = imag < 0 ? ' − ' : ' + ';
+          readout.textContent = 'A/B ≈ ' + real.toFixed(4) + sign + Math.abs(imag).toFixed(5) +
+            'i. Its imaginary part is ' + (imag < 0 ? 'negative' : 'positive') + '.';
+        }
+        paint(position);
+      }
+      range.addEventListener('input', () => { showCrossing = false; update(); });
+      button.addEventListener('click', () => { showCrossing = true; range.value = crossing; update(); });
+      new ResizeObserver(() => paint(showCrossing ? crossing : Number(range.value))).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+A larger board can use fewer ones
+
+For a rank drop modulo 17, the smallest square board has seven rows and needs 24 ones. Give it an eighth row and column, and it can do the same job with only 23 ones. No board of any size can do it with 22. The global minima for the first six primes, through 13, are the same as in their smallest boards.
+
+  Prime    First square size    Min ones at that size    Min ones at any size
+    2              3                      6                       6
+    3              4                      9                       9
+    5              5                     13                      13
+    7              6                     16                      16
+   11              7                     20                      20
+   13              7                     21                      21
+   17              7                     24                      23
+   19              8                     23                      23
+
+The eight-row board for 17
+
+00000011
+00000101
+00001110
+00011001
+00110110
+01101000
+10101000
+11010000
+
+It has 23 ones and determinant 17. Using column weights −7, −7, 5, −3, 2, −1, −1, 1 gives zero on the first seven rows and −17 on the last, which vanishes modulo 17. The determinant is exactly 17, so the other primes keep all eight independent directions.
+
+Why the search only has to go a few rows farther
+
+If a matrix loses rank modulo p, take a nonzero minor of maximal ordinary rank. Its determinant is divisible by p, and it uses at most the original number of ones. In a witness with the fewest ones, this lets us work with an invertible square board. A row or column with a single 1 could be expanded away, preserving the absolute determinant and saving one or more ones. So every row and column needs at least two ones. A support cap w rules out every dimension above floor(w/2), even when the starting matrix can be rectangular.
+
+For 2 and 3, this immediately excludes larger sizes at a cap one below the known minimum. For 5, the only new possible size below 13 ones is six, with exactly two ones in each row. Those equations have the same rank over the fractions and mod 5. For 7 at a cap of 15, size seven can have at most a single heavier row of size three. Resolving the two-one equations leaves one scalar coefficient of absolute value at most three, too small to give a mod-7 drop.
+
+For 11, the extra sizes to check below 20 ones are eight and nine. Resolving the two-one equations and searching the remaining heavy rows excluded 9,482 and 51 smaller systems respectively. For 13 below 21 ones, sizes eight and nine excluded 212,117 and 1,133 smaller systems. In size ten all rows would have exactly two ones.
+
+For 17 below 23 ones, sizes through seven are covered by the seven-row spectrum check. Its eight-row mode bounds support by 23 and requires at least two ones in every row and column. It visits a representative from each row-column equivalence class under those restrictions. In 22,027,239 nonsingular boards passing its local sorting rules, it finds 40 with determinant divisible by 17. All have magnitude 17 and exactly 23 ones. In sizes nine and ten, the signed-component check excludes 557,324 and 2,115 smaller systems at cap 22. At size eleven every row would have exactly two ones. These cases give the global lower bound of 23.
+
+Moving one mark trades 17 for 19
+
+The same support cap of 23 gives determinant 19 in eight rows. There is no nonzero multiple of 19 in the seven-row spectrum. The eight-row check found no multiple of 19 with fewer than 23 ones, and the same reduced systems in sizes nine through eleven exclude 22 ones. So 23 is the global minimum for 19 too. In the paired exhibit, moving one mark from column C to D in row 7 changes the determinant from 17 to 19 and keeps the support at 23. The respective cofactors are 3 and 5, so the move adds exactly two to the determinant.
+
+Replays from the repository root
+
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_global_prime_minima.py
+c++ -O3 -std=c++17 tools/check_seven_row_spectrum.cpp -o /tmp/check_seven_row_spectrum
+/tmp/check_seven_row_spectrum --eight-row-mod17
+
+crew_visuals/prime_rank_drop.html
+crew_visuals/seven_row_spectrum.txt
+crew_visuals/mod17_shapes.txt
+crew_visuals/move_a_mark_change_prime.html

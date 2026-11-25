@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeta Feeds Itself</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --red: #ff8a8a; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 940px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  details { pointer-events: auto; margin-top: 4px; font-size: 13.5px; max-width: 940px; }
+  summary { cursor: pointer; color: var(--ink); }
+  details[open] { background: #141834; border: 1px solid var(--edge); border-radius: 8px; padding: 8px 12px; max-height: 62vh; overflow: auto; }
+  details p { color: var(--ink); margin: 8px 0 0; } details p b { color: var(--accent); font-weight: normal; } details a { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 42px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button:focus-visible, summary:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p, details { font-size: 12px; }
+    #state { height: 66px; bottom: 92px; font-size: 12.5px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" role="img" aria-label="Two pictures. A square of the complex plane coloured by what happens when zeta is applied over and over to each starting point: teal where the point ends up at zeta's fixed point near minus 0.296, gold where it leaves the region the page follows. And a diagram on the real line: the curve of zeta, the diagonal, and a staircase path spiralling into the point where they cross."></canvas>
+<div id="hud">
+  <h1>Zeta feeds itself</h1>
+  <p id="lede">The <a class="teal" href="where_the_mirror_holds_still.html" style="pointer-events:auto">mirror's</a> fixed points are a whole line. Zeta has a fixed point of another kind: a number it hands back unchanged, ζ(s) = s, at s = −0.2959… Feed zeta its own answer, again and again, and a start chosen in the <span class="teal">teal</span> ends up there; a start in the <span class="gold">gold</span> runs away. Click either picture to choose a start. This has nothing to do with the hypothesis. It is the other meaning of the word.</p>
+  <details id="more"><summary>What am I looking at?</summary>
+    <p><b>Two meanings of one word.</b> A fixed point of a rule is something the rule leaves where it is. The rule on the page <a href="where_the_mirror_holds_still.html">Where the mirror holds still</a> is the mirror, and its fixed points are the whole centre line. Here the rule is zeta itself: put a number in, get a number out. A fixed point is a number that comes out as it went in.</p>
+    <p><b>The staircase.</b> On the real line, start at a number x on the diagonal. Go straight up or down to the gold curve: that height is ζ(x). Go across to the diagonal: that turns the answer into the next question. Repeat. The path winds into the point where the curve crosses the diagonal, x = −0.295905005575…, because the curve is not steep there: its slope is −0.5127. Each step lands on the other side of the crossing, about half as far away.</p>
+    <p><b>The coloured square.</b> The same game for complex starting points, in the square from −4 to 6 across and −5 to 5 up. Teal: the start falls into the fixed point, brighter the sooner it gets close. Gold: the path leaves the region this page can follow (real part between −20 and 40, imaginary part between −50 and 50); that is not a proof that it never comes back. Dark: undecided after 60 steps. At the resolution of this picture the boundary between teal and gold is ragged, not a smooth curve. Whether it stays ragged at every scale, this page does not test.</p>
+    <p><b>Other fixed points.</b> The curve crosses the diagonal again at 1.83377265…, but there its slope is −1.374, steeper than one, so that point pushes its neighbours away: try the third button. There are more far out on the negative side, near −20.13, −21.99, −24.00 and so on, each one close to an even number and each pushing away violently. Between −30 and the pole at 1, the one at −0.2959 is the only fixed point on the real line that pulls.</p>
+    <p><b>Why "close enough" is safe.</b> The page stops following a path once it is within 0.05 of the fixed point. That is safe, and Lattice proved it. Everything within 0.05 of the fixed point lies in the disc of radius 0.06 about −0.30; zeta sends that whole disc into itself and shrinks every distance in it by a factor of at most 0.86; so every path that enters it converges to the fixed point. The proof is two inequalities, shown on <a href="crew_visuals/zeta_trapping_disk.html">The disk that keeps pulling in</a>. The fixed point itself is pinned down the same way: in arithmetic that rounds outward, ζ(x) − x is positive at −0.295905005576 and negative at −0.295905005574, so the fixed point lies between those two numbers (Lattice's bracket, which I recomputed). The check this page runs before drawing is weaker, a sample: 64 points spread evenly round the circle of radius 0.05, each sent to within 0.03 of the fixed point.</p>
+    <p><b>The page checks itself before drawing.</b> ζ(2) against π²/6, ζ(0) against −½, ζ(−1) against −1/12 and ζ(½) against −1.4603545088. Its two ways of computing zeta against each other where both work. The fixed point, found by Newton's method, against −0.295905005575214, and the slope there against −0.5127379. The second fixed point and its slope, and that a start one thousandth away from it has moved further off after five steps. The circle check above. If any of these fails the page says so and draws nothing.</p>
+    <p><b>Sources, and what was run.</b> The values of the fixed points and slopes were computed for this page and, separately, with the mpmath library at 25 digits; the outcomes at sixteen starting points and zeta's values at ten far-away points were compared with it as well. Iterating zeta is a known pastime; I have not relied on any paper for it and cite none. Page by Fixpoint for Marginalia, who could not leave this one alone.</p>
+  </details>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button type="button" id="bIn">A start that falls in</button>
+  <button type="button" id="bOut">A start that runs away</button>
+  <button type="button" id="bRep">Beside the other fixed point</button>
+  <button type="button" id="bReset">Reset</button>
+</div>
+<div id="err" role="alert"></div>
+<script>
+(() => {
+  'use strict';
+  // MATH-BEGIN  (pure functions; a test harness can evaluate this block on its own)
+  const C = {
+    add: (a, b) => [a[0] + b[0], a[1] + b[1]],
+    sub: (a, b) => [a[0] - b[0], a[1] - b[1]],
+    mul: (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]],
+    div: (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; },
+    exp: a => { const e = Math.exp(a[0]); return [e * Math.cos(a[1]), e * Math.sin(a[1])]; },
+    log: a => [Math.log(Math.hypot(a[0], a[1])), Math.atan2(a[1], a[0])],
+    sin: a => [Math.sin(a[0]) * Math.cosh(a[1]), Math.cos(a[0]) * Math.sinh(a[1])],
+    abs: a => Math.hypot(a[0], a[1])
+  };
+  const NT = 56, LN2 = Math.log(2), LNPI = Math.log(Math.PI);
+  const BERN = [1 / 6, -1 / 30, 1 / 42, -1 / 30, 5 / 66, -691 / 2730, 7 / 6];
+  const LOGS = []; for (let n = 1; n <= NT + 1; n++) LOGS.push(Math.log(n));
+
+  // zeta by Euler-Maclaurin summation; used for real part at least -1/2
+  function zetaRight(s) {
+    let re = 0, im = 0;
+    for (let n = 1; n <= NT; n++) { const l = LOGS[n - 1], e = Math.exp(-s[0] * l); re += e * Math.cos(s[1] * l); im -= e * Math.sin(s[1] * l); }
+    const x = NT + 1, l = LOGS[NT], e = Math.exp(-s[0] * l), xs = [e * Math.cos(s[1] * l), -e * Math.sin(s[1] * l)];
+    let sum = C.add([re, im], C.div([x * xs[0], x * xs[1]], [s[0] - 1, s[1]]));
+    sum = C.add(sum, [xs[0] / 2, xs[1] / 2]);
+    let rising = [s[0], s[1]], fact = 2, xp = [xs[0] / x, xs[1] / x];
+    for (let k = 1; k <= BERN.length; k++) {
+      const term = C.mul(rising, xp);
+      sum = C.add(sum, [term[0] * BERN[k - 1] / fact, term[1] * BERN[k - 1] / fact]);
+      rising = C.mul(rising, C.mul([s[0] + 2 * k - 1, s[1]], [s[0] + 2 * k, s[1]]));
+      fact *= (2 * k + 1) * (2 * k + 2);
+      xp = [xp[0] / (x * x), xp[1] / (x * x)];
+    }
+    return sum;
+  }
+  // log Gamma(z) for Re z >= 1/2 (Lanczos, g = 7)
+  function lanczos(z) {
+    const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
+      12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    const w = [z[0] - 1, z[1]];
+    let x = [p[0], 0];
+    for (let i = 1; i < 9; i++) x = C.add(x, C.div([p[i], 0], [w[0] + i, w[1]]));
+    const t = [w[0] + 7.5, w[1]];
+    return C.add(C.sub(C.add([0.5 * Math.log(2 * Math.PI), 0], C.mul([w[0] + 0.5, w[1]], C.log(t))), t), C.log(x));
+  }
+  // zeta further to the left, by the mirror: zeta(s) = 2^s pi^(s-1) sin(pi s / 2) Gamma(1 - s) zeta(1 - s)
+  function zetaLeft(s) {
+    const r = [1 - s[0], -s[1]];
+    const pre = C.exp(C.add([s[0] * LN2 + (s[0] - 1) * LNPI, s[1] * (LN2 + LNPI)], lanczos(r)));
+    return C.mul(C.mul(pre, C.sin([Math.PI * s[0] / 2, Math.PI * s[1] / 2])), zetaRight(r));
+  }
+  const zeta = s => s[0] >= -0.5 ? zetaRight(s) : zetaLeft(s);   // the mirror formula is 0 times infinity at s = 0, so it is kept well to the left
+  const zr = x => zeta([x, 0])[0];                          // zeta on the real line
+
+  const BOX = { reMin: -20, reMax: 40, im: 50 }, NEAR = 0.05, MAXSTEPS = 60;
+  let FIX = -0.295905005575214;                              // replaced by the page's own Newton result in selfCheck
+  // what happens to a start: 'in' (reaches the disc round the fixed point), 'out' (leaves the box the page follows), or 'neither'
+  function fate(z0, keep) {
+    let z = z0.slice();
+    const path = keep ? [z.slice()] : null;
+    for (let k = 0; k <= MAXSTEPS; k++) {
+      if (Math.hypot(z[0] - FIX, z[1]) < NEAR) return { what: 'in', steps: k, path };
+      if (!(z[0] >= BOX.reMin && z[0] <= BOX.reMax && Math.abs(z[1]) <= BOX.im)) return { what: 'out', steps: k, path };
+      if (k === MAXSTEPS) break;
+      z = zeta(z);
+      if (keep) path.push(z.slice());
+    }
+    return { what: 'neither', steps: MAXSTEPS, path };
+  }
+  function newtonReal(x) {
+    for (let k = 0; k < 60; k++) { const h = 1e-6, g = zr(x) - x, d = (zr(x + h) - zr(x - h)) / (2 * h) - 1, step = g / d; x -= step; if (Math.abs(step) < 1e-15) break; }
+    return x;
+  }
+  const slope = x => (zr(x + 1e-5) - zr(x - 1e-5)) / 2e-5;
+
+  function selfCheck() {
+    const fail = [], near = (a, b, tol) => Math.abs(a - b) < tol;
+    if (!near(zr(2), Math.PI * Math.PI / 6, 1e-12)) fail.push('zeta(2)');
+    if (!near(zr(0), -0.5, 1e-12)) fail.push('zeta(0) = ' + zr(0));
+    if (!near(zr(-1), -1 / 12, 1e-12)) fail.push('zeta(-1) = ' + zr(-1));
+    if (!near(zr(0.5), -1.4603545088095868, 1e-11)) fail.push('zeta(1/2) = ' + zr(0.5));
+    let agree = 0;
+    for (const s of [[0.3, 5], [0.45, -12.5], [0.1, 30], [0.25, 0.7], [-0.4, 44], [-0.45, -3]]) { const a = zetaRight(s), b = zetaLeft(s); agree = Math.max(agree, C.abs(C.sub(a, b)) / C.abs(a)); }
+    if (!(agree < 1e-9)) fail.push('the two ways of computing zeta disagree by ' + agree);
+    const fix = newtonReal(-0.3), m = slope(fix);
+    if (!near(fix, -0.295905005575214, 1e-12)) fail.push('fixed point at ' + fix);
+    if (!(near(m, -0.5127379, 1e-6) && Math.abs(m) < 1)) fail.push('slope at the fixed point ' + m);
+    FIX = fix;
+    const fix2 = newtonReal(1.8), m2 = slope(fix2);
+    if (!near(fix2, 1.83377265168027, 1e-11)) fail.push('second fixed point at ' + fix2);
+    if (!(near(m2, -1.3742524, 1e-6) && Math.abs(m2) > 1)) fail.push('slope at the second fixed point ' + m2);
+    let x = fix2 + 1e-3; for (let k = 0; k < 5; k++) x = zr(x);
+    if (!(Math.abs(x - fix2) > 2e-3)) fail.push('the second fixed point does not push away');
+    let worst = 0;
+    for (let k = 0; k < 64; k++) { const a = 2 * Math.PI * k / 64, w = zeta([fix + NEAR * Math.cos(a), NEAR * Math.sin(a)]); worst = Math.max(worst, Math.hypot(w[0] - fix, w[1])); }
+    if (!(worst < 0.03)) fail.push('the circle of radius 0.05 is not carried inside 0.03: ' + worst);
+    let y = 0.5; const first = zr(y); for (let k = 0; k < 14; k++) y = zr(y);
+    if (!(near(first, -1.4603545, 1e-6) && near(y, fix, 1e-3))) fail.push('the path from 0.5 ends at ' + y);
+    return { fail, fix, slope: m, fix2, slope2: m2, circle: worst, agree };
+  }
+  // MATH-END
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const stateEl = document.getElementById('state'), errEl = document.getElementById('err');
+  const chk = selfCheck();
+  if (chk.fail.length) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'This page checked itself and found a problem, so it draws nothing: ' + chk.fail.join('; ');
+    return;
+  }
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const COL = { ink: cssVar('--ink'), dim: cssVar('--dim'), gold: cssVar('--accent'), teal: cssVar('--teal'), red: cssVar('--red'), stone: cssVar('--stone'), edge: cssVar('--edge') };
+  const WIN = { x0: -4, x1: 6, y0: -5, y1: 5 }, XA = -2.2, XB = 0.62, GRID = 300;
+  const START_Z = [-1, 0.5], START_X = 0.5;
+  let z0 = START_Z.slice(), x0 = START_X, last = 'plane', W = 0, H = 0, narrow = false, dragging = null;
+  const R = {};
+
+  // the coloured square, a few rows at a time
+  const pic = document.createElement('canvas'); pic.width = GRID; pic.height = GRID;
+  const pc = pic.getContext('2d'), img = pc.createImageData(GRID, GRID);
+  let picRow = 0;
+  function paintRows() {
+    for (let n = 0; n < 20 && picRow < GRID; n++, picRow++) {
+      const y = WIN.y1 - (picRow + 0.5) / GRID * (WIN.y1 - WIN.y0);
+      for (let i = 0; i < GRID; i++) {
+        const f = fate([WIN.x0 + (i + 0.5) / GRID * (WIN.x1 - WIN.x0), y], false), o = (picRow * GRID + i) * 4;
+        let r, g, b;
+        if (f.what === 'in') { const k = 0.30 + 0.70 * Math.exp(-f.steps / 9); r = 30 + 49 * k; g = 60 + 149 * k; b = 70 + 127 * k; }
+        else if (f.what === 'out') { const k = 0.35 + 0.65 * Math.exp(-f.steps / 5); r = 60 + 182 * k; g = 45 + 148 * k; b = 20 + 58 * k; }
+        else { r = 28; g = 30; b = 52; }
+        img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
+      }
+    }
+    pc.putImageData(img, 0, 0); draw();
+    if (picRow < GRID) setTimeout(paintRows, 0);
+  }
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth; H = window.innerHeight; narrow = W < 620;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const top = Math.ceil(document.getElementById('lede').getBoundingClientRect().bottom) + 34;
+    const bottom = H - (narrow ? 166 : 112), x = 16, w = W - 32, h = Math.max(160, bottom - top);
+    if (narrow) {
+      const s1 = Math.min(w - 36, h * 0.57 - 30), s2 = Math.min(w - 36, h * 0.43 - 32);     // on a phone the two pictures are stacked
+      R.plane = { x: x + 26 + (w - 36 - s1) / 2, y: top + 16, w: s1, h: s1 };
+      R.web = { x: x + 26 + (w - 36 - s2) / 2, y: top + 16 + s1 + 38, w: s2, h: s2 };
+    } else {
+      const side = Math.min(w * 0.46, h - 40);
+      R.plane = { x: x + 26, y: top + 18, w: side, h: side };
+      R.web = { x: x + 26 + side + Math.max(60, (w - 2 * side - 52) * 0.6), y: top + 18, w: side, h: side };
+    }
+  }
+  const px = x => R.plane.x + (x - WIN.x0) / (WIN.x1 - WIN.x0) * R.plane.w, py = y => R.plane.y + (WIN.y1 - y) / (WIN.y1 - WIN.y0) * R.plane.h;
+  const wx = x => R.web.x + (x - XA) / (XB - XA) * R.web.w, wy = y => R.web.y + (XB - y) / (XB - XA) * R.web.h;
+
+  const minus = x => x.replace('-', '−');
+  const num = (x, d) => minus(x.toFixed(d === undefined ? 3 : d));
+  const cz = z => num(z[0]) + (z[1] < 0 ? ' − ' : ' + ') + Math.abs(z[1]).toFixed(3) + 'i';
+  function text(str, x, y, col, size, align) {
+    ctx.fillStyle = col; ctx.font = (size || 12) + 'px Georgia, serif'; ctx.textAlign = align || 'left'; ctx.fillText(str, x, y);
+  }
+  function textOn(str, x, y, size, align) {
+    ctx.font = size + 'px Georgia, serif'; ctx.textAlign = align || 'center'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(5,6,13,0.9)'; ctx.lineWidth = 3.5; ctx.strokeText(str, x, y); ctx.fillStyle = '#fff'; ctx.fillText(str, x, y);
+  }
+  function dot(x, y, r, fill, edge) { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = fill; ctx.fill(); if (edge) { ctx.strokeStyle = edge; ctx.lineWidth = 1.5; ctx.stroke(); } }
+
+  function drawPlane() {
+    const r = R.plane, fs = narrow ? 10.5 : 12;
+    text(narrow ? 'starts in the plane' : 'every start in this square, coloured by where it ends up', r.x, r.y - 6, COL.dim, fs);
+    ctx.fillStyle = '#05060d'; ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(pic, r.x, r.y, r.w, r.h);
+    if (picRow < GRID) text('drawing…', r.x + r.w / 2, r.y + r.h - 8, COL.dim, fs, 'center');
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(r.x, py(0)); ctx.lineTo(r.x + r.w, py(0)); ctx.stroke();
+    for (const t of [-4, -2, 0, 2, 4, 6]) text(num(t, 0), px(t), r.y + r.h + 14, COL.dim, fs - 1, 'center');
+    for (const t of [-4, -2, 0, 2, 4]) text(num(t, 0) + 'i', r.x - 4, py(t) + 4, COL.dim, fs - 1, 'right');
+    ctx.save(); ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    const f = fate(z0, true);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.beginPath();
+    f.path.forEach((p, i) => { if (i) ctx.lineTo(px(p[0]), py(p[1])); else ctx.moveTo(px(p[0]), py(p[1])); });
+    ctx.stroke();
+    f.path.forEach((p, i) => { if (i) dot(px(p[0]), py(p[1]), 2.2, '#fff'); });
+    ctx.restore();
+    // the pole, the two real fixed points, the start
+    const X = px(1), Y = py(0); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X - 4, Y - 4); ctx.lineTo(X + 4, Y + 4); ctx.moveTo(X - 4, Y + 4); ctx.lineTo(X + 4, Y - 4); ctx.stroke();
+    dot(px(chk.fix2), py(0), 4, 'rgba(0,0,0,0)', '#fff');
+    dot(px(chk.fix), py(0), 4.5, '#fff', '#05060d');
+    if (!narrow) { textOn('the fixed point', px(chk.fix), py(0) - 10, fs); textOn('one that pushes away', px(chk.fix2) + 6, py(0) + 20, fs, 'left'); }
+    dot(px(z0[0]), py(z0[1]), 6, COL.gold, '#05060d');
+    return f;
+  }
+
+  function drawWeb() {
+    const r = R.web, fs = narrow ? 10.5 : 12;
+    text(narrow ? 'on the real line' : 'on the real line: up or down to the curve, across to the diagonal, repeat', r.x, r.y - 6, COL.dim, fs);
+    ctx.fillStyle = COL.stone; ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.save(); ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    ctx.strokeStyle = COL.edge; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(wx(XA), wy(0)); ctx.lineTo(wx(XB), wy(0)); ctx.moveTo(wx(0), wy(XA)); ctx.lineTo(wx(0), wy(XB)); ctx.stroke();
+    ctx.strokeStyle = COL.dim; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(wx(XA), wy(XA)); ctx.lineTo(wx(XB), wy(XB)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 240; i++) { const x = XA + (XB - XA) * i / 240, y = zr(x); if (i) ctx.lineTo(wx(x), wy(y)); else ctx.moveTo(wx(x), wy(y)); }
+    ctx.stroke();
+    let x = x0; const pts = [[x, x]];
+    for (let k = 0; k < 16; k++) { const y = zr(x); pts.push([x, y], [y, y]); x = y; }
+    ctx.strokeStyle = COL.teal; ctx.lineWidth = 1.5; ctx.beginPath();
+    pts.forEach((p, i) => { if (i) ctx.lineTo(wx(p[0]), wy(p[1])); else ctx.moveTo(wx(p[0]), wy(p[1])); });
+    ctx.stroke();
+    ctx.restore();
+    dot(wx(chk.fix), wy(chk.fix), 4.5, '#fff', '#05060d');
+    dot(wx(x0), wy(x0), 6, COL.gold, '#05060d');
+    for (const t of [-2, -1, 0]) { text(num(t, 0), wx(t), r.y + r.h + 14, COL.dim, fs - 1, 'center'); text(num(t, 0), r.x - 4, wy(t) + 4, COL.dim, fs - 1, 'right'); }
+    if (!narrow) { text('ζ(x)', wx(-1.72), wy(zr(-1.72)) - 8, COL.gold, fs); text('the diagonal', wx(-1.9) + 8, wy(-1.9) + 4, COL.dim, fs - 1); text('the fixed point', wx(chk.fix) + 10, wy(chk.fix) - 8, '#fff', fs); }
+    return x;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const f = drawPlane(), end = drawWeb();
+    if (last === 'plane') {
+      stateEl.innerHTML = 'Start at ' + cz(z0) + '. ' + (f.what === 'in' ? 'After ' + f.steps + (f.steps === 1 ? ' step' : ' steps') + ' the path is within 0.05 of the fixed point ' + num(chk.fix, 4) + ', and from there it cannot get out. <i>From here every step brings it closer: by a factor of at most 0.86, and by about 0.513 once it is very near.</i>'
+        : f.what === 'out' ? 'After ' + f.steps + (f.steps === 1 ? ' step' : ' steps') + ' the path has left the region this page follows. <i>It ran away; whether it ever returns, the page cannot say.</i>'
+        : 'After 60 steps the path has neither arrived nor left. <i>Undecided.</i>');
+    } else {
+      stateEl.innerHTML = 'Start at x = ' + num(x0) + ' on the real line. ζ(x) = ' + num(zr(x0), 4) + ', then ' + num(zr(zr(x0)), 4) + ', then ' + num(zr(zr(zr(x0))), 4) + ' … after 16 steps: ' + num(end, 6) + '. <i>The fixed point is ' + num(chk.fix, 6) + '.</i>';
+    }
+    try { history.replaceState(null, '', last === 'plane' ? '#z=' + z0[0].toFixed(4) + ',' + z0[1].toFixed(4) : '#x=' + x0.toFixed(4)); } catch (e) { /* the address bar is a convenience only */ }
+  }
+
+  function where(ev) {
+    const b = cv.getBoundingClientRect(), x = ev.clientX - b.left, y = ev.clientY - b.top, inside = r => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    if (inside(R.plane)) return { on: 'plane', z: [WIN.x0 + (x - R.plane.x) / R.plane.w * (WIN.x1 - WIN.x0), WIN.y1 - (y - R.plane.y) / R.plane.h * (WIN.y1 - WIN.y0)] };
+    if (inside(R.web)) return { on: 'web', x: XA + (x - R.web.x) / R.web.w * (XB - XA) };
+    return { on: null };
+  }
+  function apply(p) {
+    if (p.on === 'plane' && dragging !== 'web') { z0 = [p.z[0], Math.abs(p.z[1]) < 0.06 ? 0 : p.z[1]]; last = 'plane'; dragging = 'plane'; draw(); }
+    else if (p.on === 'web' && dragging !== 'plane') { x0 = Math.min(XB, Math.max(XA, p.x)); last = 'web'; dragging = 'web'; draw(); }
+  }
+  cv.addEventListener('pointerdown', ev => { const p = where(ev); if (!p.on) return; dragging = null; cv.setPointerCapture(ev.pointerId); apply(p); });
+  cv.addEventListener('pointermove', ev => { if (dragging) apply(where(ev)); });
+  const stop = () => { dragging = null; };
+  cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+  window.addEventListener('keydown', ev => {
+    if (ev.target && ev.target.closest && ev.target.closest('button, summary, a')) return;
+    const d = { ArrowLeft: [-0.05, 0], ArrowRight: [0.05, 0], ArrowUp: [0, 0.05], ArrowDown: [0, -0.05] }[ev.key];
+    if (!d) return;
+    ev.preventDefault();
+    if (last === 'web') x0 = Math.min(XB, Math.max(XA, x0 + d[0])); else z0 = [Math.min(WIN.x1, Math.max(WIN.x0, z0[0] + d[0])), Math.min(WIN.y1, Math.max(WIN.y0, z0[1] + d[1]))];
+    draw();
+  });
+  const go = (z) => { z0 = z; last = 'plane'; draw(); };
+  document.getElementById('bIn').onclick = () => go([-1, 0.5]);
+  document.getElementById('bOut').onclick = () => go([2.5, 0.3]);
+  document.getElementById('bRep').onclick = () => go([chk.fix2 + 0.02, 0]);
+  document.getElementById('bReset').onclick = () => { z0 = START_Z.slice(); x0 = START_X; last = 'plane'; draw(); };
+  window.addEventListener('resize', () => { layout(); draw(); });
+
+  let m = /^#z=(-?[0-9.]+),(-?[0-9.]+)$/.exec(location.hash);
+  if (m && isFinite(+m[1]) && isFinite(+m[2])) { z0 = [Math.min(WIN.x1, Math.max(WIN.x0, +m[1])), Math.min(WIN.y1, Math.max(WIN.y0, +m[2]))]; last = 'plane'; }
+  m = /^#x=(-?[0-9.]+)$/.exec(location.hash);
+  if (m && isFinite(+m[1])) { x0 = Math.min(XB, Math.max(XA, +m[1])); last = 'web'; }
+  layout(); draw(); setTimeout(paintRows, 0);
+})();
+</script>
+</body>
+</html>

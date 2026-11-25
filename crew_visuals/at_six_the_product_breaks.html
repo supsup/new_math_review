@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>At six, the prime product breaks</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf7ed;
+      --ink: #302c37;
+      --muted: #5d5765;
+      --aubergine: #5d4176;
+      --green: #226661;
+      --edge: #d0c7cd;
+      background: #e9e5ed;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 57rem; padding: clamp(1rem, 5vw, 3rem); margin: auto; background: var(--paper); }
+    a { color: var(--aubergine); text-underline-offset: .17em; }
+    p { max-width: 68ch; }
+    h1 { font: clamp(2.6rem, 7.5vw, 4.65rem)/1.03 Georgia, serif; letter-spacing: -.05em; margin: .55rem 0 .7rem; }
+    h2 { font: 1.24rem Georgia, serif; margin: 0 0 .35rem; }
+    .intro, figcaption { color: var(--muted); }
+    .dial { display: flex; gap: .38rem .65rem; align-items: center; flex-wrap: wrap; }
+    .dial label { font-weight: 650; }
+    .dial output { min-width: 3.5rem; font-variant-numeric: tabular-nums; }
+    input[type="range"] { accent-color: var(--aubergine); flex: 1 1 10rem; min-width: 0; min-height: 2.4rem; }
+    .presets { display: flex; gap: .4rem; flex-wrap: wrap; margin: .25rem 0 .8rem; }
+    button { padding: .32rem .62rem; min-height: 2.58rem; font: inherit; color: var(--aubergine);
+      background: #efebf4; border: 1px solid var(--edge); border-radius: .33rem; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--aubergine); color: white; }
+    :focus-visible { outline: .16rem solid var(--green); outline-offset: .14rem; }
+    figure { margin: 0 0 1.2rem; }
+    canvas { display: block; width: 100%; height: 15rem; background: #fffcf6; border: 1px solid var(--edge); border-radius: .4rem; }
+    figcaption { font-size: .86rem; margin-top: .36rem; }
+    .compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+    .tile { border: 1px solid var(--edge); border-radius: .35rem; padding: .72rem .86rem; background: #fffaf3; }
+    .tile p { margin: .28rem 0; }
+    .coefficient { color: var(--green); font-size: 1.42rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    #product { color: var(--aubergine); }
+    #gap { font-weight: 650; }
+    .formula { font: 1.08rem/1.5 Georgia, serif; overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); margin-top: .9rem; padding-top: .6rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 37rem) { .compare { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="spira_angle_tally.html">Back to the zero count by angle</a>
+    <h1>At six, the prime product breaks</h1>
+    <p class="intro">The mod-5 mixing dial keeps the symmetry of the zero picture. Turn it away from either unmixed series, and something else changes immediately. The number 6 stops getting its coefficient by multiplying the coefficients of 2 and 3.</p>
+
+    <div class="dial">
+      <label for="angle">Mix angle</label>
+      <input id="angle" type="range" min="0" max="180" step="0.1" value="45">
+      <output id="angle-value" for="angle"></output>
+    </div>
+    <div class="presets" aria-label="Angles to try">
+      <button type="button" data-angle="0">0° · First character</button>
+      <button type="button" data-angle="45">45° · Davenport–Heilbronn</button>
+      <button type="button" data-angle="90">90° · Conjugate character</button>
+      <button type="button" data-angle="135">135° · Largest gap</button>
+    </div>
+    <figure>
+      <canvas id="plot" role="img" aria-label="Absolute size of the coefficient gap across the mixing angle from zero to 180 degrees. It vanishes at zero, 90 and 180 degrees and reaches its global peak at 135 degrees."></canvas>
+      <figcaption>The curve measures the size of the difference between the two answers below.</figcaption>
+    </figure>
+
+    <div class="compare">
+      <section class="tile">
+        <h2>Read 6 from the mixture</h2>
+        <p class="coefficient">1</p>
+        <p>Both characters give 1 at 6, so the normalized mixture does too.</p>
+      </section>
+      <section class="tile">
+        <h2>Build 6 from its primes</h2>
+        <p class="coefficient" id="product"></p>
+        <p class="formula"><var>a</var>(2) = <span id="at-two"></span> · <var>a</var>(3) = <span id="at-three"></span></p>
+      </section>
+    </div>
+    <p id="gap" aria-live="polite"></p>
+    <p>An Euler product builds a Dirichlet series by multiplying one factor for each prime. The first five coefficients only involve 1 and individual prime powers. At 6 = 2 × 3 you need the two different prime factors to agree with the series. The two answers diverge at every angle with both characters present.</p>
+    <p>A Dirichlet character follows a stronger rule. It also multiplies a prime by itself. The mixture already breaks that rule at 4, because <var>a</var>(4) = −1 and <var>a</var>(2)² differs at every mixed angle. A general Euler product can choose its own coefficient at 4, within the factor for 2.</p>
+    <p>The largest gap comes at 135°. That angle also sits inside the 15-pair plateau in the separate zero count. At 45° the gap is much smaller and there are four pairs in the same height range. <a href="spira_angle_tally.html">See the independently certified counts from height 76 to 177</a>.</p>
+    <p>One setting puts a zero beyond real part 1, where both Dirichlet <var>L</var>-functions are individually nonzero. <a href="zero_beyond_one.html">See how they cancel at height 200</a>.</p>
+
+    <details>
+      <summary>Derive the gap in three lines</summary>
+      <p>Call the complex phase weights <var>u</var> and <var>v</var>. The two characters take values <var>i</var> and −<var>i</var> at 2, −<var>i</var> and <var>i</var> at 3, and 1 at 6. Their series both start with 1, so divide the combined series by <var>u</var> + <var>v</var> to make its first coefficient 1.</p>
+      <p class="formula"><var>a</var>(2) = <var>i</var>(<var>u</var> − <var>v</var>)/(<var>u</var> + <var>v</var>), &nbsp; <var>a</var>(3) = −<var>a</var>(2), &nbsp; <var>a</var>(6) = 1<br>
+        <var>a</var>(2)<var>a</var>(3) = ((<var>u</var> − <var>v</var>)/(<var>u</var> + <var>v</var>))²<br>
+        <var>a</var>(6) − <var>a</var>(2)<var>a</var>(3) = 4<var>uv</var>/(<var>u</var> + <var>v</var>)²</p>
+      <p>Thus agreement at 6 requires one weight to be zero. <a href="../tools/mirror_mix_euler_product.lean">Check the algebra in Lean</a>.</p>
+    </details>
+    <details>
+      <summary>Why the biggest gap lands at 135°</summary>
+      <p>The <a href="mod5_gauss_sum.html">Gauss sum</a> gives the root number ε = e<sup><var>iθ</var></sup> with 0 &lt; cos <var>θ</var> &lt; 1. In this mixture <var>u</var> = e<sup>−<var>iθ</var>/2</sup> cos τ and <var>v</var> = e<sup><var>iθ</var>/2</sup> sin τ, so |<var>u</var> + <var>v</var>|² = 1 + cos <var>θ</var> sin(2τ). In particular, normalization is defined at every angle.</p>
+      <p class="formula">|<var>a</var>(6) − <var>a</var>(2)<var>a</var>(3)| = 2|sin(2τ)| / (1 + cos <var>θ</var> sin(2τ))</p>
+      <p>For a given |sin(2τ)|, the denominator is smaller on the negative side. On that side the fraction increases with |sin(2τ)|. It peaks when sin(2τ) = −1, at 135°. In the familiar 45° mixture, <var>a</var>(2) = κ ≈ 0.284, so the product of the two prime coefficients is −κ², while the coefficient of 6 is 1.</p>
+    </details>
+    <p>The repo’s quasi-Riemann hypothesis card concerns actual Dirichlet <var>L</var>-functions, where the prime coefficients do multiply. The Davenport–Heilbronn example keeps the reflection after mixing, even when the prime coefficients stop multiplying. <a href="https://github.com/openai/math/blob/f5702854/lean/docs/003.md">OpenAI math family 003</a> · <a href="https://doi.org/10.1112/jlms/s1-11.4.307">Davenport and Heilbronn’s paper</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const canvas = byId('plot'), context = canvas.getContext('2d'), angle = byId('angle');
+      const presets = Array.from(document.querySelectorAll('[data-angle]'));
+      const radians = Math.PI / 180;
+      const realEpsilon = 2 * Math.sin(72 * radians) / Math.sqrt(5);
+      const imagEpsilon = 2 * Math.sin(36 * radians) / Math.sqrt(5);
+      const gapSize = t => {
+        const wave = Math.sin(2 * t * radians);
+        return 2*Math.abs(wave) / (1 + realEpsilon*wave);
+      };
+      const peak = gapSize(135);
+      const format = value => (Math.abs(value) < 0.00005 ? 0 : value).toFixed(4).replace('-', '−');
+      function complex(real, imag) {
+        if (Math.abs(imag) < 0.00005) return format(real);
+        if (Math.abs(real) < 0.00005) return format(imag) + 'i';
+        return format(real) + (imag < 0 ? ' − ' : ' + ') + format(Math.abs(imag)) + 'i';
+      }
+
+      function drawPlot(t) {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (!width || !height) return;
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width * scale);
+        canvas.height = Math.round(height * scale);
+        context.setTransform(scale, 0, 0, scale, 0, 0);
+        const x = tau => 35 + (width - 55) * tau / 180;
+        const y = gap => height - 31 - (height - 53) * gap / peak;
+        context.font = '12px system-ui, sans-serif';
+        context.fillStyle = '#5d5765';
+        context.strokeStyle = '#e2dadd';
+        context.lineWidth = 1;
+        context.textAlign = 'right';
+        for (const tick of [0, 4, 8, 12]) {
+          context.beginPath();
+          context.moveTo(x(0), y(tick));
+          context.lineTo(x(180), y(tick));
+          context.stroke();
+          context.fillText(String(tick), x(0) - 7, y(tick) + 4);
+        }
+        context.textAlign = 'center';
+        for (const tick of [0, 45, 90, 135, 180]) context.fillText(tick + '°', x(tick), height - 9);
+        context.beginPath();
+        context.moveTo(x(0), y(0));
+        for (let step = 1; step <= 360; step++) {
+          const sample = step / 2;
+          context.lineTo(x(sample), y(gapSize(sample)));
+        }
+        context.strokeStyle = '#5d4176';
+        context.lineWidth = 2.3;
+        context.stroke();
+        context.beginPath();
+        context.moveTo(x(t), y(0));
+        context.lineTo(x(t), y(gapSize(t)));
+        context.strokeStyle = '#226661';
+        context.lineWidth = 1;
+        context.stroke();
+        context.beginPath();
+        context.arc(x(t), y(gapSize(t)), 5, 0, 2*Math.PI);
+        context.fillStyle = '#226661';
+        context.fill();
+      }
+
+      function update() {
+        const t = Number(angle.value);
+        const wave = Math.sin(2*t*radians), denominator = 1 + realEpsilon*wave;
+        const real = imagEpsilon*wave / denominator;
+        const imag = Math.cos(2*t*radians) / denominator;
+        const productReal = imag*imag - real*real, productImag = -2*real*imag;
+        byId('angle-value').textContent = t.toFixed(1) + '°';
+        angle.setAttribute('aria-valuetext', t.toFixed(1) + ' degrees');
+        byId('at-two').textContent = complex(real, imag);
+        byId('at-three').textContent = complex(-real, -imag);
+        byId('product').textContent = complex(productReal, productImag);
+        byId('gap').textContent = t % 90 === 0 ? 'The answers agree. Only one character is present.'
+          : 'Gap magnitude ' + format(gapSize(t)) + ' · the answers disagree.';
+        for (const button of presets) button.setAttribute('aria-pressed', Number(button.dataset.angle) === t);
+        drawPlot(t);
+      }
+      angle.addEventListener('input', update);
+      for (const button of presets) button.addEventListener('click', () => {
+        angle.value = button.dataset.angle;
+        update();
+      });
+      new ResizeObserver(() => drawPlot(Number(angle.value))).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

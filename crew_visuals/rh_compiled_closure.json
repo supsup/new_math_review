@@ -1,0 +1,903 @@
+{
+ "roots": [
+  "Formalism.GammaFactorNonvanishing.CritLine",
+  "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TopPlug"
+ ],
+ "files": 17278,
+ "lines": 2995326,
+ "archive_files": 175187,
+ "two": {
+  "CompanionTheory.AutomorphicTheory": [
+   6,
+   1047
+  ],
+  "Development.AbelianVarietyTheory": [
+   4057,
+   578928
+  ],
+  "Development.AutomorphicArithmetic": [
+   426,
+   55507
+  ],
+  "Formalism": [
+   9,
+   449
+  ],
+  "Formalism.AdicCompletionExports": [
+   2,
+   165
+  ],
+  "Formalism.AdmissibleDesigns": [
+   1,
+   75
+  ],
+  "Formalism.AlgebraicWeights": [
+   2,
+   228
+  ],
+  "Formalism.AlphaUniqueness": [
+   1,
+   97
+  ],
+  "Formalism.ArtinHasse": [
+   2,
+   513
+  ],
+  "Formalism.BehrendSets": [
+   14,
+   1074
+  ],
+  "Formalism.BranchSandwichDivisors": [
+   22,
+   7889
+  ],
+  "Formalism.CMTypeGalois": [
+   14,
+   1724
+  ],
+  "Formalism.CharacterColumnKernels": [
+   54,
+   7550
+  ],
+  "Formalism.CoboundaryTransfers": [
+   1,
+   221
+  ],
+  "Formalism.ConjugateSelfDual": [
+   3,
+   146
+  ],
+  "Formalism.CorankShare": [
+   3,
+   563
+  ],
+  "Formalism.CyclotomicNorms": [
+   21,
+   3643
+  ],
+  "Formalism.DegreeFormula": [
+   5,
+   902
+  ],
+  "Formalism.DirichletDensity": [
+   8,
+   1012
+  ],
+  "Formalism.DivisorInequality": [
+   5,
+   1411
+  ],
+  "Formalism.DoubleCosetMeasures": [
+   15,
+   3487
+  ],
+  "Formalism.DropLevelBounds": [
+   1,
+   20
+  ],
+  "Formalism.EllipticTorsion": [
+   48,
+   8816
+  ],
+  "Formalism.FilteredPoleLength": [
+   27,
+   2882
+  ],
+  "Formalism.FlagUnipotentLattices": [
+   77,
+   31383
+  ],
+  "Formalism.FockGram": [
+   14,
+   773
+  ],
+  "Formalism.FormalDegreeBessel": [
+   31,
+   5655
+  ],
+  "Formalism.FormalGroupLog": [
+   5,
+   935
+  ],
+  "Formalism.FormalGroupWitt": [
+   21,
+   3000
+  ],
+  "Formalism.FrobeniusOrbits": [
+   32,
+   7736
+  ],
+  "Formalism.GL3MeanSquares": [
+   438,
+   77912
+  ],
+  "Formalism.GaloisCohomology": [
+   4,
+   335
+  ],
+  "Formalism.GaloisIrreducibility": [
+   17,
+   1661
+  ],
+  "Formalism.GammaFactorNonvanishing": [
+   2,
+   94
+  ],
+  "Formalism.GaussIdealIdentity": [
+   2,
+   275
+  ],
+  "Formalism.GaussJetBounds": [
+   85,
+   12526
+  ],
+  "Formalism.GelfandTransference": [
+   4,
+   626
+  ],
+  "Formalism.GradedWeylDivisibility": [
+   103,
+   8125
+  ],
+  "Formalism.GrowthSums": [
+   14,
+   847
+  ],
+  "Formalism.HalfLinks": [
+   1,
+   186
+  ],
+  "Formalism.HarderNarasimhan": [
+   43,
+   10412
+  ],
+  "Formalism.HermitianCurvature": [
+   683,
+   273700
+  ],
+  "Formalism.HermitianLattices": [
+   43,
+   7418
+  ],
+  "Formalism.HyperbolicPlaceProducts": [
+   14,
+   1895
+  ],
+  "Formalism.IncomingBounds": [
+   17,
+   3312
+  ],
+  "Formalism.JacobiWeightFamilies": [
+   2,
+   209
+  ],
+  "Formalism.JacquetSubsetSums": [
+   2,
+   149
+  ],
+  "Formalism.LFunctionBounds": [
+   7,
+   988
+  ],
+  "Formalism.LagrangeIdealLifts": [
+   1,
+   301
+  ],
+  "Formalism.LandauZeroFreeBounds": [
+   58,
+   6579
+  ],
+  "Formalism.LatticeLocalGlobal": [
+   2,
+   216
+  ],
+  "Formalism.LatticeRigidity": [
+   12,
+   1130
+  ],
+  "Formalism.LatticeSlopes": [
+   18,
+   1977
+  ],
+  "Formalism.LatticeTheta": [
+   14,
+   1106
+  ],
+  "Formalism.LocalRingCardinality": [
+   169,
+   34740
+  ],
+  "Formalism.LocalToGlobal": [
+   2627,
+   525239
+  ],
+  "Formalism.LogFactorialBounds": [
+   5,
+   371
+  ],
+  "Formalism.LogFactorialIndices": [
+   11,
+   1403
+  ],
+  "Formalism.LogSumExpBounds": [
+   16,
+   1744
+  ],
+  "Formalism.LogVandermondeBounds": [
+   26,
+   3995
+  ],
+  "Formalism.MahlerMeasure": [
+   54,
+   16821
+  ],
+  "Formalism.MeanHeightDescent": [
+   21,
+   2359
+  ],
+  "Formalism.MirabolicMackeyTheory": [
+   26,
+   4636
+  ],
+  "Formalism.MoebiusJetDuality": [
+   5,
+   384
+  ],
+  "Formalism.MonomialMeanResidues": [
+   6,
+   1175
+  ],
+  "Formalism.NormUnitaryBounds": [
+   14,
+   2086
+  ],
+  "Formalism.PadicSubsetSums": [
+   63,
+   12747
+  ],
+  "Formalism.PairingDivisors": [
+   1,
+   139
+  ],
+  "Formalism.PeriodIntegrals": [
+   3196,
+   327988
+  ],
+  "Formalism.PieriBlockIdeals": [
+   4,
+   2865
+  ],
+  "Formalism.PolynomialDimension": [
+   41,
+   15760
+  ],
+  "Formalism.ProductFormula": [
+   1,
+   162
+  ],
+  "Formalism.QuotientMetricDivisors": [
+   63,
+   15247
+  ],
+  "Formalism.RankGapBounds": [
+   12,
+   1443
+  ],
+  "Formalism.RealPlaceAnalysis": [
+   54,
+   10653
+  ],
+  "Formalism.ResultantValuation": [
+   13,
+   842
+  ],
+  "Formalism.SatakeDualWeyl": [
+   85,
+   14777
+  ],
+  "Formalism.SelfDualUnimodular": [
+   6,
+   822
+  ],
+  "Formalism.SharpRestriction": [
+   2178,
+   524649
+  ],
+  "Formalism.SizeWindowBrackets": [
+   64,
+   28345
+  ],
+  "Formalism.SmithDeterminants": [
+   6,
+   403
+  ],
+  "Formalism.SobolevGaussianKernels": [
+   12,
+   578
+  ],
+  "Formalism.SubspaceCounting": [
+   32,
+   7069
+  ],
+  "Formalism.SuccessiveMinima": [
+   15,
+   1693
+  ],
+  "Formalism.TameInertiaTowers": [
+   15,
+   3127
+  ],
+  "Formalism.ThetaLiftIndependence": [
+   10,
+   802
+  ],
+  "Formalism.ThetaLogCoordinates": [
+   285,
+   54260
+  ],
+  "Formalism.ThetaSupremumBounds": [
+   19,
+   3287
+  ],
+  "Formalism.ThickAverageLoss": [
+   5,
+   1079
+  ],
+  "Formalism.TorsionNormIteration": [
+   15,
+   2644
+  ],
+  "Formalism.TranslateCocycles": [
+   6,
+   1937
+  ],
+  "Formalism.TruncatedSeriesCounting": [
+   3,
+   561
+  ],
+  "Formalism.TwistFamilyExistence": [
+   1,
+   87
+  ],
+  "Formalism.UnipotentAdelicQuotients": [
+   2,
+   76
+  ],
+  "Formalism.WeaklyAdmissibleFiltrations": [
+   3,
+   797
+  ],
+  "Formalism.WideWeightTheorem": [
+   1,
+   85
+  ],
+  "Formalism.WindowSums": [
+   1,
+   187
+  ],
+  "Formalism.YangianSpanCharacter": [
+   17,
+   1132
+  ],
+  "Formalism.ZeroFreeRegion": [
+   34,
+   3189
+  ],
+  "Formalism.ZetaNonvanishing": [
+   15,
+   2338
+  ],
+  "Lemmata.AddValuationProducts": [
+   1,
+   59
+  ],
+  "Lemmata.B110": [
+   1,
+   56
+  ],
+  "Lemmata.B1962s": [
+   1,
+   44
+  ],
+  "Lemmata.Cancellation": [
+   1,
+   107
+  ],
+  "Lemmata.ClearingDenominators": [
+   1,
+   259
+  ],
+  "Lemmata.CofiniteContinuousBounds": [
+   1,
+   73
+  ],
+  "Lemmata.ComplementLifts": [
+   1,
+   76
+  ],
+  "Lemmata.CurryModusPonens": [
+   1,
+   56
+  ],
+  "Lemmata.Denominators": [
+   1,
+   56
+  ],
+  "Lemmata.DetMonotoneStarMulSelf": [
+   1,
+   79
+  ],
+  "Lemmata.DetNormLeProdRows": [
+   1,
+   40
+  ],
+  "Lemmata.DiscreteValuationQuotients": [
+   1,
+   79
+  ],
+  "Lemmata.DualWeylPullback": [
+   1,
+   364
+  ],
+  "Lemmata.FiberEquations": [
+   1,
+   43
+  ],
+  "Lemmata.FirstBlockLemmaE": [
+   1,
+   21
+  ],
+  "Lemmata.FirstBlockLemmaH": [
+   1,
+   47
+  ],
+  "Lemmata.FirstBlockLemmaK": [
+   1,
+   28
+  ],
+  "Lemmata.FunctionAtZero": [
+   1,
+   52
+  ],
+  "Lemmata.GeneralBFact": [
+   1,
+   25
+  ],
+  "Lemmata.GeneralBFactAltForm": [
+   1,
+   38
+  ],
+  "Lemmata.GeneralBFactBisForm": [
+   1,
+   59
+  ],
+  "Lemmata.GeneralBFactLeftAlt": [
+   1,
+   47
+  ],
+  "Lemmata.GeneralBFactLeftAltForm": [
+   1,
+   236
+  ],
+  "Lemmata.GeneralBFactLeftBisAlt": [
+   1,
+   40
+  ],
+  "Lemmata.GeneralBFactLeftBisForm": [
+   1,
+   125
+  ],
+  "Lemmata.GeneralBFactLeftForm": [
+   1,
+   34
+  ],
+  "Lemmata.GeneralBFactLeftFurther": [
+   1,
+   89
+  ],
+  "Lemmata.GeneralBFactLeftLast": [
+   1,
+   39
+  ],
+  "Lemmata.GeneralBFactLeftMore": [
+   1,
+   26
+  ],
+  "Lemmata.GeneralBFactLeftRest": [
+   1,
+   21
+  ],
+  "Lemmata.GeneralBFactLeftTail": [
+   1,
+   27
+  ],
+  "Lemmata.GeneralBFactLeftTerForm": [
+   1,
+   37
+  ],
+  "Lemmata.GeneralBFactLeftVariant": [
+   1,
+   65
+  ],
+  "Lemmata.GeneralBFactLeftVersion": [
+   1,
+   236
+  ],
+  "Lemmata.GeneralBFactRest": [
+   1,
+   78
+  ],
+  "Lemmata.GeneralBFactRight": [
+   1,
+   17
+  ],
+  "Lemmata.GeneralBFactRightAltForm": [
+   1,
+   40
+  ],
+  "Lemmata.GeneralBFactRightBis": [
+   1,
+   18
+  ],
+  "Lemmata.GeneralBFactRightBisForm": [
+   1,
+   69
+  ],
+  "Lemmata.GeneralBFactRightExtra": [
+   1,
+   31
+  ],
+  "Lemmata.GeneralBFactRightFurther": [
+   1,
+   26
+  ],
+  "Lemmata.GeneralBFactRightLast": [
+   1,
+   97
+  ],
+  "Lemmata.GeneralBFactRightMore": [
+   1,
+   37
+  ],
+  "Lemmata.GeneralBFactRightRest": [
+   1,
+   32
+  ],
+  "Lemmata.GeneralBFactRightSide": [
+   1,
+   28
+  ],
+  "Lemmata.GeneralBFactRightTer": [
+   1,
+   17
+  ],
+  "Lemmata.GeneralBFactRightTerForm": [
+   1,
+   287
+  ],
+  "Lemmata.GeneralBFactRightVariant": [
+   1,
+   37
+  ],
+  "Lemmata.GeneralBFactRightVersion": [
+   1,
+   25
+  ],
+  "Lemmata.GeneralBFactSecondBis": [
+   1,
+   49
+  ],
+  "Lemmata.GeneralBFactSecondBisAlt": [
+   1,
+   42
+  ],
+  "Lemmata.GeneralBFactSecondBisForm": [
+   1,
+   65
+  ],
+  "Lemmata.GeneralBFactSecondExtra": [
+   1,
+   61
+  ],
+  "Lemmata.GeneralBFactSecondForm": [
+   1,
+   40
+  ],
+  "Lemmata.GeneralBFactSecondFurther": [
+   1,
+   36
+  ],
+  "Lemmata.GeneralBFactSecondLast": [
+   1,
+   34
+  ],
+  "Lemmata.GeneralBFactSecondMore": [
+   1,
+   38
+  ],
+  "Lemmata.GeneralBFactSecondRest": [
+   1,
+   49
+  ],
+  "Lemmata.GeneralBFactSecondSide": [
+   1,
+   43
+  ],
+  "Lemmata.GeneralBFactSecondTail": [
+   1,
+   42
+  ],
+  "Lemmata.GeneralBFactSecondTer": [
+   1,
+   32
+  ],
+  "Lemmata.GeneralBFactSecondTerForm": [
+   1,
+   62
+  ],
+  "Lemmata.GeneralBFactSecondVariant": [
+   1,
+   44
+  ],
+  "Lemmata.GeneralBFactSecondVersion": [
+   1,
+   52
+  ],
+  "Lemmata.GeneralBFactSide": [
+   1,
+   38
+  ],
+  "Lemmata.GeneralBFactTer": [
+   1,
+   60
+  ],
+  "Lemmata.GeneralBFactThirdAlt": [
+   1,
+   37
+  ],
+  "Lemmata.GeneralBFactThirdAltForm": [
+   1,
+   37
+  ],
+  "Lemmata.GeneralBFactThirdBisAlt": [
+   1,
+   35
+  ],
+  "Lemmata.GeneralBFactThirdExtra": [
+   1,
+   43
+  ],
+  "Lemmata.GeneralBFactThirdForm": [
+   1,
+   40
+  ],
+  "Lemmata.GeneralBFactThirdMore": [
+   1,
+   47
+  ],
+  "Lemmata.GeneralBFactThirdRest": [
+   1,
+   61
+  ],
+  "Lemmata.GeneralBFactThirdSide": [
+   1,
+   38
+  ],
+  "Lemmata.GeneralBFactThirdTail": [
+   1,
+   38
+  ],
+  "Lemmata.GeneralBFactThirdTer": [
+   1,
+   40
+  ],
+  "Lemmata.GeneralBFactThirdTerForm": [
+   1,
+   49
+  ],
+  "Lemmata.GeneralBFactThirdVariant": [
+   1,
+   47
+  ],
+  "Lemmata.GeneralBFactUpper": [
+   1,
+   24
+  ],
+  "Lemmata.GeneralBFactUpperAltForm": [
+   1,
+   23
+  ],
+  "Lemmata.GeneralBFactUpperBis": [
+   1,
+   166
+  ],
+  "Lemmata.GeneralBFactUpperVersion": [
+   1,
+   22
+  ],
+  "Lemmata.HermitianSesquilinear": [
+   1,
+   44
+  ],
+  "Lemmata.HermitianVanishing": [
+   1,
+   81
+  ],
+  "Lemmata.IntegerMulIntegral": [
+   1,
+   41
+  ],
+  "Lemmata.MiscLemmasB": [
+   1,
+   76
+  ],
+  "Lemmata.MiscLemmasD": [
+   1,
+   32
+  ],
+  "Lemmata.MiscLemmasE": [
+   1,
+   33
+  ],
+  "Lemmata.MiscLemmasO": [
+   1,
+   36
+  ],
+  "Lemmata.MiscLemmasP": [
+   1,
+   10
+  ],
+  "Lemmata.MovedPointExistence": [
+   1,
+   57
+  ],
+  "Lemmata.MultivariateIntegrals": [
+   1,
+   92
+  ],
+  "Lemmata.NatMulIsIntegral": [
+   1,
+   45
+  ],
+  "Lemmata.NearbyExistence": [
+   1,
+   60
+  ],
+  "Lemmata.PaddedFamilies": [
+   1,
+   122
+  ],
+  "Lemmata.PartialDerivativeDegree": [
+   1,
+   42
+  ],
+  "Lemmata.PeriodicFunctions": [
+   1,
+   26
+  ],
+  "Lemmata.PosDefOfRealQuadratic": [
+   1,
+   83
+  ],
+  "Lemmata.PowerApplication": [
+   1,
+   23
+  ],
+  "Lemmata.RankOneOrbitForms": [
+   1,
+   172
+  ],
+  "Lemmata.ScalarExtension": [
+   1,
+   54
+  ],
+  "Lemmata.SecondBlockLemmaA": [
+   1,
+   22
+  ],
+  "Lemmata.SimultaneousEigenvectors": [
+   1,
+   89
+  ],
+  "Lemmata.SmulListSum": [
+   1,
+   47
+  ],
+  "Lemmata.TwistedIdempotents": [
+   1,
+   170
+  ],
+  "ReciprocityTheory.AdicCompleteness": [
+   1,
+   111
+  ],
+  "ReciprocityTheory.AnalyticForms": [
+   32,
+   5242
+  ],
+  "ReciprocityTheory.Automorphisms": [
+   4,
+   461
+  ],
+  "ReciprocityTheory.BasicDefinitions": [
+   2,
+   136
+  ],
+  "ReciprocityTheory.ClassFieldTheory": [
+   1,
+   16
+  ],
+  "ReciprocityTheory.CommutativeAlgebra": [
+   18,
+   2226
+  ],
+  "ReciprocityTheory.DualLattices": [
+   28,
+   3365
+  ],
+  "ReciprocityTheory.GaloisValuations": [
+   6,
+   1534
+  ],
+  "ReciprocityTheory.GeneralLinearIntegers": [
+   1,
+   34
+  ],
+  "ReciprocityTheory.GeometryOfNumbers": [
+   7,
+   927
+  ],
+  "ReciprocityTheory.Hypotheses": [
+   2,
+   425
+  ],
+  "ReciprocityTheory.L2DbarEstimates": [
+   34,
+   5270
+  ],
+  "ReciprocityTheory.NeutralLocalFields": [
+   4,
+   882
+  ],
+  "ReciprocityTheory.ReducedBases": [
+   9,
+   1217
+  ],
+  "ReciprocityTheory.ReductiveGroups": [
+   1245,
+   189326
+  ],
+  "ReciprocityTheory.ResidueCardinality": [
+   1,
+   151
+  ],
+  "ReciprocityTheory.SemistableReduction": [
+   3,
+   526
+  ],
+  "ReciprocityTheory.ThetaQuasiPeriods": [
+   4,
+   431
+  ]
+ }
+}

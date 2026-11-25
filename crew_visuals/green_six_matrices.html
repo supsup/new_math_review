@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Six matrices and one cuspidal character</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ed;
+      --ink: #2a3735;
+      --muted: #54645e;
+      --green: #245e50;
+      --edge: #cbd1c7;
+      background: #e7ede8;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .17em; }
+    h1 { font: clamp(2.6rem, 7.5vw, 4.45rem)/1.03 Georgia, serif; letter-spacing: -.045em; margin: .55rem 0 .68rem; }
+    h2 { font: 1.3rem Georgia, serif; margin: .92rem 0 .4rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .experiment { display: grid; grid-template-columns: minmax(10rem, 11rem) minmax(0, 1fr); gap: .7rem; }
+    .chooser { padding: .65rem .72rem; border: 1px solid var(--edge); border-radius: .34rem; background: #edf2e8; }
+    .chooser label { display: grid; gap: .25rem; font-size: .87rem; font-weight: 650; }
+    select { width: 100%; min-width: 0; min-height: 2.5rem; font: inherit; color: var(--ink);
+      background: #fcfcf6; border: 1px solid #96aca1; border-radius: .25rem; padding: .27rem .3rem; }
+    :focus-visible { outline: .17rem solid #964e33; outline-offset: .15rem; }
+    .matrix { width: max-content; display: grid; grid-template-columns: repeat(2, minmax(1.35rem, auto));
+      text-align: center; margin: .65rem auto .3rem; padding: .12rem .38rem;
+      font: 1.25rem/1.32 Georgia, serif; border-inline: 2px solid var(--green); border-radius: .22rem; }
+    .chooser p { font-size: .82rem; margin: .5rem 0 0; }
+    figure { margin: 0; }
+    canvas { height: 12.3rem; width: 100%; display: block; background: #fffcf5; border: 1px solid var(--edge); border-radius: .34rem; }
+    figcaption { font-size: .82rem; margin-top: .25rem; }
+    table { width: 100%; border-collapse: collapse; margin: .35rem 0 .85rem; font-variant-numeric: tabular-nums; }
+    th, td { border-bottom: 1px solid var(--edge); padding: .42rem .3rem; text-align: center; }
+    th:first-child { text-align: left; }
+    thead th { font-size: .82rem; line-height: 1.24; vertical-align: bottom; }
+    tbody tr:nth-child(2) { background: #edf2e8; color: var(--green); }
+    .label { font: 1.19rem Georgia, serif; }
+    details { border-top: 1px solid var(--edge); padding-top: .6rem; margin: .85rem 0 0; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 34rem) { .experiment { grid-template-columns: 1fr; } .chooser { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .75rem; } .matrix { margin: .2rem 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_chain_length_window.html">Back to the checked proof route</a>
+    <h1>Six matrices and one cuspidal character</h1>
+    <p class="intro">The compiled implication toward the Riemann Hypothesis starts with a statement called <code>Green</code>. Its smallest case with two rows has only six matrices. Each one shuffles three nonzero binary vectors, and that shuffle tells us which character meets the premise.</p>
+
+    <div class="experiment">
+      <div class="chooser">
+        <label for="pick">Choose a matrix
+          <select id="pick"></select>
+        </label>
+        <div class="matrix" id="matrix" role="img"></div>
+        <p>All entries are computed modulo 2. In particular, 1 + 1 = 0.</p>
+      </div>
+      <figure>
+        <canvas id="plot" role="img"></canvas>
+        <figcaption id="action"></figcaption>
+      </figure>
+    </div>
+
+    <h2>Which character survives the test?</h2>
+    <p>A character records the trace of a matrix’s action in a representation. Here the trivial representation always acts by 1. The sign representation gives −1 for a swap and +1 for an even shuffle. The standard representation has character equal to the number of fixed points minus one.</p>
+    <table>
+      <thead><tr><th scope="col">Character</th><th scope="col">Trace of chosen matrix</th><th scope="col">Dimensions fixed by the shear</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Trivial</th><td id="trivial"></td><td>1</td></tr>
+        <tr><th scope="row">Sign</th><td id="sign"></td><td>0</td></tr>
+        <tr><th scope="row">Standard</th><td id="standard"></td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p>In this case the archive calls an irreducible character <em>cuspidal</em> when the shear group leaves no nonzero vector fixed in its representation. On the sign representation the shear acts by −1. Over the complex numbers, only the zero vector equals its own negative.</p>
+    <p><strong class="label">One character, one label.</strong> The sign character gets <var>T</var>² + <var>T</var> + 1, the only monic quadratic with no root in the two-element field. Its dimension is 1, which matches Green’s formula here, 2 − 1.</p>
+
+    <details>
+      <summary>How the six matrices give the whole answer</summary>
+      <p>The images of the two coordinate vectors can be any two distinct nonzero vectors, giving 3 × 2 = 6 invertible matrices. They produce all six permutations. The three characters in the table are irreducible and exhaust the possibilities. Their inner products, averaged over the six matrices, give three unit norms and zero off the diagonal. Their squared dimensions add to 1 + 1 + 4 = 6.</p>
+      <p>The shear group has two elements, the identity and the matrix that fixes (1,0) and swaps (0,1) with (1,1). Averaging those two actions projects onto their fixed vectors, so the last column is (trace at identity + trace at shear) / 2. The same calculation applies to the conjugate shear groups that fix each of the other two lines.</p>
+      <p>The archive also gives a trace formula on matrices with irreducible characteristic polynomial. Here they are the two 3-cycles. Their eigenvalues in the field of four elements are the two nonidentity cube roots. The regular character in the formula sends them to the complex numbers ω and ω², so Green’s trace formula is −(ω + ω²) = 1. This agrees with the sign of a 3-cycle.</p>
+      <p><a href="../tools/check_green_two_by_two.py">Replay the six-matrix computation</a> with Python.</p>
+    </details>
+
+    <p>Green’s statement uses the same kind of labels over every prime field and in every positive dimension. The six matrices illustrate its smallest two-dimensional case. In the compiled implication, the general statement is one of three inputs. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/LabelDatum.lean#L64-L65">The archive’s cuspidal condition</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/LabelDatum.lean#L108">Green in Lean</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/TopPlug.lean#L16">The conditional theorem</a> · <a href="https://doi.org/10.1090/S0002-9947-1955-0072878-2">J. A. Green’s 1955 paper</a>.</p>
+    <p>The next input budgets lengths across primes. <a href="vwin_weighted_lengths.html">Try the VWin example</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const pick = byId('pick'), matrix = byId('matrix'), canvas = byId('plot');
+      const context = canvas.getContext('2d');
+      const vectors = [[1,0],[0,1],[1,1]];
+      const names = vectors.map(v => '(' + v.join(',') + ')');
+      const colors = ['#286d63','#7f4d86','#a34e2e'];
+
+      function action([a,b,c,d]) {
+        return vectors.map(([x,y]) => vectors.findIndex(([u,v]) =>
+          u === (a*x+b*y)%2 && v === (c*x+d*y)%2));
+      }
+      function title(g) {
+        const map = action(g);
+        const fixed = map.findIndex((j,i) => j === i);
+        if (g.join('') === '1001') return 'Identity';
+        if (g.join('') === '1101') return 'Shear · fixes (1,0)';
+        if (fixed >= 0) return 'Swap · fixes ' + names[fixed];
+        return '3-cycle · (1,0) to ' + names[map[0]];
+      }
+      const matrices = Array.from({length:16}, (_, n) =>
+        [n >> 3, (n >> 2)&1, (n >> 1)&1, n&1]
+      ).filter(([a,b,c,d]) => (a*d-b*c)%2 !== 0);
+      for (const g of matrices) pick.add(new Option(title(g),g.join('')));
+      pick.value = '1101';
+
+      function draw(map) {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (!width || !height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width*dpr);
+        canvas.height = Math.round(height*dpr);
+        context.setTransform(dpr,0,0,dpr,0,0);
+        const x0 = 55, x1 = width-55;
+        const y = i => 49 + i*(height-75)/2;
+        context.font = '12px system-ui, sans-serif';
+        context.fillStyle = '#54645e';
+        context.textAlign = 'center';
+        context.fillText('Input vectors',x0,19);
+        context.fillText('Images',x1,19);
+        for (const [i,j] of map.entries()) {
+          const from = y(i), to = y(j), span = x1-x0;
+          context.beginPath();
+          context.moveTo(x0+8,from);
+          context.bezierCurveTo(x0+span*.43,from,x0+span*.62,to,x1-10,to);
+          context.strokeStyle = colors[i];
+          context.lineWidth = 2.2;
+          context.stroke();
+          context.beginPath();
+          context.moveTo(x1-9,to);
+          context.lineTo(x1-18,to-4);
+          context.lineTo(x1-18,to+4);
+          context.closePath();
+          context.fillStyle = colors[i];
+          context.fill();
+        }
+        context.font = '13px system-ui, sans-serif';
+        for (let i=0; i<3; i++) {
+          for (const x of [x0,x1]) {
+            context.beginPath();
+            context.arc(x,y(i),5,0,2*Math.PI);
+            context.fillStyle = colors[i];
+            context.fill();
+          }
+          context.fillStyle = '#2a3735';
+          context.textAlign = 'right';
+          context.fillText(names[i],x0-10,y(i)+4);
+          context.textAlign = 'left';
+          context.fillText(names[i],x1+10,y(i)+4);
+        }
+      }
+
+      function update() {
+        const g = Array.from(pick.value, Number);
+        const map = action(g);
+        const fixed = map.filter((j,i) => i === j).length;
+        const entries = g.map(n => Object.assign(document.createElement('span'), {textContent:n}));
+        matrix.replaceChildren(...entries);
+        matrix.setAttribute('aria-label','Matrix rows ' + g.slice(0,2).join(', ') + ' and ' + g.slice(2).join(', '));
+        const moves = names.map((v,i) => v + ' to ' + names[map[i]]).join(', ');
+        canvas.setAttribute('aria-label',moves);
+        byId('action').textContent = moves + '.';
+        byId('trivial').textContent = '1';
+        byId('sign').textContent = fixed === 1 ? '−1' : '1';
+        byId('standard').textContent = String(fixed-1).replace('-', '−');
+        draw(map);
+      }
+      pick.addEventListener('change',update);
+      new ResizeObserver(() => draw(action(Array.from(pick.value,Number)))).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

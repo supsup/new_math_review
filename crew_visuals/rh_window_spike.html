@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How tall a spike can fit?</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcfaf3;
+      --ink: #252d28;
+      --muted: #505f55;
+      --green: #276044;
+      --line: #ced6c7;
+      --amber: #963f26;
+      background: #e9ede4;
+      color: var(--ink);
+      font: 100%/1.54 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 59rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    h1 { font: clamp(2.6rem, 7vw, 4.45rem)/1.04 Georgia, serif; letter-spacing: -.04em; margin: .55rem 0 .75rem; }
+    p { max-width: 66ch; }
+    .intro, figcaption { color: var(--muted); }
+    .examples { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.2rem 0 .85rem; }
+    button {
+      font: inherit; color: var(--ink); background: #eff3e8; min-height: 2.75rem;
+      padding: .35rem .7rem; border: 1px solid var(--line); border-radius: .3rem; cursor: pointer;
+    }
+    button:hover { background: #e3eddc; }
+    :focus-visible { outline: .16rem solid var(--amber); outline-offset: .18rem; }
+    .lab { display: grid; grid-template-columns: minmax(0, 3fr) minmax(13.5rem, 2fr); gap: 1.25rem; align-items: start; }
+    figure { margin: 0; }
+    canvas { width: 100%; height: 14rem; display: block; background: #eef2e8; border-radius: .4rem; }
+    figcaption { font-size: .9rem; margin-top: .45rem; }
+    .sliders { padding: .7rem .85rem; border: 1px solid var(--line); border-radius: .4rem; }
+    .sliders div { display: grid; grid-template-columns: 1fr auto; gap: 0 .45rem; align-items: baseline; }
+    .sliders label { font-weight: 620; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.25rem; margin: 0; accent-color: var(--green); }
+    output { font-variant-numeric: tabular-nums; font-size: .92rem; }
+    .budget { display: flex; gap: .5rem 1.5rem; flex-wrap: wrap; margin: 1.25rem 0 .5rem; }
+    .budget div { flex: 1 1 8rem; }
+    dt { font-size: .86rem; color: var(--muted); }
+    dd { margin: .05rem 0; font: 1.6rem/1.2 Georgia, serif; font-variant-numeric: tabular-nums; }
+    #status { color: var(--green); font-weight: 650; margin-top: .55rem; }
+    #status.over { color: var(--amber); }
+    details { border-top: 1px solid var(--line); padding-top: .6rem; margin-top: 1rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 42rem) { .lab { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_window_lens.html">Back to the window lens</a>
+    <h1>How tall a spike can fit?</h1>
+    <p class="intro">A bound on the area under a curve leaves room for a tall peak if it is narrow. Try the three shapes below. The archive’s window criterion uses this kind of area to measure a nonnegative upper envelope of a prime-power sum.</p>
+    <div class="examples" aria-label="Example shapes">
+      <button type="button" data-peak="6" data-width="6">Tall and narrow</button>
+      <button type="button" data-peak=".8" data-width="45">Same area, spread out</button>
+      <button type="button" data-peak=".8" data-width="100">Too wide at the starting scale</button>
+    </div>
+    <div class="lab">
+      <figure>
+        <canvas id="plot" role="img" aria-label="Normalized upper envelope from the start to the end of a logarithmic window"></canvas>
+        <figcaption>The horizontal scale is <var>v</var> = log <var>y</var> / log <var>Y</var>. The green area is the normalized envelope. The vertical scale adjusts to the peak.</figcaption>
+      </figure>
+      <div class="sliders">
+        <div><label for="peak">Extra peak height</label><output id="peak-value" for="peak"></output><input id="peak" type="range" min="0" max="8" step=".1" value="6"></div>
+        <div><label for="width">Part of the window</label><output id="width-value" for="width"></output><input id="width" type="range" min="1" max="100" value="6"></div>
+        <div><label for="scale">Starting scale <var>Y</var></label><output id="scale-value" for="scale"></output><input id="scale" type="range" min="3" max="50" value="6"></div>
+        <div><label for="eta">Budget exponent η</label><output id="eta-value" for="eta"></output><input id="eta" type="range" min=".04" max=".20" step=".01" value=".10"></div>
+      </div>
+    </div>
+    <dl class="budget">
+      <div><dt>Green area</dt><dd id="area"></dd></div>
+      <div><dt>Cost · area × log <var>Y</var></dt><dd id="cost"></dd></div>
+      <div><dt>Limit · <var>Y</var><sup>η</sup></dt><dd id="limit"></dd></div>
+    </dl>
+    <p id="status" aria-live="polite"></p>
+    <p>The extra area of the peak is its height times its width in log coordinates. That is why the first two shapes cost the same. A pointwise bound would instead have to allow the full height of the peak.</p>
+    <details>
+      <summary>Translate the picture back into Lean</summary>
+      <p><code>WindowHyp</code> uses windows from <var>Y</var> to <var>Y</var><sup>1+δ</sup>. The envelope <var>R</var>(<var>y</var>) must be nonnegative and at least <code>Gm F y</code> at every point of the window. Its cost is the integral of <var>R</var>(<var>y</var>) <var>y</var><sup>−θ−1</sup>. With <var>y</var> = <var>Y</var><sup><var>v</var></sup>, the height plotted here is <var>r</var>(<var>v</var>) = <var>R</var>(<var>y</var>)/<var>y</var><sup>θ</sup> and d<var>y</var>/<var>y</var> = log <var>Y</var> d<var>v</var>. The toy fixes δ = ½ and uses a baseline height of 0.1. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/CharFamily.lean#L41-L45">The definition of the hypothesis</a></p>
+      <p>The real hypothesis asks for arbitrarily large qualifying windows for every positive η. The archive supplies an envelope using a pointwise bound <code>Gm F y ≤ C * y ^ θ</code> on arbitrarily large windows. That gives the flat normalized envelope |<var>C</var>|, at cost |<var>C</var>| δ log <var>Y</var>, which is below <var>Y</var><sup>η</sup> for sufficiently large <var>Y</var>. The peaks in the picture are illustrative envelopes. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/WindowHypOfRpow.lean#L27-L58">The pointwise-to-area step</a> · <a href="why_the_poles_add.html">Why the poles add</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const peak = byId('peak'), width = byId('width'), scale = byId('scale'), eta = byId('eta');
+      const delta = .5, baseline = .1;
+      const canvas = byId('plot'), ctx = canvas.getContext('2d');
+      const format = value => value < 100000 ? value.toLocaleString('en-US', { maximumFractionDigits: 3 }) : value.toExponential(2);
+      const superscript = n => String(n).replace(/[0-9]/g, digit => '⁰¹²³⁴⁵⁶⁷⁸⁹'[digit]);
+
+      function draw(height, portion) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const left = 41, right = w - 22, top = 27, floor = h - 37;
+        const ceiling = Math.max(1, Math.ceil(height + baseline));
+        const y = value => floor - value * (floor - top) / ceiling;
+        const first = left + (right - left) * (1 - portion) / 2;
+        const last = right - (right - left) * (1 - portion) / 2;
+        const base = y(baseline), peakY = y(baseline + height);
+
+        ctx.fillStyle = '#b4d3b1';
+        ctx.fillRect(left, base, right - left, floor - base);
+        ctx.fillStyle = '#6daa74';
+        ctx.fillRect(first, peakY, last - first, base - peakY);
+        ctx.strokeStyle = '#276044';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(first, base);
+        ctx.lineTo(first, peakY);
+        ctx.lineTo(last, peakY);
+        ctx.lineTo(last, base);
+        ctx.lineTo(right, base);
+        ctx.stroke();
+        ctx.strokeStyle = '#6d7a6a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, top);
+        ctx.lineTo(left, floor);
+        ctx.lineTo(right, floor);
+        ctx.stroke();
+        ctx.font = '12px system-ui';
+        ctx.fillStyle = '#45554b';
+        ctx.textAlign = 'center';
+        ctx.fillText('1', left, floor + 20);
+        ctx.fillText('1.25', (left + right) / 2, floor + 20);
+        ctx.fillText('1.5', right, floor + 20);
+        ctx.textAlign = 'right';
+        ctx.fillText('0', left - 8, floor + 4);
+        ctx.fillText(String(ceiling), left - 8, top + 4);
+      }
+
+      function update() {
+        const height = peak.valueAsNumber, percent = width.valueAsNumber;
+        const power = scale.valueAsNumber, exponent = eta.valueAsNumber;
+        const area = delta * (baseline + height * percent / 100);
+        const cost = area * power * Math.log(10);
+        const limit = 10 ** (power * exponent);
+        byId('peak-value').textContent = format(height);
+        byId('width-value').textContent = percent + '%';
+        byId('scale-value').textContent = '10' + superscript(power);
+        byId('eta-value').textContent = exponent.toFixed(2);
+        byId('area').textContent = format(area);
+        byId('cost').textContent = format(cost);
+        byId('limit').textContent = format(limit);
+        const status = byId('status');
+        const over = cost > limit;
+        status.classList.toggle('over', over);
+        status.textContent = over ? 'This envelope goes over budget.' : 'This envelope fits the budget.';
+        draw(height, percent / 100);
+      }
+
+      for (const input of [peak, width, scale, eta]) input.addEventListener('input', update);
+      for (const button of document.querySelectorAll('[data-peak]')) {
+        button.addEventListener('click', () => {
+          peak.value = button.dataset.peak;
+          width.value = button.dataset.width;
+          scale.value = 6;
+          eta.value = .10;
+          update();
+        });
+      }
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

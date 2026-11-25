@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeros Keep Their Distance</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --rose: #ff7a90;
+    --lav: #a99fff; --line: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; }
+  body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  header { flex: none; padding: 14px 16px 4px; max-height: 42vh; overflow-y: auto; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  header p { margin: 4px 0 0; font-size: 14px; color: var(--dim); max-width: 860px; line-height: 1.45; }
+  details { margin-top: 6px; max-width: 860px; font-size: 13.5px; color: var(--dim); line-height: 1.45; }
+  summary { cursor: pointer; color: var(--ink); }
+  details p { margin: 6px 0 0; }
+  b { color: var(--ink); font-weight: normal; }
+  a { color: var(--teal); }
+  .gold { color: var(--accent); } .rose { color: var(--rose); } .lav { color: var(--lav); }
+  #wrap { flex: 1; min-height: 260px; position: relative; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #state { flex: none; padding: 4px 16px; font-size: 15px; color: var(--accent); min-height: 21px; }
+  #bar { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 14px; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #err { display: none; margin: 12px 16px; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px;
+    font: 14px monospace; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zeros keep their distance</h1>
+  <p>Why do mathematicians expect every zero of zeta to be single? A repeated zero would be two zeros at zero
+  distance. Small gaps are common between <span class="lav">random points</span> and rare between
+  <span class="gold">zeta's zeros</span>. <span class="rose">Red links</span> mark close pairs: neighbours less than a quarter of the usual gap apart.</p>
+  <details>
+    <summary>What am I looking at?</summary>
+    <p><b>Top.</b> One stretch of the critical line, drawn twice. The gold row is zeta's actual zeros there, found by
+    computing zeta. The lavender row has the same number of points dropped at random into the same stretch. Random
+    points clump and leave holes; zeta's zeros spread out evenly, as if they pushed each other apart.</p>
+    <p><b>Bottom.</b> Every gap between neighbouring zeros up to height 7,010, measured in units of the usual gap
+    at that height (the zeros slowly crowd together as you climb, so the unit shrinks). The bars show how often each
+    gap size occurs. For random points (dashed) the most common gap would be the smallest. For zeta's zeros, tiny
+    gaps are rare: the bars start near zero.</p>
+    <p><b>The gold curve</b> is a simple approximation: Wigner's formula for the gaps between the two eigenvalues
+    of a 2×2 random matrix (the page checks this by sampling 200,000 of them). The gaps of large random matrices
+    follow a slightly different exact law, which this curve approximates. That zeta's zeros follow the
+    large-matrix law is a famous observation (the Montgomery–Odlyzko law), supported by a great deal of computation
+    and not proved.</p>
+    <p><b>Why it matters for the card.</b> A repeated zero would be a gap of exactly zero. The repulsion makes that
+    look very unlikely, which is one reason mathematicians expect every zero to be single. It is not a proof: a rare
+    exception is not ruled out by an average. The smallest gap here is the Lehmer pair near height 7,005, also drawn
+    on <a href="zeta_wave.html#t=7005.4&amp;paused">the zeta wave</a>: small, and still not zero.</p>
+    <p id="checks"><b>Checks.</b> Running…</p>
+    <p><b>Sources.</b> Zeta is computed here by the same code as <a href="zeta_wave.html">the zeta wave</a> (the
+    Riemann–Siegel formula, checked against Borwein's series). The proved results this card rests on: Alpöge and
+    Furman, arXiv:2608.13637 (at least 67% of the count is simple); the Riemann Hypothesis, Alpöge with Claude,
+    2026-11-20. Page by Confluence for Marginalia: crew_visuals/zeta_spacing.html in supsup/new_math_review.</p>
+  </details>
+</header>
+<div id="err"></div>
+<div id="wrap"><canvas id="c" role="img" aria-label="Top: two rows of dots over the same stretch, random points that clump with several close pairs, and zeta's zeros evenly spread. Bottom: a histogram of gaps between neighbouring zeros, low near zero, following a random-matrix curve rather than the random-points curve."></canvas></div>
+<div id="state">finding zeros…</div>
+<div id="bar">
+  <button id="bShuffle" disabled>Shuffle the random points</button>
+  <button id="bStretch" disabled>Another stretch</button>
+  <button id="bLehmer" disabled>The closest pair</button>
+</div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const ZETA = (function () {
+  const TAU = 2 * Math.PI;
+  const TABLE = 4096, LOGN = new Float64Array(TABLE + 1), ISQ = new Float64Array(TABLE + 1);
+  for (let n = 1; n <= TABLE; n++) { LOGN[n] = Math.log(n); ISQ[n] = 1 / Math.sqrt(n); }
+
+  // Riemann-Siegel theta, asymptotic series (good for t >= 10)
+  function theta(t) {
+    return t / 2 * Math.log(t / TAU) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * t * t * t);
+  }
+  // Hardy's Z(t), real, |Z(t)| = |zeta(1/2 + it)|: Riemann-Siegel main sum plus the first correction term
+  function Z(t, th) {
+    const a = Math.sqrt(t / TAU), N = Math.floor(a), tt = (th || theta)(t);
+    let s = 0;
+    for (let n = 1; n <= N; n++) {
+      s += n <= TABLE ? Math.cos(tt - t * LOGN[n]) * ISQ[n] : Math.cos(tt - t * Math.log(n)) / Math.sqrt(n);
+    }
+    let p = a - N, den = Math.cos(TAU * p);
+    if (Math.abs(den) < 1e-9) { p += 1e-7; den = Math.cos(TAU * p); }   // removable 0/0 at p = 1/4 and 3/4
+    const c0 = Math.cos(TAU * (p * p - p - 1 / 16)) / den;
+    return 2 * s + (N % 2 === 1 ? 1 : -1) * Math.pow(t / TAU, -0.25) * c0;
+  }
+  // zeta(1/2 + it) = exp(-i theta(t)) Z(t): the moving point in the plane
+  function zetaOnLine(t) { const z = Z(t), th = theta(t); return [z * Math.cos(th), -z * Math.sin(th)]; }
+  function slope(t) { return (Z(t + 1e-5) - Z(t - 1e-5)) / 2e-5; }
+  function density(t) { return Math.log(t / TAU) / TAU; }   // zeros per unit of height, on average
+
+  // A second, unrelated formula, used only to check the first: Borwein's accelerated alternating series (1991)
+  const BW_N = 80;
+  const BW_D = (function () {
+    const n = BW_N, d = [];
+    let term = 1 / n, acc = 0;
+    for (let i = 0; i <= n; i++) {
+      if (i > 0) term *= 4 * (n + i - 1) * (n - i + 1) / ((2 * i) * (2 * i - 1));
+      acc += term;
+      d.push(n * acc);
+    }
+    return d;
+  })();
+  function zetaBorwein(sig, t) {
+    const n = BW_N, dn = BW_D[n];
+    let re = 0, im = 0;
+    for (let k = 0; k < n; k++) {
+      const m = k + 1, c = (k % 2 === 0 ? 1 : -1) * (BW_D[k] - dn) / dn * Math.pow(m, -sig), ang = -t * Math.log(m);
+      re += c * Math.cos(ang);
+      im += c * Math.sin(ang);
+    }
+    const gg = Math.pow(2, 1 - sig), ar = 1 - gg * Math.cos(t * Math.LN2), ai = gg * Math.sin(t * Math.LN2);
+    const q = ar * ar + ai * ai;   // zeta = -(re + i im) / (1 - 2^(1-s))
+    return [-(re * ar + im * ai) / q, -(im * ar - re * ai) / q];
+  }
+  // sign changes of Z on [lo, hi], each refined by bisection, appended to out
+  function scan(lo, hi, step, th, out) {
+    let t = lo, z = Z(lo, th);
+    while (t < hi) {
+      const t2 = Math.min(t + step, hi), z2 = Z(t2, th);
+      if (z === 0 || z * z2 < 0) {
+        let a = t, b = t2, za = z;
+        for (let i = 0; i < 50; i++) {
+          const m = (a + b) / 2, zm = Z(m, th);
+          if (za * zm <= 0) b = m; else { a = m; za = zm; }
+        }
+        out.push((a + b) / 2);
+      }
+      t = t2; z = z2;
+    }
+    return out;
+  }
+  // largest |zeros found below T - (theta(T)/pi + 1)| at heights between consecutive zeros, and at hi
+  function countGap(zs, hi, th) {
+    let worst = 0;
+    for (let k = 1; k <= zs.length; k++) {
+      const T = k < zs.length ? (zs[k - 1] + zs[k]) / 2 : hi;
+      worst = Math.max(worst, Math.abs(k - (th(T) / Math.PI + 1)));
+    }
+    return worst;
+  }
+  return { theta, Z, zetaOnLine, slope, density, zetaBorwein, scan, countGap };
+})();
+
+/* ---------- the checks (run before anything is drawn; each one can fail) ---------- */
+function runChecks() {
+  const fail = [], info = {};
+  const z2 = ZETA.zetaBorwein(2, 0);
+  if (!(Math.abs(z2[0] - Math.PI * Math.PI / 6) < 1e-10 && Math.abs(z2[1]) < 1e-12)) {
+    fail.push("Borwein's series does not give zeta(2) = pi^2/6");
+  }
+  let worst = 0, worstMirror = 0;
+  const H = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+  for (const t of H) {
+    const b = ZETA.zetaBorwein(0.5, t), z = ZETA.Z(t), th = ZETA.theta(t);
+    worst = Math.max(worst, Math.hypot(b[0] - z * Math.cos(th), b[1] + z * Math.sin(th)));
+    worstMirror = Math.max(worstMirror, Math.hypot(b[0] - z * Math.cos(th), b[1] - z * Math.sin(th)));
+  }
+  info.heights = H.length; info.agree = worst; info.mirror = worstMirror;
+  if (!(worst < 0.03)) fail.push("the two formulas for zeta disagree by " + worst.toFixed(4));
+  if (!(worstMirror > 0.3)) fail.push("CONTROL: a mirrored spiral was not caught (gap " + worstMirror.toFixed(3) + ")");
+  const zs = ZETA.scan(10, 400, 0.01, ZETA.theta, []);
+  info.n400 = zs.length; info.gap400 = ZETA.countGap(zs, 400, ZETA.theta);
+  if (!(info.gap400 < 1)) fail.push("zeros found up to 400 do not match the counting formula (gap " + info.gap400.toFixed(3) + ")");
+  const wrongTheta = t => ZETA.theta(t) + t / 10;
+  info.wrong = ZETA.countGap(ZETA.scan(10, 60, 0.01, wrongTheta, []), 60, ZETA.theta);
+  if (!(info.wrong >= 1)) fail.push("CONTROL: a wrong angle formula was not caught (gap " + info.wrong.toFixed(3) + ")");
+  let minSlope = Infinity;
+  for (const r of zs) minSlope = Math.min(minSlope, Math.abs(ZETA.slope(r)));
+  info.minSlope = minSlope;
+  if (!(minSlope > 0.1)) fail.push("a zero below 400 is nearly flat (slope " + minSlope.toFixed(3) + "): the captions need rewording");
+  return { fail, info, zeros: zs };
+}
+/* ---------- the spacing (no drawing) ---------- */
+const SPACING = (function () {
+  // the random-matrix curve (Wigner's surmise for the unitary ensemble), and the curve for random points
+  const matrix = s => 32 / (Math.PI * Math.PI) * s * s * Math.exp(-4 * s * s / Math.PI);
+  const random = s => Math.exp(-s);
+  function simpson(f, lo, hi, n) {
+    const h = (hi - lo) / n;
+    let s = f(lo) + f(hi);
+    for (let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * f(lo + i * h);
+    return s * h / 3;
+  }
+  function seeded(seed) {   // mulberry32: a small, repeatable random-number generator
+    return function () {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // gaps between consecutive zeros, in units of the usual gap at that height
+  function gaps(zs, dens) {
+    const out = [];
+    for (let k = 1; k < zs.length; k++) out.push((zs[k] - zs[k - 1]) * dens((zs[k] + zs[k - 1]) / 2));
+    return out;
+  }
+  return { matrix, random, simpson, seeded, gaps };
+})();
+const mean = xs => xs.reduce((a, b) => a + b, 0) / xs.length;
+
+function spacingChecks(zs) {
+  const fail = [], info = {};
+  const g = SPACING.gaps(zs, ZETA.density);
+  info.n = g.length; info.mean = mean(g);
+  if (!(Math.abs(info.mean - 1) < 0.02)) fail.push("the average gap is " + info.mean.toFixed(4) + " usual gaps, not 1");
+  info.wrongMean = mean(SPACING.gaps(zs, t => Math.log(t) / (2 * Math.PI)));
+  if (!(Math.abs(info.wrongMean - 1) > 0.1)) fail.push("CONTROL: a wrong density (log t instead of log(t/2π)) was not caught");
+  info.mInt = SPACING.simpson(SPACING.matrix, 0, 12, 4000);
+  info.mMean = SPACING.simpson(s => s * SPACING.matrix(s), 0, 12, 4000);
+  if (!(Math.abs(info.mInt - 1) < 1e-4 && Math.abs(info.mMean - 1) < 1e-4)) fail.push("the random-matrix curve is not a spacing law with average 1");
+  const rnd = SPACING.seeded(20261124), M = 200000, pts = new Float64Array(M);
+  for (let i = 0; i < M; i++) pts[i] = rnd() * M;
+  pts.sort();
+  let below = 0;
+  for (let k = 1; k < M; k++) if (pts[k] - pts[k - 1] < 0.25) below++;
+  info.randShare = below / (M - 1); info.randTheory = 1 - Math.exp(-0.25);
+  if (!(Math.abs(info.randShare - info.randTheory) < 0.005)) fail.push("random points do not follow the dashed curve (" + info.randShare.toFixed(4) + ")");
+  info.zetaShare = g.filter(x => x < 0.25).length / g.length;
+  info.matrixShare = SPACING.simpson(SPACING.matrix, 0, 0.25, 400);
+  // the gold curve is exactly the gap law of 2×2 random Hermitian matrices (GUE): sample 200,000 of them
+  const u = SPACING.seeded(7), gauss = () => Math.sqrt(-2 * Math.log(1 - u())) * Math.cos(2 * Math.PI * u());
+  const K = 200000, gm = new Float64Array(K);
+  let sum = 0;
+  for (let i = 0; i < K; i++) {
+    const a = gauss(), d = gauss(), b = gauss() * Math.SQRT1_2, c = gauss() * Math.SQRT1_2;
+    gm[i] = Math.sqrt((a - d) * (a - d) + 4 * (b * b + c * c));
+    sum += gm[i];
+  }
+  let q1 = 0;
+  for (let i = 0; i < K; i++) { gm[i] = gm[i] * K / sum; if (gm[i] < 0.25) q1++; }
+  info.m2Share = q1 / K;
+  // the largest difference between their cumulative share and the curve's (the curve integrated on a fine grid);
+  // a wrong off-diagonal variance in the sampling misses by about 0.009, so the bar 0.004 can fail
+  const HH = 0.0005, NN = 12000, cdf = new Float64Array(NN + 1);
+  for (let i = 1; i <= NN; i++) cdf[i] = cdf[i - 1] + HH * (SPACING.matrix((i - 1) * HH) + SPACING.matrix(i * HH)) / 2;
+  const F = s => { const x = s / HH, i = Math.min(NN - 1, Math.floor(x)); return cdf[i] + (cdf[i + 1] - cdf[i]) * (x - i); };
+  gm.sort();
+  let ks = 0;
+  for (let i = 0; i < K; i++) { const f = F(gm[i]); ks = Math.max(ks, Math.abs((i + 1) / K - f), Math.abs(i / K - f)); }
+  info.m2KS = ks;
+  if (!(ks < 0.004)) fail.push("2×2 random matrices do not follow the gold curve (largest difference " + ks.toFixed(4) + ")");
+  let k = 0;
+  for (let i = 1; i < g.length; i++) if (g[i] < g[k]) k = i;
+  info.minGap = g[k]; info.minAt = zs[k];
+  return { fail, info, gaps: g };
+}
+
+/* ---------- the drawing ---------- */
+const BG = "#0d1020", INK = "#e8e6f2", DIM = "#9a98b4", GOLD = "#f2c14e", TEAL = "#4fd1c5", ROSE = "#ff7a90",
+  LAV = "#a99fff", LINE = "#39406e", FAINT = "#252b4d";
+const $ = id => document.getElementById(id);
+const wrap = $("wrap"), cv = $("c"), g = cv.getContext("2d"), state = $("state");
+const bShuffle = $("bShuffle"), bStretch = $("bStretch"), bLehmer = $("bLehmer");
+const fmt = (x, d) => x.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = x => (100 * x).toFixed(x < 0.1 ? 2 : 1) + "%";
+const TOP = 7010, CLOSE = 0.25;
+let W = 0, H = 0, dead = false, zeros = [], gapsAll = [], info = null, stretch = 0, seed = 1, lehmerIndex = 0;
+
+function showError(msg) {
+  if (dead) return;
+  dead = true;
+  const e = $("err");
+  e.textContent = "This page stopped: a check failed, so it will not draw.\n" + msg;
+  e.style.display = "block";
+  wrap.style.display = "none";
+  for (const b of [bShuffle, bStretch, bLehmer]) b.disabled = true;
+  state.textContent = "";
+}
+window.addEventListener("error", e => showError(String(e.message || e)));
+
+function resize() {
+  const r = wrap.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (info) draw();
+}
+
+function rowCount() { return W < 520 ? 26 : 40; }
+function drawRows(x0, y0, w, h) {
+  const N = rowCount(), i0 = Math.max(0, Math.min(zeros.length - N, stretch - (N >> 1)));
+  const zs = zeros.slice(i0, i0 + N), unit = 1 / ZETA.density((zs[0] + zs[N - 1]) / 2);
+  const lo = zs[0] - unit / 2, hi = zs[N - 1] + unit / 2;
+  const rnd = SPACING.seeded(seed), rs = [];
+  for (let i = 0; i < N; i++) rs.push(lo + (hi - lo) * rnd());
+  rs.sort((a, b) => a - b);
+  const X = t => x0 + 12 + (w - 24) * (t - lo) / (hi - lo);
+  g.font = "13px Georgia, serif"; g.textAlign = "left"; g.fillStyle = DIM;
+  g.fillText(w < 520 ? "one stretch, near height " + fmt((lo + hi) / 2, 0) : "one stretch of the line, near height " + fmt((lo + hi) / 2, 0) + ", drawn twice", x0, y0 + 14);
+  const rows = [
+    { pts: rs, y: y0 + h * 0.46, color: LAV, label: w < 520 ? "random points" : "random points, same number, same stretch" },
+    { pts: zs, y: y0 + h * 0.86, color: GOLD, label: "zeta's zeros" },
+  ];
+  for (const row of rows) {
+    let close = 0;
+    g.strokeStyle = FAINT; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x0, row.y); g.lineTo(x0 + w, row.y); g.stroke();
+    for (let i = 1; i < row.pts.length; i++) {
+      const gap = (row.pts[i] - row.pts[i - 1]) * ZETA.density((row.pts[i] + row.pts[i - 1]) / 2);
+      if (gap >= CLOSE) continue;
+      close++;
+      const a = X(row.pts[i - 1]), b = X(row.pts[i]), r = Math.max(7, (b - a) / 2 + 5);
+      g.strokeStyle = ROSE; g.lineWidth = 2;
+      g.beginPath(); g.arc((a + b) / 2, row.y, r, Math.PI, 2 * Math.PI); g.stroke();
+    }
+    g.fillStyle = row.color;
+    for (const t of row.pts) { g.beginPath(); g.arc(X(t), row.y, 4.5, 0, 2 * Math.PI); g.fill(); }
+    g.textAlign = "left"; g.fillStyle = row.color;
+    g.fillText(row.label, x0, row.y - 22);
+    g.textAlign = "right"; g.fillStyle = close ? ROSE : DIM;
+    g.fillText(close === 1 ? "1 close pair" : close + " close pairs", x0 + w, row.y - 22);
+  }
+}
+
+function drawHist(x0, y0, w, h) {
+  const narrow = w < 520;   // on a phone the axis runs higher, so the labels sit above the bars
+  const left = x0 + 40, right = x0 + w - 8, top = y0 + 30, bot = y0 + h - 40, SMAX = 3, YMAX = narrow ? 1.6 : 1.1, BIN = 0.1;
+  const X = s => left + (right - left) * s / SMAX, Y = d => bot - (bot - top) * d / YMAX;
+  g.font = "13px Georgia, serif"; g.textAlign = "left"; g.fillStyle = DIM;
+  g.fillText(narrow ? "gaps between neighbouring zeros (" + fmt(gapsAll.length, 0) + ")"
+    : "how far apart are neighbouring zeros? all " + fmt(gapsAll.length, 0) + " gaps up to height " + fmt(TOP, 0), x0, y0 + 14);
+  g.fillStyle = "rgba(255, 122, 144, 0.12)"; g.fillRect(X(0), top, X(CLOSE) - X(0), bot - top);
+  const counts = new Array(Math.round(SMAX / BIN)).fill(0);
+  for (const s of gapsAll) if (s < SMAX) counts[Math.floor(s / BIN)]++;
+  g.fillStyle = "rgba(79, 209, 197, 0.75)";
+  counts.forEach((c, i) => {
+    const d = c / (gapsAll.length * BIN);
+    g.fillRect(X(i * BIN) + 1, Y(d), X(BIN) - X(0) - 2, bot - Y(d));
+  });
+  g.strokeStyle = LINE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(left, top); g.lineTo(left, bot); g.lineTo(right, bot); g.stroke();
+  g.fillStyle = DIM; g.textAlign = "center";
+  for (let s = 0; s <= SMAX + 1e-9; s += 0.5) g.fillText(s === 1 && !narrow ? "1 (usual)" : String(s), X(s), bot + 17);
+  g.fillText("gap, in units of the usual gap", (left + right) / 2, bot + 34);
+  g.textAlign = "right";
+  for (const d of [0, 0.5, 1]) g.fillText(String(d), left - 6, Y(d) + 4);
+  const curve = (f, color, dash, width) => {
+    g.strokeStyle = color; g.lineWidth = width; g.setLineDash(dash);
+    g.beginPath();
+    for (let i = 0; i <= 300; i++) { const s = SMAX * i / 300; if (i) g.lineTo(X(s), Y(f(s))); else g.moveTo(X(s), Y(f(s))); }
+    g.stroke(); g.setLineDash([]);
+  };
+  curve(SPACING.random, LAV, [6, 5], 2);
+  curve(SPACING.matrix, GOLD, [], 2.5);
+  const lx = Math.min(X(1.85), right - (narrow ? 120 : 170)), items = [
+    ["rgba(79, 209, 197, 0.75)", "bar", narrow ? "zeta" : "zeta's zeros"],
+    [LAV, "dash", narrow ? "random" : "random points"],
+    [GOLD, "line", narrow ? "random matrix" : "random-matrix curve"],
+  ];
+  g.textAlign = "left";
+  items.forEach(([color, kind, text], i) => {
+    const y = top + 8 + 18 * i;
+    if (kind === "bar") { g.fillStyle = color; g.fillRect(lx, y - 6, 22, 10); }
+    else { g.strokeStyle = color; g.lineWidth = 2.5; g.setLineDash(kind === "dash" ? [6, 5] : []); g.beginPath(); g.moveTo(lx, y - 1); g.lineTo(lx + 22, y - 1); g.stroke(); g.setLineDash([]); }
+    g.fillStyle = INK; g.fillText(text, lx + 30, y + 3);
+  });
+  g.fillStyle = ROSE; g.textAlign = "left";
+  if (!narrow) g.fillText("tiny gaps: zeta " + pct(info.zetaShare) + ", random " + pct(info.randTheory), X(CLOSE) + 6, Y(YMAX) + 12);
+}
+
+function draw() {
+  g.fillStyle = BG; g.fillRect(0, 0, W, H);
+  const rowsH = Math.max(130, Math.min(190, H * 0.38));
+  drawRows(16, 4, W - 32, rowsH);
+  drawHist(16, rowsH + 14, W - 32, H - rowsH - 18);
+}
+
+function fillText() {
+  const I = info;
+  state.textContent = "gaps under a quarter of the usual: zeta's zeros " + pct(I.zetaShare) + ", random points " +
+    pct(I.randTheory) + "  ·  smallest gap " + I.minGap.toFixed(3) + " (near height " + fmt(I.minAt, 0) + ")";
+  $("checks").innerHTML = "<b>Checks.</b> Before drawing, the page runs the zeta wave's checks (two unrelated formulas " +
+    "for zeta agree; zero counts match θ(t)/π + 1; two deliberate mistakes are caught), then finds every zero up to " +
+    fmt(TOP, 0) + ", " + fmt(zeros.length, 0) + " of them, checking the count all the way (worst gap " +
+    I.worstCount.toFixed(2) + "). The average gap must be 1 usual gap: it is " + I.mean.toFixed(4) + ", and a wrong " +
+    "density (log t for log(t/2π)) must fail: it gives " + I.wrongMean.toFixed(3) + ". The random-matrix curve must " +
+    "have total 1 and average 1: " + I.mInt.toFixed(6) + " and " + I.mMean.toFixed(6) + ". And 200,000 random points " +
+    "must really follow the dashed curve: " + pct(I.randShare) + " of their gaps are under a quarter, against " +
+    pct(I.randTheory) + " from the curve. And 200,000 random 2×2 matrices must follow the gold curve: " + pct(I.m2Share) +
+    " of their gaps are under a quarter (curve " + pct(I.matrixShare) + "), and at every gap size their cumulative " +
+    "share stays within " + (100 * I.m2KS).toFixed(2) + " percentage points of the curve's (the bar is 0.40). The random-matrix curve puts " + pct(I.matrixShare) + " there; zeta's zeros " +
+    "put " + pct(I.zetaShare) + ". If any check fails, you get an error instead of a picture.";
+}
+
+(function start() {
+  const R = runChecks();
+  if (R.fail.length) { showError(R.fail.join("\n")); return; }
+  zeros = R.zeros;
+  let known = 400, worst = R.info.gap400;
+  (function more() {
+    if (dead) return;
+    const lo = known, hi = Math.min(TOP, known + 300), before = zeros.length;
+    ZETA.scan(lo, hi, 0.01, ZETA.theta, zeros);
+    for (let k = Math.max(1, before); k < zeros.length; k++) {
+      const m = (zeros[k - 1] + zeros[k]) / 2;
+      worst = Math.max(worst, Math.abs(k - (ZETA.theta(m) / Math.PI + 1)));
+    }
+    known = hi;
+    if (worst >= 1) { showError("zeros found do not match the counting formula (gap " + worst.toFixed(2) + "): a zero was missed"); return; }
+    if (known < TOP) {
+      state.textContent = "finding zeros… height " + fmt(known, 0) + " of " + fmt(TOP, 0);
+      setTimeout(more, 0);
+      return;
+    }
+    const S = spacingChecks(zeros);
+    if (S.fail.length) { showError(S.fail.join("\n")); return; }
+    info = S.info; info.worstCount = worst; gapsAll = S.gaps;
+    let k = 0;
+    for (let i = 1; i < gapsAll.length; i++) if (gapsAll[i] < gapsAll[k]) k = i;
+    lehmerIndex = k;
+    let near = 0;
+    while (near < zeros.length && zeros[near] < 1000) near++;
+    stretch = near;
+    fillText();
+    for (const b of [bShuffle, bStretch, bLehmer]) b.disabled = false;
+    resize();
+  })();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener("resize", resize);
+})();
+
+bShuffle.onclick = () => { seed++; draw(); };
+bStretch.onclick = () => { stretch = 20 + Math.floor(Math.random() * (zeros.length - 40)); seed++; draw(); };
+bLehmer.onclick = () => { stretch = lehmerIndex; draw(); };
+</script>
+</body>
+</html>

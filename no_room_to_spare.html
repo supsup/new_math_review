@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No Room to Spare</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --red: #ff8a8a; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 940px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  details { pointer-events: auto; margin-top: 4px; font-size: 13.5px; max-width: 940px; }
+  summary { cursor: pointer; color: var(--ink); }
+  details[open] { background: #141834; border: 1px solid var(--edge); border-radius: 8px; padding: 8px 12px; max-height: 62vh; overflow: auto; }
+  details p { color: var(--ink); margin: 8px 0 0; } details p b { color: var(--accent); font-weight: normal; } details a { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 42px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p, details { font-size: 12px; }
+    #state { height: 52px; bottom: 92px; font-size: 12.5px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Three panels sharing one horizontal axis, the height of a zero. Top: zeros as dots, on a line or off it. Middle: a wave whose crossings are the zeros on the line. Bottom: a map of every dial setting, showing each zero's path; as the dial goes down, two paths meet and the pair leaves the line."></canvas>
+<div id="hud">
+  <h1>No room to spare</h1>
+  <p>Zeta sits on a <b class="gold">dial</b>. Every setting has its own <span class="teal">wave</span>, and each place the wave crosses is a zero <span class="gold">on the line</span>.
+  Turn the dial down and two crossings slide together, touch, and lift off: that pair of zeros has <span class="red">left the line</span>.
+  The Riemann Hypothesis says that at zeta's own setting, 0, no zero has left. A theorem of 2018 says that at every setting below 0, some pair already has. So 0 would be exactly the edge.</p>
+  <details id="more"><summary>What am I looking at?</summary>
+    <p><b>The dial.</b> The zeta function belongs to a family of functions H<sub>t</sub>, one for each number t; the family goes back to de Bruijn and Newman, whose names the constant below carries. Setting t = 0 is zeta itself, in the standard form that keeps only the zeros that matter (heights 14.13, 21.02, 25.01, …). Turning the dial up never takes a zero off the line: once every zero is on it, they all stay. Turning it down lets zeros collide.</p>
+    <p><b>The three panels</b> share one horizontal axis, the height of a zero. <span class="gold">Top:</span> the zeros at the current setting, as dots on the line or off it. <span class="teal">Middle:</span> the wave at that setting (scaled so every crossing shows). <b>Bottom:</b> every setting at once. Each gold curve is one zero's path; where two paths meet, the pair leaves the line and continues, dashed red, off it. Drag up and down in the bottom panel to turn the dial.</p>
+    <p><b>The constant.</b> Newman showed there is one number Λ so that every zero is on the line exactly when t ≥ Λ. The Riemann Hypothesis is the statement Λ ≤ 0. Newman guessed Λ ≥ 0; Rodgers and Tao proved it (arXiv:1801.05914, 2018). Before November 2026 the known range was 0 ≤ Λ ≤ 0.2: Polymath proved 0.22 (arXiv:1904.12438), later improved to 0.2 by Platt and Trudgian (arXiv:2004.09765). If the announced proof of the Riemann Hypothesis stands, Λ is exactly 0: true, with no room to spare.</p>
+    <p><b>Why does this picture stay calm until t = <span id="n1">…</span>?</b> Because it shows only the first five zeros, and they are far apart. The reason usually given: higher up, zeros crowd together, and a close pair leaves much sooner. A rough rule, which this page tests on its own two collisions: two neighbours a distance g apart on this picture's own scale (twice the height) meet near t = −g²/8. The famous near miss at height 7005 (two zeros 0.0377 apart in height) would by that rule go near t = −0.00071, some five thousand times sooner than the first pair here. Lattice computed the actual meeting separately, at high precision: t = −0.000711 at height 7005.08 (tools/check_lehmer_heat.py; a plain check without libraries, tools/check_near_miss_meeting.py, agrees within 0.000000003 in t). For a pair this close the rule is almost exact. Lattice's close view of that pair as it meets: <a href="crew_visuals/lehmer_pair_meeting.html">Where two zeta zeros meet</a>. What the 2018 theorem proves is the limit: no setting below 0, however close to it, is safe.</p>
+    <p><b>Checked before drawing.</b> <span id="checks">Running…</span></p>
+    <p><b>Sources.</b> The family: H<sub>t</sub>(x) = ∫<sub>0</sub><sup>∞</sup> e<sup>tu²</sup> Φ(u) cos(xu) du with Φ(u) = Σ (2π²n⁴e<sup>9u</sup> − 3πn²e<sup>5u</sup>) exp(−πn²e<sup>4u</sup>), as written in the abstract of Rodgers and Tao, read at arXiv. Read there too: the hypothesis is equivalent to Λ ≤ 0; the paper establishes Λ ≥ 0. Polymath's abstract: Λ ≤ 0.22. Platt and Trudgian's 0.2 is their Corollary 2, read at source by Lattice. The two meetings in view were recomputed by Confluence (the same integral, separate code) and by Lattice (a different formula, high precision); all three agree. The years of the older papers (de Bruijn 1950, Newman 1976) are as listed in Wikipedia's article on the constant, not read by us in the originals. Every curve and number in the picture is computed by this page; none is a proof. The Riemann Hypothesis: announced as a Lean proof on 20 November 2026; see the card "Where are the zeros of the zeta function?". Page by Fixpoint for Marginalia.</p>
+  </details>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button id="bPlay" aria-pressed="false">Turn the dial down</button>
+  <button id="bZero">Zeta (t = 0)</button>
+  <button id="bN1">First pair leaves</button>
+  <button id="bN2">Second pair leaves</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const MATH = (function () {
+  const fail = [];
+  const PI = Math.PI, XMAX = 72, TMAX = 2, TMIN = -16, TSTEP = 0.1;
+
+  // Phi, and a table of it with the trapezoid weights folded in. c is 3 in the true formula; the control uses another value.
+  function Phi(u, c) {
+    let s = 0;
+    for (let n = 1; n < 30; n++) {
+      const a = PI * n * n * Math.exp(4 * u);
+      if (a > 740) break;
+      s += (2 * PI * PI * n * n * n * n * Math.exp(9 * u) - c * PI * n * n * Math.exp(5 * u)) * Math.exp(-a);
+    }
+    return s;
+  }
+  function table(h, c) {
+    const U = [], P = [];
+    for (let k = 0; k * h <= 1.2 + 1e-12; k++) { U.push(k * h); P.push(Phi(k * h, c) * (k === 0 ? 0.5 : 1) * h); }
+    return { U: Float64Array.from(U), P: Float64Array.from(P) };
+  }
+  const TAB = table(0.01, 3);
+  function weights(t, tab) { const w = new Float64Array(tab.U.length); for (let k = 0; k < w.length; k++) w[k] = tab.P[k] * Math.exp(t * tab.U[k] * tab.U[k]); return w; }
+  function H(x, w, U) { let s = 0; for (let k = 0; k < w.length; k++) s += w[k] * Math.cos(x * U[k]); return s; }
+  // H and its first three x-derivatives. The t-derivative is minus the second x-derivative (the heat equation run backwards).
+  function jet(x, w, U) {
+    let c0 = 0, s1 = 0, c2 = 0, s3 = 0;
+    for (let k = 0; k < w.length; k++) { const u = U[k], c = w[k] * Math.cos(x * u), s = w[k] * Math.sin(x * u); c0 += c; s1 += u * s; c2 += u * u * c; s3 += u * u * u * s; }
+    return { h: c0, hx: -s1, hxx: -c2, hxxx: s3 };
+  }
+  // complex argument x + iy: returns H and dH/dz as [re, im, dre, dim]
+  function Hc(x, y, w, U) {
+    let re = 0, im = 0, dre = 0, dim = 0;
+    for (let k = 0; k < w.length; k++) {
+      const u = U[k], cx = Math.cos(x * u), sx = Math.sin(x * u), ch = Math.cosh(y * u), sh = Math.sinh(y * u);
+      re += w[k] * cx * ch; im -= w[k] * sx * sh;
+      dre -= w[k] * u * sx * ch; dim -= w[k] * u * cx * sh;
+    }
+    return [re, im, dre, dim];
+  }
+  function realZeros(w, U, x0, x1, dx) {
+    const out = [], n = Math.round((x1 - x0) / dx);
+    let x = x0, prev = H(x, w, U);
+    for (let i = 1; i <= n; i++) {
+      const x2 = x0 + i * dx, cur = H(x2, w, U);
+      if (prev * cur < 0) {
+        let a = x, b = x2, fa = prev;
+        for (let k = 0; k < 48; k++) { const m = (a + b) / 2, fm = H(m, w, U); if (fa * fm <= 0) b = m; else { a = m; fa = fm; } }
+        out.push((a + b) / 2);
+      }
+      x = x2; prev = cur;
+    }
+    return out;
+  }
+
+  // zeta by Euler-Maclaurin summation: a completely separate route to zeta, used only to check the dial at t = 0
+  function zeta(sr, si) {
+    const N = 40; let re = 0, im = 0;
+    for (let n = 1; n < N; n++) { const L = Math.log(n), m = Math.exp(-sr * L); re += m * Math.cos(si * L); im -= m * Math.sin(si * L); }
+    const L = Math.log(N), m = Math.exp(-sr * L), pr = m * Math.cos(si * L), pi_ = -m * Math.sin(si * L);   // N^(-s)
+    re += pr / 2; im += pi_ / 2;
+    const d = (sr - 1) * (sr - 1) + si * si, qr = N * pr, qi = N * pi_;                                       // N^(1-s)/(s-1)
+    re += (qr * (sr - 1) + qi * si) / d; im += (qi * (sr - 1) - qr * si) / d;
+    const B = [1 / 12, -1 / 720, 1 / 30240, -1 / 1209600, 1 / 47900160];
+    let tr = sr, ti = si, pw = 1 / N;                                                                        // s(s+1)...(s+2k-2) and N^(-2k+1)
+    for (let k = 1; k <= 5; k++) {
+      re += B[k - 1] * pw * (tr * pr - ti * pi_); im += B[k - 1] * pw * (tr * pi_ + ti * pr);
+      for (let j = 2 * k - 1; j <= 2 * k; j++) { const ar = sr + j, nr = tr * ar - ti * si, ni = tr * si + ti * ar; tr = nr; ti = ni; }
+      pw /= N * N;
+    }
+    return [re, im];
+  }
+  const absZeta = (sr, si) => { const z = zeta(sr, si); return Math.hypot(z[0], z[1]); };
+
+  const info = {};
+  const U = TAB.U, w0 = weights(0, TAB);
+
+  // check 1: the integral does not depend on the step used to compute it
+  const fine = table(0.005, 3), wf = weights(0, fine);
+  let quad = 0;
+  for (const x of [0, 10, 40, 70]) { const a = H(x, w0, U), b = H(x, wf, fine.U); quad = Math.max(quad, Math.abs(a - b) / Math.abs(b)); }
+  info.quad = quad;
+  if (!(quad < 1e-6)) fail.push("the integral changes with the step size (by " + quad.toExponential(1) + ")");
+
+  // check 2: at t = 0 this really is zeta. The value at 0, and every zero, against the separate zeta routine.
+  const GAMMA_QUARTER = 3.625609908221908;
+  const z12 = zeta(0.5, 0)[0];
+  const xiHalf = -(1 / 8) * Math.pow(PI, -0.25) * GAMMA_QUARTER * z12;
+  info.h00 = H(0, w0, U); info.xi8 = xiHalf / 8;
+  if (!(Math.abs(info.h00 - info.xi8) < 1e-9)) fail.push("at t = 0 the value at 0 is not xi(1/2)/8: " + info.h00 + " against " + info.xi8);
+  const zeros0 = realZeros(w0, U, 0, XMAX, 0.05);
+  info.zeros0 = zeros0;
+  if (zeros0.length !== 5) fail.push("expected the first five zeros of zeta in view at t = 0, found " + zeros0.length);
+  let worst = 0, least = 1;
+  for (const x of zeros0) { worst = Math.max(worst, absZeta(0.5, x / 2)); least = Math.min(least, absZeta(0.5, x / 2 + 0.01)); }
+  info.zetaAtZeros = worst; info.zetaBeside = least;
+  if (!(worst < 1e-7)) fail.push("a zero found at t = 0 is not a zero of zeta (|zeta| = " + worst.toExponential(1) + ")");
+  if (!(least > 1e-3)) fail.push("CONTROL: the zeta check cannot tell a zero from a point 0.01 beside it");
+  // control: a wrong formula for Phi must be caught by the same test
+  const bad = table(0.01, 2.99), zb = realZeros(weights(0, bad), bad.U, 0, XMAX, 0.05);
+  info.badZeros = zb.length; info.badZeta = zb.length ? absZeta(0.5, zb[0] / 2) : 1;
+  if (!(info.badZeta > 1e-3)) fail.push("CONTROL: a wrong formula was not caught (|zeta| = " + info.badZeta.toExponential(1) + ")");
+
+  // every dial setting: the real zeros in view, row by row, from the top of the dial down
+  const rows = [];
+  for (let i = 0; i <= Math.round((TMAX - TMIN) / TSTEP); i++) { const t = TMAX - i * TSTEP; rows.push({ t: t, z: realZeros(weights(t, TAB), U, 0, XMAX, 0.1) }); }
+  // follow each zero; when the count drops by two, the closest neighbours of the row above have met
+  const tracks = rows[0].z.map(x => ({ pts: [[rows[0].t, x]], nose: -1 }));
+  let alive = tracks.map((_, i) => i);
+  const noses = [];
+  let countOk = true;
+  for (let r = 1; r < rows.length; r++) {
+    const z = rows[r].z;
+    if (z.length === alive.length) { alive.forEach((id, k) => tracks[id].pts.push([rows[r].t, z[k]])); continue; }
+    if (z.length !== alive.length - 2) { countOk = false; break; }
+    const prev = rows[r - 1].z; let best = 0;
+    for (let k = 1; k + 1 < prev.length; k++) if (prev[k + 1] - prev[k] < prev[best + 1] - prev[best]) best = k;
+    // polish the meeting point: solve H = 0 and dH/dx = 0 together for (x, t)
+    let x = (prev[best] + prev[best + 1]) / 2, t = rows[r - 1].t - TSTEP / 2;
+    for (let it = 0; it < 40; it++) {
+      const j = jet(x, weights(t, TAB), U);
+      // unknowns dx, dt:  hx dx + ht dt = -h ;  hxx dx + hxt dt = -hx ;  with ht = -hxx and hxt = -hxxx
+      const a = j.hx, b = -j.hxx, c = j.hxx, d = -j.hxxx, det = a * d - b * c;
+      const dx = (-j.h * d + j.hx * b) / det, dt = (-a * j.hx + c * j.h) / det;
+      x += dx; t += dt;
+      if (Math.abs(dx) < 1e-12 && Math.abs(dt) < 1e-12) break;
+    }
+    const nose = { t: t, x: x, a: alive[best], b: alive[best + 1], pair: [] };
+    tracks[nose.a].pts.push([t, x]); tracks[nose.b].pts.push([t, x]); tracks[nose.a].nose = tracks[nose.b].nose = noses.length;
+    noses.push(nose);
+    alive = alive.filter((_, k) => k !== best && k !== best + 1);
+    alive.forEach((id, k) => tracks[id].pts.push([rows[r].t, z[k]]));
+  }
+  if (!countOk) fail.push("zeros appeared, or left one at a time: the window or the step is wrong");
+  if (noses.length !== 2) fail.push("expected two pairs to leave the line in view, found " + noses.length);
+  info.counts = rows.map(r => r.z.length);
+
+  // after a meeting, follow the pair off the line: a complex zero x + iy and its mirror image x - iy
+  function complexZero(t, x, y) {
+    const w = weights(t, TAB);
+    for (let it = 0; it < 60; it++) {
+      const f = Hc(x, y, w, U), d = f[2] * f[2] + f[3] * f[3];
+      const dx = (f[0] * f[2] + f[1] * f[3]) / d, dy = (f[1] * f[2] - f[0] * f[3]) / d;
+      x -= dx; y -= dy;
+      if (Math.abs(dx) + Math.abs(dy) < 1e-13) break;
+    }
+    const f = Hc(x, y, w, U);
+    return { x: x, y: Math.abs(y), res: Math.hypot(f[0], f[1]) / Math.hypot(f[2], f[3]) };     // res: how far Newton would still move it
+  }
+  let worstRes = 0, growing = true;
+  for (const n of noses) {
+    let x = n.x, y = 0;
+    for (const r of rows) {
+      if (r.t >= n.t) continue;
+      if (y === 0) y = Math.sqrt(2 * (n.t - r.t));
+      const z = complexZero(r.t, x, y);
+      if (n.pair.length && z.y <= n.pair[n.pair.length - 1][2]) growing = false;
+      worstRes = Math.max(worstRes, z.res);
+      n.pair.push([r.t, z.x, z.y]); x = z.x; y = z.y;
+    }
+  }
+  info.worstRes = worstRes;
+  if (!(worstRes < 1e-6)) fail.push("a zero drawn off the line is not a zero (it is still " + worstRes.toExponential(1) + " away from one)");
+  if (!growing) fail.push("a pair that left the line came back toward it");
+
+  // check: just before two zeros meet, the square of their gap shrinks like 8 (t - t_meeting)
+  info.gapLaw = noses.map(n => { const z = realZeros(weights(n.t + 0.05, TAB), U, n.x - 2, n.x + 2, 0.01); return z.length === 2 ? (z[1] - z[0]) * (z[1] - z[0]) / (8 * 0.05) : 0; });
+  for (const g of info.gapLaw) if (!(g > 0.9 && g < 1.1)) fail.push("the gap between two meeting zeros does not shrink like the square root law (ratio " + g.toFixed(3) + ")");
+  // the rough rule quoted in the text, tested on the two meetings in view: it must give the right order of size and err on the early side
+  info.rough = noses.map(n => { const g = zeros0[n.b] - zeros0[n.a]; return -g * g / 8; });
+  noses.forEach((n, i) => { if (!(info.rough[i] > n.t && info.rough[i] < n.t / 2)) fail.push("the rough rule -g^2/8 is not within a factor of two, on the early side, for pair " + (i + 1)); });
+
+  function at(t) {      // everything the picture needs at one dial setting
+    const w = weights(t, TAB), z = realZeros(w, U, 0, XMAX, 0.05), off = [];
+    for (const n of noses) {
+      if (t >= n.t) continue;
+      let k = 0; while (k + 1 < n.pair.length && n.pair[k + 1][0] >= t) k++;
+      const g = n.pair.length ? n.pair[k] : [n.t, n.x, Math.sqrt(2 * (n.t - t))];
+      const guessY = t > g[0] ? Math.sqrt(2 * (n.t - t)) : g[2];
+      off.push(complexZero(t, g[1], Math.max(guessY, 1e-4)));
+    }
+    return { w: w, real: z, off: off };
+  }
+  return { fail: fail, info: info, rows: rows, tracks: tracks, noses: noses, at: at, H: H, U: U, XMAX: XMAX, TMAX: TMAX, TMIN: TMIN };
+})();
+
+/* ---------- drawing ---------- */
+(function () {
+  const cv = document.getElementById("c"), g = cv.getContext("2d"), err = document.getElementById("err");
+  const state = document.getElementById("state"), hud = document.getElementById("hud"), bar = document.getElementById("bar");
+  const I = MATH.info, N = MATH.noses;
+  if (MATH.fail.length) { err.style.display = "block"; err.textContent = "This page failed its own checks and is not drawing: " + MATH.fail.join("; "); document.getElementById("checks").textContent = "FAILED: " + MATH.fail.join("; "); return; }
+  const f2 = v => v.toFixed(2).replace("-", "−"), f4 = v => v.toFixed(4).replace("-", "−");
+  document.getElementById("n1").textContent = f2(N[0].t);
+  document.getElementById("checks").textContent =
+    "At t = 0 the page's five zeros are zeros of zeta by a separate formula (largest |zeta| there " + I.zetaAtZeros.toExponential(0) + "; 0.01 to the side it is at least " + I.zetaBeside.toFixed(3) +
+    "), and a wrong formula is caught. The zeros in view go 5, then 3, then 1 as the dial goes down, never up. " +
+    "Zeros 4 and 5 meet at t = " + f4(N[0].t) + " near height " + (N[0].x / 2).toFixed(2) + "; zeros 2 and 3 at t = " + f4(N[1].t) + " near height " + (N[1].x / 2).toFixed(2) +
+    ". Just before meeting, gap squared over 8 times the time left is " + I.gapLaw[0].toFixed(3) + " and " + I.gapLaw[1].toFixed(3) + " (the law says 1). " +
+    "The rough rule gives " + f2(I.rough[0]) + " and " + f2(I.rough[1]) + " for the two meetings: the right size, and too early, because the neighbours hold a pair apart.";
+
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const C = { ink: css("--ink"), dim: css("--dim"), gold: css("--accent"), teal: css("--teal"), red: css("--red"), edge: css("--edge"), stone: css("--stone") };
+  let W = 0, Hh = 0, L = {}, t = 0, playing = false, drag = false, last = 0;
+  const HMAX = MATH.XMAX / 2;                 // the picture's horizontal axis is height = x / 2
+  const OFFMAX = 2.7;                          // top panel: how far off the line the scale runs, in units of the real part of s
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth; Hh = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const sum = hud.querySelector("summary").getBoundingClientRect();
+    const top = sum.bottom + 10, bottom = state.getBoundingClientRect().top - 22, h = Math.max(120, bottom - top);
+    const x0 = W < 620 ? 34 : 54, x1 = W - 14, gap = 16;
+    const hs = Math.round(h * 0.24), hw = Math.round(h * 0.2), hm = h - hs - hw - 2 * gap;
+    L = { x0: x0, x1: x1, strip: [top, top + hs], wave: [top + hs + gap, top + hs + gap + hw], map: [top + hs + hw + 2 * gap, top + hs + hw + 2 * gap + hm] };
+  }
+  const X = ht => L.x0 + (L.x1 - L.x0) * ht / HMAX;
+  const TY = tt => L.map[0] + (L.map[1] - L.map[0]) * (MATH.TMAX - tt) / (MATH.TMAX - MATH.TMIN);
+  const small = () => W < 620;
+  function text(s, x, y, color, align, size) { g.fillStyle = color; g.font = (size || (small() ? 11 : 12.5)) + "px Georgia, serif"; g.textAlign = align || "left"; g.fillText(s, x, y); }
+
+  function draw() {
+    const A = MATH.at(t);
+    g.clearRect(0, 0, W, Hh);
+    // shared vertical guides at each zero on the line
+    g.strokeStyle = "rgba(242,193,78,0.16)"; g.lineWidth = 1;
+    for (const x of A.real) { g.beginPath(); g.moveTo(X(x / 2), L.strip[0]); g.lineTo(X(x / 2), L.wave[1]); g.stroke(); }
+
+    g.save(); g.beginPath(); g.rect(L.x0 - 7, L.strip[0] - 8, L.x1 - L.x0 + 14, L.wave[1] - L.strip[0] + 16); g.clip();
+    // top: the zeros, on the line or off it
+    const sy = (L.strip[0] + L.strip[1]) / 2, sk = (L.strip[1] - L.strip[0]) / 2 / OFFMAX;
+    g.strokeStyle = C.gold; g.globalAlpha = 0.55; g.beginPath(); g.moveTo(L.x0, sy); g.lineTo(L.x1, sy); g.stroke(); g.globalAlpha = 1;
+    text("the line", L.x0 + 4, sy - 6, C.gold);
+    text(small() ? "zeros: on the line, or off it" : "the zeros at this setting: on the line, or off it to both sides", L.x0, L.strip[0] + 12, C.dim);
+    for (const x of A.real) { g.fillStyle = C.gold; g.beginPath(); g.arc(X(x / 2), sy, 5, 0, 7); g.fill(); }
+    for (const z of A.off) {
+      if (z.x > MATH.XMAX) continue;        // drifted past the right edge: the readout says so
+      const px = X(z.x / 2), dy = Math.min(z.y / 2, OFFMAX) * sk;
+      g.strokeStyle = "rgba(255,138,138,0.45)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(px, sy - dy); g.lineTo(px, sy + dy); g.stroke(); g.setLineDash([]);
+      g.fillStyle = C.red; for (const s of [-1, 1]) { g.beginPath(); g.arc(px, sy + s * dy, 5, 0, 7); g.fill(); }
+    }
+
+    // middle: the wave, scaled so that every crossing shows
+    const wy = (L.wave[0] + L.wave[1]) / 2, wk = (L.wave[1] - L.wave[0]) / 2 - 3;
+    g.strokeStyle = C.edge; g.beginPath(); g.moveTo(L.x0, wy); g.lineTo(L.x1, wy); g.stroke();
+    text(small() ? "the wave" : "the wave at this setting", L.x0, L.wave[0] + 2, C.dim);
+    const n = Math.max(160, Math.round((L.x1 - L.x0) / 1.5));
+    g.strokeStyle = C.teal; g.lineWidth = 2; g.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const x = MATH.XMAX * i / n, v = MATH.H(x, A.w, MATH.U) * Math.exp(Math.PI * x / 8) / Math.pow(1 + x / 2, 1.75);
+      const y = wy - wk * v / Math.sqrt(v * v + 0.08);
+      if (i) g.lineTo(X(x / 2), y); else g.moveTo(X(x / 2), y);
+    }
+    g.stroke(); g.lineWidth = 1;
+    for (const x of A.real) { g.fillStyle = C.gold; g.beginPath(); g.arc(X(x / 2), wy, 3, 0, 7); g.fill(); }
+
+    g.restore();
+    // bottom: every setting of the dial
+    const y0 = TY(0);
+    g.fillStyle = "rgba(79,209,197,0.07)"; g.fillRect(L.x0, L.map[0], L.x1 - L.x0, y0 - L.map[0]);
+    g.fillStyle = "rgba(255,138,138,0.05)"; g.fillRect(L.x0, y0, L.x1 - L.x0, L.map[1] - y0);
+    g.strokeStyle = C.edge; g.strokeRect(L.x0, L.map[0], L.x1 - L.x0, L.map[1] - L.map[0]);
+    g.strokeStyle = C.ink; g.globalAlpha = 0.7; g.beginPath(); g.moveTo(L.x0, y0); g.lineTo(L.x1, y0); g.stroke(); g.globalAlpha = 1;
+    text(small() ? "t = 0: zeta" : "t = 0: zeta itself. Here and above: every zero on the line, if the 2026 proof stands", L.x0 + 6, y0 - 5, C.ink);
+    text(small() ? "below 0: some pair is off (2018)" : "below 0: somewhere, a pair is already off the line (proved 2018)", L.x0 + 6, y0 + 15, C.red);
+    for (const tt of [0, -4, -8, -12, -16]) text(String(tt).replace("-", "−"), L.x0 - 6, TY(tt) + 4, C.dim, "right");
+    text("t", L.x0 - 6, TY(1.6) + 4, C.dim, "right");
+    for (const ht of [10, 20, 30]) { text(String(ht), X(ht), L.map[1] + 14, C.dim, "center"); g.strokeStyle = "rgba(57,64,110,0.5)"; g.beginPath(); g.moveTo(X(ht), L.map[0]); g.lineTo(X(ht), L.map[1]); g.stroke(); }
+    text("height", L.x1, L.map[1] + 14, C.dim, "right");
+    g.save(); g.beginPath(); g.rect(L.x0, L.map[0], L.x1 - L.x0, L.map[1] - L.map[0]); g.clip();
+    g.lineWidth = 2; g.strokeStyle = C.gold;
+    for (const tr of MATH.tracks) { g.beginPath(); tr.pts.forEach((p, i) => { if (i) g.lineTo(X(p[1] / 2), TY(p[0])); else g.moveTo(X(p[1] / 2), TY(p[0])); }); g.stroke(); }
+    g.strokeStyle = C.red; g.setLineDash([5, 4]);
+    for (const nn of N) { g.beginPath(); g.moveTo(X(nn.x / 2), TY(nn.t)); for (const p of nn.pair) g.lineTo(X(p[1] / 2), TY(p[0])); g.stroke(); }
+    g.setLineDash([]); g.lineWidth = 1; g.restore();
+    N.forEach(nn => { g.fillStyle = C.ink; g.beginPath(); g.arc(X(nn.x / 2), TY(nn.t), 4, 0, 7); g.fill(); text((small() ? "t = " : "leaves at t = ") + f2(nn.t), X(nn.x / 2) - 9, TY(nn.t) + (small() ? 16 : 4), C.ink, "right"); });
+    text(small() ? "gold: on the line \u00b7 dashed: off it" : "gold: a zero on the line \u00b7 dashed red: a pair off the line", L.x0 + 6, L.map[1] - 8, C.dim);
+    // the dial's pointer
+    const ty = TY(t);
+    g.strokeStyle = C.teal; g.lineWidth = 2; g.beginPath(); g.moveTo(L.x0, ty); g.lineTo(L.x1, ty); g.stroke(); g.lineWidth = 1;
+    g.fillStyle = C.teal; g.beginPath(); g.moveTo(L.x1, ty); g.lineTo(L.x1 + 10, ty - 6); g.lineTo(L.x1 + 10, ty + 6); g.fill();
+    for (const x of A.real) { g.fillStyle = C.gold; g.beginPath(); g.arc(X(x / 2), ty, 4, 0, 7); g.fill(); }
+    for (const z of A.off) if (z.x <= MATH.XMAX) { g.fillStyle = C.red; g.beginPath(); g.arc(X(z.x / 2), ty, 4, 0, 7); g.fill(); }
+
+    const on = A.real.length, seen = A.off.filter(z => z.x <= MATH.XMAX), off = seen.length, gone = A.off.length - off;
+    state.innerHTML = "dial at t = " + f2(t) + ": " + on + (on === 1 ? " zero" : " zeros") + " on the line in view" +
+      (off ? ", " + off + (off === 1 ? " pair" : " pairs") + " off it <i>(by " + seen.map(z => (z.y / 2).toFixed(2)).join(" and ") + " to each side)</i>" : (A.off.length ? "" : " <i>(all of the first five)</i>")) +
+      (gone ? " <i>· the first pair has drifted out of view to the right</i>" : "") +
+      (t >= 0 ? " <i>· at 0 and above: every zero on the line, if the 2026 proof stands</i>" : (A.off.length ? "" : " <i>· below 0: some pair of zeros has already left the line, though none of these five</i>"));
+  }
+
+  function setT(v) { t = Math.max(MATH.TMIN, Math.min(MATH.TMAX, v)); draw(); }
+  function play(on) { playing = on; const b = document.getElementById("bPlay"); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Pause" : "Turn the dial down"; if (on) { if (t <= MATH.TMIN + 0.01) t = MATH.TMAX; last = 0; requestAnimationFrame(tick); } }
+  function tick(now) { if (!playing) return; if (last) setT(t - (now - last) * 0.0011); last = now; if (t <= MATH.TMIN) { play(false); return; } requestAnimationFrame(tick); }
+  document.getElementById("bPlay").onclick = () => play(!playing);
+  document.getElementById("bZero").onclick = () => { play(false); setT(0); };
+  document.getElementById("bN1").onclick = () => { play(false); setT(N[0].t - 0.4); };
+  document.getElementById("bN2").onclick = () => { play(false); setT(N[1].t - 0.4); };
+  function fromPointer(e) { const r = cv.getBoundingClientRect(), y = e.clientY - r.top; setT(MATH.TMAX - (MATH.TMAX - MATH.TMIN) * (y - L.map[0]) / (L.map[1] - L.map[0])); }
+  cv.addEventListener("pointerdown", e => { const y = e.clientY; if (y >= L.map[0] - 8 && y <= L.map[1] + 8) { drag = true; play(false); cv.setPointerCapture(e.pointerId); fromPointer(e); } });
+  cv.addEventListener("pointermove", e => { if (drag) fromPointer(e); });
+  cv.addEventListener("pointerup", () => { drag = false; });
+  window.addEventListener("keydown", e => { if (e.key === "ArrowDown") { play(false); setT(t - 0.1); e.preventDefault(); } if (e.key === "ArrowUp") { play(false); setT(t + 0.1); e.preventDefault(); } });
+  window.addEventListener("resize", () => { layout(); draw(); });
+  document.getElementById("more").addEventListener("toggle", () => { layout(); draw(); });
+
+  layout();
+  const m = /^#t=(-?[0-9.]+)$/.exec(location.hash);
+  if (m) setT(parseFloat(m[1])); else { setT(0); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) { t = MATH.TMAX; play(true); } }
+})();
+</script>
+</body>
+</html>

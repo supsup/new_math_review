@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Move a mark, change the prime</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f2f0e6; color: #29343c;
+      --muted: #57646a; --blue: #335b6a; --blue-pale: #d8e9eb; --line: #a8b8b9;
+      --gold: #eed7a0; --paper: #fffdf1;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 60rem); margin: auto; padding: clamp(1.85rem,6vw,4.1rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.85rem,8vw,5.7rem)/.96 Georgia,serif; letter-spacing: -.065em; text-wrap: balance; }
+    h2 { font: 1.65rem/1.15 Georgia,serif; }
+    p { line-height: 1.54; }
+    .intro { max-width: 63ch; color: var(--muted); margin: .86rem 0 1.15rem; }
+    .pair { display: grid; grid-template-columns: minmax(0,1.02fr) minmax(0,1fr); gap: .8rem; align-items: start; margin-top: .8rem; }
+    .panel { background: var(--paper); padding: .82rem clamp(.52rem,2vw,1rem) 1rem; border: 1px solid var(--line); border-radius: .62rem; }
+    button { min-height: 2.7rem; padding: .42rem .68rem; color: #fff; background: var(--blue); border: 1px solid var(--blue); border-radius: .38rem; font: inherit; font-weight: 650; cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34c24; outline-offset: 3px; }
+    table { width: 100%; table-layout: fixed; border-spacing: 3px; text-align: center; font-variant-numeric: tabular-nums; }
+    th { color: var(--muted); font-size: .83rem; font-weight: 600; }
+    td { height: clamp(1.76rem,4.5vw,2.45rem); padding: 0; background: #edeae2; border-radius: .24rem; }
+    td[data-one="true"] { background: var(--blue-pale); font-weight: 650; }
+    tr[data-moved="true"] td[data-track="true"] { box-shadow: inset 0 0 0 1px #a97743; }
+    tr[data-moved="true"] td[data-track="true"][data-one="true"] { background: var(--gold); }
+    .det { margin: .55rem 0; color: var(--blue); font: 1.5rem/1.4 Georgia,serif; }
+    .ranks { padding: 0 0 0 1.15rem; line-height: 1.55; }
+    .ranks li { margin: .32rem 0; }
+    .derivation { color: var(--muted); }
+    details { max-width: 75ch; border-top: 1px solid var(--line); margin-top: 1rem; padding-top: .72rem; }
+    details p { margin-top: .55rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--blue); text-underline-offset: .18em; }
+    @media (max-width: 42rem) { .pair { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { table { border-spacing: 2px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Move a mark, change the prime</h1>
+    <p class="intro">Move the marked 1 one square to the right. The board still has 23 ones, but determinant 17 becomes 19. The rank drop switches primes with it.</p>
+    <button type="button" id="move">Move from C to D</button>
+    <div class="pair">
+      <div class="panel">
+        <table id="board" aria-label="Eight by eight binary board with one movable mark">
+          <thead><tr><th scope="col">Row</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">D</th><th scope="col">E</th><th scope="col">F</th><th scope="col">G</th><th scope="col">H</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <section class="panel" aria-labelledby="title-result">
+        <h2 id="title-result">What the move changes</h2>
+        <p class="det" id="det" aria-live="polite"></p>
+        <ul class="ranks" id="ranks"></ul>
+        <p class="derivation" id="step"></p>
+      </section>
+    </div>
+    <details>
+      <summary>Why replacing one square adds two</summary>
+      <p>Expand the determinant along row 7. The numbers multiplying the entries in columns A through H are 10, −6, 3, 5, 4, −4, 1, −1. They depend only on the other seven rows. The 1s in A and E always contribute 10+4. The movable 1 adds 3 in C and 5 in D.</p>
+      <p>Each determinant is prime. Reducing modulo that prime makes the determinant zero, while a seven-row minor of magnitude 1 keeps seven directions independent. Both boards use the fewest ones possible for their respective primes. <a href="more_rows_fewer_ones.html">Compare the mod-17 minimum with seven rows</a> · <a href="global_rank_minima.txt">Read the sparsity proof</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const original=['00000011','00001100','00010101','00100110','01010010','01101001','10101000','11000100'].map(row=>[...row].map(Number));
+      const button = document.getElementById('move');
+      const table = document.querySelector('#board tbody');
+      const ranks = document.getElementById('ranks');
+      let moved = false;
+
+      function determinant(matrix) {
+        if (matrix.length===1) return matrix[0][0];
+        return matrix[0].reduce((s,value,k)=>s+(value ? value*(-1)**k*determinant(matrix.slice(1).map(row=>row.filter((_,i)=>i!==k))) : 0),0);
+      }
+
+      function render() {
+        const board = original.map(row=>[...row]);
+        if (moved) [board[6][2],board[6][3]] = [0,1];
+        table.replaceChildren();
+        board.forEach((bits,r) => {
+          const tr = table.insertRow();
+          tr.dataset.moved = r===6;
+          const label = document.createElement('th'); label.scope = 'row'; label.textContent = r+1;
+          tr.append(label);
+          bits.forEach((bit,c) => {
+            const cell = tr.insertCell(); cell.textContent = bit;
+            cell.dataset.one = bit===1; cell.dataset.track = c===2 || c===3;
+          });
+        });
+        const value = determinant(board);
+        document.getElementById('det').textContent = `Determinant ${value} · ${board.flat().filter(Boolean).length} ones`;
+        ranks.replaceChildren(...[17,19].map(p => {
+          const li = document.createElement('li');
+          li.textContent = `Modulo ${p}, rank ${value%p===0?7:8}.`;
+          return li;
+        }));
+        document.getElementById('step').textContent = moved ? 'The move replaces a contribution of 3 with a contribution of 5.' : 'The marked 1 in column C contributes 3.';
+        button.textContent = moved ? 'Move from D to C' : 'Move from C to D';
+      }
+
+      button.addEventListener('click', () => { moved = !moved; render(); });
+      render();
+    })();
+  </script>
+</body>
+</html>

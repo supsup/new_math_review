@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Four loops, every angle</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf8ef;
+      --ink: #2c333b;
+      --muted: #535d69;
+      --line: #c3ccd2;
+      --blue: #236386;
+      --orange: #974426;
+      background: #e7ebef;
+      color: var(--ink);
+      font: 100%/1.54 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .16em; }
+    h1 { font: clamp(2.55rem, 8vw, 4.65rem)/1.05 Georgia, serif; letter-spacing: -.047em; margin: .55rem 0 .72rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    figure { margin: 1rem 0; padding: .95rem; background: #eef2f3; border: 1px solid var(--line); border-radius: .4rem; }
+    .control { display: grid; grid-template-columns: 1fr auto; gap: .08rem .65rem; }
+    label { font-weight: 650; }
+    output, .height, .axes { font-variant-numeric: tabular-nums; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.5rem; margin: 0; accent-color: var(--orange); }
+    :focus-visible { outline: .17rem solid var(--orange); outline-offset: .15rem; }
+    .timeline { --angle: 25%; display: grid; grid-template-columns: auto 1fr; gap: .37rem .75rem; margin: .35rem 0 0; align-items: center; }
+    .height { font-size: .85rem; }
+    .track { height: 1.45rem; border: 1px solid #c2cdd2; position: relative; background: #e4e9ec; }
+    .track::after { position: absolute; content: ""; height: calc(100% + .14rem); width: 2px; left: var(--angle); top: -.07rem; background: var(--orange); }
+    .arc { position: absolute; top: .17rem; bottom: .17rem; background: #b1c8d6; border: 1px solid #8caaba; }
+    .arc.active { background: var(--blue); border-color: var(--blue); }
+    .axes { display: flex; justify-content: space-between; grid-column: 2; color: var(--muted); font-size: .77rem; }
+    #count { color: var(--blue); font-weight: 650; margin: .9rem 0 .32rem; }
+    figcaption { font-size: .86rem; }
+    ol { padding-left: 1.35rem; }
+    li { margin-bottom: .4rem; }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: .9rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="../how_a_zero_leaves_the_line.html">Back to the dial</a>
+    <h1>Four loops, every angle</h1>
+    <p class="intro">Real mixtures of two mod 5 L-functions can send pairs of zeros off the center line. In the height band from 76 to 96, four loops account for every such pair, across the whole half-turn of the mixing dial.</p>
+    <figure>
+      <div class="control">
+        <label for="angle">Mixing angle τ</label><output id="angle-value" for="angle"></output>
+        <input id="angle" type="range" min="0" max="180" step=".5" value="45">
+      </div>
+      <div class="timeline" id="timeline" aria-hidden="true">
+        <span class="height">76.96–77.50</span><span class="track"><span class="arc" data-start="128.113004" data-end="157.080635"></span></span>
+        <span class="height">80.90–83.98</span><span class="track"><span class="arc" data-start="99.425927" data-end="161.330623"></span></span>
+        <span class="height">85.10–86.00</span><span class="track"><span class="arc" data-start="23.733657" data-end="84.930642"></span></span>
+        <span class="height">88.47–91.26</span><span class="track"><span class="arc" data-start="109.621179" data-end="167.330028"></span></span>
+        <span class="axes"><span>0°</span><span>90°</span><span>180°</span></span>
+      </div>
+      <p id="count" aria-live="polite"></p>
+      <figcaption>Each row gives a loop’s height window. A blue interval marks the angles for which its pair is off the line. At 45° the third row holds the Davenport–Heilbronn pair. At 135° three pairs are out at once.</figcaption>
+    </figure>
+    <p>Multiply the first completed function <var>A</var> by cos τ and the second <var>B</var> by sin τ, then add. The phases make each function real on the center line. Changing the angle by 180° changes the sign of the mixture and leaves its zeros where they were. <a href="mod5_gauss_sum.html">See the four arrows that set the phases</a></p>
+    <ol>
+      <li>At angle zero, a certified count finds 14 zeros in the band. All 14 are on the line.</li>
+      <li>At every angle, the top and bottom of the band can only have a simple zero on the line. Such a zero stays on the line as it crosses the boundary. Off-line roots cannot cross the top or bottom.</li>
+      <li>Far to the left or right the mixture stays away from zero. Inside the band, an off-line pair can appear or disappear only at a double root on the line. The eight checked contacts already belong to the four loops.</li>
+    </ol>
+    <details>
+      <summary>How the boundary stays clear</summary>
+      <p>Two complex numbers <var>A</var>(<var>s</var>) and <var>B</var>(<var>s</var>) are independent over the reals if Im(<var>A</var> <span aria-label="conjugate of B">B̄</span>) is nonzero. Then a real mixture cannot vanish. The two components share a nonzero completion factor at these heights, so it is enough to make this check after dividing out that factor.</p>
+      <p>At each horizontal edge, reflection gives Im(<var>A</var> B̄) = 0 exactly on the line. Right next to the line the reduced expression has a strictly negative derivative as the real coordinate increases. Further to the right, interval arithmetic finds a strictly negative value over each of 77 panels at height 76 and 98 panels at height 96. At the line itself the Wronskian is nonzero, which rules out common zeros and multiple mixture roots. Reflection gives the left side.</p>
+      <p>At real part at least 4, each Dirichlet series differs from 1 by at most 2<sup>−4</sup> + ∫<sub>2</sub><sup>∞</sup> <var>x</var><sup>−4</sup> d<var>x</var> = 5/48. Thus the product of one series and the conjugate of the other differs from 1 by less than ¼. The relative phase is the root number ε, whose imaginary part is greater than ½. It takes more than this error to make the imaginary product vanish. Reflection covers real part at most −3. <a href="https://dlmf.nist.gov/25.15.E1">The series</a> · <a href="https://dlmf.nist.gov/25.15.E5">The functional equation</a> · <a href="https://dlmf.nist.gov/25.15.E6">The root number’s Gauss sum</a></p>
+    </details>
+    <details>
+      <summary>How the counts fit together</summary>
+      <p>At angle zero the Euler product and the functional equation put all zeros of the chosen character between real parts −½ and 1½ in this band. The winding count uses 1,204 certified contour panels and gives 14. Signs of the phase-rotated function on the center line give 14 disjoint brackets, so every zero has been accounted for. <a href="https://dlmf.nist.gov/25.15.E2">The Euler product</a></p>
+      <p>As the angle changes, zeros vary continuously as a collection, counted with multiplicity. A simple zero on the line stays there by reflection. A collision off the line may move or split roots off the line, and the total there is preserved locally. The only changes in that total can come from the eight contacts. Each is a simple fold on the line. The separate loop replay certifies its pair from leave to return in a rectangle with zero-free boundary. Since each change is accounted for and the initial off-line count is zero, the four rectangles contain all off-line roots for all angles in the band.</p>
+      <p>Run <a href="../tools/check_mirror_mix_band.py">the band checker</a> for the boundary and starting count, and <a href="../tools/check_mirror_mix_loops.py">the loop checker</a> for the folds and the continuation inside each rectangle. The <a href="mirror_mix_loops.txt">loop notes</a> give the complementary argument.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const angle = document.getElementById('angle');
+      const timeline = document.getElementById('timeline');
+      const count = document.getElementById('count');
+      const shownAngle = document.getElementById('angle-value');
+      const arcs = Array.from(timeline.querySelectorAll('.arc'), node => {
+        const start = Number(node.dataset.start), end = Number(node.dataset.end);
+        node.style.left = 100 * start / 180 + '%';
+        node.style.width = 100 * (end - start) / 180 + '%';
+        return { node, start, end };
+      });
+      function update() {
+        const tau = angle.valueAsNumber;
+        shownAngle.textContent = tau + '°';
+        timeline.style.setProperty('--angle', 100 * tau / 180 + '%');
+        let activePairs = 0;
+        for (const { node, start, end } of arcs) {
+          const active = start < tau && tau < end;
+          node.classList.toggle('active', active);
+          if (active) activePairs++;
+        }
+        count.textContent = activePairs === 1 ? '1 pair off the line'
+          : activePairs === 0 ? 'All zeros in the band are on the line' : activePairs + ' pairs off the line';
+      }
+      angle.addEventListener('input', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

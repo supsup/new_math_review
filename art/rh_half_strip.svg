@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="The critical strip from 0 to 1: a zero at one quarter would have a mirror image at three quarters, and the right half is proved empty" font-family="Georgia, serif">
+<rect width="900" height="360" fill="#fbf9f4"/>
+<text x="40.0" y="34.0" font-size="17" fill="#8a4b16" text-anchor="start">Rule out the right half, and the mirror does the rest</text>
+<text x="40.0" y="56.0" font-size="12" fill="#5b5348" text-anchor="start">A zero at ¼ would have a partner at ¾. The proof shows the right half of the strip is empty, so both are gone.</text>
+<rect x="450.0" y="86" width="280.0" height="200" fill="#f3dcd8"/>
+<rect x="170.0" y="86" width="280.0" height="200" fill="#f6ece9"/>
+<line x1="170.0" x2="170.0" y1="86" y2="286" stroke="#5b5348"/>
+<line x1="730.0" x2="730.0" y1="86" y2="286" stroke="#5b5348"/>
+<line x1="450.0" x2="450.0" y1="78" y2="294" stroke="#1f7a52" stroke-width="3"/>
+<text x="170.0" y="312.0" font-size="14" fill="#1d1b18" text-anchor="middle">0</text>
+<text x="310.0" y="312.0" font-size="14" fill="#1d1b18" text-anchor="middle">¼</text>
+<text x="450.0" y="312.0" font-size="14" fill="#1f7a52" text-anchor="middle">½</text>
+<text x="590.0" y="312.0" font-size="14" fill="#1d1b18" text-anchor="middle">¾</text>
+<text x="730.0" y="312.0" font-size="14" fill="#1d1b18" text-anchor="middle">1</text>
+<circle cx="310.0" cy="176.0" r="9" fill="#fbf9f4" stroke="#b83a2e" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="303.0" y1="169.0" x2="317.0" y2="183.0" stroke="#b83a2e" stroke-width="2"/>
+<circle cx="590.0" cy="176.0" r="9" fill="#fbf9f4" stroke="#b83a2e" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="583.0" y1="169.0" x2="597.0" y2="183.0" stroke="#b83a2e" stroke-width="2"/>
+<path d="M324.0 176.0 L576.0 176.0" stroke="#5b5348" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>
+<text x="380.0" y="162.0" font-size="12" fill="#5b5348" text-anchor="middle">mirror image</text>
+<text x="310.0" y="206.0" font-size="12" fill="#b83a2e" text-anchor="middle">a zero here?</text>
+<text x="590.0" y="206.0" font-size="12" fill="#b83a2e" text-anchor="middle">then one here</text>
+<text x="590.0" y="106.0" font-size="13" fill="#b83a2e" text-anchor="middle">proved empty</text>
+<text x="310.0" y="106.0" font-size="13" fill="#b83a2e" text-anchor="middle">so empty too</text>
+<circle cx="450.0" cy="126.0" r="5" fill="#1f7a52"/>
+<circle cx="450.0" cy="170.0" r="5" fill="#1f7a52"/>
+<circle cx="450.0" cy="212.0" r="5" fill="#1f7a52"/>
+<circle cx="450.0" cy="258.0" r="5" fill="#1f7a52"/>
+<text x="462.0" y="278.0" font-size="12" fill="#1f7a52" text-anchor="start">every nontrivial zero is on this line</text>
+<text x="170.0" y="334.0" font-size="12" fill="#5b5348" text-anchor="start">real part of the input (the strip runs on upward; the green dots only mark the idea, not real heights)</text>
+</svg>

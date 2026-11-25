@@ -1,0 +1,300 @@
+{
+"revision": "6193bb5",
+"tokens": 155191492,
+"distinct_tokens": 1110863,
+"plain_theorems": 811394,
+"named_once": 17949,
+"named_once_lines": 193232,
+"named_once_in_main": 4,
+"declarations": 1057807,
+"reached": 983899,
+"unreached": 73908,
+"theorems": 818755,
+"unreached_theorems": 49856,
+"theorem_lines": 13683896,
+"unreached_theorem_lines": 715833,
+"declaration_lines": 15237351,
+"unreached_lines": 920460,
+"root_declarations": 13070,
+"root_tokens": 85049,
+"by_top": [
+[
+"Development",
+387754,
+10497717
+],
+[
+"Formalism",
+433458,
+2982801
+],
+[
+"GroundTheory",
+62095,
+1008768
+],
+[
+"ReciprocityTheory",
+31367,
+518534
+],
+[
+"CompanionTheory",
+3003,
+172117
+],
+[
+"PositivityTheory",
+2783,
+49466
+],
+[
+"Lemmata",
+0,
+7912
+],
+[
+"Statements",
+0,
+15
+],
+[
+"Supplements",
+0,
+11
+],
+[
+"Main",
+0,
+10
+]
+],
+"by_two": [
+[
+"Development.AbelianVarietyTheory",
+319249,
+6894852
+],
+[
+"Formalism.LocalToGlobal",
+132128,
+880196
+],
+[
+"Formalism.SharpRestriction",
+99797,
+670171
+],
+[
+"Formalism.HermitianCurvature",
+39565,
+436708
+],
+[
+"Development.AutomorphicArithmetic",
+27757,
+1578717
+],
+[
+"Formalism.PeriodIntegrals",
+24938,
+407595
+],
+[
+"Development.AutomorphicSpectrum",
+24701,
+1025933
+],
+[
+"GroundTheory.HeightsAndTheta",
+20731,
+562993
+],
+[
+"Formalism.GL3MeanSquares",
+19987,
+73639
+],
+[
+"ReciprocityTheory.ReductiveGroups",
+19205,
+375796
+],
+[
+"Formalism.WachLatticeTwists",
+18684,
+35673
+],
+[
+"GroundTheory.AutomorphicForms",
+15937,
+141428
+]
+],
+"probe": {
+"stmt3c": [
+1,
+0
+],
+"DefiniteChainFromRallis": [
+1,
+0
+],
+"familyDefiniteLiftChain": [
+1,
+0
+],
+"DefiniteLiftChain": [
+3,
+3
+],
+"duty_seven_library": [
+1,
+1
+],
+"PageWin": [
+2,
+2
+],
+"LiftChain": [
+1,
+1
+],
+"ThetaChainStatement": [
+1,
+0
+],
+"ThetaLiftChainTyped": [
+1,
+1
+],
+"ConstantFreeStatements": [
+1,
+0
+],
+"ConstantFreeFamily": [
+1,
+0
+],
+"constant_free_items_of_parts": [
+1,
+0
+],
+"InChain": [
+2,
+2
+],
+"ChainTied": [
+1,
+1
+],
+"TiePts": [
+1,
+1
+],
+"TwoUpOK": [
+1,
+1
+],
+"twoUpOK_of_steps": [
+1,
+1
+],
+"tLiftK": [
+1,
+1
+],
+"TLiftK": [
+1,
+1
+],
+"IsLift": [
+48,
+48
+],
+"geoOne_holds": [
+1,
+1
+],
+"GeoOne": [
+1,
+1
+],
+"toCoreK": [
+1,
+1
+],
+"coreAll_of": [
+1,
+1
+],
+"galoisLocalGlobal_of_geometry_lift": [
+1,
+1
+],
+"recTExists": [
+1,
+1
+],
+"vwin_of_row": [
+1,
+1
+],
+"VWin": [
+1,
+1
+],
+"rh_of_every": [
+1,
+1
+],
+"everyCharacter": [
+1,
+1
+],
+"EveryCharacter": [
+1,
+1
+],
+"plugAll": [
+1,
+0
+],
+"plugWin": [
+1,
+0
+],
+"imprimitive": [
+1,
+1
+],
+"zeroFreeAll_of_topG": [
+1,
+1
+],
+"level_gm_le_on_family_scales": [
+1,
+1
+],
+"every_character_of_literature_of_vWin": [
+1,
+1
+],
+"deligne_ribet_of_literature": [
+1,
+1
+],
+"UnusedSlot72": [
+1,
+1
+],
+"TopCovolSlim2": [
+0,
+0
+],
+"topCovolSlim2_use_alt_alt": [
+1,
+1
+]
+}
+}

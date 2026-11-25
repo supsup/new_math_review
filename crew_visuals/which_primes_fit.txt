@@ -1,0 +1,86 @@
+When seven rows aren’t enough
+
+Can one little 0–1 board lose rank modulo 2, 3 and 5 at once? Yes. It takes at least eight rows. Eight rows are also enough for each of the primes 29 and 31, and seven rows are too few for either.
+
+An 8 × 8 board with determinant 30
+
+11010000
+01000110
+10101010
+01110011
+10100101
+01001001
+10010111
+00011110
+
+Thirty is 2 × 3 × 5, so precisely those three primes make the rank drop.
+
+An 8 × 8 board with determinant 31
+
+00100101
+10011101
+00111110
+11000100
+10110000
+01010011
+10100010
+01101000
+
+Change the second row to 10011111. One entry changes from 0 to 1. The determinant falls from 31 to 29, so the offending prime changes too. Exact integer elimination and the signed permutation formula agree on all three values.
+
+Why seven rows cannot work
+
+For a 7 × 7 binary matrix A, replace each 0 with +1 and each 1 with −1. Add a top row and a left column of +1s to get a square array B of size eight. Subtracting the top row from every other row shows that |det B| = 128 |det A|. Hadamard’s bound gives |det B| ≤ 8⁴, hence |det A| ≤ 32.
+
+There is a gap just below 32. If two rows of B have an inner product of magnitude at least four, project one away from the other. Its squared length falls from 8 to at most 6. Hadamard then gives |det A| ≤ 32√(3/4) < 28.
+
+Otherwise group the rows by the parity of their number of minus signs. Rows of the same parity have inner products divisible by four, so distinct rows in each group are orthogonal. Across the two groups the inner products are all +2 or −2. If there is only one group, the array is orthogonal and |det A| = 32.
+
+If both groups occur, let m ≤ 4 be the size of the smaller group and C the matrix of inner products between groups. Dividing the Gram matrix by 8 leaves diagonal blocks equal to the identity and off-diagonal block C/8. Its determinant is the product of 1 − σ²/64 over the m singular values σ of C, including zeros if needed. The sum of the σ² is 4m(8 − m), since every entry of C has magnitude two. The arithmetic–geometric mean bounds the product by (1 − (8 − m)/16)^m, which is at most 9/16 for m = 1, 2, 3, 4. Thus |det A| ≤ 32 × 3/4 = 24 in this case.
+
+So a 7 × 7 binary determinant with magnitude above 27 must have magnitude 32. The same restriction applies to all smaller square matrices by padding with identity entries.
+
+If a matrix has ordinary rank r, losing rank modulo a prime requires every r × r minor to be divisible by that prime. Losing rank modulo all of 2, 3 and 5 would force each such minor to be divisible by 30. At least one is nonzero, and size seven has no room for a determinant of magnitude 30. The same argument works for 29 and 31. The three eight-row boards above reach the lower bound on dimension.
+
+A way to use fewer ones
+
+In the bordered sign array, move a different row and column to the border. Flip signs of whole rows and columns to make that border all +1, then remove it and turn the remaining negative entries into ones. These operations preserve the absolute determinant. Trying every choice of border reduced our 30 witness from 39 ones to 31. For the paired witnesses, we chose a border that preserves the single-cell flip and brought the 31 and 29 boards down to 29 and 30 ones.
+
+The fewest ones for a joint mod-2, mod-3 and mod-5 drop
+
+The minimum is 26 ones, allowing any number of rows or columns. Here is an eight-row witness with determinant −30.
+
+00000011
+00001100
+00110001
+01010100
+01101010
+10011010
+10100110
+11001001
+
+Use column weights (9, 1, 11, 3, 4, −4, −16, −14). The weighted totals are −30 in the first row and zero in all the others. The weights stay nonzero in each modulus because the second weight is 1. Deleting the first row and second column leaves a determinant of −1, so the board has exactly seven independent directions in each of mods 2, 3 and 5.
+
+Why 25 ones cannot suffice
+
+Take a nonzero maximal minor. It keeps the joint divisibility and uses at most the original number of marks. Expanding a row or column with just one mark preserves the absolute determinant and removes at least one mark. So a smallest witness can be taken square, invertible, and with at least two marks in every row and column. With at most 25 marks it could have no more than 12 rows.
+
+Sizes through seven are excluded above. In eight and nine rows, an exact search builds the board row by row, keeping at least one representative per row-and-column permutation class. At the caps of 26 and 25 ones, respectively, it checks 301,717,646 and 390,738,028 invertible boards satisfying its local sorting rules. A nonzero multiple of 30 first appears at 26 ones in size eight. There are no nine-row hits at cap 25.
+
+In sizes ten through twelve, most rows would have just two marks. Treat each such row as an edge between its two columns. An invertible board can give a tree or an odd cycle with trees attached in each component. An even cycle has dependent rows. A component with more than one cycle has more edge equations than variables. Eliminate the leaf variables first. A tree leaves one variable and expresses its original variables as signed copies of it. An odd cycle contributes a determinant factor of 2 and leaves no variable. Hence the remaining rows have a square reduced matrix with one column per tree. If there are no odd cycles, its determinant must be a multiple of 30. If an odd cycle occurs, the reduced determinant still must be a multiple of 15. With no remaining rows, the original determinant’s magnitude is a power of two.
+
+The small search lists possible tree sizes and signs, then all reduced rows that can come from the support budget. A reduced entry is the number of positive copies selected minus the number of negative copies selected. Making canceling pairs or selecting columns of an odd component can fill out a row, so the search allows both. Hadamard bounds the determinant by the product of the remaining row lengths, each at most its original weight. Cases where even the balanced product of those weights is too small can be skipped. The remaining searches check 17,498,699 reduced systems in size ten and 17,119 in size eleven. In size twelve the size bound alone suffices. This completes the lower bound.
+
+Replays from the repository root
+
+c++ -O3 -std=c++17 tools/check_seven_row_spectrum.cpp -o /tmp/check_seven_row_spectrum
+/tmp/check_seven_row_spectrum --eight-row-mod30
+/tmp/check_seven_row_spectrum --nine-row-mod30
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mixed_prime_minimum.py
+
+Related experiments
+crew_visuals/determinant_doubling_note.txt
+crew_visuals/mod13_rank_card.txt
+crew_visuals/three_primes_drop.html
+
+The witnesses above for 29 and 31 still leave open how few ones those two primes need.

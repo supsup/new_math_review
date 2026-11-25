@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How the proof gets to one half</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f6efe0; color: #2c3131;
+      --paper: #fffaf0; --ink: #2c3131; --muted: #545e59; --teal: #275b55;
+      --soft: #dce8db; --gold: #b87140; --line: #bbbdac;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 66rem); padding: clamp(1.9rem,6vw,4.3rem) 0; margin: auto; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(3rem,8vw,5.9rem)/.96 Georgia,serif; letter-spacing: -.066em; text-wrap: balance; }
+    h2 { font: 1.8rem/1.1 Georgia,serif; }
+    p, li { line-height: 1.56; }
+    p { max-width: 72ch; }
+    .intro { color: var(--muted); margin: .86rem 0 1.15rem; }
+    .story { margin: 0 0 1.6rem; padding-left: 1.4rem; max-width: 75ch; }
+    .story li { margin: .58rem 0; padding-left: .17rem; }
+    .story li::marker { color: var(--teal); font-weight: 700; }
+    .balance { border: 1px solid var(--line); border-radius: .62rem; background: var(--paper); padding: .85rem clamp(.58rem,2vw,1.1rem) 1rem; margin: 1rem 0; }
+    .balance > p { margin: .52rem 0; }
+    .controls { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.7fr) auto; gap: .5rem .9rem; align-items: end; }
+    label { display: grid; gap: .32rem; font-weight: 630; }
+    select, button { min-height: 2.65rem; padding: .36rem .55rem; font: inherit; border: 1px solid var(--line); border-radius: .34rem; color: var(--ink); background: #fbfaf1; }
+    button { background: var(--teal); color: white; border-color: var(--teal); cursor: pointer; }
+    input[type="range"] { width: 100%; min-height: 2.65rem; accent-color: var(--teal); }
+    :focus-visible { outline: 3px solid #9f4828; outline-offset: 3px; }
+    .strip { display: flex; height: 1.1rem; margin: .7rem 0 .52rem; background: var(--soft); border-radius: .6rem; overflow: hidden; }
+    #left { background: var(--teal); height: 100%; }
+    #right { background: var(--gold); height: 100%; }
+    .key { margin: .25rem 0; }
+    .key .end { color: var(--teal); font-weight: 650; }
+    .key .step { color: #89431e; font-weight: 650; }
+    #total { font-weight: 650; }
+    details { max-width: 78ch; border-top: 1px solid var(--line); padding-top: .7rem; margin: .9rem 0; }
+    details p { margin-top: .56rem; }
+    details ul { padding-left: 1.2rem; }
+    details li { margin-bottom: .46rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--teal); text-underline-offset: .18em; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 39rem) { .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>How the proof gets to one half</h1>
+    <p class="intro">A short route through Alpöge and Claude’s argument for the zeta function. The big move is to turn a question about zeros into a bound on a count over prime powers.</p>
+    <ol class="story">
+      <li><strong>Ask what a zero would do.</strong> Take a weighted sum over prime powers and remove its predictable part. If a zero were to the right of one half, the remainder would exceed a bound close to the square root somewhere in every sufficiently large window of the form below.</li>
+      <li><strong>Measure divisibility against size.</strong> Take one power from each of several distinct primes. If each divides an integer, their product is bounded by its magnitude. The proof applies a related comparison to maps between lattices, or grids of allowed vectors. Divisibility forces their outputs to lie in coarser grids, and size estimates cap the amount of divisibility they can carry.</li>
+      <li><strong>Repeat the gain.</strong> Compose many theta lifts, which are maps carrying automorphic data from one space to another. The construction earns more divisibility with each map, while also having to control denominators, sizes, and how much of the target space the maps cover.</li>
+      <li><strong>Balance the errors and combine the prime classes.</strong> After the comparison is normalized, a cost from the ends has scale <var>X</var>/<var>m</var> and a cost from the steps has scale <var>m</var>. Choose about √<var>X</var> lifts and use auxiliary character estimates to recover the bound for the whole weighted count.</li>
+      <li><strong>Reflect.</strong> The bound rules out zeros to the right. The functional equation reflects a left-hand zero to the right, so every nontrivial zero must be on the center line.</li>
+    </ol>
+
+    <section class="balance" aria-labelledby="balance-heading">
+      <h2 id="balance-heading">Why choose about √<var>X</var> lifts?</h2>
+      <p>Here is just the part of the error budget that balances. Change the number of lifts and watch one cost shrink as the other grows.</p>
+      <div class="controls">
+        <label for="scale">Prime scale <var>X</var>
+          <select id="scale"><option value="100">100</option><option value="10000">10,000</option><option value="1000000" selected>1,000,000</option></select>
+        </label>
+        <label for="lifts">Number of lifts <var>m</var> <output id="count" for="lifts"></output>
+          <input id="lifts" type="range" min="1" max="4000" value="300">
+        </label>
+        <button type="button" id="balance">Use √X lifts</button>
+      </div>
+      <div class="strip" aria-hidden="true"><span id="left"></span><span id="right"></span></div>
+      <p class="key"><span class="end" id="end-cost"></span> · <span class="step" id="step-cost"></span></p>
+      <p id="total" aria-live="polite"></p>
+    </section>
+
+    <details>
+      <summary>One small divisibility example</summary>
+      <p>Each of 11, 13, 17 and 19 divides the middle binomial coefficient <var>C</var>(20,10) = 184,756, since it occurs in 20! and does not occur in 10!. Their product is 46,189, which fits inside 184,756. Taking logs turns that product into a sum over primes. The proof uses a far more precise size and divisibility comparison for a family of maps. Rubinstein’s guide explains the comparison and the costs in §§I.2 and I.7–I.8. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=7">Divisibility and size</a></p>
+      <p><a href="two_arrows_area_limit.html">Try a size bound on a two-column lattice</a></p>
+    </details>
+
+    <details>
+      <summary>The weighted count and the analytic step</summary>
+      <p>For each prime power <var>n</var> = <var>p</var><sup><var>k</var></sup> up to <var>X</var>, give it the weight log(<var>p</var>)(<var>X</var>/<var>n</var> − 1). Call the sum <var>S</var>(<var>X</var>) and subtract <var>X</var> log <var>X</var> − (1 + γ)<var>X</var> to get <var>G</var>(<var>X</var>), where γ is Euler’s constant.</p>
+      <p>The Mellin transform of <var>G</var> has a pole at a zeta zero because it contains the logarithmic derivative −ζ′/ζ. A high-derivative argument rules out a pole to the right of ½ when <var>G</var> has the required one-sided bound throughout arbitrarily large windows [<var>Y</var>, <var>Y</var><sup>3/2</sup>]. It is enough to have <var>G</var>(<var>X</var>) ≤ <var>X</var><sup>1/2+ε</sup> there for each positive ε. <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/zeta-paper_v2.pdf#page=5">The guide’s analytic step</a></p>
+      <p><a href="prime_power_joins.html">See a new prime power join the weighted count</a> · <a href="rh_window_lens.html">See how derivatives focus on one window</a> · <a href="why_the_poles_add.html">See why the weighted sum reveals each member’s zeros</a></p>
+    </details>
+
+    <details>
+      <summary>Where to see it in Lean</summary>
+      <p>The Lean bound is on <code>Gm</code>, which starts with the zeta remainder and adds weighted real parts of remainders for other characters. The analytic criterion then applies to each character in that collection. <a href="rh_window_lens.html">See the two definitions and the analytic step</a> · <a href="rh_window_proof_trail.html">Try the exponent choice and follow the checked proof links</a></p>
+      <ul>
+        <li><code>ChebyshevInequalityOnWindows</code> states the one-sided bound on the weighted statistic on the chosen windows, with exponent ½ plus a constant times ε. Its neighbor <code>level_of_tiedWin</code> picks ε small compared with a hypothetical zero’s excess real part. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/RamificationFrobenius/TotientGaloisClasses/TopWin.lean#L26">Window bound and application</a></li>
+        <li><code>level_gm_le_on_family_scales</code> supplies the comparison for families built from the chain. <code>zeroFreeAll_of_topG</code> uses that comparison, the analytic criterion and the supply of the families to obtain zero-freeness for primitive characters. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/PrimitiveCosets/LevelGmLeOnFamilyScales.lean#L28">Family comparison</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ZeroFreeAllOfTopG.lean#L26">From that comparison to zero-freeness</a></li>
+        <li><code>size_windows_of_thick_density</code> takes the square-root bound on the chain length from <code>FamP.sizes</code> and passes it into the window calculation. <a href="rh_chain_length_window.html">See the numerical bound and where it is used</a></li>
+        <li><code>imprimitive</code> uses the primitive character that induces a given character. The extra factors are nonzero in the right half because the quantities being subtracted from 1 have absolute value below 1. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/Imprimitive.lean#L5">The extra Euler factors</a></li>
+        <li><code>rh_of_every</code> picks the character of modulus one to get the zeta result, and <code>rh_of_right</code> uses reflection. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GammaFactorNonvanishing/CritLine.lean#L29">Modulus one</a> · <a href="riemann_center_line.html">Try the reflection</a></li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>What the written guide covers</summary>
+      <p>Alpöge’s announcement motivates the chain using Stepanov’s multiplicity argument. The explanation of the lattices, lifts and balance follows the announcement and Rubinstein’s working guide. The guide proves the analytic deduction for zeta from a central lattice inequality and two auxiliary estimates. It reduces that lattice inequality to thirteen named inputs, and gives a complete calculation in the simpler lemniscate case. The archive contains the announced formal argument. The crew compiled the conditional analytic chain through <code>CritLine</code>; the final assembly lies outside that build. <a href="https://alpo.ge/remark.pdf">Alpöge’s announcement</a> · <a href="https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/">Rubinstein’s guide and verification</a></p>
+    </details>
+
+    <p><a href="../rh_proof_map.html">See where these steps sit in the Lean archive</a> · <a href="../what_multiplicity_buys.html">Watch the ancestor of the method run on a small curve</a></p>
+  </main>
+
+  <script>
+    (() => {
+      const scale = document.getElementById('scale');
+      const lifts = document.getElementById('lifts');
+      const count = document.getElementById('count');
+      const end = document.getElementById('end-cost');
+      const step = document.getElementById('step-cost');
+      const total = document.getElementById('total');
+      const left = document.getElementById('left');
+      const right = document.getElementById('right');
+      const number = value => value.toLocaleString('en-US',{maximumFractionDigits:1});
+
+      function render() {
+        const x = Number(scale.value);
+        const m = Number(lifts.value);
+        const a = x/m;
+        const b = m;
+        const sum = a+b;
+        count.textContent = number(m);
+        lifts.setAttribute('aria-valuetext', `${number(m)} lifts`);
+        end.textContent = `End cost X/m = ${number(a)}`;
+        step.textContent = `Step cost m = ${number(b)}`;
+        total.textContent = `Total ${number(sum)}. Minimum ${number(2*Math.sqrt(x))} at ${number(Math.sqrt(x))} lifts.`;
+        left.style.width = `${100*a/sum}%`;
+        right.style.width = `${100*b/sum}%`;
+      }
+      lifts.addEventListener('input',render);
+      scale.addEventListener('change', () => {
+        const balanced = Math.sqrt(Number(scale.value));
+        lifts.max = 4*balanced;
+        lifts.value = Math.round(.3*balanced);
+        render();
+      });
+      document.getElementById('balance').addEventListener('click',() => {
+        lifts.value = Math.sqrt(Number(scale.value));
+        render();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

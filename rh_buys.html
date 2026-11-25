@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What RH Buys</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: manipulation; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 900px; line-height: 1.4; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 46px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p { font-size: 12px; }
+    #state { height: 70px; bottom: 60px; font-size: 13px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Two panels. Top: the miss between the number of primes below x and a smooth estimate, drawn as a fraction of what the Riemann Hypothesis allows; it stays inside the band from minus one to one. Bottom: for odd numbers that are not prime, the smallest number that exposes them, far below the ceiling that the generalized hypothesis guarantees."></canvas>
+<div id="hud">
+  <h1>What RH buys</h1>
+  <p>Two results proved long ago <em>on the assumption</em> that the Riemann Hypothesis is true, so each has been waiting for a proof of it.
+  <span class="gold">Top:</span> count the primes below x and compare with a smooth estimate. The miss never leaves a known band (Schoenfeld, 1976).
+  <span class="teal">Bottom:</span> a fast test for primes becomes a proof, because some small number always exposes a non-prime (Miller, 1976; Bach, 1990).
+  For that one, the Dirichlet part of the November 2026 release supplies the assumption. Lattice read both statements at source (Schoenfeld 1976, Corollary 1; Bach 1990, with Miller's 1976 appendix); every number drawn is computed here.</p>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button id="bPlay" aria-pressed="true">Pause</button>
+  <button id="bAgain">Start over</button>
+  <button id="bEnd">Jump to the end</button>
+</div>
+<div id="err"></div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const MATH = (function () {
+  const fail = [];
+  const XMAX = 10000000;
+  // primes up to ten million by sieve, and a running count on a logarithmic grid
+  const comp = new Uint8Array(XMAX + 1);
+  for (let i = 2; i * i <= XMAX; i++) if (!comp[i]) for (let j = i * i; j <= XMAX; j += i) comp[j] = 1;
+  const GAMMA = 0.5772156649015329;
+  function li(x) { const L = Math.log(x); let s = GAMMA + Math.log(L), term = 1; for (let k = 1; k < 200; k++) { term *= L / k; s += term / k; if (term / k < 1e-16 * Math.abs(s)) break; } return s; }
+  const allowed = x => Math.sqrt(x) * Math.log(x) / (8 * Math.PI);     // Schoenfeld's band, for x >= 2657
+  const START = 2657, STEPS = 900, grid = [];
+  let count = 0, at = 2;
+  for (let k = 0; k <= STEPS; k++) {
+    const x = Math.round(Math.exp(Math.log(100) + (Math.log(XMAX) - Math.log(100)) * k / STEPS));
+    while (at <= x) { if (!comp[at]) count++; at++; }
+    grid.push({ x, pi: count, li: li(x), miss: count - li(x), room: allowed(x) });
+  }
+  // controls: two values of the prime count and one of the smooth estimate that every table gives
+  let c6 = 0; for (let i = 2; i <= 1000000; i++) if (!comp[i]) c6++;
+  if (c6 !== 78498) fail.push("the sieve counts " + c6 + " primes below a million, not 78,498");
+  if (count !== 664579) fail.push("the sieve counts " + count + " primes below ten million, not 664,579");
+  if (Math.abs(li(1000000) - 78627.549) > 0.01) fail.push("the smooth estimate at a million is " + li(1000000).toFixed(3) + ", not 78,627.549");
+  for (const g of grid) if (g.x >= START && Math.abs(g.miss) >= g.room) fail.push("the miss leaves the band at x = " + g.x + " (that would be news)");
+
+  // Miller's test. n - 1 = d * 2^s with d odd; a exposes n unless a^d = 1 or a^(d 2^r) = -1 for some r < s (all mod n).
+  const NMAX = 1500000;
+  function mulmod(a, b, n) { return (a * b) % n; }                      // safe: n < 2^21, so a * b < 2^42
+  function powmod(a, e, n) { let r = 1; a %= n; while (e > 0) { if (e & 1) r = mulmod(r, a, n); a = mulmod(a, a, n); e = Math.floor(e / 2); } return r; }
+  function exposes(a, n) { let d = n - 1, s = 0; while (d % 2 === 0) { d /= 2; s++; } let x = powmod(a, d, n); if (x === 1 || x === n - 1) return false; for (let r = 1; r < s; r++) { x = mulmod(x, x, n); if (x === n - 1) return false; } return true; }
+  const ceiling = n => 2 * Math.log(n) * Math.log(n);                   // Bach's bound on the least witness, assuming GRH
+  const hard = []; let composites = 0, worst = 2;
+  for (let n = 9; n <= NMAX; n += 2) {
+    if (!comp[n]) continue; composites++;
+    let a = 2; while (!exposes(a, n)) { a++; if (a >= ceiling(n)) { fail.push("no witness below the ceiling for n = " + n + " (that would be news)"); break; } }
+    if (a > 2) hard.push({ n, a }); if (a > worst) worst = a;
+  }
+  // controls: the first number that fools 2, and the first that fools both 2 and 3, are classical
+  if (!hard.length || hard[0].n !== 2047) fail.push("the first number that fools the base 2 is not 2,047");
+  const five = hard.find(h => h.a >= 5);
+  if (!five || five.n !== 1373653) fail.push("the first number that fools both 2 and 3 is not 1,373,653");
+  if (exposes(2, 2047) || !exposes(3, 2047) || !exposes(2, 9)) fail.push("the test itself is wrong on a small case");
+  return { grid, START, XMAX, NMAX, hard, composites, worst, ceiling, fail };
+})();
+
+/* ---------- the drawing ---------- */
+(function () {
+  const errBox = document.getElementById("err");
+  function stop(m) { errBox.style.display = "block"; errBox.textContent = m; }
+  if (MATH.fail.length) { stop("Checks failed, nothing drawn: " + MATH.fail.join("; ")); return; }
+  const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  if (!ctx) { stop("This browser gave no 2D canvas."); return; }
+  const stateEl = document.getElementById("state");
+  const still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const COL = { bg: "#0d1020", ink: "#e8e6f2", dim: "#9a98b4", gold: "#f2c14e", teal: "#4fd1c5", edge: "#39406e", band: "rgba(242,193,78,0.07)", band2: "rgba(79,209,197,0.07)" };
+  let W = 0, H = 0, G = null, t = 0, playing = true, raf = 0, last = 0;
+  const fmt = v => Math.round(v).toLocaleString("en-US");
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1; W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const hud = document.getElementById("hud").getBoundingClientRect(), stR = stateEl.getBoundingClientRect();
+    const top = hud.bottom + 22, bottom = stR.top - 26, gap = 46, h = (bottom - top - gap) / 2;
+    G = { left: 52, right: W - 16, t1: top, b1: top + h, t2: top + h + gap, b2: bottom, narrow: W < 620 };
+  }
+  const lx0 = Math.log(MATH.START), lx1 = Math.log(MATH.XMAX), ln0 = Math.log(9), ln1 = Math.log(MATH.NMAX);
+  const X1 = x => G.left + (G.right - G.left) * (Math.log(x) - lx0) / (lx1 - lx0);
+  const Y1 = v => (G.t1 + G.b1) / 2 - v * (G.b1 - G.t1) / 2 * 0.92;
+  const X2 = n => G.left + (G.right - G.left) * (Math.log(n) - ln0) / (ln1 - ln0);
+  const Y2 = a => G.b2 - (G.b2 - G.t2) * Math.log(a) / Math.log(600);
+
+  function draw() {
+    ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+    ctx.font = "12px Georgia, serif";
+    // ----- top: the prime count inside its band -----
+    ctx.fillStyle = COL.band; ctx.fillRect(G.left, Y1(1), G.right - G.left, Y1(-1) - Y1(1));
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.2; ctx.setLineDash([6, 5]);
+    for (const v of [1, -1]) { ctx.beginPath(); ctx.moveTo(G.left, Y1(v)); ctx.lineTo(G.right, Y1(v)); ctx.stroke(); }
+    ctx.setLineDash([]); ctx.strokeStyle = COL.edge; ctx.beginPath(); ctx.moveTo(G.left, Y1(0)); ctx.lineTo(G.right, Y1(0)); ctx.stroke();
+    ctx.fillStyle = COL.dim; ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText("+1", G.left - 6, Y1(1)); ctx.fillText("0", G.left - 6, Y1(0)); ctx.fillText("−1", G.left - 6, Y1(-1));
+    ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillStyle = COL.gold; ctx.fillText(G.narrow ? "the band RH allows" : "the miss in the prime count, as a share of what RH allows", G.left + 6, Y1(1) - 4);
+    ctx.fillStyle = COL.dim; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (const x of (G.narrow ? [10000, 1000000] : [10000, 100000, 1000000, 10000000])) ctx.fillText("x = " + fmt(x), Math.min(X1(x), G.right - 40), Y1(-1) + 6);
+    const xNow = Math.exp(lx0 + (lx1 - lx0) * t); let cur = null;
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.beginPath(); let started = false;
+    for (const g of MATH.grid) { if (g.x < MATH.START) continue; if (g.x > xNow) break; const px = X1(g.x), py = Y1(g.miss / g.room); if (started) ctx.lineTo(px, py); else { ctx.moveTo(px, py); started = true; } cur = g; }
+    ctx.stroke();
+    if (cur) { ctx.fillStyle = COL.ink; ctx.beginPath(); ctx.arc(X1(cur.x), Y1(cur.miss / cur.room), 4, 0, 6.283); ctx.fill(); }
+    // ----- bottom: witnesses far below the ceiling -----
+    const nNow = Math.exp(ln0 + (ln1 - ln0) * t);
+    ctx.fillStyle = COL.band2; ctx.beginPath(); ctx.moveTo(G.left, Y2(1));
+    for (let k = 0; k <= 120; k++) { const n = Math.exp(ln0 + (ln1 - ln0) * k / 120); ctx.lineTo(X2(n), Y2(MATH.ceiling(n))); }
+    ctx.lineTo(G.right, Y2(1)); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = COL.teal; ctx.lineWidth = 1.5; ctx.setLineDash([6, 5]); ctx.beginPath();
+    for (let k = 0; k <= 120; k++) { const n = Math.exp(ln0 + (ln1 - ln0) * k / 120), px = X2(n), py = Y2(MATH.ceiling(n)); if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); }
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = COL.teal; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(G.narrow ? "the ceiling GRH guarantees" : "the ceiling GRH guarantees: some number below this line always exposes a non-prime", X2(G.narrow ? 60 : 400), Y2(11));
+    ctx.fillStyle = COL.dim; ctx.textAlign = "right"; ctx.textBaseline = "middle"; for (const a of [2, 3, 5, 100]) ctx.fillText(String(a), G.left - 6, Y2(a));
+    ctx.textAlign = "center"; ctx.textBaseline = "top"; for (const n of (G.narrow ? [1000, 1000000] : [100, 1000, 10000, 100000, 1000000])) ctx.fillText("n = " + fmt(n), Math.min(X2(n), G.right - 40), G.b2 + 6);
+    // every odd non-prime drawn so far is exposed by 2 (a solid line), except the listed ones (dots at 3 or 5)
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(G.left, Y2(2)); ctx.lineTo(X2(nNow), Y2(2)); ctx.stroke();
+    let lastHard = null;
+    for (const h of MATH.hard) { if (h.n > nNow) break; ctx.fillStyle = h.a >= 5 ? COL.gold : COL.teal; ctx.beginPath(); ctx.arc(X2(h.n), Y2(h.a), h.a >= 5 ? 5 : 3, 0, 6.283); ctx.fill(); lastHard = h; }
+    ctx.fillStyle = COL.dim; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(G.narrow ? "smallest number that exposes n" : "the smallest number that exposes each odd non-prime n (white line: 2 is enough)", G.left + 6, G.t2 - 16);
+    return { cur, nNow, lastHard };
+  }
+  function say(s) {
+    if (!s.cur) { stateEl.innerHTML = "<i>Counting…</i>"; return; }
+    const g = s.cur, seen = MATH.hard.filter(h => h.n <= s.nNow), fives = seen.filter(h => h.a >= 5);
+    stateEl.innerHTML = "x = " + fmt(g.x) + ": " + fmt(g.pi) + " primes, the smooth estimate says " + g.li.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ", a miss of " + Math.abs(g.miss).toFixed(1) + "; RH allows " + g.room.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "." +
+      " &nbsp; Up to n = " + fmt(s.nNow) + ": 2 exposes every odd non-prime except " + seen.length + (seen.length ? " (the first is 2,047)" : "") + "; " +
+      (fives.length ? "one needs 5: " + fmt(fives[0].n) + "." : "3 has been enough for those.") + " The ceiling there is " + Math.round(MATH.ceiling(s.nNow)) + "." +
+      (t >= 1 ? " <i>Done: " + fmt(MATH.composites) + " odd non-primes checked; the largest witness needed was " + MATH.worst + ".</i>" : "");
+  }
+  function frame(now) {
+    raf = 0; const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
+    if (playing && t < 1) t = Math.min(1, t + (still ? 1 : dt / 14));
+    say(draw());
+    if (playing && t < 1) raf = requestAnimationFrame(frame);
+  }
+  function kick() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+  const bPlay = document.getElementById("bPlay");
+  bPlay.addEventListener("click", () => { playing = !playing; bPlay.textContent = playing ? "Pause" : "Play"; bPlay.setAttribute("aria-pressed", playing ? "true" : "false"); kick(); });
+  document.getElementById("bAgain").addEventListener("click", () => { t = 0; playing = true; bPlay.textContent = "Pause"; bPlay.setAttribute("aria-pressed", "true"); kick(); });
+  document.getElementById("bEnd").addEventListener("click", () => { t = 1; kick(); });
+  window.addEventListener("resize", () => { layout(); kick(); });
+  layout(); if (location.hash === "#done") t = 1;     // #done opens with both sweeps finished
+  kick();
+})();
+</script>
+</body>
+</html>

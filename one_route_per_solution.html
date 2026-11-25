@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>One route per solution</title>
+<style>
+  :root {
+    --ink: #242728;
+    --neutral: #596267;
+    --paper: #fcfbf3;
+    --line: #c4c9c2;
+    --flow: #af7345;
+    --flow-light: #f6e9cf;
+    --teal: #3a645f;
+    --teal-light: #dfece6;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+    background: #eeeae0;
+    font: 16px/1.5 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 58rem); margin: auto; padding-block: 2.25rem; }
+  h1, h2, p, figure { margin: 0; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; letter-spacing: -.04em; }
+  h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); }
+  h2 { font-size: 1.6rem; }
+  .intro { max-width: 45rem; margin-top: .6rem; color: var(--neutral); }
+  .layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 1rem; margin-top: 1.15rem; }
+  .panel { padding: 1rem; border: 1px solid var(--line); border-radius: .7rem; background: var(--paper); }
+  .note, figcaption { color: var(--neutral); font-size: .88rem; margin-top: .5rem; }
+  table { border-collapse: collapse; margin-block: .65rem; width: 100%; }
+  .board { table-layout: fixed; border-spacing: .35rem; border-collapse: separate; }
+  th { font-size: .86rem; font-weight: normal; color: var(--neutral); }
+  .board th { font-family: var(--mono); text-align: center; }
+  button { cursor: pointer; color: inherit; font: inherit; padding: .42rem .6rem; background: var(--paper); border: 1px solid var(--line); border-radius: .4rem; }
+  button:hover { border-color: var(--teal); }
+  button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .tile { width: 100%; min-height: 2.55rem; padding: .25rem; font: 1.06rem var(--mono); }
+  .tile[aria-pressed="true"] { background: var(--teal-light); color: var(--teal); }
+  .tile[data-current="true"] { box-shadow: inset 0 0 0 2px var(--flow); }
+  .graph { display: block; width: 100%; margin-top: .5rem; }
+  .graph .return { stroke: var(--line); stroke-width: 1.4; fill: none; }
+  .graph .route { stroke: var(--teal); opacity: .35; stroke-width: 1.5; }
+  .graph .highlighted { stroke: var(--flow); opacity: 1; stroke-width: 4; }
+  .graph circle { fill: var(--paper); stroke: var(--teal); stroke-width: 1.4; }
+  .graph text { fill: var(--ink); text-anchor: middle; font: 15px var(--mono); dominant-baseline: middle; }
+  #graph-caption { min-height: 1.35rem; }
+  .rank-panel { margin-top: 1rem; }
+  .rank-panel th, .rank-panel td { text-align: right; padding: .45rem .45rem; border-bottom: 1px solid var(--line); }
+  .rank-panel th:first-child { text-align: left; }
+  .rank-panel td { font: 1rem var(--mono); }
+  .rank-panel td[data-drop="true"] { color: var(--teal); background: var(--teal-light); }
+  #count { margin-top: .5rem; color: var(--teal); }
+  details { margin-top: 1rem; border-block-start: 1px solid var(--line); padding-top: .65rem; }
+  details p { max-width: 48rem; }
+  summary { cursor: pointer; }
+  a { color: var(--teal); }
+  @media (max-width: 41rem) {
+    main { padding-block: 1.5rem; }
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .rank-panel th, .rank-panel td { padding-inline: .22rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>One route per solution</h1>
+    <p class="intro">The same nine SAT solutions give two different matrices. One records which assignments work. The other turns each solution into a route so its determinant counts them.</p>
+  </header>
+  <div class="layout">
+    <section class="panel" aria-labelledby="table-title">
+      <h2 id="table-title">Which assignments work?</h2>
+      <p class="note">Flip any square to add or remove a route.</p>
+      <table class="board" id="board" aria-label="Editable 4 by 4 table of assignments">
+        <thead><tr><th>xy/zw</th><th scope="col">00</th><th scope="col">01</th><th scope="col">10</th><th scope="col">11</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button type="button" id="restore">Restore the nine solutions</button>
+    </section>
+    <figure class="panel">
+      <h2>What does one route look like?</h2>
+      <svg class="graph" id="network" viewBox="0 0 408 255" role="img" aria-label="A three-step route from a shared start through a row and a column and back to start"></svg>
+      <figcaption id="graph-caption" role="status"></figcaption>
+    </figure>
+  </div>
+  <section class="rank-panel panel" aria-labelledby="ranks-title">
+    <h2 id="ranks-title">Same solutions, different ranks</h2>
+    <p id="count" role="status"></p>
+    <table aria-label="Ranks of the two matrices under three types of arithmetic">
+      <thead><tr><th scope="col">Matrix</th><th scope="col">Ordinary</th><th scope="col">Mod 2</th><th scope="col">Mod 3</th></tr></thead>
+      <tbody id="ranks"></tbody>
+    </table>
+    <p class="note">The counting matrix has one possible missing rank. The count tells you exactly when it drops.</p>
+  </section>
+  <details>
+    <summary>Why the determinant counts the routes</summary>
+    <p class="note">Use nine vertices. One is the start, four are row choices, and four are column choices. Give each row and column vertex a loop back to itself. Draw arrows from the start to each row and from each column back to the start. An entry of 1 adds the arrow from that row to that column.</p>
+    <p class="note">Every nonzero determinant term must choose one way for the start to leave and come back. The only possible cycle through the start uses one solution arrow. It has length three, which gives a plus sign. Every unused vertex takes its loop. So the sum of the determinant terms is exactly the number of solutions.</p>
+    <p class="note">The eight-by-eight block away from the start is triangular with ones along its diagonal, so those eight rows remain independent in any field. The page checks the exact count and all six ranks after every edit. The original assignment table comes from <a href="nine_solutions_two_ranks.html">Lattice’s SAT example</a>. The broader route idea appears in <a href="pick_the_primes.html">Pick the primes that change rank</a>.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+const fixture = ["0011", "0101", "0110", "1110"].map(row => [...row].map(Number));
+const choices = ["00", "01", "10", "11"];
+const positions = [0, 1, 2, 3];
+
+function countingMatrix(table) {
+  const result = Array.from({ length: 9 }, () => Array(9).fill(0));
+  for (const i of positions) {
+    result[0][1 + i] = 1;
+    result[5 + i][0] = 1;
+    result[1 + i][1 + i] = 1;
+    result[5 + i][5 + i] = 1;
+    for (const j of positions) result[1 + i][5 + j] = table[i][j];
+  }
+  return result;
+}
+
+function determinant(matrix) {
+  if (matrix.length === 1) return matrix[0][0];
+  return matrix[0].reduce((sum, value, column) => {
+    if (!value) return sum;
+    const minor = matrix.slice(1).map(row => row.filter((_, index) => index !== column));
+    return sum + (column % 2 ? -value : value) * determinant(minor);
+  }, 0);
+}
+
+function rank(matrix, modulus = 0) {
+  const values = matrix.map(row => [...row]);
+  let pivot = 0;
+  for (let column = 0; column < values[0].length; column++) {
+    const index = values.findIndex((row, rowIndex) => rowIndex >= pivot && row[column] !== 0);
+    if (index < 0) continue;
+    [values[index], values[pivot]] = [values[pivot], values[index]];
+    const lead = values[pivot][column];
+    for (let row = pivot + 1; row < values.length; row++) {
+      const value = values[row][column];
+      if (!value) continue;
+      for (let j = column; j < values[row].length; j++) {
+        const entry = lead * values[row][j] - value * values[pivot][j];
+        values[row][j] = modulus ? entry % modulus : entry;
+      }
+    }
+    pivot++;
+  }
+  return pivot;
+}
+
+if (typeof module !== "undefined") module.exports = { fixture, countingMatrix, determinant, rank };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const set = (id, value) => { byId(id).textContent = value; };
+  const element = (tag, label) => {
+    const result = document.createElement(tag);
+    if (label !== undefined) result.textContent = label;
+    return result;
+  };
+  const svg = (tag, attributes, label) => {
+    const result = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [name, value] of Object.entries(attributes)) result.setAttribute(name, value);
+    if (label !== undefined) result.textContent = label;
+    return result;
+  };
+  let table = fixture.map(row => [...row]);
+  let current = [0, 2];
+  const tableBody = byId("board").tBodies[0];
+  const tiles = positions.flatMap(i => {
+    const row = tableBody.insertRow();
+    const heading = element("th", choices[i]);
+    heading.scope = "row";
+    row.append(heading);
+    return positions.map(j => {
+      const button = element("button");
+      button.type = "button";
+      button.className = "tile";
+      button.addEventListener("click", () => {
+        current = [i, j];
+        table[i][j] ^= 1;
+        update();
+      });
+      row.insertCell().append(button);
+      return { i, j, button };
+    });
+  });
+
+  function drawNetwork() {
+    const net = byId("network");
+    const level = i => 27 + 50 * i;
+    const [row, column] = current;
+    const available = Boolean(table[row][column]);
+    net.replaceChildren();
+    for (const i of positions) {
+      net.append(svg("path", {
+        d: "M 204 222 Q 33 240 105 " + level(i),
+        class: available && row === i ? "return highlighted" : "return"
+      }));
+      net.append(svg("path", {
+        d: "M 303 " + level(i) + " Q 378 239 204 222",
+        class: available && column === i ? "return highlighted" : "return"
+      }));
+      for (const j of positions) {
+        if (!table[i][j]) continue;
+        net.append(svg("line", { x1: 105, y1: level(i), x2: 303, y2: level(j),
+          class: i === row && j === column ? "route highlighted" : "route" }));
+      }
+    }
+    for (const i of positions) {
+      for (const x of [105, 303]) {
+        net.append(svg("circle", { cx: x, cy: level(i), r: 17 }),
+          svg("text", { x, y: level(i) }, choices[i]));
+      }
+    }
+    net.append(svg("circle", { cx: 204, cy: 222, r: 22 }), svg("text", { x: 204, y: 222 }, "S"));
+    set("graph-caption", available ? "Start → row " + choices[row] + " → column " + choices[column] + " → start."
+      : "The route through row " + choices[row] + " and column " + choices[column] + " is absent.");
+  }
+
+  function update() {
+    for (const { i, j, button } of tiles) {
+      button.textContent = table[i][j];
+      button.setAttribute("aria-pressed", String(Boolean(table[i][j])));
+      button.setAttribute("aria-label", "Row " + choices[i] + ", column " + choices[j] + ", " + table[i][j]);
+      button.dataset.current = String(current[0] === i && current[1] === j);
+    }
+    const number = table.flat().reduce((sum, cell) => sum + cell, 0);
+    const matrix = countingMatrix(table);
+    if (determinant(matrix) !== number) throw new Error("Determinant differs from route count.");
+    set("count", number + " routes. The counting matrix determinant is " + number + ".");
+    const body = byId("ranks");
+    body.replaceChildren();
+    for (const [name, values] of [["Solution table", table], ["Counting matrix", matrix]]) {
+      const tr = body.insertRow();
+      const label = element("th", name);
+      label.scope = "row";
+      tr.append(label);
+      const ordinary = rank(values);
+      for (const modulus of [0, 2, 3]) {
+        const value = rank(values, modulus);
+        const cell = tr.insertCell();
+        cell.textContent = value;
+        cell.dataset.drop = String(value < ordinary);
+      }
+    }
+    drawNetwork();
+  }
+
+  byId("restore").addEventListener("click", () => {
+    table = fixture.map(row => [...row]);
+    current = [0, 2];
+    update();
+  });
+  update();
+}
+</script>
+</body>
+</html>

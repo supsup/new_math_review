@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When the nearest pole wins</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf8ef;
+      --ink: #272a3c;
+      --muted: #57596a;
+      --purple: #624b80;
+      --orange: #964c2f;
+      --line: #c9c4d2;
+      background: #eae6ec;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 55rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--purple); text-underline-offset: .16em; }
+    h1 { font: clamp(2.55rem, 8vw, 4.5rem)/1.04 Georgia, serif; letter-spacing: -.047em; margin: .58rem 0; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { padding: .7rem .9rem; border: 1px solid var(--line); border-radius: .4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 1.5rem; }
+    .controls div { display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; }
+    .controls label { font-weight: 620; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.5rem; margin: 0; accent-color: var(--purple); }
+    :focus-visible { outline: .15rem solid var(--orange); outline-offset: .15rem; }
+    output, dd { font-variant-numeric: tabular-nums; }
+    figure { margin: 1rem 0; }
+    canvas { display: block; width: 100%; height: 15rem; background: #f1edf3; border-radius: .4rem; }
+    figcaption { font-size: .9rem; margin-top: .45rem; }
+    dl { display: flex; flex-wrap: wrap; gap: .45rem 1.2rem; margin: 1rem 0 .4rem; }
+    dl div { flex: 1 1 7rem; }
+    dt { font-size: .85rem; color: var(--muted); }
+    dd { font: 1.6rem/1.2 Georgia, serif; margin: .18rem 0 0; }
+    .key { font-weight: 700; color: var(--purple); }
+    #status { font-weight: 650; }
+    #status[data-contradiction="true"] { color: var(--orange); }
+    details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: .95rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 36rem) { .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_window_lens.html">Back to the window lens</a>
+    <h1>When the nearest pole wins</h1>
+    <p class="intro">If the transform had a pole in the forbidden region, its high Taylor coefficients would be too large for the window estimate. In the example below, the nearest pole sets the dashed line. Raise the order <var>k</var> until the allowed amount falls below it.</p>
+    <div class="controls">
+      <div><label for="distance">Distance to the pole <var>d</var></label><output id="distance-value" for="distance"></output><input id="distance" type="range" min="1.50" max="1.99" step=".01" value="1.75"></div>
+      <div><label for="order">Taylor order <var>k</var></label><output id="order-value" for="order"></output><input id="order" type="range" min="0" max="1000" value="10"></div>
+    </div>
+    <figure>
+      <canvas id="growth" role="img" aria-label="Logarithmic plot of the allowed amount relative to the nearest pole’s Taylor coefficient"></canvas>
+      <figcaption><span class="key">Purple curve</span> gives the right-hand side as a multiple of the pole’s contribution. The dashed line is equality. The dot marks your order. The horizontal axis expands to show larger orders.</figcaption>
+    </figure>
+    <dl>
+      <div><dt>Cauchy radius <var>e</var></dt><dd id="radius"></dd></div>
+      <div><dt>Bound distance <var>E</var></dt><dd>2</dd></div>
+      <div><dt>Allowed amount ÷ pole</dt><dd id="ratio"></dd></div>
+    </dl>
+    <p id="status" aria-live="polite"></p>
+    <p>Moving the pole a little farther away can add many more derivatives to the argument. As long as <var>d</var> is strictly smaller than the other distances, the purple curve eventually drops below 1.</p>
+    <details>
+      <summary>What the two terms mean</summary>
+      <p>A simple pole with residue <var>b</var> at distance <var>d</var> contributes |<var>b</var>|/<var>d</var><sup><var>k</var>+1</sup>. Write this as <var>c</var>/<var>d</var><sup><var>k</var></sup>. The argument bounds the other analytic terms by <var>M</var>/<var>e</var><sup><var>k</var></sup> and the window term by <var>C</var> exp(η<var>U</var>)/<var>E</var><sup><var>k</var></sup>, with <var>d</var> &lt; <var>e</var> ≤ <var>E</var> and the log scale <var>U</var> ≤ <var>k</var>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/landauWindow.lean#L20-L38">The comparison in Lean</a></p>
+      <p>Divide by the pole’s contribution. The first ratio decays like (<var>d</var>/<var>e</var>)<sup><var>k</var></sup>. For the second, use exp(η<var>U</var>) ≤ exp(η<var>k</var>). Lean chooses η = ½ log(<var>e</var>/<var>d</var>), small enough that (<var>d</var>/<var>E</var>) exp(η) is below 1 too. The plot uses this choice, with <var>M</var>/<var>c</var> = 2, <var>C</var>/<var>c</var> = 4 and <var>e</var> halfway between <var>d</var> and <var>E</var>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/LandauGrowthContra.lean#L9-L23">The choice of η</a></p>
+      <p>The complex-center case isolates one nearest pole, with room for a larger circle around it after subtracting its principal part. At a real center the proof can also use the positivity of a real pole’s residue. Both branches give the same inequality used here. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/landauWindow.lean#L83-L155">The two branches</a> · <a href="why_the_poles_add.html">Where the sign comes from</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const distance = byId('distance'), order = byId('order'), canvas = byId('growth');
+      const ctx = canvas.getContext('2d'), boundDistance = 2;
+      const format = value => value >= .001 ? value.toFixed(3) : value.toExponential(2);
+
+      function draw(relativeAmount, k) {
+        if (!ctx) return;
+        const w = canvas.clientWidth, h = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * density);
+        canvas.height = Math.round(h * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+
+        const left = 50, right = w - 34, top = 19, floor = h - 34;
+        const end = Math.max(70, Math.ceil(k / 50) * 50);
+        const x = point => left + (right - left) * point / end;
+        const low = -3, high = 1;
+        const y = value => top + (floor - top) * (high - Math.max(low, Math.log10(value))) / (high - low);
+        ctx.font = '12px system-ui';
+        ctx.fillStyle = '#57596a';
+        ctx.textAlign = 'right';
+        for (const level of [10, 1, .1, .01, .001]) {
+          const py = y(level);
+          ctx.strokeStyle = level === 1 ? '#964c2f' : '#d3ccdd';
+          ctx.setLineDash(level === 1 ? [6, 4] : []);
+          ctx.beginPath();
+          ctx.moveTo(left, py);
+          ctx.lineTo(right, py);
+          ctx.stroke();
+          ctx.fillText(String(level), left - 7, py + 4);
+        }
+        ctx.setLineDash([]);
+        ctx.textAlign = 'center';
+        for (const i of [0, end / 2, end]) ctx.fillText(String(i), x(i), floor + 20);
+
+        ctx.strokeStyle = '#624b80';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x(0), y(relativeAmount(0)));
+        for (let i = 1; i <= 160; i++) {
+          const point = end * i / 160;
+          const value = relativeAmount(point);
+          ctx.lineTo(x(point), y(value));
+          if (value <= .001) break;
+        }
+        ctx.stroke();
+        const selected = relativeAmount(k);
+        ctx.fillStyle = '#624b80';
+        ctx.beginPath();
+        ctx.arc(x(k), y(selected), 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      function update() {
+        const d = distance.valueAsNumber, k = order.valueAsNumber;
+        const e = (d + boundDistance) / 2;
+        const eta = Math.log(e / d) / 2;
+        const relativeAmount = n => 2 * (d / e) ** n + 4 * ((d / boundDistance) * Math.exp(eta)) ** n;
+        const relative = relativeAmount(k);
+        byId('distance-value').textContent = d.toFixed(2);
+        byId('order-value').textContent = k;
+        byId('radius').textContent = e.toFixed(3);
+        byId('ratio').textContent = format(relative);
+        const status = byId('status');
+        status.dataset.contradiction = relative < 1;
+        status.textContent = relative < 1 ? 'The pole asks for more than the estimate allows.' : 'At this order, the estimate still leaves room for the pole.';
+        draw(relativeAmount, k);
+      }
+
+      distance.addEventListener('input', update);
+      order.addEventListener('input', update);
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

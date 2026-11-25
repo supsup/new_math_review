@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Multiplicity Buys</title>
+<style>
+:root { --bg:#f6f4ee; --card:#fffdf8; --ink:#1d1b18; --muted:#5b5348; --line:#e3ddd2; --accent:#8a4b16; --gold:#b8860b; --teal:#1f7a6d; --red:#a23b3b; --slack:#d9d2c4; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14130f; --card:#1d1b16; --ink:#ece7dc; --muted:#a79f90; --line:#353026; --accent:#e0a36a; --gold:#f2c14e; --teal:#4fd1c5; --red:#ff8a8a; --slack:#4a443a; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
+main { max-width:900px; margin:0 auto; padding:32px 16px 64px; }
+h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:22px; margin:0 0 6px; }
+.sub { color:var(--muted); margin:0 0 22px; }
+section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin:0 0 18px; }
+p { margin:8px 0; } a { color:var(--accent); }
+.gold { color:var(--gold); } .teal { color:var(--teal); } .red { color:var(--red); }
+button { background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 11px; font:14px Georgia, serif; cursor:pointer; margin:3px 4px 3px 0; }
+button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
+button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+svg { width:100%; height:auto; display:block; }
+.ax { stroke:var(--muted); stroke-width:1; } .grid { stroke:var(--line); stroke-width:1; }
+.lab { font:12px Georgia, serif; fill:var(--muted); } .labink { font:13px Georgia, serif; fill:var(--ink); }
+.cell { stroke:var(--card); stroke-width:1; }
+#state { color:var(--accent); min-height:1.6em; } .note { color:var(--muted); font-size:14.5px; }
+ul.checks { padding-left:1.2em; margin:6px 0; } ul.checks li { margin:3px 0; }
+#err { display:none; background:#5a1020; color:#fff; padding:12px; border-radius:6px; font:14px ui-monospace, Menlo, monospace; margin:0 0 18px; }
+code { font:13px ui-monospace, Menlo, monospace; }
+@media (max-width:620px) { h1 { font-size:24px; } section { padding:14px 14px; } }
+</style>
+</head>
+<body><main>
+<h1>What multiplicity buys</h1>
+<p class="sub">A polynomial of degree D can vanish at most D times, counting repeats. So if you can build one that vanishes ℓ times at every point you want to count, there are at most D ÷ ℓ such points. This page runs that idea live on one small curve. It is the ancestor of the announced proof of the Riemann Hypothesis, and only the ancestor.</p>
+<div id="err"></div>
+
+<section>
+<h2>The thing to count</h2>
+<p>Take the curve y² = x³ − x + 1, but let x and y be remainders after division by a prime p, so there are only p possible values of x. For each x, the number x³ − x + 1 is either <span class="gold">a square or zero</span> (then some y works) or not a square (then none does). How many x are gold? We want a cap that comes from an argument, not from going through them one by one.</p>
+<p>Prime: <span id="primes"></span></p>
+<div id="strip"></div>
+<p class="note" id="stripnote"></p>
+</section>
+
+<section>
+<h2>The valley</h2>
+<p>For each ℓ = 1, 2, 3, … the page builds a polynomial that vanishes ℓ times at every gold x, and reads off the cap: its degree divided by ℓ. Asking for more vanishing is good, because you divide by more. It also costs, because the polynomial has to grow. The best cap is in between.</p>
+<div id="valley"></div>
+<p id="state" aria-live="polite">Working…</p>
+</section>
+
+<section>
+<h2>The budget, for one ℓ</h2>
+<p>Choose ℓ: <span id="lbtns"></span></p>
+<div id="budget"></div>
+<p id="budgetnote"></p>
+<ul class="checks" id="checks"></ul>
+</section>
+
+<section>
+<h2>Both sides</h2>
+<p>Run the same method on the other side, the x where x³ − x + 1 is <em>not</em> a square, together with the zeros again, and you cap those too. That pins the squares from below. Together the two caps trap the number of points on the curve.</p>
+<div id="band"></div>
+<p class="note" id="bandnote"></p>
+</section>
+
+<section>
+<h2>How the polynomial is found</h2>
+<p>A polynomial that vanishes ℓ times at N points in general position needs degree about ℓ × N, which would tell us nothing. The trick, due to Stepanov, is to look inside a special family: combinations of x³ − x + 1, of its power (x³ − x + 1)<sup>(p−1)/2</sup>, and of x<sup>p</sup>. On the gold points those collapse: x<sup>p</sup> is just x, and the big power is just 1. Because of that collapse, "vanishes one more time at every gold point" costs a fixed handful of linear conditions, the same number however many gold points there are. The page never needs to know which points are gold in order to build the polynomial.</p>
+<p>One detail. Where x³ − x + 1 is itself zero, the collapse does not apply; there the polynomial vanishes for a different reason, because it carries the factor (x³ − x + 1)<sup>ℓ</sup>. Those x are counted among the gold ones, and the test checks them like the rest.</p>
+<p>So the page solves a system of linear equations modulo p for the coefficients. Then it forgets how the polynomial was built, writes it out in full, and tests it the slow honest way: differentiate it ℓ times and evaluate at every gold x. The sizes of the systems are shown above with each ℓ.</p>
+<p class="note">We wrote this construction from the description of the method; we have not read Stepanov's 1969 paper. That is why the test does not rely on the construction: any polynomial that passes it proves the cap, whoever built it.</p>
+</section>
+
+<section>
+<h2>What this is, and is not</h2>
+<p>For curves over finite fields this argument, pushed to large p, gives a cap of about p/2 plus some multiple of √p. An error of the size of √p is the scale that the Riemann Hypothesis for the curve predicts. Hasse's theorem, the band on <a href="hasse_band.html">RH's little sibling</a>, is the sharp form, with exactly 2√p, and this elementary version does not reach it. The best ℓ sits near √p, where the two costs balance.</p>
+<p>The author of the announced proof calls that proof a descendant of this one, and says the hard part is that whole numbers offer no ready-made way to make something vanish ℓ times; the note says chains of theta lifts play that part, with a chain about √X long for primes up to X. See <a href="rh_proof_map.html">the proof as a map</a> and Lattice's <a href="crew_visuals/rh_argument_map.html">How the proof gets to one half</a>.</p>
+<p>Nothing on this page checks that bridge. It shows what multiplicity buys in the one setting where anyone can watch it work.</p>
+<p class="note">Page by Fixpoint for Marginalia. Every number is computed here, in your browser, in exact arithmetic modulo p.</p>
+</section>
+</main>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const MATH = (function () {
+  function field(p) {
+    const inv = new Int32Array(p); inv[1] = 1;
+    for (let i = 2; i < p; i++) inv[i] = (p - Math.floor(p / i)) * inv[p % i] % p;
+    const mod = v => ((v % p) + p) % p;
+    const padd = (A, B) => { const n = Math.max(A.length, B.length), R = new Array(n); for (let i = 0; i < n; i++) R[i] = ((i < A.length ? A[i] : 0) + (i < B.length ? B[i] : 0)) % p; return R; };
+    const pmul = (A, B) => { const R = new Array(A.length + B.length - 1).fill(0); for (let i = 0; i < A.length; i++) { const a = A[i]; if (a) for (let j = 0; j < B.length; j++) R[i + j] = (R[i + j] + a * B[j]) % p; } return R; };
+    const pscale = (A, c) => A.map(v => v * c % p);
+    const pder = A => { if (A.length < 2) return [0]; const R = new Array(A.length - 1); for (let i = 1; i < A.length; i++) R[i - 1] = i * A[i] % p; return R; };
+    const ev = (A, x) => { let r = 0; for (let i = A.length - 1; i >= 0; i--) r = (r * x + A[i]) % p; return r; };
+    const trim = A => { let n = A.length; while (n > 1 && A[n - 1] === 0) n--; return A.slice(0, n); };
+    return { p, inv, mod, padd, pmul, pscale, pder, ev, trim };
+  }
+
+  function setup(p) {
+    const F = field(p), f = [1, p - 1, 0, 1], fp = F.pder(f);                  // 1 - x + x^3 and its derivative
+    let g = [1]; for (let i = 0; i < (p - 1) / 2; i++) g = F.pmul(g, f);        // f^((p-1)/2): 1 on squares, p-1 on non-squares, 0 at zeros of f
+    const val = []; for (let x = 0; x < p; x++) val.push(F.ev(g, x));
+    // an independent way to know which x are gold: list the squares directly
+    const isSq = new Uint8Array(p); for (let y = 0; y < p; y++) isSq[y * y % p] = 1;
+    let agree = true; const kind = [];
+    for (let x = 0; x < p; x++) { const fx = F.ev(f, x), k = fx === 0 ? 0 : (isSq[fx] ? 1 : -1); kind.push(k); if ((k === 1 && val[x] !== 1) || (k === -1 && val[x] !== p - 1) || (k === 0 && val[x] !== 0)) agree = false; }
+    const zeros = kind.filter(k => k === 0).length, squares = kind.filter(k => k === 1).length;
+    return { F, p, f, fp, g, kind, zeros, squares, agree, A: Math.floor((p - 3) / 2), half: F.inv[2] };
+  }
+
+  // a = 1: the set is { x : f(x) a square or zero }.  a = -1: { x : f(x) a non-square or zero }.
+  function build(P, l, a) {
+    const F = P.F, p = P.p, A = P.A, fail = [];
+    let J = 1; while (2 * A * J <= l * (A + J - 1) + l * (l - 1)) J++;
+    const offs = []; let nrow = 0; for (let k = 0; k < l; k++) { offs.push(nrow); nrow += A + J - 1 + 2 * k; }
+    const ncol = 2 * A * J, M = []; for (let r = 0; r < nrow; r++) M.push(new Int32Array(ncol));
+    const am = F.mod(a);
+    for (let i = 0; i < A; i++) {
+      let u = new Array(i + 1).fill(0); u[i] = 1; let v = u.slice();
+      for (let k = 0; k < l; k++) {
+        for (let j = 0; j < J; j++) {
+          const cu = j * A + i, cv = A * J + j * A + i, base = offs[k] + j;
+          for (let m = 0; m < u.length; m++) if (u[m]) M[base + m][cu] = u[m];
+          for (let m = 0; m < v.length; m++) if (v[m]) M[base + m][cv] = am * v[m] % p;
+        }
+        if (k + 1 < l) {
+          u = F.padd(F.pscale(F.pmul(P.fp, u), F.mod(l - k)), F.pmul(P.f, F.pder(u)));
+          v = F.padd(F.pscale(F.pmul(P.fp, v), F.mod(l - k - P.half)), F.pmul(P.f, F.pder(v)));
+        }
+      }
+    }
+    // solve M c = 0 modulo p for a nonzero c
+    const where = new Int32Array(ncol).fill(-1), pivs = []; let r = 0;
+    for (let c = 0; c < ncol && r < nrow; c++) {
+      let pr = -1; for (let i = r; i < nrow; i++) if (M[i][c]) { pr = i; break; }
+      if (pr < 0) continue;
+      const t = M[r]; M[r] = M[pr]; M[pr] = t;
+      const R = M[r], iv = F.inv[R[c]];
+      if (iv !== 1) for (let x = c; x < ncol; x++) R[x] = R[x] * iv % p;
+      for (let i = r + 1; i < nrow; i++) { const q = M[i][c]; if (q) { const row = M[i], nq = p - q; for (let x = c; x < ncol; x++) row[x] = (row[x] + nq * R[x]) % p; } }
+      where[c] = r; pivs.push(c); r++;
+    }
+    let free = -1; for (let c = 0; c < ncol; c++) if (where[c] < 0) { free = c; break; }
+    if (free < 0) return { l, a, fail: ["the linear system has only the zero solution"] };
+    const sol = new Int32Array(ncol); sol[free] = 1;
+    for (let idx = pivs.length - 1; idx >= 0; idx--) { const c = pivs[idx], R = M[where[c]]; let s = 0; for (let x = c + 1; x < ncol; x++) if (sol[x] && R[x]) s = (s + R[x] * sol[x]) % p; sol[c] = (p - s) % p; }
+    // write the polynomial out in full
+    let poly = [0];
+    for (let j = 0; j < J; j++) {
+      const U = Array.from(sol.slice(j * A, (j + 1) * A)), V = Array.from(sol.slice(A * J + j * A, A * J + (j + 1) * A));
+      const term = F.padd(U, F.pmul(V, P.g)), shifted = new Array(p * j).fill(0).concat(term);
+      poly = F.padd(poly, shifted);
+    }
+    let fl = [1]; for (let i = 0; i < l; i++) fl = F.pmul(fl, P.f);
+    poly = F.trim(F.pmul(poly, fl));
+    const degree = poly.length - 1, nonzero = poly.some(v => v !== 0);
+    if (!nonzero) fail.push("the polynomial came out identically zero");
+    // the honest test: differentiate the written-out polynomial l times and evaluate at every point of the set
+    const S = []; for (let x = 0; x < p; x++) if (P.kind[x] === a || P.kind[x] === 0) S.push(x);
+    let D = poly, vanishes = true;
+    for (let k = 0; k < l && vanishes; k++) { for (const x of S) if (F.ev(D, x) !== 0) { vanishes = false; break; } D = F.pder(D); }
+    if (!vanishes) fail.push("the polynomial does not vanish " + l + " times at every point of the set");
+    // control: the same test must reject a polynomial that is off by one
+    const off = poly.slice(); off[0] = (off[0] + 1) % p;
+    let caught = false; for (const x of S) if (F.ev(off, x) !== 0) { caught = true; break; }
+    if (!caught) fail.push("CONTROL: the vanishing test accepted a polynomial that is off by one");
+    const cap = Math.floor(degree / l);
+    if (nonzero && vanishes && S.length * l > degree) fail.push("more zeros than the degree allows: the arithmetic is wrong");
+    return { l, a, J, nrow, ncol, degree, cap, size: S.length, fail };
+  }
+  return { setup, build };
+})();
+
+/* ---------- drawing ---------- */
+(function () {
+  const $ = id => document.getElementById(id), err = $("err");
+  const PRIMES = [31, 53, 101];
+  let P = null, results = [], sel = 0, token = 0, manual = false;     // manual: the reader chose an ℓ; keep it until the prime changes
+  const num = n => n.toLocaleString("en-US");
+  function stop(msg) { err.style.display = "block"; err.textContent = "This page failed its own checks and stopped: " + msg; $("state").textContent = "Stopped."; }
+
+  const narrow = () => window.innerWidth < 620;
+
+  function strip() {
+    const p = P.p, nw = narrow(), cols = Math.min(p, nw ? 13 : 34), rows = Math.ceil(p / cols), VW = nw ? 416 : 1000, cw = VW / cols, ch = Math.min(cw, 30);
+    let s = `<svg viewBox="0 0 ${VW} ${(rows * ch).toFixed(0)}" role="img" aria-label="${p} cells, one for each value of x. ${P.squares + P.zeros} are gold: there x cubed minus x plus one is a square or zero.">`;
+    for (let x = 0; x < p; x++) {
+      const cx = (x % cols) * cw, cy = Math.floor(x / cols) * ch, k = P.kind[x];
+      s += `<rect class="cell" x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" width="${cw.toFixed(1)}" height="${ch.toFixed(1)}" fill="${k >= 0 ? "var(--gold)" : "var(--slack)"}" opacity="${k === 0 ? 0.55 : 1}"><title>x = ${x}: ${k === 1 ? "a square" : k === 0 ? "zero" : "not a square"}</title></rect>`;
+      s += `<text x="${(cx + cw / 2).toFixed(1)}" y="${(cy + ch / 2 + 4).toFixed(1)}" text-anchor="middle" class="lab" style="fill:var(--card)">${x}</text>`;
+    }
+    $("strip").innerHTML = s + "</svg>";
+    $("stripnote").textContent = `Counting them, which the method is not allowed to do: ${P.squares + P.zeros} of the ${p} values of x are gold` + (P.zeros ? ` (${P.zeros} of them a zero)` : "") + `. So the curve has ${1 + P.zeros + 2 * P.squares} points, counting the one at infinity.`;
+  }
+
+  function valley() {
+    const p = P.p, gold = P.squares + P.zeros, L = Math.floor(Math.sqrt(p)) + 6, nw = narrow();
+    const W = nw ? 420 : 1000, H = nw ? 330 : 380, x0 = nw ? 34 : 62, x1 = W - (nw ? 8 : 20), y0 = 26, y1 = H - 52;
+    const top = results.reduce((m, r) => Math.max(m, r.cap), p), ymax = Math.ceil(top * 1.1);
+    const X = l => x0 + (x1 - x0) * (l - 0.5) / L, Y = v => y1 - (y1 - y0) * Math.min(v, ymax) / ymax;
+    const pts = results.filter(r => r.a === 1), best = pts.length ? pts.reduce((m, r) => r.cap < m.cap ? r : m) : null;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="The cap on the number of gold points for each multiplicity. It falls, reaches a floor near the square root of p, and rises again.">`;
+    for (let v = 0; v <= ymax; v += (ymax > 120 ? 40 : ymax > 60 ? 20 : 10)) s += `<line class="grid" x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}"/><text class="lab" x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+    s += `<line x1="${x0}" y1="${Y(p)}" x2="${x1}" y2="${Y(p)}" stroke="var(--red)" stroke-dasharray="5 4"/><text class="lab" x="${x1}" y="${Y(p) - 6}" text-anchor="end" style="fill:var(--red)">${nw ? "above here: nothing learned" : "a cap up here says nothing: there are only " + p + " values of x"}</text>`;
+    s += `<line x1="${x0}" y1="${Y(gold)}" x2="${x1}" y2="${Y(gold)}" stroke="var(--gold)" stroke-width="2"/><text class="lab" x="${x1}" y="${Y(gold) + 15}" text-anchor="end" style="fill:var(--gold)">${nw ? "true number: " + gold : "the true number of gold points: " + gold}</text>`;
+    const sq = Math.sqrt(p);
+    s += `<line x1="${X(sq)}" y1="${y0}" x2="${X(sq)}" y2="${y1}" stroke="var(--muted)" stroke-dasharray="2 4"/><text class="lab" x="${X(sq)}" y="${y0 - 8}" text-anchor="middle">√${p} ≈ ${sq.toFixed(1)}</text>`;
+    for (let l = 1; l <= L; l++) if (!nw || L <= 10 || l % 2 === 1) s += `<text class="lab" x="${X(l)}" y="${y1 + 17}" text-anchor="middle">${l}</text>`;
+    s += `<text class="lab" x="${(x0 + x1) / 2}" y="${H - 10}" text-anchor="middle">${nw ? "ℓ: times it vanishes at each gold point" : "ℓ: how many times the polynomial vanishes at each gold point"}</text>`;
+    if (pts.length > 1) s += `<polyline fill="none" stroke="var(--teal)" stroke-width="2" points="${pts.map(r => X(r.l) + "," + Y(r.cap)).join(" ")}"/>`;
+    for (const r of pts) {
+      const show = !nw || r.l === 1 || r.l === sel || r === best || r.l === pts[pts.length - 1].l;
+      s += `<circle cx="${X(r.l)}" cy="${Y(r.cap)}" r="${r.l === sel ? 7 : 4.5}" fill="var(--teal)"><title>ℓ = ${r.l}: degree ${r.degree}, so at most ${r.cap}</title></circle>` + (show ? `<text class="labink" x="${X(r.l)}" y="${Y(r.cap) - 10}" text-anchor="middle">${r.cap}</text>` : "");
+    }
+    $("valley").innerHTML = s + "</svg>";
+  }
+
+  function budget() {
+    const r = results.find(q => q.a === 1 && q.l === sel); if (!r) return;
+    const nw = narrow(), W = nw ? 420 : 1000, H = 104, x0 = 6, x1 = W - 8, need = r.size * r.l, k = (x1 - x0) / r.degree;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="A bar as long as the polynomial's degree, ${r.degree}. The ${r.size} gold points each take ${r.l} units of it, ${need} in all, and fit.">`;
+    s += `<rect x="${x0}" y="30" width="${x1 - x0}" height="38" fill="var(--slack)"/>`;
+    for (let i = 0; i < r.size; i++) s += `<rect x="${(x0 + i * r.l * k).toFixed(1)}" y="30" width="${Math.max(r.l * k - (nw ? 0.5 : 1), 0.4).toFixed(1)}" height="38" fill="var(--gold)" opacity="${i % 2 ? 0.7 : 1}"/>`;
+    s += `<text class="labink" x="${x0}" y="20">${nw ? "degree " + r.degree + ": room for " + r.degree + " zeros" : "degree " + r.degree + ": room for " + r.degree + " zeros, counted with repeats"}</text>`;
+    s += `<text class="lab" x="${x0}" y="88">${r.size} × ${r.l} = ${need} used</text><text class="lab" x="${x1}" y="88" text-anchor="end">${r.degree - need} to spare</text>`;
+    $("budget").innerHTML = s + "</svg>";
+    $("budgetnote").innerHTML = `With ℓ = ${r.l} the polynomial has degree ${num(r.degree)}. <b>${r.cap + 1} points would need ${(r.cap + 1) * r.l} zeros, which is more than ${num(r.degree)}. So there are at most ${r.cap} gold points.</b> (There are ${r.size}.)`;
+    $("checks").innerHTML = [
+      `The polynomial is not the zero polynomial, and its degree is ${num(r.degree)}.`,
+      `Written out in full and differentiated ${r.l} time${r.l > 1 ? "s" : ""}, it vanishes at each of the ${r.size} gold values of x every time.`,
+      `Control: the same polynomial plus 1 fails that test.`,
+      `It came from ${num(r.nrow)} linear conditions on ${num(r.ncol)} unknown coefficients, modulo ${P.p}. The construction never looks at which x are gold: it uses only the equation of the curve.`,
+    ].map(t => "<li>" + t + "</li>").join("");
+    document.querySelectorAll("#lbtns button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.l === sel)));
+  }
+
+  function band() {
+    const up = results.filter(r => r.a === 1), dn = results.filter(r => r.a === -1); if (!up.length || !dn.length) return;
+    const p = P.p, bu = up.reduce((m, r) => r.cap < m.cap ? r : m), bd = dn.reduce((m, r) => r.cap < m.cap ? r : m);
+    // gold = squares + zeros <= bu.cap ; (non-squares + zeros) <= bd.cap, so squares >= p - bd.cap
+    const hi = Math.min(2 * p + 1, 1 - P.zeros + 2 * bu.cap), lo = Math.max(1, 1 + P.zeros + 2 * (p - bd.cap)), truth = 1 + P.zeros + 2 * P.squares;
+    const h = 2 * Math.sqrt(p), nw = narrow(), W = nw ? 420 : 1000, H = 168, x0 = 10, x1 = W - 12, X = v => x0 + (x1 - x0) * v / (2 * p + 2);
+    if (truth < lo || truth > hi) return stop("the true point count lies outside the proven band");
+    if (Math.abs(truth - (p + 1)) > h) return stop("the true point count lies outside Hasse's band");
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Three nested ranges for the number of points on the curve: everything possible, the range this page proved, and Hasse's theorem. The true count lies in all three.">`;
+    const row = (y, a, b, col, label) => `<line x1="${X(a)}" y1="${y}" x2="${X(b)}" y2="${y}" stroke="${col}" stroke-width="8" stroke-linecap="round"/><text class="lab" x="${x0}" y="${y - 11}">${label}</text>`;
+    s += row(30, 1, 2 * p + 1, "var(--slack)", `before any argument: 1 to ${2 * p + 1}`);
+    s += row(76, lo, hi, "var(--teal)", nw ? `proved here: ${lo} to ${hi}` : `proved on this page (ℓ = ${bu.l} above, ℓ = ${bd.l} below): ${lo} to ${hi}`);
+    s += row(122, Math.ceil(p + 1 - h), Math.floor(p + 1 + h), "var(--accent)", `Hasse's theorem: ${Math.ceil(p + 1 - h)} to ${Math.floor(p + 1 + h)}`);
+    s += `<line x1="${X(truth)}" y1="22" x2="${X(truth)}" y2="136" stroke="var(--gold)" stroke-width="2"/><circle cx="${X(truth)}" cy="76" r="6" fill="var(--gold)"/><text class="labink" x="${X(truth)}" y="156" text-anchor="middle">true count: ${truth}</text>`;
+    $("band").innerHTML = s + "</svg>";
+    $("bandnote").textContent = `This elementary version does not quite reach Hasse's range at primes this small; its constants are worse. What it does do, with nothing but a polynomial and a count of zeros, is cut the possible range from ${2 * p + 1} values to ${hi - lo + 1}.`;
+  }
+
+  function run(p) {
+    const my = ++token;
+    err.style.display = "none"; results = []; sel = 0; manual = false;
+    P = MATH.setup(p);
+    if (!P.agree) return stop("the two ways of telling squares from non-squares disagree");
+    document.querySelectorAll("#primes button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.p === p)));
+    strip(); $("lbtns").innerHTML = ""; $("budget").innerHTML = ""; $("budgetnote").textContent = ""; $("checks").innerHTML = ""; $("band").innerHTML = ""; $("bandnote").textContent = "";
+    const L = Math.floor(Math.sqrt(p)) + 6;
+    valley();
+    function step(l) {
+      if (my !== token) return;
+      if (l > L) {
+        const up = results.filter(r => r.a === 1), best = up.reduce((m, r) => r.cap < m.cap ? r : m);
+        if (!manual) sel = best.l;
+        valley(); budget(); band();
+        $("state").textContent = `Done. The best cap is ${best.cap}, at ℓ = ${best.l}; the square root of ${p} is ${Math.sqrt(p).toFixed(1)}. The true number is ${P.squares + P.zeros}.`;
+        return;
+      }
+      $("state").textContent = `Building the polynomial for ℓ = ${l} of ${L}…`;
+      setTimeout(() => {
+        if (my !== token) return;
+        for (const a of [1, -1]) { const r = MATH.build(P, l, a); if (r.fail.length) return stop("ℓ = " + l + ": " + r.fail.join("; ")); results.push(r); }
+        const b = document.createElement("button"); b.textContent = String(l); b.dataset.l = String(l); b.setAttribute("aria-pressed", "false");
+        b.onclick = () => { sel = l; manual = true; valley(); budget(); };
+        $("lbtns").appendChild(b);
+        if (!manual) sel = l;
+        valley(); budget(); step(l + 1);
+      }, 20);
+    }
+    step(1);
+  }
+
+  $("primes").innerHTML = PRIMES.map(p => `<button data-p="${p}" aria-pressed="false">${p}</button>`).join("");
+  document.querySelectorAll("#primes button").forEach(b => { b.onclick = () => run(+b.dataset.p); });
+  window.addEventListener("resize", () => { if (P) { strip(); valley(); budget(); band(); } });
+  const m = /^#p=(31|53|101)$/.exec(location.hash);
+  run(m ? +m[1] : 53);
+})();
+</script>
+</body>
+</html>

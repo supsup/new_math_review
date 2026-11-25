@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a Zero Leaves the Line</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --red: #ff8a8a; --stone: #1c2140; --edge: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  #hud h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  #hud p { margin: 4px 0 0; font-size: 13.5px; color: var(--dim); max-width: 940px; line-height: 1.4; }
+  #hud p a { pointer-events: auto; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); } .red { color: var(--red); }
+  details { pointer-events: auto; margin-top: 4px; font-size: 13.5px; max-width: 940px; }
+  summary { cursor: pointer; color: var(--ink); }
+  details[open] { background: #141834; border: 1px solid var(--edge); border-radius: 8px; padding: 8px 12px; max-height: 62vh; overflow: auto; }
+  details p { color: var(--ink); margin: 8px 0 0; } details p b { color: var(--accent); font-weight: normal; } details a { color: var(--teal); }
+  #state { position: fixed; left: 16px; right: 16px; bottom: 62px; height: 42px; overflow: auto; font-size: 14.5px; line-height: 1.4; color: var(--accent); }
+  #state i { color: var(--dim); font-style: normal; }
+  #bar { position: fixed; left: 16px; right: 16px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  button { background: var(--stone); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--edge); border-color: var(--accent); }
+  button:focus-visible, summary:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #err { position: fixed; inset: auto 16px 16px 16px; background: #5a1020; color: #fff; padding: 12px;
+    border-radius: 6px; display: none; font: 14px monospace; }
+  @media (max-width: 620px) {
+    #hud h1 { font-size: 21px; } #hud p, details { font-size: 12px; }
+    #state { height: 66px; bottom: 92px; font-size: 12.5px; }
+    button { padding: 6px 9px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" role="img" aria-label="Two pictures that share one horizontal axis, the height from 76 to 96. Above, a strip of the plane lying on its side, coloured by the value of a function, with a gold centre line and four white loops attached to it. Dots mark the zeros: most sit on the centre line, and for some settings a pair sits off it, one dot above the line and one below, on one of the loops. Below, a gold curve shows, for each height, the one setting of a dial at which a zero sits there on the line; a white horizontal line marks the current setting, and dashed red curves show where pairs travel while they are off the line."></canvas>
+<div id="hud">
+  <h1>How a zero leaves the line</h1>
+  <p id="lede">A <a class="teal" href="where_the_mirror_holds_still.html">mirror</a> lets zeros leave the <span class="gold">line</span> only in pairs. Here is a pair doing it. A dial runs from one honest L-function, through <a class="teal" href="a_mirror_is_not_enough.html">the cousin</a>, to another; the mirror holds at every setting. Turn it: two zeros on the line run together, touch, and step off sideways as twins. Keep turning, and they come home.</p>
+  <details id="more"><summary>What am I looking at?</summary>
+    <p><b>The dial.</b> There are two characters modulo 5 that take the values 1, i, −i, −1; each has an L-function, a sum like zeta's that is also a product over the primes. Attach to each its known factor, (5/π)^((s+1)/2) · Γ((s + 1)/2), and turn it by a fixed angle, and it becomes real on the centre line. Call the two results A and B. The dial mixes them: at setting τ the function is cos τ · A + sin τ · B. At 0° it is the first L-function and at 90° the second. At 45° it is exactly the cousin from the page before this one, and at 135° a second cousin, the same kind of function with κ replaced by −1/κ. At 180° it is the first L-function again with its sign changed, so the dial is a circle.</p>
+    <p><b>The mirror never breaks.</b> A and B are both real on the line, so every mix is real on the line, and that is the same thing as the mirror: the value at a point's twin is the conjugate of the value at the point. So at every setting a zero off the line has a twin on the other side, at the same height. What the mixes lose is the product over the primes; only the two ends have one. Lattice found exactly where it breaks: at 6, the first number built from two different primes, where an honest function's coefficient must be the product of its coefficients at 2 and 3 and a mix's is not (<a href="crew_visuals/at_six_the_product_breaks.html">At six, the prime product breaks</a>). Losing the product has a price that can be seen: beyond the right edge of the strip, where the real part is more than 1, a function with a prime product has no zeros at all, and a mix can have one. Lattice found one and proved it, at height exactly 200 with real part about 1.227, for the setting 122.2446° (<a href="crew_visuals/zero_beyond_one.html">A zero beyond one</a>; this page's own arithmetic, pointed at that spot, lands on the same zero to nine decimal places). There is a limit to it, though: Lattice also proved, with nothing but fractions, that no setting has a zero with real part 2½ or more, at any height (<a href="crew_visuals/mirror_mix_wall.html">A wall at five halves</a>; Lattice and Confluence then proved it in Lean as well, with nothing assumed: <a href="tools/mirror_mix_wall.lean">tools/mirror_mix_wall.lean</a>). The true edge is a little lower, about 2.38229, and it is not a new number: Lattice's <a href="crew_visuals/mirror_mix_sharp_walls.html">The last wall is made of prime angles</a> re-derives it and names the papers that have it. Zeros do get close: Marlow certified one at 135°, at a height above a million, with real part 2.37876. And every setting of the dial has an edge of its own, from just above 1 for settings next to the two honest ends (1.014 at 1°) up to 2.382 at 135°: Lattice's <a href="crew_visuals/mirror_mix_all_angle_walls.html">How far right each mix can go</a> encloses it for each whole number of degrees. On the real axis, by contrast, nothing wild can happen: Marlow proved that the only real zero any setting ever has is at ½ itself, once per half-turn of the dial, at 135° (<a href="crew_visuals/spira_real_axis.txt">the proof, in plain text</a>). (Confluence's remark: the usual form of the rule, which swaps s with 1 − s, turns the setting τ into 90° − τ. Only 45° and 135° are sent to themselves, so only the two cousins have a functional equation of their own. The mirror in the sense used here holds for all.)</p>
+    <p><b>The upper picture</b> is the strip lying on its side: height runs left to right, and the <span class="gold">centre line</span> runs across the middle. Colour is the direction of the mix's value, as on the page before: red for positive, cyan for negative, and a zero is a dark point where all the colours meet. The white loops are roads. A point is on a road exactly when some setting of the dial puts a zero there. The whole centre line is a road: every point of it is a zero for exactly one setting in each half-turn of the dial. Off the line there are four loops in this window and no other road (that is proved; see the sources below), so a zero that leaves the line travels along a loop, with its twin on the mirror-image loop.</p>
+    <p><b>The lower picture</b> is the timetable. For each height, the gold curve gives the one setting at which a zero sits at that height on the line. The white line is the dial. Each place it crosses the gold curve is a zero on the line, directly below its dot in the upper picture. Where the gold curve turns back, two crossings merge: that is two zeros meeting. Past the turn they are off the line, and the dashed red curve carries on with the height of the pair until it lands at another turn and the pair is back. Drag the white line, or press Play.</p>
+    <p><b>Why a zero cannot leave alone.</b> On the line each mix is a real curve, and a zero is a place where the curve changes sign. Turning the dial a little moves a change of sign but cannot remove it: the curve is still below on one side and above on the other. Two changes of sign can cancel each other, and only by meeting. So zeros leave the line two at a time, from the same spot, and a zero that crosses cleanly, with no partner at the same place, stays on the line under every small turn. That is the sense in which "simple and on the line" is a stable state; the card <a href="showcase.html#card-zeta23">on zeta's zeros</a> is about a proved share of zeros in exactly that state. For zeta's own dial, and the pair there that would leave first, see <a href="no_room_to_spare.html">No room to spare</a>.</p>
+    <p><b>The two ends, and the proof.</b> At 0° and at 90° the function is a Dirichlet L-function. In this window each has 14 zeros and all 14 are on the line: 14 changes of sign, and a walk around the border of the window that counts 14 in all. The proof announced in November 2026 is about exactly such functions (see <a href="rh_proof_map.html">the map</a>); it says nothing about the mixes in between, and the mixes do lose zeros from the line. The first pair leaves at 23.73°, is at 0.8085 + 85.6993i when the dial reaches the cousin, and is back on the line at 84.93°, before the dial reaches the other end. Three more pairs are out between 99° and 168°. None of this is evidence about zeta. It shows what the mirror alone allows.</p>
+    <p><b>The page checks itself before drawing.</b> That A and B are real on the line, and that a deliberately wrong turn is not. The mirror rule for four mixes at six points each. That the mix at 45° is the cousin's own sum times a constant. The zeros on the line at 0°, 45°, 90° and 135°: 14, 11, 14 and 8, and the cousin's eleven at the heights found on the page before. The eight places where zeros meet, against the heights and settings that Lattice certified. The four loops: each traced from a place where a pair leaves to a place where one returns, with the setting rising all the way along it. The cousin's pair, found again on the first loop. That the pair the page reports is a true zero off the line at twenty settings, including just after a pair leaves and just before it returns. And one walk around the border of a wider box, read at four settings: 14, 13, 14 and 14 zeros in all, each equal to the number on the line plus twice the number of pairs. If any check fails, the page says so and draws nothing.</p>
+    <p><b>Sources, and what was run.</b> Everything drawn is computed by this page. Separately: the constants, the eight meeting places and the zeros at four settings were computed at 20 digits with the mpmath library and agree; Lattice certified the eight meeting places with interval arithmetic that rounds outward, and that there are exactly eight in this window (<a href="crew_visuals/mirror_mix_contacts.txt">the note</a>; replay <a href="tools/check_mirror_mix_contacts.py">tools/check_mirror_mix_contacts.py</a>); Lattice's <a href="crew_visuals/certify_a_zeta_cousin_zero.html">certificate</a> proves the cousin's pair. And Lattice proved the loops: in a box around each one, interval arithmetic shows that for every setting between its two meeting places exactly one pair is off the line, so the pair that leaves is the pair that returns (<a href="crew_visuals/mirror_mix_loops.txt">the note</a>; replay <a href="tools/check_mirror_mix_loops.py">tools/check_mirror_mix_loops.py</a>). The white curves on this page are traced numerically; that note is the proof that they join up as drawn. And there is no fifth road: Lattice's <a href="crew_visuals/mirror_mix_all_angles.html">Four loops, every angle</a> proves that between heights 76 and 96 these four loops account for every zero off the line, at every setting of the dial (replay <a href="tools/check_mirror_mix_band.py">tools/check_mirror_mix_band.py</a>). Higher up, the cousin's other three known pairs do the same thing, each on a loop of its own: Lattice's <a href="crew_visuals/spira_four_pairs.html">Four pairs in one portrait</a>. And for the whole stretch from height 0 to 201, Lattice counted the pairs off the line at every setting, with proof: none at the two ends, four at the cousin's 45°, and never more than twenty-seven, a number reached at 135° (<a href="crew_visuals/spira_through_201.html">Twenty-seven pairs off the line</a>). Marlow and Lattice each pointed out that the meeting places are the turning points of one curve, and Confluence checked the algebra of the dial. The cousin is the Davenport–Heilbronn function; its sources are on <a href="a_mirror_is_not_enough.html">its own page</a>. Page by Fixpoint for Marginalia.</p>
+  </details>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="bar">
+  <button type="button" data-tau="0" data-short="0°">An L-function (0°)</button>
+  <button type="button" data-tau="23" data-short="23°">Just before (23°)</button>
+  <button type="button" data-tau="45" data-short="45°">The cousin (45°)</button>
+  <button type="button" data-tau="84" data-short="84°">Almost home (84°)</button>
+  <button type="button" data-tau="90" data-short="90°">The other L-function (90°)</button>
+  <button type="button" data-tau="135" data-short="135°">A second cousin (135°)</button>
+  <button type="button" id="bPlay" aria-pressed="false">Play</button>
+</div>
+<div id="err" role="alert"></div>
+<script>
+(() => {
+  'use strict';
+  // MATH-BEGIN  (pure functions; a test harness can evaluate this block on its own)
+  const T0 = 76, T1 = 96, NT = 80, LNPI = Math.log(Math.PI), LN5 = Math.log(5), DEG = Math.PI / 180;
+  const SMIN = -1.3, SMAX = 2.3;                       // the part of the plane the picture shows (symmetric about one half)
+  const BERN = [1 / 6, -1 / 30, 1 / 42, -1 / 30, 5 / 66, -691 / 2730, 7 / 6];
+  const KAPPA = (Math.sqrt(10 - 2 * Math.sqrt(5)) - 2) / (Math.sqrt(5) - 1);
+  const HALF = Math.atan(KAPPA);                       // half the angle of the root number: the turn that makes each function real on the line
+  const LOGM = []; for (let m = 0; m < 5 * NT + 5; m++) LOGM.push(m ? Math.log(m) : 0);
+
+  // For s = sg + i t: the four sums of (5n + a)^(-s), a = 1..4, over n = 0, 1, 2, ... (Euler-Maclaurin: NT terms, the tail, seven corrections).
+  // Returns [re1, im1, re2, im2, re3, im3, re4, im4].
+  function sums4(sg, t) {
+    const out = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (let n = 0; n < NT; n++) for (let a = 1; a <= 4; a++) {
+      const l = LOGM[5 * n + a], e = Math.exp(-sg * l), k = 2 * (a - 1);
+      out[k] += e * Math.cos(t * l); out[k + 1] -= e * Math.sin(t * l);
+    }
+    for (let a = 1; a <= 4; a++) {
+      const x = 5 * NT + a, l = Math.log(x), e = Math.exp(-sg * l), xr = e * Math.cos(t * l), xi = -e * Math.sin(t * l), k = 2 * (a - 1);
+      const d = (sg - 1) * (sg - 1) + t * t, ar = x * xr / 5, ai = x * xi / 5;
+      let re = (ar * (sg - 1) + ai * t) / d + xr / 2, im = (ai * (sg - 1) - ar * t) / d + xi / 2;
+      let rr = sg, ri = t, pr = xr / x, pi = xi / x, fact = 2, five = 5;
+      for (let j = 1; j <= BERN.length; j++) {
+        const c = BERN[j - 1] / fact * five;
+        re += c * (rr * pr - ri * pi); im += c * (rr * pi + ri * pr);
+        const u1 = sg + 2 * j - 1, u2 = sg + 2 * j, nr = rr * u1 - ri * t, ni = rr * t + ri * u1;
+        rr = nr * u2 - ni * t; ri = nr * t + ni * u2;
+        fact *= (2 * j + 1) * (2 * j + 2); five *= 25; pr /= x * x; pi /= x * x;
+      }
+      out[k] += re; out[k + 1] += im;
+    }
+    return out;
+  }
+  // The two honest functions, each turned by a constant:  A = e^(-i HALF) L(s, chi),  B = e^(+i HALF) L(s, chi-bar),
+  // chi = the character modulo 5 with chi(2) = i.  wrong = true turns both the same way (a control that must fail).  Returns [Ar, Ai, Br, Bi].
+  function turned(sg, t, wrong) {
+    const h = sums4(sg, t);
+    const ur = h[0] - h[6], ui = h[1] - h[7], vr = h[2] - h[4], vi = h[3] - h[5];     // u = S1 - S4, v = S2 - S3; L(chi) = u + i v, L(chi-bar) = u - i v
+    const lr = ur - vi, li = ui + vr, mr = ur + vi, mi = ui - vr, c = Math.cos(HALF), s = Math.sin(HALF);
+    return wrong ? [lr * c + li * s, li * c - lr * s, mr * c + mi * s, mi * c - mr * s] : [lr * c + li * s, li * c - lr * s, mr * c - mi * s, mi * c + mr * s];
+  }
+  // the mix at angle tau (radians): cos(tau) A + sin(tau) B, without the known factor (which never vanishes)
+  function mix(tau, sg, t) { const w = turned(sg, t), c = Math.cos(tau), s = Math.sin(tau); return [c * w[0] + s * w[2], c * w[1] + s * w[3]]; }
+  // the cousin's own sum, coefficients 1, kappa, -kappa, -1, 0 repeating
+  function cousin(sg, t) { const h = sums4(sg, t); return [h[0] + KAPPA * (h[2] - h[4]) - h[6], h[1] + KAPPA * (h[3] - h[5]) - h[7]]; }
+
+  // log of the known factor (5/pi)^((s+1)/2) Gamma((s+1)/2)   (Lanczos, g = 7)
+  function logFactor(sg, t) {
+    const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
+      12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    const zr = (sg + 1) / 2, zi = t / 2, wr = zr, wi = zi;                             // Gamma(z) = Gamma(z + 1) / z, and Lanczos works with (z + 1) - 1 = z
+    let xr = p[0], xi = 0;
+    for (let i = 1; i < 9; i++) { const d = (wr + i) * (wr + i) + wi * wi; xr += p[i] * (wr + i) / d; xi -= p[i] * wi / d; }
+    const tr = wr + 7.5, ti = wi, ltr = Math.log(Math.hypot(tr, ti)), lti = Math.atan2(ti, tr), k = (LN5 - LNPI) / 2;
+    const gr = 0.5 * Math.log(2 * Math.PI) + (wr + 0.5) * ltr - wi * lti - tr + Math.log(Math.hypot(xr, xi)), gi = (wr + 0.5) * lti + wi * ltr - ti + Math.atan2(xi, xr);
+    return [gr - Math.log(Math.hypot(zr, zi)) + (sg + 1) * k, gi - Math.atan2(zi, zr) + t * k];
+  }
+  // the completed mix (known factor attached, the factor's size on the line at that height divided out)
+  function completed(tau, sg, t, wrong) {
+    const w = turned(sg, t, wrong), c = Math.cos(tau), s = Math.sin(tau), vr = c * w[0] + s * w[2], vi = c * w[1] + s * w[3];
+    const f = logFactor(sg, t), f0 = logFactor(0.5, t), m = Math.exp(f[0] - f0[0]), ph = f[1], cr = m * Math.cos(ph), ci = m * Math.sin(ph);
+    return [vr * cr - vi * ci, vr * ci + vi * cr];
+  }
+  // on the centre line the two turned functions, with the factor's direction attached, are real: returns [a, b, ia, ib] (ia, ib should vanish)
+  function linePair(t, wrong) {
+    const w = turned(0.5, t, wrong), ph = logFactor(0.5, t)[1], c = Math.cos(ph), s = Math.sin(ph);
+    return [w[0] * c - w[1] * s, w[2] * c - w[3] * s, w[0] * s + w[1] * c, w[2] * s + w[3] * c];
+  }
+  const norm180 = d => { d %= 180; return d < 0 ? d + 180 : d; };
+  // the one mix angle, in degrees from 0 to 180, whose mix vanishes at height t on the line
+  function angleAt(t) { const p = linePair(t); return norm180(Math.atan2(-p[0], p[1]) / DEG); }
+
+  // the line, sampled once
+  const LSTEP = 0.005;
+  function sampleLine() {
+    const n = Math.round((T1 - T0) / LSTEP) + 1, a = new Float64Array(n), b = new Float64Array(n);
+    for (let i = 0; i < n; i++) { const p = linePair(T0 + i * LSTEP); a[i] = p[0]; b[i] = p[1]; }
+    return { n, a, b };
+  }
+  // heights of the zeros on the line for the mix at tauDeg: changes of sign of cos * a + sin * b, each refined by bisection
+  function lineZeros(L, tauDeg, rough) {
+    const c = Math.cos(tauDeg * DEG), s = Math.sin(tauDeg * DEG), out = [], f = t => { const p = linePair(t); return c * p[0] + s * p[1]; };
+    let prev = c * L.a[0] + s * L.b[0];
+    for (let i = 1; i < L.n; i++) {
+      const v = c * L.a[i] + s * L.b[i];
+      if (prev * v < 0) {
+        let lo = T0 + (i - 1) * LSTEP, hi = lo + LSTEP;
+        if (rough) out.push(lo + LSTEP * prev / (prev - v));
+        else { let flo = prev; for (let k = 0; k < 44; k++) { const mid = (lo + hi) / 2, fm = f(mid); if (flo * fm <= 0) hi = mid; else { lo = mid; flo = fm; } } out.push((lo + hi) / 2); }
+      }
+      prev = v;
+    }
+    return out;
+  }
+  // where two zeros on the line can meet: the turning points of the angle. The angle rises with height where W = a b' - a' b is positive.
+  function contacts(L) {
+    const h = 1e-4, W = t => { const p = linePair(t), q = linePair(t + h), r = linePair(t - h); return p[0] * (q[1] - r[1]) - (q[0] - r[0]) * p[1]; };
+    const out = [], w = i => L.a[i] * (L.b[i + 1] - L.b[i - 1]) - (L.a[i + 1] - L.a[i - 1]) * L.b[i];
+    let prev = w(1);
+    for (let i = 2; i < L.n - 1; i++) {
+      const v = w(i);
+      if (prev * v < 0) {
+        let lo = T0 + (i - 1) * LSTEP, hi = lo + LSTEP, flo = W(lo);
+        for (let k = 0; k < 44; k++) { const mid = (lo + hi) / 2, fm = W(mid); if (flo * fm <= 0) hi = mid; else { lo = mid; flo = fm; } }
+        const t = (lo + hi) / 2;
+        out.push({ t, angle: angleAt(t), leaves: prev > 0 });       // angle at a maximum: turning the dial up past it, the two zeros meet and leave
+      }
+      prev = v;
+    }
+    return out;
+  }
+  // Q = Im(A conj B): zero exactly where A / B is real, that is where SOME mix vanishes. Also the angle of that mix.
+  function road(sg, t) { const w = turned(sg, t); return w[1] * w[2] - w[0] * w[3]; }
+  function angleOff(sg, t) { const w = turned(sg, t); return norm180(Math.atan2(-(w[0] * w[2] + w[1] * w[3]), w[2] * w[2] + w[3] * w[3]) / DEG); }
+  // follow the road that leaves the line at a contact, on the right-hand side, until it comes back to the line
+  function traceLoop(start, all) {
+    const STEP = 0.02, e = 1e-5, grad = (x, y) => [(road(x + e, y) - road(x - e, y)) / (2 * e), (road(x, y + e) - road(x, y - e)) / (2 * e)];
+    let x = 0.5 + 0.012, y = start.t;
+    for (let k = 0; k < 20; k++) { const q = road(x, y), d = (road(x, y + e) - road(x, y - e)) / (2 * e); const dy = q / d; y -= dy; if (Math.abs(dy) < 1e-13) break; }
+    const pts = [{ sg: 0.5, t: start.t, tau: start.angle }, { sg: x, t: y, tau: angleOff(x, y) }];
+    let dir = [1, 0];
+    for (let n = 0; n < 4000; n++) {
+      let g = grad(x, y), gn = Math.hypot(g[0], g[1]), tx = -g[1] / gn, ty = g[0] / gn;
+      if (tx * dir[0] + ty * dir[1] < 0) { tx = -tx; ty = -ty; }
+      let px = x + STEP * tx, py = y + STEP * ty;
+      for (let k = 0; k < 6; k++) { g = grad(px, py); const q = road(px, py), g2 = g[0] * g[0] + g[1] * g[1]; px -= q * g[0] / g2; py -= q * g[1] / g2; if (Math.abs(q) / Math.sqrt(g2) < 1e-12) break; }
+      dir = [px - x, py - y]; const dn = Math.hypot(dir[0], dir[1]); dir = [dir[0] / dn, dir[1] / dn];
+      x = px; y = py;
+      if (n > 4 && x < 0.5 + 0.012) break;
+      pts.push({ sg: x, t: y, tau: angleOff(x, y) });
+    }
+    let end = null;
+    for (const c of all) if (c !== start && (!end || Math.abs(c.t - y) < Math.abs(end.t - y))) end = c;
+    pts.push({ sg: 0.5, t: end.t, tau: end.angle });
+    return { from: start, to: end, pts, reach: Math.max(...pts.map(p => p.sg)) };
+  }
+  // a zero of the mix near a starting guess (Newton's method, numerical derivative)
+  function newtonMix(tau, sg, t) {
+    for (let k = 0; k < 40; k++) {
+      const h = 1e-6, v = mix(tau, sg, t), a = mix(tau, sg + h, t), b = mix(tau, sg - h, t), dr = (a[0] - b[0]) / (2 * h), di = (a[1] - b[1]) / (2 * h), d = dr * dr + di * di;
+      const sr = (v[0] * dr + v[1] * di) / d, si = (v[1] * dr - v[0] * di) / d;
+      sg -= sr; t -= si;
+      if (Math.hypot(sr, si) < 1e-13) break;
+    }
+    return [sg, t];
+  }
+  // where on a loop the pair sits for the mix at tauDeg (null if that mix has no pair on this loop): read off the traced road, then made exact by Newton's method
+  function pairOn(loop, tauDeg) {
+    const p = loop.pts, n = p.length, lo = loop.from.angle, hi = loop.to.angle;
+    if (!(tauDeg > lo && tauDeg < hi)) return null;
+    let i = 0, j = n - 1;
+    while (j - i > 1) { const m = (i + j) >> 1; if (p[m].tau <= tauDeg) i = m; else j = m; }
+    const f = (tauDeg - p[i].tau) / (p[j].tau - p[i].tau);
+    let sg = p[i].sg + f * (p[j].sg - p[i].sg);
+    const t = p[i].t + f * (p[j].t - p[i].t);
+    // next to a meeting place the pair moves off the line like a square root of the turn, not in proportion to it
+    if (i === 0) sg = 0.5 + (p[j].sg - 0.5) * Math.sqrt(f); else if (j === n - 1) sg = 0.5 + (p[i].sg - 0.5) * Math.sqrt(1 - f);
+    const z = newtonMix(tauDeg * DEG, sg, t);
+    return z[0] - 0.5 > 1e-7 && Math.hypot(z[0] - sg, z[1] - t) < 0.05 ? z : [sg, t];
+  }
+  // walk once round the border of the box -2.5 < sigma < 3.5, T0 < t < T1 and add up the turning of each mix's direction (one walk serves every angle asked for)
+  function borderCount(tausDeg) {
+    const nH = 1500, nV = 5000, k = tausDeg.length, total = new Array(k).fill(0), prev = new Array(k).fill(null), big = new Array(k).fill(0);
+    const cs = tausDeg.map(d => [Math.cos(d * DEG), Math.sin(d * DEG)]);
+    const visit = (sg, t) => {
+      const w = turned(sg, t);
+      for (let i = 0; i < k; i++) {
+        const a = Math.atan2(cs[i][0] * w[1] + cs[i][1] * w[3], cs[i][0] * w[0] + cs[i][1] * w[2]);
+        if (prev[i] !== null) { let d = a - prev[i]; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; total[i] += d; big[i] = Math.max(big[i], Math.abs(d)); }
+        prev[i] = a;
+      }
+    };
+    for (let i = 0; i <= nH; i++) visit(-2.5 + 6 * i / nH, T0);
+    for (let i = 1; i <= nV; i++) visit(3.5, T0 + (T1 - T0) * i / nV);
+    for (let i = 1; i <= nH; i++) visit(3.5 - 6 * i / nH, T1);
+    for (let i = 1; i <= nV; i++) visit(-2.5, T1 - (T1 - T0) * i / nV);
+    return { turns: total.map(x => x / (2 * Math.PI)), biggestStep: Math.max(...big) };
+  }
+
+  // The eight contacts as certified by Lattice with interval arithmetic (crew_visuals/mirror_mix_contacts.txt), and the cousin's zeros from the page before this one
+  const CERTIFIED = [[77.018839481, 157.08063514, false], [77.450969917, 128.11300406, true], [80.977613764, 161.33062322, false], [83.906566889, 99.42592712, true],
+    [85.222670197, 84.93064220, false], [85.899025335, 23.73365740, true], [88.546597400, 167.33002755, false], [91.191884267, 109.62117944, true]];
+  const COUSIN_LINE = [77.226418, 78.717410, 80.327947, 81.925402, 83.108841, 87.647476, 89.439189, 90.724505, 92.182744, 93.780944, 95.348661];
+  const COUSIN_OFF = [0.808517182, 85.699348485];
+  const STOPS = [0, 45, 90, 135], EXPECT_LINE = [14, 11, 14, 8], EXPECT_ALL = [14, 13, 14, 14];
+
+  function selfCheck() {
+    const fail = [], res = {};
+    if (!(Math.abs(KAPPA - 0.284079043840412) < 1e-14)) fail.push('kappa');
+    if (!(Math.abs(Math.cos(2 * HALF) - 2 * Math.sin(2 * Math.PI / 5) / Math.sqrt(5)) < 1e-14)) fail.push('the root number');
+    let im = 0, imWrong = 0;
+    for (const t of [77, 81.3, 86, 90.9, 95]) { const p = linePair(t), q = linePair(t, true); im = Math.max(im, Math.abs(p[2]) / Math.hypot(p[0], p[2]), Math.abs(p[3]) / Math.hypot(p[1], p[3])); imWrong = Math.max(imWrong, Math.abs(q[3]) / Math.hypot(q[1], q[3])); }
+    res.im = im; res.imWrong = imWrong;
+    if (!(im < 1e-9)) fail.push('the two functions are not real on the line: ' + im);
+    if (!(imWrong > 0.1)) fail.push('the wrong turn passed as real on the line');
+    let worst = 0;
+    for (const tauDeg of [10, 45, 100, 163]) for (const s of [[0.8, 85.2], [1.7, 80.5], [0.05, 90], [0.95, 82.3], [2.1, 93], [0.4, 77.7]]) {
+      const a = completed(tauDeg * DEG, s[0], s[1]), b = completed(tauDeg * DEG, 1 - s[0], s[1]); worst = Math.max(worst, Math.hypot(a[0] - b[0], a[1] + b[1]) / Math.hypot(a[0], a[1]));
+    }
+    res.mirror = worst;
+    if (!(worst < 1e-8)) fail.push('the mirror rule fails for a mix by ' + worst);
+    const r1 = [], pts = [[0.5, 80], [0.7, 88], [0.2, 93.5]];
+    for (const s of pts) { const m = mix(45 * DEG, s[0], s[1]), c = cousin(s[0], s[1]), d = c[0] * c[0] + c[1] * c[1]; r1.push([(m[0] * c[0] + m[1] * c[1]) / d, (m[1] * c[0] - m[0] * c[1]) / d]); }
+    res.cousinRatio = r1[0];
+    if (!(r1.every(z => Math.hypot(z[0] - r1[0][0], z[1] - r1[0][1]) < 1e-9))) fail.push('the mix at 45 degrees is not the cousin');
+    const L = sampleLine(); res.L = L;
+    res.lineZeros = STOPS.map(d => lineZeros(L, d));
+    STOPS.forEach((d, i) => { if (res.lineZeros[i].length !== EXPECT_LINE[i]) fail.push('at ' + d + ' degrees: ' + res.lineZeros[i].length + ' zeros on the line, expected ' + EXPECT_LINE[i]); });
+    const z45 = res.lineZeros[1];
+    if (z45.length === COUSIN_LINE.length && z45.some((x, i) => Math.abs(x - COUSIN_LINE[i]) > 3e-6)) fail.push('the cousin\'s zeros on the line came out at ' + z45.map(x => x.toFixed(6)).join(', '));
+    const cs = contacts(L); res.contacts = cs;
+    if (cs.length !== CERTIFIED.length) fail.push(cs.length + ' places where zeros can meet, expected ' + CERTIFIED.length);
+    else cs.forEach((c, i) => { if (Math.abs(c.t - CERTIFIED[i][0]) > 2e-6 || Math.abs(c.angle - CERTIFIED[i][1]) > 2e-5 || c.leaves !== CERTIFIED[i][2]) fail.push('contact ' + (i + 1) + ' came out at height ' + c.t.toFixed(7) + ', angle ' + c.angle.toFixed(6)); });
+    const loops = fail.length ? [] : cs.filter(c => c.leaves).map(c => traceLoop(c, cs)).sort((p, q) => p.from.angle - q.from.angle); res.loops = loops;
+    for (const lp of loops) {
+      if (lp.to.leaves) fail.push('a road from height ' + lp.from.t.toFixed(3) + ' did not end where a pair returns');
+      const last = lp.pts[lp.pts.length - 2];
+      if (Math.hypot(last.sg - 0.5, last.t - lp.to.t) > 0.05) fail.push('a road ended ' + Math.hypot(last.sg - 0.5, last.t - lp.to.t).toFixed(3) + ' away from its contact');
+      for (let i = 1; i < lp.pts.length; i++) if (!(lp.pts[i].tau > lp.pts[i - 1].tau)) { fail.push('the angle does not rise steadily along the road from height ' + lp.from.t.toFixed(3)); break; }
+    }
+    if (loops.length && new Set(loops.map(l => l.to)).size !== loops.length) fail.push('two roads end at the same place');
+    if (loops.length) {
+      const z = pairOn(loops[0], 45); res.off = z;
+      if (!z || Math.abs(z[0] - COUSIN_OFF[0]) > 1e-7 || Math.abs(z[1] - COUSIN_OFF[1]) > 1e-7) fail.push('the cousin\'s pair came out at ' + (z ? z[0] + ' + ' + z[1] + 'i' : 'nowhere'));
+      let worstPair = 0;                                      // just after a pair leaves and just before it returns, the point reported must still be a true zero off the line
+      for (const lp of loops) for (const d of [lp.from.angle + 0.02, lp.from.angle + 0.5, (lp.from.angle + lp.to.angle) / 2, lp.to.angle - 0.5, lp.to.angle - 0.02]) {
+        const q = pairOn(lp, d), v = q ? mix(d * DEG, q[0], q[1]) : [1, 1], w = q ? mix(d * DEG, q[0] + 0.01, q[1]) : [1, 1];
+        if (!q || !(q[0] > 0.5)) { fail.push('no pair found at ' + d.toFixed(2) + ' degrees'); continue; }
+        worstPair = Math.max(worstPair, Math.hypot(v[0], v[1]) / Math.hypot(w[0], w[1]));
+      }
+      res.worstPair = worstPair;
+      if (!(worstPair < 1e-8)) fail.push('a reported pair is not a zero: ' + worstPair);
+      const b = borderCount(STOPS); res.border = b;
+      if (!(b.biggestStep < 1)) fail.push('the walk round the border is unreliable: step ' + b.biggestStep);
+      STOPS.forEach((d, i) => {
+        const pairs = loops.filter(l => d > l.from.angle && d < l.to.angle).length, n = Math.round(b.turns[i]);
+        if (Math.abs(b.turns[i] - n) > 1e-6 || n !== EXPECT_ALL[i]) fail.push('at ' + d + ' degrees the walk round the border counts ' + b.turns[i] + ' zeros, expected ' + EXPECT_ALL[i]);
+        if (n !== res.lineZeros[i].length + 2 * pairs) fail.push('at ' + d + ' degrees: ' + n + ' zeros in all, but ' + res.lineZeros[i].length + ' on the line and ' + pairs + ' pairs');
+      });
+    }
+    return Object.assign(res, { fail });
+  }
+  // MATH-END
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const stateEl = document.getElementById('state'), errEl = document.getElementById('err'), playBtn = document.getElementById('bPlay');
+  const chk = selfCheck();
+  if (chk.fail.length) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'This page checked itself and found a problem, so it draws nothing: ' + chk.fail.join('; ');
+    return;
+  }
+  const L = chk.L, CONTACTS = chk.contacts, LOOPS = chk.loops;
+  const THETA = new Float32Array(L.n); for (let i = 0; i < L.n; i++) THETA[i] = norm180(Math.atan2(-L.a[i], L.b[i]) / DEG);
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const COL = { ink: cssVar('--ink'), dim: cssVar('--dim'), gold: cssVar('--accent'), teal: cssVar('--teal'), red: cssVar('--red'), stone: cssVar('--stone'), edge: cssVar('--edge') };
+  const NAMES = [[0, 'an honest L-function'], [45, 'the cousin'], [90, 'the other honest L-function'], [135, 'a second cousin'], [180, 'an honest L-function']];
+  let tau = 23, W = 0, H = 0, narrow = false, dragging = false, playing = false, lastFrame = 0, cur = null, playTau = 0, frameHandle = 0;
+  const R = {};
+
+  function hsl(h, sat, li) {                               // h in radians
+    const hh = ((h * 180 / Math.PI) % 360 + 360) % 360, c = (1 - Math.abs(2 * li - 1)) * sat, x = c * (1 - Math.abs((hh / 60) % 2 - 1)), m = li - c / 2;
+    const [r, g, b] = hh < 60 ? [c, x, 0] : hh < 120 ? [x, c, 0] : hh < 180 ? [0, c, x] : hh < 240 ? [0, x, c] : hh < 300 ? [x, 0, c] : [c, 0, x];
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+  // The coloured picture. A and B and the known factor are worked out once for each cell of the right-hand half (a few columns at a time);
+  // after that, any setting of the dial is only a weighted sum, and the left-hand half is the mirror image with the direction reversed.
+  const PC = 480, PR = 88, HR = PR / 2, PORT = { col: 0, A: new Float32Array(PC * HR * 2), B: new Float32Array(PC * HR * 2), ph: new Float32Array(PC * HR), mg: new Float32Array(PC * HR), shown: -1 };
+  PORT.cvs = document.createElement('canvas'); PORT.cvs.width = PC; PORT.cvs.height = PR; PORT.c2 = PORT.cvs.getContext('2d'); PORT.img = PORT.c2.createImageData(PC, PR);
+  for (let i = 3; i < PORT.img.data.length; i += 4) PORT.img.data[i] = 255;
+  function portraitChunk() {
+    for (let n = 0; n < 10 && PORT.col < PC; n++, PORT.col++) {
+      const t = T0 + (PORT.col + 0.5) / PC * (T1 - T0), f0 = logFactor(0.5, t)[0];
+      for (let r = 0; r < HR; r++) {
+        const sg = SMAX - (r + 0.5) / PR * (SMAX - SMIN), w = turned(sg, t), f = logFactor(sg, t), k = r * PC + PORT.col;
+        PORT.A[2 * k] = w[0]; PORT.A[2 * k + 1] = w[1]; PORT.B[2 * k] = w[2]; PORT.B[2 * k + 1] = w[3]; PORT.ph[k] = f[1]; PORT.mg[k] = Math.exp(f[0] - f0);
+      }
+    }
+    PORT.shown = -1; draw();
+    if (PORT.col < PC) setTimeout(portraitChunk, 0);
+  }
+  function recolour() {
+    const key = tau * 1000 + PORT.col; if (PORT.shown === key) return; PORT.shown = key;
+    const c = Math.cos(tau * DEG), s = Math.sin(tau * DEG), d = PORT.img.data;
+    for (let r = 0; r < HR; r++) for (let i = 0; i < PORT.col; i++) {
+      const k = r * PC + i, vr = c * PORT.A[2 * k] + s * PORT.B[2 * k], vi = c * PORT.A[2 * k + 1] + s * PORT.B[2 * k + 1];
+      const m = Math.hypot(vr, vi) * PORT.mg[k], a = Math.atan2(vi, vr) + PORT.ph[k], li = 0.13 + 0.45 * m / (m + 0.7);
+      let rgb = hsl(a, 0.72, li), o = k * 4; d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2];
+      rgb = hsl(-a, 0.72, li); o = ((PR - 1 - r) * PC + i) * 4; d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2];
+    }
+    PORT.c2.putImageData(PORT.img, 0, 0);
+  }
+
+  function layout() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth; H = window.innerHeight; narrow = W < 620;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const top = Math.ceil(document.getElementById('more').getBoundingClientRect().top) + 30;
+    const bottom = H - (narrow ? 166 : 112), x0 = 16, w = W - 32, h = Math.max(230, bottom - top), wl = narrow ? w : Math.max(w * 0.72, w - 330);
+    const hs = Math.round((h - 34) * (narrow ? 0.34 : 0.38));
+    R.strip = { x: x0 + 34, y: top + 12, w: wl - 40, h: hs };
+    R.table = { x: x0 + 34, y: top + 12 + hs + 22, w: wl - 40, h: h - 34 - hs - 18 };
+    R.info = narrow ? null : { x: x0 + wl + 22, y: top + 12, w: w - wl - 22, h: h - 12 };
+    for (const b of document.querySelectorAll('#bar button[data-tau]')) { if (!b.dataset.long) b.dataset.long = b.textContent; b.textContent = narrow ? b.dataset.short : b.dataset.long; b.setAttribute('aria-label', b.dataset.long); }
+  }
+  const tx = t => R.strip.x + (t - T0) / (T1 - T0) * R.strip.w;
+  const sy = sig => R.strip.y + (SMAX - sig) / (SMAX - SMIN) * R.strip.h;
+  const ay = deg => R.table.y + R.table.h - deg / 180 * R.table.h;
+
+  // everything the current setting of the dial implies
+  function now() {
+    if (cur && cur.tau === tau) return cur;
+    const zs = lineZeros(L, tau, true), pairs = [];
+    LOOPS.forEach((lp, i) => { const z = pairOn(lp, tau); if (z) pairs.push({ z, loop: i }); });
+    return cur = { tau, zs, pairs, total: zs.length + 2 * pairs.length };
+  }
+  function nameOf(d) { for (const [a, n] of NAMES) if (Math.abs(d - a) < 0.13) return n; return null; }
+  function setTau(d, keep) {
+    d = ((d % 180) + 180) % 180; tau = Math.round(d * 100) / 100; cur = null;
+    if (!keep) { try { history.replaceState(null, '', '#tau=' + tau); } catch (e) { /* a file page may refuse; the picture does not depend on it */ } }
+    draw();
+  }
+
+  function text(str, x, y, col, size, align) { ctx.fillStyle = col; ctx.font = (size || 12) + 'px Georgia, serif'; ctx.textAlign = align || 'left'; ctx.fillText(str, x, y); }
+  function textOn(str, x, y, size, align) {                // white text with a dark edge, for labels on the coloured picture
+    ctx.font = size + 'px Georgia, serif'; ctx.textAlign = align || 'center'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(5,6,13,0.9)'; ctx.lineWidth = 3.5; ctx.strokeText(str, x, y); ctx.fillStyle = '#fff'; ctx.fillText(str, x, y);
+  }
+  function ring(x, y, r, col, width, fill) { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); if (fill) { ctx.fillStyle = fill; ctx.fill(); } ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke(); }
+  function wrap(str, x, y, w, col, size, lh) {             // plain word wrap; returns the y after the last line
+    ctx.font = size + 'px Georgia, serif'; ctx.fillStyle = col; ctx.textAlign = 'left';
+    let line = '';
+    for (const word of str.split(' ')) { const t = line ? line + ' ' + word : word; if (ctx.measureText(t).width > w && line) { ctx.fillText(line, x, y); y += lh; line = word; } else line = t; }
+    if (line) { ctx.fillText(line, x, y); y += lh; }
+    return y;
+  }
+
+  function drawStrip(st) {
+    const b = R.strip, fs = narrow ? 10.5 : 12;
+    ctx.fillStyle = '#05060d'; ctx.fillRect(b.x, b.y, b.w, b.h);
+    recolour(); ctx.imageSmoothingEnabled = true; ctx.drawImage(PORT.cvs, b.x, b.y, b.w, b.h);
+    if (PORT.col < PC) { ctx.fillStyle = '#05060d'; const x = tx(T0 + PORT.col / PC * (T1 - T0)); ctx.fillRect(x, b.y, b.x + b.w - x, b.h); text('drawing the picture…', b.x + b.w - 8, b.y + b.h - 8, COL.dim, fs, 'right'); }
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x, b.y, b.w, b.h); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 1;
+    for (const e of [0, 1]) { ctx.beginPath(); ctx.moveTo(b.x, sy(e)); ctx.lineTo(b.x + b.w, sy(e)); ctx.stroke(); }
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.5; ctx.setLineDash([2, 5]); ctx.beginPath(); ctx.moveTo(b.x, sy(0.5)); ctx.lineTo(b.x + b.w, sy(0.5)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.3;                      // the roads: four loops and their mirror images
+    for (const lp of LOOPS) for (const side of [1, -1]) { ctx.beginPath(); lp.pts.forEach((p, i) => { const x = tx(p.t), y = sy(0.5 + side * (p.sg - 0.5)); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke(); }
+    for (const z of st.zs) ring(tx(z), sy(0.5), narrow ? 2.8 : 3.6, '#fff', 1.4, '#10142c');
+    for (const p of st.pairs) {
+      const x = tx(p.z[1]), y1 = sy(p.z[0]), y2 = sy(1 - p.z[0]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke(); ctx.setLineDash([]);
+      ring(x, y1, narrow ? 4 : 5, '#fff', 2, COL.red); ring(x, y2, narrow ? 4 : 5, '#fff', 2, COL.red);
+    }
+    if (st.pairs.length && !narrow) {                                                    // label the pair that is easiest to read: the one nearest the line
+      const p = st.pairs.reduce((u, v) => (v.z[0] < u.z[0] ? v : u)), x = tx(p.z[1]), flip = x > b.x + b.w - 150, ya = Math.max(b.y + 14, sy(p.z[0]) - 8), yb = Math.min(b.y + b.h - 6, sy(1 - p.z[0]) + 16);
+      if (yb - ya > 26) { textOn('a zero off the line', x + (flip ? -9 : 9), ya, 12, flip ? 'right' : 'left'); textOn('its twin', x + (flip ? -9 : 9), yb, 12, flip ? 'right' : 'left'); }
+    }
+    ctx.restore();
+    text('0', b.x - 6, sy(0) + 4, COL.dim, fs, 'right'); text('½', b.x - 6, sy(0.5) + 4, COL.gold, fs + 1, 'right'); text('1', b.x - 6, sy(1) + 4, COL.dim, fs, 'right');
+    if (!narrow) { text('2', b.x - 6, sy(2) + 4, COL.dim, fs, 'right'); text('−1', b.x - 6, sy(-1) + 4, COL.dim, fs, 'right'); }
+    text(narrow ? 'the strip on its side; the white loops are roads' : 'the strip, lying on its side: colour is the direction of the value; the white loops are the only roads off the line', b.x, b.y - 5, COL.dim, fs);
+  }
+
+  function drawTable(st) {
+    const b = R.table, fs = narrow ? 10.5 : 12;
+    ctx.fillStyle = COL.stone; ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x, b.y, b.w, b.h); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1;
+    for (const d of [45, 90, 135]) { ctx.beginPath(); ctx.moveTo(b.x, ay(d)); ctx.lineTo(b.x + b.w, ay(d)); ctx.stroke(); }
+    for (let t = 80; t <= 95; t += 5) { ctx.beginPath(); ctx.moveTo(tx(t), b.y); ctx.lineTo(tx(t), b.y + b.h); ctx.stroke(); }
+    ctx.strokeStyle = COL.red; ctx.lineWidth = 1.6; ctx.setLineDash([5, 4]);            // pairs off the line: their height at each setting
+    for (const lp of LOOPS) { ctx.beginPath(); lp.pts.forEach((p, i) => { const x = tx(p.t), y = ay(p.tau); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.8; ctx.beginPath();                    // zeros on the line: the one setting for each height
+    let pen = false;
+    for (let i = 0; i < L.n; i++) {
+      const x = tx(T0 + i * LSTEP), y = ay(THETA[i]);
+      if (pen && Math.abs(THETA[i] - THETA[i - 1]) > 90) { const up = THETA[i] < THETA[i - 1]; ctx.lineTo(x, ay(up ? 180 : 0)); ctx.moveTo(x, ay(up ? 0 : 180)); }
+      if (pen) ctx.lineTo(x, y); else { ctx.moveTo(x, y); pen = true; }
+    }
+    ctx.stroke();
+    for (const c of CONTACTS) ring(tx(c.t), ay(c.angle), 3.2, COL.gold, 1.5, c.leaves ? COL.gold : COL.stone);
+    const y = ay(tau);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(b.x, y); ctx.lineTo(b.x + b.w, y); ctx.stroke();
+    for (const z of st.zs) ring(tx(z), y, narrow ? 2.8 : 3.6, '#fff', 1.4, '#10142c');
+    for (const p of st.pairs) ring(tx(p.z[1]), y, narrow ? 4 : 5, '#fff', 2, COL.red);
+    const lab = 'the dial: ' + tau.toFixed(1) + '°', ly = y < b.y + 18 ? y + 15 : y - 6;
+    textOn(lab, b.x + b.w - 8, ly, fs + 1, 'right');
+    ctx.restore();
+    for (const [d, n] of NAMES) { if (d === 180) continue; text(d + '°', b.x - 6, ay(d) + 4, COL.dim, fs, 'right'); if (!narrow) { ctx.font = '11px Georgia, serif'; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(28,33,64,0.92)'; ctx.lineWidth = 4; ctx.strokeText(n, b.x + 6, ay(d) - 5); ctx.fillStyle = 'rgba(232,230,242,0.7)'; ctx.fillText(n, b.x + 6, ay(d) - 5); } }
+    text('180°', b.x - 6, ay(180) + 9, COL.dim, fs, 'right');
+    for (let t = 80; t <= 95; t += 5) text(String(t), tx(t), b.y + b.h + 15, COL.dim, fs, 'center');
+    text('height', b.x, b.y + b.h + 15, COL.dim, fs);
+    text(narrow ? 'the timetable: drag the white line' : 'the timetable: for each height, the setting that puts a zero there. Gold: on the line. Dashed red: a pair off it. Drag the white line.', b.x, b.y - 5, COL.dim, fs);
+  }
+
+  function drawInfo(st) {
+    const b = R.info; if (!b) return;
+    let y = b.y + 18;
+    text(st.total + ' zeros in this window', b.x, y, COL.gold, 19); y += 24;
+    text(st.pairs.length ? st.zs.length + ' sit on the line.' : 'All ' + st.zs.length + ' sit on the line.', b.x, y, COL.ink, 14); y += 20;
+    if (st.pairs.length) y = wrap(st.pairs.length === 1 ? 'One pair of twins is off it.' : st.pairs.length + ' pairs of twins are off it.', b.x, y, b.w, COL.red, 14, 19);
+    else y = wrap('No pair is off it.', b.x, y, b.w, COL.dim, 14, 19);
+    // the dial itself: a half circle from 0 to 180 degrees
+    const r = Math.min(b.w / 2 - 26, 86), cx = b.x + r + 22, cy = y + r + 26;
+    ctx.strokeStyle = COL.edge; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI); ctx.stroke();
+    for (const lp of LOOPS) { ctx.strokeStyle = COL.red; ctx.lineWidth = 3; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.arc(cx, cy, r - 5 - 4 * LOOPS.indexOf(lp), Math.PI + lp.from.angle * DEG, Math.PI + lp.to.angle * DEG); ctx.stroke(); ctx.globalAlpha = 1; }
+    for (const [d, n] of NAMES) {
+      const a = Math.PI + d * DEG, x1 = cx + r * Math.cos(a), y1 = cy + r * Math.sin(a), x2 = cx + (r + 7) * Math.cos(a), y2 = cy + (r + 7) * Math.sin(a);
+      ctx.strokeStyle = COL.dim; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      text(d + '°', cx + (r + 19) * Math.cos(a), cy + (r + 19) * Math.sin(a) + 4, COL.dim, 11, 'center');
+    }
+    const a = Math.PI + tau * DEG;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + (r - 2) * Math.cos(a), cy + (r - 2) * Math.sin(a)); ctx.stroke();
+    ring(cx, cy, 3.5, '#fff', 1.5, '#10142c');
+    y = cy + 24;
+    y = wrap('Red arcs: the settings at which a pair is off the line. No arc reaches 0° or 90°, the two honest L-functions.', b.x, y, b.w, COL.dim, 12, 16);
+    const nm = nameOf(tau); if (nm) wrap('This setting is ' + nm + '.', b.x, y + 6, b.w, COL.ink, 13, 17);
+  }
+
+  function describe(st) {
+    const nm = nameOf(tau), on = st.zs.length;
+    let s = (nm ? nm.charAt(0).toUpperCase() + nm.slice(1) + ' (' + tau.toFixed(0) + '°)' : 'Dial at ' + tau.toFixed(1) + '°') + ': ' + st.total + ' zeros in this window, ';
+    s += st.pairs.length ? on + ' on the line and ' + (st.pairs.length === 1 ? 'one pair' : st.pairs.length + ' pairs') + ' off it.' : 'all on the line.';
+    if (st.pairs.length === 1) { const z = st.pairs[0].z; s += ' The pair: ' + z[0].toFixed(4) + ' + ' + z[1].toFixed(4) + 'i and its twin ' + (1 - z[0]).toFixed(4) + ' + ' + z[1].toFixed(4) + 'i.'; }
+    let best = null;
+    for (const c of CONTACTS) { const ahead = ((c.angle - tau) % 180 + 180) % 180; if (ahead < 9 && (!best || ahead < best.ahead)) best = { c, ahead }; }
+    let hint = '';
+    if (best) hint = best.c.leaves ? 'Two zeros near height ' + best.c.t.toFixed(2) + ' are closing on each other. They meet, and leave the line, at ' + best.c.angle.toFixed(2) + '°.'
+      : 'The pair near height ' + best.c.t.toFixed(2) + ' is on its way back. It lands on the line at ' + best.c.angle.toFixed(2) + '°.';
+    else if (!st.pairs.length) hint = 'Every zero is its own twin.';
+    else hint = 'The mirror is satisfied at every setting; the line is not needed.';
+    return s + ' <i>' + hint + '</i>';
+  }
+
+  function draw() {
+    if (!W) return;
+    ctx.clearRect(0, 0, W, H);
+    const st = now();
+    drawStrip(st); drawTable(st); drawInfo(st);
+    const html = describe(st); if (stateEl.dataset.last !== html) { stateEl.dataset.last = html; if (!playing) stateEl.innerHTML = html; }
+  }
+
+  function frame(ts) {
+    if (!playing) return;
+    const dt = Math.min(0.1, Math.max(0, (ts - lastFrame) / 1000 || 0)); lastFrame = ts;
+    playTau = (playTau + 7.5 * dt) % 180;                  // kept unrounded, so that very short frames still add up
+    setTau(playTau, true); frameHandle = requestAnimationFrame(frame);
+  }
+  function setPlaying(p) {
+    playing = p; playBtn.setAttribute('aria-pressed', String(p)); playBtn.textContent = p ? 'Pause' : 'Play';
+    cancelAnimationFrame(frameHandle);                   // one loop at most: a frame still waiting from an earlier Play must not start a second one (found by Marlow)
+    if (p) { stateEl.innerHTML = 'Turning the dial. <i>Watch the white line in the lower picture and the dots above it.</i>'; playTau = tau; lastFrame = performance.now(); frameHandle = requestAnimationFrame(frame); }
+    else { cur = null; stateEl.dataset.last = ''; setTau(tau); }
+  }
+  function fromPointer(e) {
+    const b = R.table, r = cv.getBoundingClientRect(), y = e.clientY - r.top;
+    setTau(Math.min(179.99, Math.max(0, (b.y + b.h - y) / b.h * 180)), true);
+  }
+  cv.addEventListener('pointerdown', e => {
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, b = R.table;
+    if (x < b.x - 30 || x > b.x + b.w + 6 || y < b.y - 4 || y > b.y + b.h + 4) return;
+    if (playing) setPlaying(false);
+    dragging = true; cv.setPointerCapture(e.pointerId); fromPointer(e);
+  });
+  cv.addEventListener('pointermove', e => { if (dragging) fromPointer(e); });
+  const endDrag = () => { if (dragging) { dragging = false; cur = null; setTau(tau); } };
+  cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+  cv.addEventListener('keydown', e => {
+    const step = { ArrowUp: 0.25, ArrowRight: 0.25, ArrowDown: -0.25, ArrowLeft: -0.25, PageUp: 5, PageDown: -5 }[e.key];
+    if (step) { if (playing) setPlaying(false); setTau(tau + step); e.preventDefault(); }
+    else if (e.key === ' ') { setPlaying(!playing); e.preventDefault(); }
+  });
+  for (const b of document.querySelectorAll('#bar button[data-tau]')) b.addEventListener('click', () => { if (playing) setPlaying(false); setTau(Number(b.dataset.tau)); });
+  playBtn.addEventListener('click', () => setPlaying(!playing));
+  document.getElementById('more').addEventListener('toggle', () => { layout(); draw(); });
+  window.addEventListener('resize', () => { layout(); draw(); });
+  const m = /tau=([0-9.]+)/.exec(location.hash); if (m && isFinite(Number(m[1]))) tau = ((Number(m[1]) % 180) + 180) % 180;
+  layout(); draw(); portraitChunk();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+Where are the zeros of the zeta function?
+
+A zero is an input that makes the zeta function equal zero. Picture each input as a point on a map. Its horizontal coordinate is called the real part. The nontrivial zeros lie in a strip between horizontal coordinates 0 and 1. The Riemann Hypothesis puts every one on the center line at ½. The negative even integers are the trivial zeros.
+
+Why one half is enough
+
+Suppose a zero had real part ¼. A symmetry of the zeta function would give a corresponding zero at ¾. Levent Alpöge’s work with Claude proves the right half of the strip is zero-free. That rules out the partner at ¾, and symmetry rules out the original position too. The same argument works for every position in the left half. Only the center line remains.
+
+This is the final reduction in the Lean proof. At modulus 1 the general right-half result gives the zeta version, and rh_of_right uses the functional equation to handle the left half. Try the reflection at crew_visuals/riemann_center_line.html.
+
+What this changes
+
+Card 003 recorded an earlier zero-free bound at ⅞. The new right-half results strengthen its zeta and Dirichlet statements. The Hecke result in 003 over Q(√−3) has a different scope.
+
+The companion zeta23 card asks how often a zero occurs once. A zero on the line can still be repeated. For a different consequence of RH, try crew_visuals/lagarias_divisor_race.html. The verified composition with Lagarias’s criterion proves a bound on the sum of the divisors of every positive integer. For 4, the divisors sum to 7, just below the ceiling of about 7.98.
+
+What was checked
+
+We read the two entry-point Lean files at the pinned revision. Our local source scan counted 175,187 files and 17,374,215 lines, with zero matches for the words sorry and axiom. Full Lean builds and independent proof checks are reported separately below.
+
+Lean FRO and the Mathlib Initiative certified Mathlib’s statement of RH and the Lean proof. Andrew Sutherland’s records document a separate sandboxed rebuild, acceptance by independent proof checkers, and matching all five headline theorems to Mathlib-only statements. The generalized result covers Dirichlet L-functions. Dedekind zeta functions and general automorphic L-functions lie beyond those statements.
+
+Alpöge plans a human-readable account. Michael Rubinstein’s November 22 working guide explains the route to the result for zeta in classical terms. Thirteen hypotheses remain inputs to the guide.
+
+Sources
+
+Alpöge’s November 20, 2026 announcement and original archive
+https://alpo.ge/remark.pdf
+
+Cinna Davis’s archive mirror at 6193bb5, Mathlib statement and Dirichlet scope
+https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Main.lean
+https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Statements.lean
+
+Lean proof from the right-half theorem to RH
+https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Supplements/Kernels/MainTheorems.lean#L9
+https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GammaFactorNonvanishing/RhOfRight.lean#L5
+
+Joint RH certification and independent verification including Dirichlet and arithmetic targets
+https://leanprover-community.github.io/blog/posts/riemann-hypothesis/
+https://math.mit.edu/~drew/grh/
+
+Rubinstein’s working guide
+https://www.math.uwaterloo.ca/~mrubinst/alpoge_claude_grh/
+
+OpenAI family 003 at f5702854 and Alpöge–Furman’s zeta23 at 11b6c7e
+https://github.com/openai/math/blob/f5702854/lean/docs/003.md
+https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/README.md#what-is-proved

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When a crossing gets cheaper</title>
+  <style>
+    :root {
+      color-scheme: light;
+      background: #f5f2e9;
+      color: #223127;
+      --muted: #505d50;
+      --line: #c2c9b8;
+      --pine: #235542;
+      --warm: #fae4d6;
+      --rust: #8b3d23;
+      --paper: #fffcf4;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 67rem); margin: auto; padding: clamp(2rem, 6vw, 4.3rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.55rem, 8vw, 5.3rem)/.99 Georgia, serif; letter-spacing: -.065em; text-wrap: balance; }
+    h2 { font: 1.65rem/1.12 Georgia, serif; }
+    p, details { line-height: 1.55; }
+    .intro { max-width: 63ch; color: var(--muted); margin: .85rem 0 1.4rem; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .6rem 1rem; margin-bottom: 1rem; }
+    label { display: grid; gap: .32rem; font-weight: 650; font-size: .9rem; }
+    select { background: var(--paper); color: inherit; border: 1px solid #818f7e; border-radius: .35rem; padding: .48rem; min-height: 2.8rem; font: inherit; }
+    :focus-visible { outline: 3px solid var(--rust); outline-offset: 3px; }
+    .cuts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+    .cut { border: 1px solid var(--line); background: var(--paper); border-radius: .65rem; padding: .9rem clamp(.55rem, 2.5vw, 1.2rem) 1.1rem; }
+    .cut-header { display: flex; align-items: center; gap: .7rem; margin-bottom: .62rem; }
+    .cut-mark { width: 2.6rem; height: 2.6rem; position: relative; border: 1px solid var(--line); border-radius: .28rem; color: var(--pine); }
+    .cut-mark span { position: absolute; top: 0; left: 0; display: grid; place-content: center; width: 50%; height: 50%; font-family: Georgia, serif; }
+    .cut-mark span:nth-child(2n) { left: 50%; }
+    .cut-mark span:nth-child(n+3) { top: 50%; }
+    .cut-mark::after { content: ""; position: absolute; width: 100%; left: 0; top: 50%; border-top: 1px dashed var(--rust); }
+    .cut-mark.vertical::after { width: 0; height: 100%; left: 50%; top: 0; border: 0; border-left: 1px dashed var(--rust); }
+    .rank { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .rank strong { color: var(--pine); font-size: 1.2rem; }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: center; font-size: .85rem; font-variant-numeric: tabular-nums; }
+    th, td { padding: .45rem .26rem; border-bottom: 1px solid var(--line); }
+    thead th { color: var(--muted); font-weight: 600; }
+    tr > :first-child { text-align: left; }
+    th:last-child { width: 37%; }
+    td[data-exists="false"] { color: var(--muted); }
+    tr[data-lost="true"] { color: var(--rust); background: var(--warm); }
+    .count { display: grid; grid-template-columns: minmax(0, 1fr) 4ch; gap: .24rem; align-items: center; text-align: right; }
+    .bar { min-height: .48rem; height: .48rem; background: var(--pine); border-radius: 100vw; }
+    tr[data-lost="true"] .bar { background: repeating-linear-gradient(120deg, var(--rust) 0 2px, transparent 2px 4px); }
+    .readout { max-width: 65ch; margin: .8rem 0 1.15rem; }
+    details { max-width: 70ch; border-top: 1px solid var(--line); padding-top: .7rem; }
+    details p { margin: .6rem 0; }
+    summary { cursor: pointer; font-weight: 650; }
+    a { color: var(--pine); text-underline-offset: .18em; }
+    @media (max-width: 43rem) { .cuts { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>When a crossing gets cheaper</h1>
+    <p class="intro">Two crossed wires can be rewritten as a sum of pieces. Pick a piece and count how many independent directions it needs across each cut. Then count modulo an odd prime. A whole group of directions disappears whenever its multiplier becomes zero.</p>
+
+    <div class="controls">
+      <label for="bits">Bits per wire
+        <select id="bits"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+      </label>
+      <label for="piece">Singlets in the piece
+        <select id="piece"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+      </label>
+      <label for="field">Arithmetic
+        <select id="field"><option value="0">Ordinary fractions</option><option selected value="3">Modulo 3</option><option value="5">Modulo 5</option><option value="7">Modulo 7</option></select>
+      </label>
+    </div>
+
+    <div class="cuts">
+      <section class="cut" id="row-cut" aria-labelledby="row-cut-title">
+        <header class="cut-header">
+          <span class="cut-mark" aria-hidden="true"><span>a</span><span>b</span><span>c</span><span>d</span></span>
+          <div><h2 id="row-cut-title">Top from bottom</h2><p class="rank"></p></div>
+        </header>
+        <table aria-labelledby="row-cut-title">
+          <thead><tr><th scope="col">Group</th><th scope="col">Factor*</th><th scope="col">Stays?</th><th scope="col">Directions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+      <section class="cut" id="col-cut" aria-labelledby="col-cut-title">
+        <header class="cut-header">
+          <span class="cut-mark vertical" aria-hidden="true"><span>a</span><span>b</span><span>c</span><span>d</span></span>
+          <div><h2 id="col-cut-title">Left from right</h2><p class="rank"></p></div>
+        </header>
+        <table aria-labelledby="col-cut-title">
+          <thead><tr><th scope="col">Group</th><th scope="col">Factor*</th><th scope="col">Stays?</th><th scope="col">Directions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </div>
+    <p class="readout" id="readout" aria-live="polite"></p>
+
+    <details>
+      <summary>Why the groups disappear</summary>
+      <p>A <strong>singlet</strong> is the one-dimensional direction spanned by 01 − 10. On two bits, swapping them acts as the identity minus twice the projector onto that direction. In a piece with <var>j</var> singlets, pick <var>j</var> of the <var>n</var> bit positions at which to use this projector term and add all such choices.</p>
+      <p>For the top–bottom cut, a basis vector in group <var>t</var> lies in the singlet direction at <var>t</var> positions. So exactly “<var>t</var> choose <var>j</var>” summands reach it. Each other position has three choices, giving “<var>n</var> choose <var>t</var>” × 3<sup><var>n</var>−<var>t</var></sup> directions in the group.</p>
+      <p>For the left–right cut, rearrange the four indices into the other pairing. The identity term then acts only on 00 + 11, while the singlet term acts diagonally on the four directions 00 ± 11 and 01 ± 10. A vector in group <var>k</var> uses a direction other than 00 + 11 at <var>k</var> positions. All of those must be among the <var>j</var> picks, so its multiplier is “<var>n</var> − <var>k</var> choose <var>j</var> − <var>k</var>”. There are “<var>n</var> choose <var>k</var>” × 3<sup><var>k</var></sup> directions in the group.</p>
+      <p>*A dash means the group has zero coefficient even over fractions. The factors shown omit signs and powers of 2, which never affect whether a coefficient vanishes in the arithmetic shown. At the prime 2 the sum and difference directions coincide. <a href="crossing_mod_two.txt">See the calculation modulo 2.</a></p>
+      <p>This compares ranks of one piece of the crossing, the building block in Anthropic’s 3-SAT argument. It pairs with the single-place overlap in our SAT factorization. <a href="https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/eth/README.md#the-key-idea-in-condensed-form-interpretable-by-ai-models">Anthropic’s condensed argument</a> · <a href="sat_three_products.html">The SAT factorization</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const bitControl = document.getElementById('bits');
+      const pieceControl = document.getElementById('piece');
+      const fieldControl = document.getElementById('field');
+      const rowCut = document.getElementById('row-cut');
+      const colCut = document.getElementById('col-cut');
+      const readout = document.getElementById('readout');
+
+      function choose(n, k) {
+        if (k < 0 || k > n) return 0;
+        let value = 1;
+        for (let i = 1; i <= k; i++) value = value * (n + 1 - i) / i;
+        return value;
+      }
+
+      function renderCut(container, groups, prime) {
+        const table = container.querySelector('tbody');
+        const largest = Math.max(...groups.map(group => group.size));
+        let rank = 0;
+        let ordinary = 0;
+        table.replaceChildren();
+
+        groups.forEach(({name, multiplier, size}) => {
+          const present = multiplier !== 0;
+          const survives = present && (prime === 0 || multiplier % prime !== 0);
+          if (present) ordinary += size;
+          if (survives) rank += size;
+
+          const row = table.insertRow();
+          row.dataset.lost = present && !survives;
+          const heading = document.createElement('th');
+          heading.scope = 'row';
+          heading.textContent = name;
+          row.append(heading);
+          row.insertCell().textContent = multiplier;
+          const state = row.insertCell();
+          state.dataset.exists = present;
+          state.textContent = present ? (survives ? 'Yes' : 'No') : '—';
+          const count = document.createElement('span');
+          count.className = 'count';
+          const bar = document.createElement('span');
+          bar.className = 'bar';
+          bar.style.width = present ? `${100 * size / largest}%` : '0';
+          bar.setAttribute('aria-hidden', 'true');
+          count.append(bar, String(size));
+          row.insertCell().append(count);
+        });
+
+        const label = container.querySelector('.rank');
+        const number = document.createElement('strong');
+        number.textContent = rank.toLocaleString('en-US');
+        label.replaceChildren('Rank ', number);
+        if (prime) label.append(` of ${ordinary.toLocaleString('en-US')} over fractions`);
+        return {rank, ordinary};
+      }
+
+      function render() {
+        const n = Number(bitControl.value);
+        const j = Math.min(Number(pieceControl.value), n);
+        const prime = Number(fieldControl.value);
+        pieceControl.replaceChildren(...Array.from({length:n + 1}, (_, k) => new Option(String(k), String(k))));
+        pieceControl.value = j;
+        const rowGroups = [];
+        const columnGroups = [];
+        for (let k = 0; k <= n; k++) {
+          rowGroups.push({name:`t = ${k}`, multiplier:choose(k, j), size:choose(n, k) * 3 ** (n - k)});
+          columnGroups.push({name:`k = ${k}`, multiplier:choose(n - k, j - k), size:choose(n, k) * 3 ** k});
+        }
+        const row = renderCut(rowCut, rowGroups, prime);
+        const column = renderCut(colCut, columnGroups, prime);
+        if (!prime) {
+          readout.textContent = 'Over fractions, every group with a nonzero multiplier contributes its full size to the rank.';
+        } else {
+          const lost = row.ordinary - row.rank + column.ordinary - column.rank;
+          readout.textContent = lost
+            ? `Modulo ${prime}, the striped groups lose ${row.ordinary - row.rank} directions across the first cut and ${column.ordinary - column.rank} across the second.`
+            : `Modulo ${prime}, every group that was present over fractions survives in both cuts.`;
+        }
+      }
+
+      for (const control of [bitControl, pieceControl, fieldControl]) control.addEventListener('change', render);
+      render();
+    })();
+  </script>
+</body>
+</html>

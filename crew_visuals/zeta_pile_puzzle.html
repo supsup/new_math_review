@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How much can zeros pile up?</title>
+  <style>
+    :root {
+      color-scheme: light;
+      background: #f7efe3;
+      color: #241c1a;
+      --muted: #655950;
+      --border: #c6b6a7;
+      --teal: #116a60;
+      --teal-pale: #cae4d9;
+      --rose: #842b42;
+      --rose-pale: #f3cfce;
+      --unit: clamp(.72rem, 2.7vw, 1.24rem);
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 58rem); margin: 0 auto; padding: clamp(2.25rem, 6vw, 4.5rem) 0; }
+    h1, h2, p, dl { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 400; }
+    h1 { font-size: clamp(2.75rem, 7.2vw, 4.9rem); letter-spacing: -.055em; line-height: .99; margin: .55rem 0 .85rem; text-wrap: balance; }
+    h2 { font-size: 1.5rem; }
+    .topic { color: var(--rose); font-size: .86rem; font-weight: 700; letter-spacing: .06em; }
+    .intro, .note, .pile figcaption, details { color: var(--muted); line-height: 1.55; }
+    .intro { max-width: 60ch; }
+    button { font: inherit; cursor: pointer; }
+    a { color: var(--teal); text-underline-offset: .22em; }
+    :focus-visible { outline: 2px solid var(--rose); outline-offset: 4px; }
+    .splits { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; max-width: 30rem; margin: 1.3rem 0; }
+    .splits button { min-height: 2.9rem; padding: .3rem; border: 1px solid var(--border); border-radius: .4rem; background: transparent; color: inherit; }
+    .splits button[aria-pressed="true"] { color: #fff9ed; background: var(--rose); border-color: var(--rose); font-weight: 700; }
+    .splits button[aria-pressed="false"]:hover { border-color: var(--rose); color: var(--rose); }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--border); gap: .75rem; padding: .85rem 0; }
+    .metrics dt { font-size: .9rem; color: var(--muted); }
+    .metrics dd { margin: .2rem 0 0; font-family: Georgia, serif; font-size: clamp(1.9rem, 4vw, 2.65rem); line-height: 1; font-variant-numeric: tabular-nums; }
+    #pair-score { color: var(--rose); }
+    .board { display: grid; grid-template-columns: minmax(13rem, .9fr) minmax(0, 1.5fr); gap: 1.5rem; padding: 1.25rem 0 .7rem; }
+    .board h2 { margin-bottom: .65rem; }
+    .singles { display: grid; grid-template-columns: repeat(6, var(--unit)); gap: .36rem; padding: .2rem 0 .4rem; }
+    .singles span { height: var(--unit); border: 1px solid var(--teal); border-radius: 3px; background: var(--teal-pale); }
+    .piles { display: flex; align-items: flex-end; flex-wrap: wrap; gap: clamp(.6rem, 2.3vw, 1.2rem); min-height: calc(6 * var(--unit) + 1.8rem); }
+    .pile { margin: 0; }
+    .tile-grid { display: grid; grid-template-columns: repeat(var(--size), var(--unit)); }
+    .tile-grid span { height: var(--unit); border: 1px solid #f7efe3; border-radius: 2px; background: var(--rose-pale); }
+    .pile figcaption { margin: .25rem 0 0; font-size: .86rem; text-align: center; font-variant-numeric: tabular-nums; }
+    .note { max-width: 64ch; padding: .55rem 0; }
+    details { margin-top: .65rem; max-width: 68ch; border-top: 1px solid var(--border); padding-top: .75rem; }
+    summary { color: #241c1a; cursor: pointer; }
+    details p { margin: .6rem 0 0; }
+    @media (max-width: 39rem) {
+      .board { grid-template-columns: 1fr; gap: .95rem; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 23rem) { .splits button { font-size: .88rem; white-space: nowrap; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">Alpöge–Furman · A toy model</p>
+      <h1>How much can zeros pile up?</h1>
+      <p class="intro">Imagine 18 zero occurrences. Twelve sit alone. The last six must go into piles of two or more. Change the piles and see how many different locations you get.</p>
+    </header>
+
+    <div class="splits" role="group" aria-label="Group the six repeated occurrences">
+      <button type="button" data-split="6" aria-pressed="true" aria-label="One pile of six">6</button>
+      <button type="button" data-split="4,2" aria-pressed="false" aria-label="One pile of four and one pile of two">4 + 2</button>
+      <button type="button" data-split="3,3" aria-pressed="false" aria-label="Two piles of three">3 + 3</button>
+      <button type="button" data-split="2,2,2" aria-pressed="false" aria-label="Three piles of two">2 + 2 + 2</button>
+    </div>
+
+    <dl class="metrics" aria-live="polite" aria-atomic="true">
+      <div><dt>Occurrences</dt><dd>18</dd></div>
+      <div><dt>Simple zeros</dt><dd>12</dd></div>
+      <div><dt>Distinct zeros</dt><dd id="distinct">13</dd></div>
+      <div><dt>Pair score</dt><dd id="pair-score">48</dd></div>
+    </dl>
+
+    <div class="board">
+      <section aria-labelledby="singles-heading">
+        <h2 id="singles-heading">Twelve singles</h2>
+        <div class="singles" aria-label="Twelve single-cell squares" role="img">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </section>
+      <section aria-labelledby="piles-heading">
+        <h2 id="piles-heading">Six occurrences in piles</h2>
+        <div class="piles" id="piles"></div>
+      </section>
+    </div>
+
+    <p class="note">Each tile counts one way to choose twice from the same location, with repeats allowed. A pile of six makes a 6 × 6 square worth 36. Three piles of two are worth just 12 together.</p>
+
+    <details>
+      <summary>What the score can tell us</summary>
+      <p>Let <var>N</var> count occurrences, <var>S</var> count singles, <var>D</var> count locations, and <var>Q</var> be the pair score. A location with multiplicity <var>m</var> contributes <var>m</var> to <var>N</var> and <var>m</var>² to <var>Q</var>.</p>
+      <p>At a single location, 2<var>m</var> − <var>m</var>² is 1 for a single, 0 for a double, and negative for a larger pile. So <var>S</var> ≥ 2<var>N</var> − <var>Q</var>. Similarly, 3<var>m</var> − <var>m</var>² is at most 2 at any location, giving <var>D</var> ≥ (3<var>N</var> − <var>Q</var>)/2. With three piles of two, both bounds are exact.</p>
+      <p>Here the pair score is just a count of tiles. The zeta proof uses the same multiplicity expressions inside a matrix inequality, then uses analytic estimates to derive the asymptotic bounds. <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/Zeta23/ZeroSide/Mult.lean">Multiplicity inequalities in Lean</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/Zeta23/ThmD/Mult.lean">Theorem D in Lean</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const choices = document.querySelectorAll('[data-split]');
+      const piles = document.getElementById('piles');
+      const distinct = document.getElementById('distinct');
+      const pairScore = document.getElementById('pair-score');
+      const singles = document.querySelectorAll('.singles span').length;
+
+      function drawPile(size) {
+        const figure = document.createElement('figure');
+        figure.className = 'pile';
+        const grid = document.createElement('div');
+        grid.className = 'tile-grid';
+        grid.setAttribute('aria-hidden', 'true');
+        grid.style.setProperty('--size', String(size));
+        for (let tile = 0; tile < size * size; tile++) grid.append(document.createElement('span'));
+        const caption = document.createElement('figcaption');
+        caption.textContent = `${size} × ${size}`;
+        figure.append(grid, caption);
+        return figure;
+      }
+
+      function choose(choice) {
+        const sizes = choice.dataset.split.split(',').map(Number);
+        for (const button of choices) button.setAttribute('aria-pressed', String(button === choice));
+        distinct.textContent = String(singles + sizes.length);
+        pairScore.textContent = String(sizes.reduce((total, size) => total + size * size, singles));
+        piles.replaceChildren(...sizes.map(drawPile));
+      }
+
+      for (const choice of choices) choice.addEventListener('click', () => choose(choice));
+      choose(choices[0]);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race the Twins</title>
+<style>
+  :root { --bg: #0d1020; --ink: #e8e6f2; --dim: #9a98b4; --accent: #f2c14e; --teal: #4fd1c5; --line: #39406e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; }
+  body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  header { flex: none; padding: 14px 16px 4px; max-height: 42vh; overflow-y: auto; }
+  h1 { margin: 0; font-size: 26px; font-weight: normal; }
+  header p { margin: 4px 0 0; font-size: 14px; color: var(--dim); max-width: 860px; line-height: 1.45; }
+  details { margin-top: 6px; max-width: 860px; font-size: 13.5px; color: var(--dim); line-height: 1.45; }
+  summary { cursor: pointer; color: var(--ink); }
+  details p { margin: 6px 0 0; }
+  b { color: var(--ink); font-weight: normal; }
+  .gold { color: var(--accent); } .teal { color: var(--teal); }
+  #wrap { flex: 1; min-height: 220px; position: relative; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #state { flex: none; padding: 4px 16px; font-size: 15px; color: var(--accent); min-height: 21px; }
+  #bar { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 14px; }
+  button { background: #1c2140; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 12px; font: 13px Georgia, serif; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #err { display: none; margin: 12px 16px; background: #5a1020; color: #fff; padding: 12px; border-radius: 6px;
+    font: 14px monospace; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Race the twins</h1>
+  <p>The <span class="teal">determinant</span> and the <span class="gold">permanent</span> of a square grid add up
+  the same products; only the signs differ. Press <b>Race</b>: your browser computes both for bigger and bigger
+  random grids of zeros and ones, and times them. On tiny grids the permanent can even be quicker; then it falls
+  behind, doubling its time at every size, while the determinant stays instant.</p>
+  <details>
+    <summary>What am I looking at?</summary>
+    <p><b>The twins.</b> Pick one cell in every row and every column of an m by m grid and multiply them. There are m!
+    ways. The permanent adds all those products; the determinant gives half of them a minus sign. That sign is what
+    makes the determinant easy: elimination computes it in about m³ steps without dividing anything into fractions
+    (here: the Bareiss method, exact whole numbers). Elimination does divide, exactly; the VP card's claims are about
+    recipes with only + and ×, and the determinant has one of those too, still of polynomial size, as the card says. For the permanent a standard general recipe is Ryser's
+    formula from 1963, about m·2^m steps (here with a Gray code, so each step changes one column). Glynn's formula
+    (2010) has the same order with half as many terms, but it ends by dividing by 2^(m−1), which arithmetic modulo an
+    even number cannot do directly; this page counts modulo an even number so that it also gets the parity, so it uses Ryser's.
+    No recipe of polynomial size is known.</p>
+    <p><b>The chart</b> shows the measured time of each, on a scale where every grid line is ten times longer.
+    The determinant's dots hardly rise (small bumps are the browser warming up, not the mathematics). The
+    permanent's climb in a straight line: a fixed factor per size, about 2 and a little more. On very small grids
+    the permanent can win: it has few column sets to add up, and the determinant here works with exact big whole
+    numbers, which cost more per step. Where the lines cross depends on the browser and the machine; the summary
+    under the chart says where they crossed in your run.</p>
+    <p><b>Where the twins agree.</b> In arithmetic modulo 2, plus and minus are the same, so the permanent and the
+    determinant are equal there. The page checks this on every grid it races: their parities always match. That is
+    why the claims on the VP card say "wherever 1 + 1 is not 0".</p>
+    <p><b>What this is not.</b> A race of two recipes is not a proof that no faster recipe for the permanent exists.
+    That is what the two November claims on the VP card say, for recipes made of + and ×; the VP card explains what
+    has been checked of each.</p>
+    <p id="checks"><b>Checks.</b> Running…</p>
+    <p><b>Sources.</b> The VP and VNP card in this showcase (families 379 and vp-vnp). Ryser's formula and the
+    Bareiss method are standard; both are checked here against the definition by brute force. Glynn's formula:
+    D. G. Glynn, The permanent of a square matrix, European Journal of Combinatorics 31 (2010), 1887–1891,
+    doi:10.1016/j.ejc.2010.01.010 (pointed out by Lattice). Page by Confluence
+    for Marginalia: crew_visuals/twins_race.html in supsup/new_math_review.</p>
+  </details>
+</header>
+<div id="err"></div>
+<div id="wrap"><canvas id="c" role="img" aria-label="Measured time to compute the determinant and the permanent of random 0-1 grids of growing size, on a logarithmic scale: the determinant stays near zero, the permanent rises by a fixed factor per size."></canvas></div>
+<div id="state">running checks…</div>
+<div id="bar">
+  <button id="bRace" disabled>Race</button>
+  <button id="bReset" disabled>Start over</button>
+</div>
+<script>
+"use strict";
+/* ---------- the mathematics (no drawing) ---------- */
+const TWINS = (function () {
+  const P = 16777213, M = 2 * P;   // P prime, below 2^24, so every product below stays under 2^53
+  function isPrime(n) { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; }
+  // the determinant by Bareiss elimination: whole numbers throughout, every division exact
+  function det(A) {
+    const n = A.length, X = A.map(r => r.map(BigInt));
+    let sign = 1n, prev = 1n;
+    for (let k = 0; k < n - 1; k++) {
+      if (X[k][k] === 0n) {
+        const s = X.findIndex((r, i) => i > k && r[k] !== 0n);
+        if (s < 0) return 0n;
+        [X[k], X[s]] = [X[s], X[k]]; sign = -sign;
+      }
+      for (let i = k + 1; i < n; i++) for (let j = k + 1; j < n; j++) X[i][j] = (X[i][j] * X[k][k] - X[i][k] * X[k][j]) / prev;
+      prev = X[k][k];
+    }
+    return sign * X[n - 1][n - 1];
+  }
+  // the permanent by Ryser's formula with a Gray code, modulo m (any modulus: the formula uses only +, - and x)
+  function perm(A, m) {
+    const n = A.length, rowSum = new Array(n).fill(0), inS = new Array(n).fill(false);
+    let total = 0, size = 0;
+    for (let g = 1; g < (1 << n); g++) {
+      const j = 31 - Math.clz32(g & -g);
+      inS[j] = !inS[j]; size += inS[j] ? 1 : -1;
+      for (let i = 0; i < n; i++) rowSum[i] += inS[j] ? A[i][j] : -A[i][j];
+      let prod = 1;
+      for (let i = 0; i < n && prod; i++) prod = (prod * (((rowSum[i] % m) + m) % m)) % m;
+      total = ((n - size) % 2 ? total - prod : total + prod) % m;
+    }
+    return ((total % m) + m) % m;
+  }
+  // the definition itself, for checking: every permutation, with or without its sign
+  function brute(A, signed) {
+    const n = A.length, used = new Array(n).fill(false);
+    let s = 0n;
+    (function go(k, sign, prod, chosen) {
+      if (prod === 0n) return;
+      if (k === n) { s += signed ? sign * prod : prod; return; }
+      for (let j = 0; j < n; j++) {
+        if (used[j]) continue;
+        let inv = 0;
+        for (const c of chosen) if (c > j) inv++;
+        used[j] = true; chosen.push(j);
+        go(k + 1, inv % 2 ? -sign : sign, prod * BigInt(A[k][j]), chosen);
+        used[j] = false; chosen.pop();
+      }
+    })(0, 1n, 1n, []);
+    return s;
+  }
+  function seeded(seed) {
+    return function () {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const grid = (n, rnd) => Array.from({ length: n }, () => Array.from({ length: n }, () => rnd() < 0.5 ? 1 : 0));
+  const mod = (x, m) => Number(((x % BigInt(m)) + BigInt(m)) % BigInt(m));
+  return { P, M, isPrime, det, perm, brute, seeded, grid, mod };
+})();
+
+/* ---------- the checks (before anything runs; each one can fail) ---------- */
+function runChecks() {
+  const fail = [], info = { tested: 0 };
+  if (!TWINS.isPrime(TWINS.P)) fail.push("the modulus " + TWINS.P + " is not prime");
+  const rnd = TWINS.seeded(379);
+  for (let t = 0; t < 60; t++) {
+    const n = 1 + (t % 7), A = TWINS.grid(n, rnd);
+    const dBrute = TWINS.brute(A, true), pBrute = TWINS.brute(A, false);
+    if (TWINS.det(A) !== dBrute) { fail.push("the Bareiss determinant disagrees with the definition on a " + n + "x" + n + " grid"); break; }
+    if (TWINS.perm(A, TWINS.M) !== TWINS.mod(pBrute, TWINS.M)) { fail.push("Ryser's permanent disagrees with the definition on a " + n + "x" + n + " grid"); break; }
+    if (TWINS.mod(pBrute, 2) !== TWINS.mod(dBrute, 2)) { fail.push("a permanent and a determinant differ modulo 2"); break; }
+    info.tested++;
+  }
+  for (let n = 1; n <= 10; n++) {   // the all-ones grid: permanent n!, determinant 0 from n = 2
+    const J = Array.from({ length: n }, () => new Array(n).fill(1));
+    let f = 1n; for (let k = 2n; k <= BigInt(n); k++) f *= k;
+    if (TWINS.perm(J, TWINS.M) !== TWINS.mod(f, TWINS.M) || TWINS.det(J) !== (n === 1 ? 1n : 0n)) { fail.push("the all-ones grid of size " + n + " gives the wrong values"); break; }
+  }
+  const two = [[1, 1], [1, 1]];
+  info.twoPerm = TWINS.perm(two, TWINS.M); info.twoDet = TWINS.det(two);
+  if (!(info.twoPerm === 2 && info.twoDet === 0n)) fail.push("CONTROL: the twins should differ on the 2x2 all-ones grid (2 against 0)");
+  return { fail, info };
+}
+
+/* ---------- the race and the drawing ---------- */
+const BG = "#0d1020", INK = "#e8e6f2", DIM = "#9a98b4", GOLD = "#f2c14e", TEAL = "#4fd1c5", LINE = "#39406e";
+const $ = id => document.getElementById(id);
+const wrap = $("wrap"), cv = $("c"), g = cv.getContext("2d"), state = $("state"), bRace = $("bRace"), bReset = $("bReset");
+const MMAX = 22;
+let W = 0, H = 0, dead = false, results = [], running = false, next = 2, rnd = TWINS.seeded(2026), timer = null;
+
+function showError(msg) {
+  if (dead) return;
+  dead = true; running = false;
+  const e = $("err");
+  e.textContent = "This page stopped: a check failed.\n" + msg;
+  e.style.display = "block"; wrap.style.display = "none";
+  bRace.disabled = true; bReset.disabled = true; state.textContent = "";
+}
+window.addEventListener("error", e => showError(String(e.message || e)));
+
+function timeIt(fn, maxReps) {   // repeat small jobs until 15 ms have passed (capped), so tiny times are still measured
+  let reps = 0, out;
+  const t0 = performance.now();
+  do { out = fn(); reps++; } while (performance.now() - t0 < 15 && reps < maxReps);
+  return { ms: (performance.now() - t0) / reps, out };
+}
+function step() {
+  if (!running || dead) return;
+  const n = next, A = TWINS.grid(n, rnd);
+  const d = timeIt(() => TWINS.det(A), 2000), p = timeIt(() => TWINS.perm(A, TWINS.M), n >= 14 ? 1 : 2000);
+  const detParity = TWINS.mod(d.out, 2), permParity = p.out % 2;
+  if (detParity !== permParity) { showError("size " + n + ": the permanent and the determinant differ modulo 2"); return; }
+  const exact = n <= 9 ? TWINS.brute(A, false) : null;
+  if (exact !== null && TWINS.mod(exact, TWINS.M) !== p.out) { showError("size " + n + ": Ryser's permanent disagrees with the definition"); return; }
+  results.push({ n, detMs: d.ms, permMs: p.ms, det: d.out, perm: exact, parity: permParity });
+  next++;
+  draw();
+  state.textContent = "size " + n + ": determinant " + d.out + " in " + fmtMs(d.ms) + "; permanent " +
+    (exact !== null ? exact + " " : "") + "in " + fmtMs(p.ms) + "; both " + (permParity ? "odd" : "even");
+  if (next > MMAX) { running = false; bRace.textContent = "Race"; bRace.disabled = true; summary(); return; }
+  timer = setTimeout(step, 30);
+}
+function fmtMs(ms) { return ms < 1 ? (ms * 1000).toFixed(ms < 0.01 ? 2 : 0) + " µs" : ms < 1000 ? ms.toFixed(ms < 10 ? 1 : 0) + " ms" : (ms / 1000).toFixed(1) + " s"; }
+function summary() {
+  const big = results.filter(r => r.n >= 12);
+  if (big.length < 2) return;
+  const f = Math.pow(big[big.length - 1].permMs / big[0].permMs, 1 / (big[big.length - 1].n - big[0].n));
+  const last = results[results.length - 1], quicker = results.filter(r => r.permMs < r.detMs).map(r => r.n);
+  const cross = quicker.length ? " In this run the permanent was last quicker at size " + quicker[quicker.length - 1] + "." : " In this run the permanent was never quicker.";
+  state.textContent = "done: at size " + last.n + " the permanent took " + fmtMs(last.permMs) + " and the determinant " +
+    fmtMs(last.detMs) + ". From size 12 on, each size multiplied the permanent's time by about " + f.toFixed(2) +
+    "." + cross + " Every pair agreed modulo 2.";
+}
+
+function resize() {
+  const r = wrap.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+function draw() {
+  g.fillStyle = BG; g.fillRect(0, 0, W, H);
+  const left = 58, right = W - 16, top = 26, bot = H - 40, LO = -4, HI = 4;   // 10^-4 ms (0.1 µs) to 10^4 ms
+  const X = n => left + (right - left) * (n - 1) / (MMAX - 1), Y = ms => bot - (bot - top) * (Math.log10(ms) - LO) / (HI - LO);
+  g.font = "13px Georgia, serif"; g.fillStyle = DIM; g.textAlign = "left";
+  g.fillText("time to compute, each grid line ten times longer", left, 16);
+  g.strokeStyle = LINE; g.lineWidth = 1;
+  for (let e = LO; e <= HI; e++) {
+    g.globalAlpha = 0.5; g.beginPath(); g.moveTo(left, Y(10 ** e)); g.lineTo(right, Y(10 ** e)); g.stroke(); g.globalAlpha = 1;
+    g.textAlign = "right"; g.fillText(fmtMs(10 ** e), left - 6, Y(10 ** e) + 4);
+  }
+  g.textAlign = "center";
+  for (let n = 2; n <= MMAX; n += (W < 560 ? 4 : 2)) g.fillText(String(n), X(n), bot + 17);
+  g.fillText("size of the grid (m by m)", (left + right) / 2, bot + 33);
+  for (const [key, colour] of [["detMs", TEAL], ["permMs", GOLD]]) {
+    g.strokeStyle = colour; g.lineWidth = 2; g.beginPath();
+    results.forEach((r, i) => { const x = X(r.n), y = Y(Math.max(1e-4, r[key])); if (i) g.lineTo(x, y); else g.moveTo(x, y); });
+    g.stroke();
+    g.fillStyle = colour;
+    for (const r of results) { g.beginPath(); g.arc(X(r.n), Y(Math.max(1e-4, r[key])), 4, 0, 2 * Math.PI); g.fill(); }
+  }
+  g.textAlign = "left"; g.font = "14px Georgia, serif";
+  g.fillStyle = GOLD; g.fillText("permanent (Ryser, about m·2^m steps)", left + 10, top + 18);
+  g.fillStyle = TEAL; g.fillText("determinant (Bareiss, about m³ steps)", left + 10, top + 38);
+}
+
+(function start() {
+  const R = runChecks();
+  if (R.fail.length) { showError(R.fail.join("\n")); return; }
+  $("checks").innerHTML = "<b>Checks.</b> Before the race, on " + R.info.tested + " random grids up to 7 by 7, the " +
+    "determinant by Bareiss elimination and the permanent by Ryser's formula must equal the definition (every " +
+    "permutation, with and without its sign), and the two must agree modulo 2; on the all-ones grids up to 10 by 10 " +
+    "the permanent must be m! and the determinant 0; and on the 2 by 2 all-ones grid the twins must differ (" +
+    R.info.twoPerm + " against " + R.info.twoDet + "). During the race, every grid's permanent and determinant " +
+    "must have the same parity, and up to 9 by 9 the permanent must also equal the definition. Large permanents are " +
+    "computed modulo " + (2 * TWINS.P).toLocaleString("en-US") + " (twice a prime): that takes exactly as many steps " +
+    "and still gives the parity. If a check fails, the race stops with an error.";
+  state.textContent = "press Race";
+  bRace.disabled = false; bReset.disabled = false;
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener("resize", resize);
+  if (location.hash === "#race") setTimeout(() => bRace.onclick(), 0);   // after the handlers below are set
+})();
+bRace.onclick = () => {
+  if (dead || next > MMAX) return;
+  running = !running; bRace.textContent = running ? "Pause" : "Race";
+  clearTimeout(timer); timer = null;   // never leave an old step pending (pause then resume quickly)
+  if (running) timer = setTimeout(step, 10);
+};
+bReset.onclick = () => { clearTimeout(timer); timer = null; running = false; results = []; next = 2; rnd = TWINS.seeded(2026); bRace.textContent = "Race"; bRace.disabled = false; state.textContent = "press Race"; draw(); };
+</script>
+</body>
+</html>

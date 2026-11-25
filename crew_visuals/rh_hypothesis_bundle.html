@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One selection, seven pieces</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf6ef;
+      --ink: #30323b;
+      --muted: #5d606a;
+      --purple: #5d4d84;
+      --teal: #286967;
+      --edge: #cfcbd4;
+      background: #eae8ee;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 56rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--purple); text-underline-offset: .17em; }
+    h1 { font: clamp(2.65rem, 7.6vw, 4.55rem)/1.02 Georgia, serif; margin: .57rem 0 .69rem; letter-spacing: -.045em; }
+    h2 { font: 1.22rem Georgia, serif; margin: 0 0 .38rem; }
+    p { max-width: 68ch; }
+    .intro, figcaption { color: var(--muted); }
+    figure { margin: .8rem 0 1rem; }
+    .flow { list-style: none; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .42rem; margin: 0; padding: 0; }
+    .flow li { padding: .53rem .62rem; background: #fffcf5; border: 1px solid var(--edge); border-top: .24rem solid var(--teal); border-radius: .32rem; }
+    .flow li:last-child { border-top-color: var(--purple); }
+    .flow span { display: block; color: var(--muted); font-size: .81rem; }
+    figcaption { font-size: .85rem; margin-top: .33rem; }
+    .choices { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .36rem; margin: .35rem 0 .58rem; }
+    button { display: flex; align-items: center; flex-wrap: wrap; gap: .16rem .43rem; padding: .44rem .53rem; min-height: 3rem; text-align: left;
+      color: var(--ink); font: inherit; font-size: .86rem; background: #fafaf4; cursor: pointer; border: 1px solid var(--edge); border-radius: .31rem; }
+    button code { font-weight: 750; }
+    button[data-prerequisite="true"] { border: 2px dashed var(--teal); background: #e7f0eb; }
+    button[aria-pressed="true"] { color: white; background: var(--purple); border-color: var(--purple); }
+    :focus-visible { outline: .18rem solid var(--teal); outline-offset: .17rem; }
+    .readout { background: #fffdf8; border: 1px solid var(--edge); border-radius: .35rem; padding: .7rem .78rem; }
+    .readout p { margin: .2rem 0 .42rem; }
+    #depends { font-weight: 650; color: var(--teal); }
+    .suppliers { display: grid; gap: .43rem; margin: .65rem 0 .85rem; }
+    .suppliers > div { background: #fffdf8; border-left: .22rem solid var(--teal); padding: .47rem .69rem; }
+    .suppliers dt { font-weight: 700; }
+    .suppliers dd { margin: .14rem 0 0; overflow-wrap: anywhere; }
+    code { overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .6rem; margin: .85rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+    @media (max-width: 39rem) { .choices { grid-template-columns: repeat(2,minmax(0,1fr)); } .flow { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="vwin_weighted_lengths.html">Back to the VWin example</a>
+    <h1>One selection, seven pieces</h1>
+    <p class="intro">The third input to the compiled RH implication asks for a complete record called <code>HypsAlt</code>. It contains a class of families, a rule for choosing data from them, and conditions on those choices. The conditions have to fit the same choices.</p>
+
+    <figure>
+      <ol class="flow">
+        <li><strong>Class of families</strong><span>Field 𝒜 of the record</span></li>
+        <li><strong>Selection rule</strong><span>Field σ of the record</span></li>
+        <li><strong>Chosen bundle</strong><span>Seven pieces at each selected index</span></li>
+      </ol>
+      <figcaption>Give σ a family in the class, an allowed scale and an index. It returns one bundle at that point.</figcaption>
+    </figure>
+    <h2>Read the pieces of a chosen bundle</h2>
+    <p>Select any field. Dashed outlines mark the earlier fields named in its type.</p>
+    <div class="choices" aria-label="Fields of BundleCondition">
+      <button type="button" data-field="R"><code>R</code> Twist data</button>
+      <button type="button" data-field="S"><code>S</code> Spectral ties</button>
+      <button type="button" data-field="P"><code>P</code> Row family</button>
+      <button type="button" data-field="pin"><code>pin</code> Row condition</button>
+      <button type="button" data-field="DH"><code>DH</code> Two numbers</button>
+      <button type="button" data-field="C"><code>C</code> Column choice</button>
+      <button type="button" data-field="B"><code>B</code> Realization</button>
+    </div>
+    <div class="readout" aria-live="polite">
+      <p id="field-reading"></p>
+      <p id="depends"></p>
+    </div>
+    <p>For example, the column choice <code>C</code> depends on both <code>R</code> and <code>P</code>. Changing the row family changes what that choice has to satisfy. The final condition <code>B</code> is stated using the same twist data, rows, columns, spectral ties and scale numbers.</p>
+
+    <details>
+      <summary>Where Lean opens the record</summary>
+      <p><code>HypsAlt</code> has 46 fields. Along with the class and selection rule, it has a field that gives a required <code>Duty</code> for every family in the class. Another field is the condition <code>nRest</code> on a more restricted class. In the call that leads to the right-half zero-free result, that condition requires a bound named <code>LinkN</code>.</p>
+      <p>The compiled theorem <code>goal_of_shape_of_hyps</code> projects all 46 fields from the record, and several selectors get pieces from the very same σ. A Lean replay reads the proof value and shows each of those references. <a href="../tools/rh_hypothesis_bundle.lean">Replay the structure and projection checks</a>.</p>
+      <p><code>Nonempty (HypsAlt …)</code> says such a complete record exists. The compiled theorem takes that existence as its third premise, alongside <a href="green_six_matrices.html">Green</a> and <a href="vwin_weighted_lengths.html">VWin</a>.</p>
+    </details>
+    <p><a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/Hyps.lean#L22-L90">The 46-field record</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/ColumnChoiceWithTies.lean#L47-L61">The seven pieces and their selectors</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/ShapeOf.lean#L24-L32">Where the record is opened</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/TopPlug.lean#L11-L18">The conditional theorem</a>.</p>
+    <details>
+      <summary>Where the archive supplies the three inputs</summary>
+      <p>In the source, <code>every_character_of_theta_integrals_local_matching</code> is the theorem that hands all three inputs to the compiled theorem in <code>TopPlug</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/SiegelEisensteinSecondTermHypotheses.lean#L69-L73">The call site</a>.</p>
+      <dl class="suppliers">
+        <div><dt>Green</dt><dd><code>green_of_regular</code> translates the classification by regular characters to the classification with polynomial labels. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AbelianVarietyTheory/Proofs/InertiaEigenvalues/SumRangeEqRoots.lean#L225">The translation</a>.</dd></div>
+        <div><dt>VWin</dt><dd><code>vwin_of_row</code> uses the archive’s Galois representation input and a base-change theorem. It supplies the cohomology budget to the wrapper that calls <code>TopPlug</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/AutomorphicVarieties/ModularityArgument/ThresholdArguments/DenseThresholdCases/VwinOfRow.lean#L4-L5">The budget supplier</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/MainConclusion.lean#L7-L11">Where it is supplied</a>.</dd></div>
+        <div><dt>HypsAlt</dt><dd><code>nonempty_hyps_definite_side_of_closed_bound</code> gets the record from local matching and estimates. It calls the theorem that produces the record from the resulting linked data. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/SiegelEisensteinSecondTermHypotheses.lean#L44-L68">The record supplier</a>.</dd></div>
+      </dl>
+      <p>The archive’s final <code>rhOfAll</code> applies the compiled mirror step to <code>allChi</code>, the assembled right-half theorem. The conditional theorem and mirror step are present in our two compiled closures. The three supplier declarations and the final assembly live in other archive files and are absent from that local Lean environment. The source links show the outer calls. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Supplements/Kernels/MainTheorems.lean#L7-L9">The final call to the mirror step</a> · <a href="../tools/rh_hypothesis_bundle.lean">Replay the scope query</a>.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const fields = {
+        R: {preceding: [], text: 'R is the twist record chosen for the local data at this index.'},
+        S: {preceding: ['R'], text: 'S gives spectral conditions for the selected twist record R.'},
+        P: {preceding: [], text: 'P is the row family for the same underlying local data.'},
+        pin: {preceding: ['R','P'], text: 'pin requires the row family P to satisfy the specified relation with the T part of R.'},
+        DH: {preceding: [], text: 'DH gives two natural numbers tied to the scale quantities Del and etaSz in the underlying data.'},
+        C: {preceding: ['R','P'], text: 'C is a square-integrable column choice for the T part of R and the selected row family P.'},
+        B: {preceding: ['R','S','P','DH','C'], text: 'B gives the realization condition for these twist, spectral, row, scale and column choices.'}
+      };
+      const controls = Array.from(document.querySelectorAll('[data-field]'));
+      const reading = document.getElementById('field-reading');
+      const depends = document.getElementById('depends');
+      function show(name) {
+        const field = fields[name];
+        reading.textContent = field.text;
+        depends.textContent = field.preceding.length
+          ? 'Uses earlier fields ' + field.preceding.join(', ') + '.'
+          : 'Its type starts from the underlying data of the selected index.';
+        for (const button of controls) {
+          button.setAttribute('aria-pressed', button.dataset.field === name);
+          button.dataset.prerequisite = field.preceding.includes(button.dataset.field);
+        }
+      }
+      for (const button of controls) button.addEventListener('click', () => show(button.dataset.field));
+      show('B');
+    })();
+  </script>
+</body>
+</html>

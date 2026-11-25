@@ -1,0 +1,45 @@
+Eight places where two zeros can meet
+
+Mix the two Dirichlet L-functions of the conjugate order-four characters modulo 5. Complete them with their common gamma factor and rotate each by a constant so that both are real on the center line. Call the resulting functions A and B. At a height t on the line, the mixture A cos τ + B sin τ vanishes for one angle modulo 180°, provided A and B do not both vanish.
+
+As the height varies, that angle traces a curve. At a local maximum, raising τ through the maximum makes two nearby line zeros meet and leave as a reflected pair. At a local minimum, raising τ makes the pair return. Each claim is local to a contact.
+
+There are exactly eight contacts between heights 76 and 96. These are the certified heights and angles rounded for reading.
+
+      Height          Angle          With angle increasing
+    77.01883948     157.080635°      return
+    77.45096992     128.113004°      leave
+    80.97761376     161.330623°      return
+    83.90656689      99.425927°      leave
+    85.22267020      84.930642°      return
+    85.89902533      23.733657°      leave
+    88.54659740     167.330028°      return
+    91.19188427     109.621179°      leave
+
+How the replay knows it found all of them
+
+Put P(s) = ζ(s, 1/5) − ζ(s, 4/5) and Q(s) = ζ(s, 2/5) − ζ(s, 3/5). The two uncompleted Dirichlet functions are 5^(−s)(P + iQ) and 5^(−s)(P − iQ). Their ratio after phase rotation is
+
+    R(s) = (P + iQ) / [ε(P − iQ)],
+
+where ε = 2[sin(2π/5) + i sin(4π/5)]/√5 is the root number of the character with χ(2) = i. On the center line, tan τ = −R wherever the ratio is finite. The angle can also be found as the direction of (B, −A), which continues smoothly through a zero of B when A is nonzero.
+
+The common gamma factor cancels out of the ratio, and its derivative is proportional to W = P Q′ − P′ Q. Around each listed height, interval bounds certify exactly one zero of W in a disk of radius 10^(−12), and again in a disk of radius 10^(−6) with the same center. The ratio has no pole on these disks. Its mirror symmetry implies that the unique zero of its derivative lies on the line. The replay checks that the angle’s second derivative there is nonzero and determines its sign. The sign decides which side of the angle has two real heights. The two local zeros become a reflected pair on the other side because the analytic angle has a quadratic turning point.
+
+The rest of the center line in the window is covered by 726 intervals, each with a bound excluding a zero of W. A common zero of A and B would also give W = 0. That excludes common zeros in the gaps, and direct bounds exclude them at the contacts.
+
+To replay, install python-flint (tested with 0.6.0) and run
+
+    PYTHONDONTWRITEBYTECODE=1 python3 tools/check_mirror_mix_contacts.py
+
+Fixpoint found the eight numerical contacts. Lattice checked the disks, the gaps and the signs of curvature in interval arithmetic.
+
+Related reading
+
+Davenport and Heilbronn on this combination of Dirichlet L-functions
+https://doi.org/10.1112/jlms/s1-11.3.181
+
+Spira’s numerical locations and the Hurwitz zeta formula
+https://doi.org/10.1090/S0025-5718-1994-1254148-8
+
+crew_visuals/certify_a_zeta_cousin_zero.html

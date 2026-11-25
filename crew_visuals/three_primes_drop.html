@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One board, three primes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf8ef;
+      --ink: #26352f;
+      --muted: #4f6056;
+      --green: #28624d;
+      --pale: #e2ede3;
+      --gold: #8e4223;
+      --line: #b9c2b4;
+      color: var(--ink);
+      background: #e7ece4;
+      font: 100%/1.53 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 58rem; padding: clamp(1rem, 5vw, 3rem); margin: auto; background: var(--paper); }
+    h1 { font: clamp(2.6rem, 7.4vw, 4.8rem)/1.08 Georgia, serif; letter-spacing: -.05em; margin: .65rem 0; }
+    p { max-width: 66ch; }
+    .intro { color: var(--muted); }
+    a { color: var(--green); text-underline-offset: .17em; }
+    .controls { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    button {
+      min-height: 2.7rem; border: 1px solid var(--line); border-radius: .3rem;
+      padding: .25rem .68rem; color: var(--ink); background: #f7faf5; font: inherit; cursor: pointer;
+    }
+    button[aria-pressed="true"] { background: var(--green); color: white; border-color: var(--green); }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    table { border-collapse: separate; border-spacing: .18rem; text-align: center; width: min(100%, 37rem); table-layout: fixed; }
+    caption { text-align: left; font-size: .9rem; color: var(--muted); margin-bottom: .45rem; }
+    th { font-weight: 650; }
+    th, td { font-variant-numeric: tabular-nums; font-size: clamp(.75rem, 2.4vw, 1rem); }
+    thead th:first-child { width: 2.15rem; }
+    thead th:last-child { width: clamp(2.7rem, 12vw, 5rem); }
+    thead .weight td { font-weight: 650; color: var(--green); }
+    .bit { border-radius: .2rem; height: clamp(1.45rem, 5vw, 2.3rem); background: #f1f1e8; color: #5f6a60; }
+    .on { background: var(--pale); color: var(--green); font-weight: 750; }
+    .decision .on { background: #ecdccc; color: var(--gold); }
+    .total { font-weight: 650; }
+    .decision .total { background: #ecdccc; color: var(--gold); border-radius: .2rem; }
+    .result { border-left: .27rem solid var(--green); padding-left: .65rem; font-weight: 650; margin: .95rem 0; }
+    details { border-top: 1px solid var(--line); padding-top: .55rem; margin-top: 1.1rem; }
+    summary { cursor: pointer; font-weight: 650; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>One board, three primes</h1>
+    <p class="intro">This eight-by-eight board has 26 ones. Pick a prime and see whether the same weighted sum of the columns disappears.</p>
+
+    <div class="controls" role="group" aria-label="Choose which arithmetic to use">
+      <button type="button" data-mod="0" aria-pressed="true">Ordinary</button>
+      <button type="button" data-mod="2" aria-pressed="false">Mod 2</button>
+      <button type="button" data-mod="3" aria-pressed="false">Mod 3</button>
+      <button type="button" data-mod="5" aria-pressed="false">Mod 5</button>
+      <button type="button" data-mod="7" aria-pressed="false">Mod 7</button>
+    </div>
+
+    <table>
+      <caption>Multiply each marked entry by the weight above its column. Add across each row.</caption>
+      <thead id="labels"></thead>
+      <tbody id="grid"></tbody>
+    </table>
+    <p class="result" id="result" aria-live="polite"></p>
+    <p>The last two weights add to −30, so the first row goes to zero whenever the prime divides 30. The other seven rows already add to zero. The second column keeps weight 1, so this gives a genuine relation among the columns.</p>
+
+    <details>
+      <summary>Why the rank is exactly seven</summary>
+      <p>Remove row 1 and column B. The seven-by-seven determinant that remains is −1, which is nonzero in every prime modulus. So there are always at least seven independent columns. The full determinant is −30, giving a rank drop exactly for 2, 3 and 5.</p>
+    </details>
+    <details>
+      <summary>Why 26 ones is the minimum</summary>
+      <p>Any board that drops rank at all three primes needs a square sub-board of full ordinary rank whose determinant is divisible by 30. If a row has just one mark, delete that row and the column containing its mark. This keeps the determinant’s magnitude. The same holds for a column with just one mark. A smallest witness with 25 marks or fewer would therefore have at least two marks in each row and column and at most twelve rows.</p>
+      <p>Seven rows can reach determinant magnitude 32, but the complete list skips 30. Smaller boards can be padded to seven rows without changing their determinant. Exhaustive checks cover eight and nine rows. From ten to twelve rows, treating rows with two marks as edges leaves just a small system to check. <a href="which_primes_fit.txt">Read the proof and replay instructions</a> · <a href="two_arrows_area_limit.html">Try the same idea with two arrows</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const board = [
+        '00000011', '00001100', '00110001', '01010100',
+        '01101010', '10011010', '10100110', '11001001'
+      ];
+      const weights = [9, 1, 11, 3, 4, -4, -16, -14];
+      const labels = document.getElementById('labels');
+      const grid = document.getElementById('grid');
+      const result = document.getElementById('result');
+      const buttons = [...document.querySelectorAll('[data-mod]')];
+      const display = n => String(n).replace('-', '−');
+
+      function cell(row, text, type = 'td', style = '') {
+        const part = document.createElement(type);
+        part.textContent = text;
+        if (style) part.className = style;
+        row.append(part);
+        return part;
+      }
+
+      function render(modulus) {
+        const reduce = n => modulus ? ((n % modulus) + modulus) % modulus : n;
+        const scores = weights.map(reduce);
+        const columns = document.createElement('tr');
+        cell(columns, 'Row', 'th').scope = 'col';
+        for (const letter of 'ABCDEFGH') cell(columns, letter, 'th').scope = 'col';
+        cell(columns, 'Sum', 'th').scope = 'col';
+        const weightsRow = document.createElement('tr');
+        weightsRow.className = 'weight';
+        cell(weightsRow, 'Wt.', 'th').scope = 'row';
+        for (const score of scores) cell(weightsRow, display(score));
+        cell(weightsRow, '');
+        labels.replaceChildren(columns, weightsRow);
+
+        let firstTotal = 0;
+        const rows = board.map((encoded, index) => {
+          const row = document.createElement('tr');
+          if (!index) row.className = 'decision';
+          cell(row, index + 1, 'th').scope = 'row';
+          let sum = 0;
+          for (const [column, bit] of [...encoded].entries()) {
+            if (bit === '1') sum += scores[column];
+            cell(row, bit, 'td', bit === '1' ? 'bit on' : 'bit');
+          }
+          const total = reduce(sum);
+          if (!index) firstTotal = total;
+          cell(row, display(total), 'td', 'total');
+          return row;
+        });
+        grid.replaceChildren(...rows);
+        const operation = modulus ? `≡ ${firstTotal} mod ${modulus}` : `= ${display(firstTotal)}`;
+        const sign = scores[7] < 0 ? '−' : '+';
+        const rank = firstTotal === 0 ? 7 : 8;
+        result.textContent = `Row 1 gives ${display(scores[6])} ${sign} ${Math.abs(scores[7])} ${operation}. Rank ${rank} of 8.`;
+        for (const button of buttons) button.setAttribute('aria-pressed', Number(button.dataset.mod) === modulus);
+      }
+      for (const button of buttons) button.addEventListener('click', () => render(Number(button.dataset.mod)));
+      render(0);
+    })();
+  </script>
+</body>
+</html>

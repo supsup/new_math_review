@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One budget across primes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf7ef;
+      --ink: #2b353b;
+      --muted: #55656c;
+      --blue: #2d6577;
+      --red: #93452e;
+      --edge: #c7cfd0;
+      background: #e8edec;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 55rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--blue); text-underline-offset: .17em; }
+    h1 { font: clamp(2.65rem, 7.6vw, 4.55rem)/1.02 Georgia, serif; margin: .6rem 0 .7rem; letter-spacing: -.048em; }
+    h2 { font: 1.24rem Georgia, serif; margin: 0 0 .32rem; }
+    p { max-width: 67ch; }
+    .intro { color: var(--muted); }
+    .experiment { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); gap: .7rem; }
+    .panel { border: 1px solid var(--edge); border-radius: .35rem; padding: .7rem .8rem; background: #fffcf6; }
+    .panel p { margin: .36rem 0; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; text-align: center; font-variant-numeric: tabular-nums; }
+    th, td { padding: .38rem .18rem; border-bottom: 1px solid var(--edge); }
+    tbody tr:last-child > * { border: 0; }
+    thead th { font-size: .76rem; line-height: 1.24; }
+    select, button { font: inherit; min-height: 2.55rem; color: var(--blue); background: #edf2ee;
+      border: 1px solid var(--edge); border-radius: .3rem; padding: .3rem .58rem; }
+    table select { max-width: 100%; }
+    button { cursor: pointer; }
+    :focus-visible { outline: .17rem solid var(--red); outline-offset: .16rem; }
+    .presets { display: flex; flex-wrap: wrap; gap: .4rem; margin: .8rem 0 .9rem; }
+    .cap { display: flex; flex-wrap: wrap; gap: .35rem .5rem; align-items: center; font-size: .88rem; font-weight: 650; }
+    .total { font: 1.33rem Georgia, serif; color: var(--blue); overflow-wrap: anywhere; }
+    #status { font-weight: 650; color: var(--blue); }
+    #status[data-fits="false"] { color: var(--red); }
+    code { overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: .88rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 42rem) { .experiment { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="green_six_matrices.html">Back to the Green example</a>
+    <h1>One budget across primes</h1>
+    <p class="intro">Another input to the compiled RH implication is called <code>VWin</code>. It puts one budget on a collection of groups indexed by prime and level. A layer at prime 5 uses more of that budget than a layer at prime 2.</p>
+
+    <div class="presets" aria-label="Examples with the same total length">
+      <button type="button" data-prime="2">Three layers at 2</button>
+      <button type="button" data-prime="5">Three layers at 5</button>
+    </div>
+    <div class="experiment">
+      <section class="panel">
+        <h2>Choose some toy lengths</h2>
+        <table>
+          <thead><tr><th scope="col">Prime</th><th scope="col">Level 1</th><th scope="col">Level 2</th><th scope="col">Weight</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">2</th><td><select aria-label="Prime 2, level 1" data-prime="2"></select></td>
+              <td><select aria-label="Prime 2, level 2" data-prime="2"></select></td><td>log 2</td></tr>
+            <tr><th scope="row">3</th><td><select aria-label="Prime 3, level 1" data-prime="3"></select></td>
+              <td><select aria-label="Prime 3, level 2" data-prime="3"></select></td><td>log 3</td></tr>
+            <tr><th scope="row">5</th><td><select aria-label="Prime 5, level 1" data-prime="5"></select></td>
+              <td><select aria-label="Prime 5, level 2" data-prime="5"></select></td><td>log 5</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>The same total in two forms</h2>
+        <p id="weighted"></p>
+        <p class="total" id="product"></p>
+        <label class="cap" for="cap">Product cap
+          <select id="cap">
+            <option>30</option><option selected>60</option><option>120</option><option>180</option>
+          </select>
+        </label>
+        <p id="status" role="status"></p>
+      </section>
+    </div>
+
+    <p>A finite-length module over the <var>p</var>-adic integers has simple layers of size <var>p</var>. Its length counts the layers. Two layers at 3 give 3² = 9 elements, whether the module looks like ℤ/9ℤ or like two copies of ℤ/3ℤ. Taking the logarithm gives a cost of 2 log 3 in either case.</p>
+    <p>Across levels, add the lengths for a fixed prime and multiply by log <var>p</var>. Across primes, add again. The result is exactly the logarithm of the product of the sizes. The toy uses only three primes and two levels so you can see each contribution.</p>
+    <p>The third input asks for a single record of compatible choices and conditions. <a href="rh_hypothesis_bundle.html">See how the archive fits those pieces together</a>.</p>
+
+    <details>
+      <summary>Where the archive’s statement uses the budget</summary>
+      <p><code>VVle</code> first asks for each length to be finite, for levels 1 ≤ <var>e</var> &lt; <var>t</var>. It then bounds the weighted sum for <em>every finite set of primes</em> by the same number <var>B</var>. The lengths belong to submodules called <code>Sha</code> in the Galois-cohomology setup.</p>
+      <p>One prime alone gives a consequence. A nonzero length at <var>p</var> contributes at least log <var>p</var>, so the singleton set would already exceed the budget if <var>p</var> &gt; exp(<var>B</var>). In particular only finitely many primes can contribute at all.</p>
+      <p><code>VWin</code> calls this bound for a range of scales in certain number fields. At a scale <var>x</var>, it sets the level cutoff to ⌊<var>x</var><sup>401</sup>⌋ and the budget to √exp(<var>x</var><sup>ε</sup>). The group construction and the choice of scales are part of the archive’s full premise.</p>
+      <p><a href="../tools/vwin_weighted_lengths.lean">Lean check of the log-product identity and the singleton consequence</a>.</p>
+    </details>
+    <p><a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ExistsPageN.lean#L12-L17">The weighted inequality in Lean</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/CharacterBoxes/ExistsPageN.lean#L41-L49">The fields, scales and cutoff in VWin</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/GaloisCohomology/Statement.lean#L75-L79">How the archive defines the length</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const lengths = Array.from(document.querySelectorAll('table select'));
+      const cap = byId('cap');
+      for (const select of lengths) {
+        for (let n = 0; n <= 4; n++) select.add(new Option(String(n),String(n)));
+      }
+      lengths[0].value = 2;
+      lengths[3].value = 1;
+
+      function update() {
+        let size = 1n, weight = 0, length = 0;
+        const exponents = new Map([[2, 0],[3, 0],[5, 0]]);
+        for (const select of lengths) {
+          const prime = Number(select.dataset.prime), n = Number(select.value);
+          length += n;
+          weight += n*Math.log(prime);
+          size *= BigInt(prime)**BigInt(n);
+          exponents.set(prime, exponents.get(prime)+n);
+        }
+        const expression = Array.from(exponents, ([prime,n]) =>
+          n ? n + ' × log ' + prime : '').filter(Boolean).join(' + ');
+        byId('weighted').textContent = (expression || '0') + ' ≈ ' + weight.toFixed(3) +
+          ' · ' + length + (length === 1 ? ' layer' : ' layers');
+        byId('product').textContent = 'Exact product ' + size.toLocaleString('en-US');
+        const fits = size <= BigInt(cap.value);
+        byId('status').dataset.fits = fits;
+        byId('status').textContent = fits
+          ? 'This fits the budget log ' + cap.value + '.'
+          : 'This exceeds the budget log ' + cap.value + '.';
+      }
+      for (const select of [...lengths,cap]) select.addEventListener('change', update);
+      for (const button of document.querySelectorAll('button[data-prime]')) {
+        button.addEventListener('click', () => {
+          for (const select of lengths) select.value = 0;
+          const spot = lengths.find(select => select.dataset.prime === button.dataset.prime);
+          spot.value = 3;
+          update();
+        });
+      }
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+Why the gap rule works better up close
+
+Two zeros approaching each other under the de Bruijn–Newman heat flow obey a simple rule. Look at their gap in ordinary zeta height, square it, and divide by two. Near the meeting, that estimates how much farther the heat parameter has to move. The shape of the wave gives a second term that improves this estimate.
+
+Write δ for the positive difference between the current heat parameter and the meeting value. For the pair near height 7005, the squared gap at t = 0 is about 0.001421176731. The leading estimate 2δ misses that squared gap by 0.000001232737. Adding the next term cuts the miss to about 0.000000000778, roughly 1,600 times smaller in this example.
+
+Three numerical checks
+
+In each case we found the meeting by Gaussian integration and then chose a time just 1% of the way from the meeting back to t = 0. We found both real zeros at that time using the same integral and compared the estimates for their squared gap.
+
+  Which zeros        C in the formula       Error with 2δ      Error with 2δ + Cδ²
+  4th and 5th       −0.1138999281           1.77971e−4          1.72473e−7
+  2nd and 3rd       −0.06697223907          1.04444e−3          1.08545e−6
+  Near 7005         −2.438681900            1.23351e−10         7.78412e−16
+
+The expansion describes a neighborhood of one double zero. These errors come from high-precision numerical quadrature at the stated times.
+
+Derivation
+
+Use the usual height y, so the argument of H_t is x = 2y. As a function of height, write the wave as F(t,y). It obeys ∂_t F = −∂_yy F/4. At a meeting (t₀,y₀), F and its height derivative vanish. Let a, b and c be the coefficients of m², m³ and m⁴ in F(t₀,y₀+m), with a nonzero. Put ε = δ/4. Applying the heat equation in the Taylor expansion gives
+
+    a(m²−2ε) + b(m³−6εm) + c(m⁴−12εm²+12ε²) + terms of higher order.
+
+For a zero, set m = ±√(2ε) + vε ± wε^(3/2) + … . Equating the next two orders gives v = 2b/a and 2√2 w = 8c/a−v². Squaring the gap between the roots gives
+
+    gap² = 8ε + [32c/a−16(b/a)²] ε² + O(ε³)
+         = 2δ + [F_yyyy/(6F_yy) − (F_yyy/F_yy)²/9] δ² + O(δ³).
+
+All derivatives in brackets are at the meeting. The square of the gap has integer powers of δ because writing m = √ε times a new variable gives two analytic branches in √ε, which swap when that square root changes sign. Their difference is odd in √ε, so its square is even. In the doubled-height coordinate the leading term is 8δ, the same rule with a different scale.
+
+Source and replay
+
+The heat equation and the Gaussian representation are in Rodgers and Tao, The De Bruijn–Newman Constant Is Non-negative, equation (15).
+https://arxiv.org/html/1801.05914v5
+
+The script uses mpmath 1.3.0. From the repository root run:
+PYTHONDONTWRITEBYTECODE=1 python3 tools/check_heat_gap_correction.py
+
+crew_visuals/lehmer_pair_meeting.html
+tools/check_lehmer_heat.py

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The last wall is made of prime angles</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf6ed;
+      --ink: #30343d;
+      --muted: #5a5f69;
+      --violet: #64508b;
+      --rust: #934b32;
+      --edge: #cfccd2;
+      background: #ebe9ee;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 57rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--violet); text-underline-offset: .16em; }
+    h1 { font: clamp(2.65rem, 7.6vw, 4.55rem)/1.02 Georgia, serif; margin: .55rem 0 .68rem; letter-spacing: -.048em; }
+    p { max-width: 69ch; }
+    .intro, figcaption { color: var(--muted); }
+    .modes { display: flex; gap: .38rem .6rem; flex-wrap: wrap; margin: .68rem 0 .8rem; }
+    button { border: 1px solid var(--edge); border-radius: .3rem; background: #eeeaf3; color: var(--violet);
+      font: inherit; min-height: 2.6rem; padding: .35rem .59rem; cursor: pointer; }
+    button[aria-pressed="true"] { color: white; background: var(--violet); }
+    :focus-visible { outline: .17rem solid var(--rust); outline-offset: .15rem; }
+    .dial { display: flex; gap: .3rem .62rem; flex-wrap: wrap; align-items: center; }
+    .dial label { font-weight: 650; }
+    output { min-width: 4.15rem; font-variant-numeric: tabular-nums; }
+    input[type="range"] { accent-color: var(--violet); flex: 1 1 9rem; min-width: 0; min-height: 2.48rem; }
+    figure { margin: .6rem 0 .75rem; }
+    canvas { width: 100%; height: 14rem; display: block; border: 1px solid var(--edge); border-radius: .35rem; background: #fffcf7; }
+    figcaption { margin-top: .36rem; font-size: .86rem; }
+    .report { border-left: .22rem solid var(--violet); background: #f0ecf3; padding: .62rem .75rem; margin: .6rem 0 .84rem; }
+    .report p { margin: .18rem 0; }
+    #edge { font-weight: 650; color: var(--violet); }
+    .formula { font: 1.08rem/1.5 Georgia, serif; overflow-wrap: anywhere; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin: .84rem 0 0; }
+    summary { font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="mirror_mix_wall.html">Back to the wall at five halves</a>
+    <h1>The last wall is made of prime angles</h1>
+    <p class="intro">The farthest a zero can go depends on how much the primes can turn the ratio of the two <var>L</var>-functions. The 45° mix needs a turn of about 148°. The 135° mix needs only about 32°, so its zeros can travel much farther right.</p>
+
+    <div class="modes" aria-label="Mixing angles to compare">
+      <button type="button" data-mix="0">45° · Davenport–Heilbronn</button>
+      <button type="button" data-mix="1">135° · Opposite weights</button>
+    </div>
+    <div class="dial">
+      <label for="sigma">Real part</label>
+      <input id="sigma" type="range" min="0" max="100" step="1" value="52">
+      <output id="sigma-value" for="sigma"></output>
+      <button type="button" id="show-wall">Show the sharp wall</button>
+    </div>
+    <figure>
+      <canvas id="plot" role="img" aria-label="The maximum phase turn provided by all relevant primes decreases as the real part grows. Its intersection with the required turn marks the sharp wall."></canvas>
+      <figcaption>The purple curve is the maximum phase turn the primes can approach, measured in degrees. The horizontal line is the turn required to make the two terms cancel.</figcaption>
+    </figure>
+    <div class="report" aria-live="polite">
+      <p id="edge"></p>
+      <p id="phase"></p>
+    </div>
+    <p>The sharp edge is near 1.120362498 at 45° and 2.382286109 at 135°. Zeros can get arbitrarily close from the left at each setting. The larger value is also a wall for the whole dial. At the wall itself the primes cannot all line up exactly.</p>
+    <p>These edges allow any height. In the band up to height 201, the 135° mix’s rightmost zero has real part about 2.34551234. <a href="spira_peak_pairs.html">See its certified disk and the other 26 pairs</a>.</p>
+    <p>Marlow then found a zero near height 1,174,561 at real part about 2.378756, only about 0.00353 from the wall. <a href="../tools/check_spira_high_root.py">Replay its certified disk</a>.</p>
+    <p>The intermediate angles require a magnitude change as well as a turn. <a href="mirror_mix_all_angle_walls.html">Compare the right walls for the entire dial</a>.</p>
+
+    <details>
+      <summary>Where the prime angles come from</summary>
+      <p>Divide the Euler product for <var>L</var>(<var>s</var>, χ) by that for its conjugate character. The factors cancel at primes where χ is real. When χ is <var>i</var> or −<var>i</var>, the remaining factor has the form (1 + <var>iz</var>)/(1 − <var>iz</var>) for <var>z</var> = ±<var>p</var><sup>−<var>s</var></sup>.</p>
+      <p>Multiplying numerator and denominator by the conjugate of the denominator makes the numerator 1 − |<var>z</var>|² + 2<var>i</var> Re(<var>z</var>). Its largest turn in either direction is 2 arctan(<var>p</var><sup>−σ</sup>), where σ is the real part. Add those limits over primes with residue 2 or 3 modulo 5 to get the curve <var>A</var>(σ).</p>
+      <p>The <a href="mod5_gauss_sum.html">root number</a> is ε = exp(<var>iθ</var>). At 135° the ratio must equal ε, which needs θ. At 45° it must equal −ε, which needs a turn of π − θ in the other direction. For any real mix, the ratio must lie on the line through ε, so θ is the smallest turn that can work. At the limiting real part, the factor for 2 would need its phase exactly opposite to the factor for 3 in the inputs 2<sup>−<var>it</var></sup> and 3<sup>−<var>it</var></sup>. One must be +1 and the other −1. This is impossible because log 2 and log 3 have irrational ratio.</p>
+    </details>
+    <details>
+      <summary>Why zeros can approach the wall</summary>
+      <p>Any finite set of distinct primes has rationally independent logarithms, by unique factorization. Kronecker–Weyl approximation lets the height <var>t</var> bring their phases as close as desired to the signs that make every turn point in the chosen direction. Absolute convergence gives the same approximation locally uniformly on Re <var>s</var> &gt; 1 when we take more primes and move the heights out.</p>
+      <p>For real σ, the limiting quotient is exp(<var>iA</var>(σ)) for the positive turn, and exp(−<var>iA</var>(σ)) for the negative turn. It reaches exactly the required unit value at the corresponding wall. The sum <var>A</var> decreases strictly there, with negative derivative, so the limiting difference from the required value has a simple zero. Rouché’s theorem gives zeros of the actual translated functions in arbitrarily small disks around it.</p>
+      <p>This explains the edges in Bombieri and Ghosh’s analysis of the two Davenport–Heilbronn-type functions. Righetti also reports the 135° value. <a href="https://doi.org/10.1070/RM2011v066n02ABEH004740">Bombieri and Ghosh, Theorem 7 and Section 6</a> · <a href="https://msp.org/ant/2017/11-9/ant-v11-n9-p05-p.pdf">Righetti, page 2138</a> · <a href="https://doi.org/10.1007/BF01475864">Weyl on equidistribution</a>.</p>
+    </details>
+    <details>
+      <summary>How the numbers were enclosed</summary>
+      <p>The direct prime sum converges slowly near 1. For the relevant primes, the quotient of the principal mod-5 series by the quadratic mod-5 series gives the factor (1 + <var>r</var>)/(1 − <var>r</var>), with <var>r</var> = <var>p</var><sup>−σ</sup>. Its logarithm sums 2 artanh(<var>r</var>). To get the desired sum of 2 arctan(<var>r</var>), subtract their difference, which starts with 4<var>r</var>³/3. The omitted terms of this faster sum are bounded by an integral.</p>
+      <p>The interval replay gives <code>1.120362498183 &lt; σ₄₅ &lt; 1.120362498184</code> and <code>2.38228610898 &lt; σ₁₃₅ &lt; 2.38228610900</code>. The graph interpolates rounded samples of the turn. <a href="../tools/check_mirror_mix_sharp_walls.py">Replay the calculation</a> with Python and python-flint.</p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      // Generated by check_mirror_mix_sharp_walls.py --plot-data.
+      const data = [
+        { angle: 45, lower: "1.120362498183", upper: "1.120362498184",
+          target: 148.282525588539, range: [1.08, 1.18], samples: [
+            170.322747, 169.6460253, 168.9779713, 168.3183734, 167.6670277, 167.0237377, 166.3883135, 165.7605719, 165.1403362, 164.5274354,
+            163.9217043, 163.3229835, 162.7311183, 162.1459595, 161.5673624, 160.995187, 160.4292978, 159.8695633, 159.3158562, 158.768053,
+            158.2260341, 157.6896833, 157.1588879, 156.6335385, 156.1135288, 155.5987558, 155.0891191, 154.5845215, 154.0848681, 153.5900669,
+            153.1000285, 152.6146657, 152.1338938, 151.6576303, 151.1857948, 150.7183093, 150.2550976, 149.7960854, 149.3412005, 148.8903724,
+            148.4435324, 148.0006137, 147.5615508, 147.1262801, 146.6947393, 146.2668679, 145.8426067, 145.4218978, 145.0046849, 144.5909127,
+            144.1805276, 143.7734768, 143.3697091, 142.9691742, 142.5718229, 142.1776075, 141.7864808, 141.398397, 141.0133113, 140.6311797,
+            140.2519593, 139.875608, 139.5020847, 139.1313491, 138.7633618, 138.3980842, 138.0354784, 137.6755074, 137.318135, 136.9633257,
+            136.6110445, 136.2612573, 135.9139308, 135.5690321, 135.2265291, 134.8863902, 134.5485846, 134.2130819, 133.8798524, 133.5488669,
+            133.2200969, 132.8935142, 132.5690912, 132.2468011, 131.9266171, 131.6085132, 131.2924639, 130.978444, 130.6664289, 130.3563943,
+            130.0483165, 129.742172, 129.4379379, 129.1355917, 128.8351111, 128.5364744, 128.2396601, 127.9446473, 127.6514152, 127.3599435,
+            127.0702121
+          ] },
+        { angle: 135, lower: "2.38228610898", upper: "2.38228610900",
+          target: 31.717474411461005, range: [2.2, 2.55], samples: [
+            37.2632925, 37.1461715, 37.0295052, 36.913291, 36.7975264, 36.682209, 36.5673363, 36.4529058, 36.3389151, 36.2253619,
+            36.1122438, 35.9995584, 35.8873033, 35.7754764, 35.6640752, 35.5530975, 35.442541, 35.3324035, 35.2226827, 35.1133766,
+            35.0044827, 34.8959991, 34.7879236, 34.6802539, 34.572988, 34.4661238, 34.3596592, 34.2535922, 34.1479206, 34.0426424,
+            33.9377556, 33.8332583, 33.7291483, 33.6254238, 33.5220828, 33.4191233, 33.3165434, 33.2143411, 33.1125147, 33.0110621,
+            32.9099816, 32.8092712, 32.7089291, 32.6089535, 32.5093425, 32.4100944, 32.3112073, 32.2126795, 32.1145093, 32.0166948,
+            31.9192343, 31.8221261, 31.7253685, 31.6289597, 31.5328981, 31.4371821, 31.3418098, 31.2467798, 31.1520903, 31.0577396,
+            30.9637263, 30.8700487, 30.7767051, 30.683694, 30.5910138, 30.498663, 30.40664, 30.3149432, 30.2235712, 30.1325224,
+            30.0417952, 29.9513883, 29.8613, 29.7715289, 29.6820737, 29.5929326, 29.5041045, 29.4155877, 29.3273809, 29.2394826,
+            29.1518914, 29.064606, 28.9776249, 28.8909467, 28.8045702, 28.7184938, 28.6327162, 28.5472362, 28.4620523, 28.3771633,
+            28.2925677, 28.2082643, 28.1242518, 28.0405289, 27.9570943, 27.8739467, 27.7910849, 27.7085075, 27.6262133, 27.5442011,
+            27.4624697
+          ] }
+      ];
+      const byId = id => document.getElementById(id);
+      const dial = byId('sigma'), canvas = byId('plot'), context = canvas.getContext('2d');
+      const controls = Array.from(document.querySelectorAll('[data-mix]'));
+      let mode = 1, atWall = true;
+      const wall = row => (Number(row.lower) + Number(row.upper)) / 2;
+
+      function draw(row, sigma, turn) {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (!width || !height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width*dpr);
+        canvas.height = Math.round(height*dpr);
+        context.setTransform(dpr,0,0,dpr,0,0);
+        const [start, end] = row.range;
+        const top = Math.ceil(row.samples[0]) + 2;
+        const bottom = Math.floor(row.samples[100]) - 2;
+        const x = s => 45 + (width-74)*(s-start)/(end-start);
+        const y = turn => 14 + (height-47)*(top-turn)/(top-bottom);
+        context.font = '12px system-ui, sans-serif';
+        context.fillStyle = '#5a5f69';
+        context.textAlign = 'center';
+        for (const fraction of [0,.25,.5,.75,1]) {
+          const s = start+(end-start)*fraction;
+          context.fillText(s.toFixed(3), x(s), height-9);
+        }
+        context.textAlign = 'right';
+        for (const tick of [Math.ceil(row.samples[0]), Math.round(row.target), Math.floor(row.samples[100])]) {
+          context.fillText(tick+'°',x(start)-7,y(tick)+4);
+        }
+        context.strokeStyle = '#934b32';
+        context.lineWidth = 1.2;
+        context.setLineDash([4,4]);
+        context.beginPath();
+        context.moveTo(x(start),y(row.target));
+        context.lineTo(x(end),y(row.target));
+        context.stroke();
+        context.setLineDash([]);
+        context.strokeStyle = '#64508b';
+        context.lineWidth = 2.2;
+        context.beginPath();
+        context.moveTo(x(start),y(row.samples[0]));
+        for (let i=1; i<=100; i++) {
+          context.lineTo(x(start+(end-start)*i/100),y(row.samples[i]));
+        }
+        context.stroke();
+        context.fillStyle = '#64508b';
+        context.beginPath();
+        context.arc(x(sigma),y(turn),5,0,2*Math.PI);
+        context.fill();
+      }
+
+      function update() {
+        const row = data[mode], end = wall(row), [minimum,maximum] = row.range;
+        const i = Number(dial.value);
+        const sigma = atWall ? end : minimum+(maximum-minimum)*i/100;
+        const angle = atWall ? row.target : row.samples[i];
+        byId('sigma-value').textContent = (atWall ? '≈ ' : '') + sigma.toFixed(atWall ? 9 : 4);
+        dial.setAttribute('aria-valuetext', sigma.toFixed(4));
+        byId('edge').textContent = 'The ' + row.angle + '° mix reaches toward real part ' + end.toFixed(9) + '.';
+        byId('phase').textContent = atWall ? 'The envelope just reaches the required ' + row.target.toFixed(4) + '° here.'
+          : 'Envelope ' + angle.toFixed(4) + '° · required ' + row.target.toFixed(4) + '°. ' +
+            (sigma > Number(row.upper) ? 'The prime turns fall short.' : 'The required turn is within the envelope.');
+        for (const button of controls) button.setAttribute('aria-pressed', Number(button.dataset.mix) === mode);
+        draw(row, sigma, angle);
+      }
+
+      function showWall() {
+        const row = data[mode], [start,end] = row.range;
+        atWall = true;
+        dial.value = Math.round(100*(wall(row)-start)/(end-start));
+        update();
+      }
+      dial.addEventListener('input',() => { atWall = false; update(); });
+      byId('show-wall').addEventListener('click',showWall);
+      for (const button of controls) button.addEventListener('click',() => {
+        mode = Number(button.dataset.mix);
+        showWall();
+      });
+      new ResizeObserver(update).observe(canvas);
+      showWall();
+    })();
+  </script>
+</body>
+</html>

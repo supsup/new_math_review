@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One curve, four point counts</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f0f4ee; color: #233139;
+      --muted: #4e6268; --ink: #203539; --teal: #205e62; --blue: #346975;
+      --pale: #d0e5db; --line: #afc2bf; --paper: #fcfdf6;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 64rem); margin: auto; padding: clamp(1.9rem, 6vw, 4.4rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.8rem, 8vw, 5.7rem)/.98 Georgia, serif; letter-spacing: -.06em; text-wrap: balance; }
+    h2 { font: 1.65rem/1.16 Georgia, serif; }
+    p { line-height: 1.54; }
+    .intro { color: var(--muted); max-width: 66ch; margin: .85rem 0 1.1rem; }
+    .choices { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+    .choices span { margin-right: .15rem; color: var(--muted); }
+    button { min-height: 2.7rem; padding: .32rem .75rem; border: 1px solid #7e9d9a; color: inherit; background: var(--paper); border-radius: .35rem; font: inherit; font-weight: 620; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--teal); color: white; border-color: var(--teal); }
+    :focus-visible { outline: 3px solid #a14c25; outline-offset: 3px; }
+    .diagram { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; margin: .85rem 0 1rem; align-items: stretch; }
+    .panel { padding: .9rem clamp(.55rem, 2vw, 1.1rem) 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: .65rem; }
+    .counts { margin-top: .65rem; display: grid; gap: .48rem; }
+    .bucket { display: grid; grid-template-columns: minmax(0,1fr) 5ch; align-items: center; gap: .2rem .5rem; }
+    .bucket span { font-size: .9rem; color: var(--muted); }
+    .bucket strong { text-align: right; font-variant-numeric: tabular-nums; }
+    .bar { grid-column: 1/-1; height: .55rem; background: var(--pale); border-radius: .75rem; }
+    .bar b { display: block; height: 100%; border-radius: .75rem; background: var(--teal); }
+    .total { margin-top: .7rem; }
+    .total strong { font: 1.55rem Georgia, serif; color: var(--teal); }
+    canvas { display: block; width: min(100%, 13.6rem); aspect-ratio: 1; margin: .02rem auto .2rem; }
+    #rotation, #prediction { margin-top: .35rem; }
+    details { max-width: 74ch; padding-top: .7rem; border-top: 1px solid var(--line); }
+    summary { cursor: pointer; font-weight: 650; }
+    details p { margin-top: .65rem; }
+    a { color: var(--teal); text-underline-offset: .18em; }
+    @media (max-width: 42rem) { .diagram { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>One curve, four point counts</h1>
+    <p class="intro">Count points on <var>y</var>² = <var>x</var>³ − <var>x</var> + 1 in a five-number field. The answer is eight, including the point at infinity. That first count fixes two complex numbers. Their powers predict the counts when the field grows to 25, 125 or 625 numbers.</p>
+
+    <div class="choices" role="group" aria-label="Choose the field">
+      <span>Field size</span>
+      <button type="button" data-degree="1" aria-pressed="true">5</button>
+      <button type="button" data-degree="2" aria-pressed="false">25</button>
+      <button type="button" data-degree="3" aria-pressed="false">125</button>
+      <button type="button" data-degree="4" aria-pressed="false">625</button>
+    </div>
+
+    <div class="diagram">
+      <section class="panel" aria-labelledby="count-title">
+        <h2 id="count-title">Direct count</h2>
+        <p>For every <var>x</var>, find how many values of <var>y</var> work.</p>
+        <div id="buckets" class="counts"></div>
+        <p class="total" id="total" aria-live="polite"></p>
+      </section>
+      <section class="panel" aria-labelledby="power-title">
+        <h2 id="power-title">From the first field alone</h2>
+        <p id="rotation"></p>
+        <canvas id="plane" width="440" height="440" role="img" aria-describedby="rotation"></canvas>
+        <p id="prediction" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <details>
+      <summary>How the field and the prediction work</summary>
+      <p>In a field with 5<sup><var>n</var></sup> elements, use <var>n</var> digits from 0 to 4 as coefficients of a polynomial in <var>z</var>. Add and multiply coefficients modulo 5, then replace powers of <var>z</var> using an irreducible polynomial of degree <var>n</var>. Here the relations are <var>z</var>² = 2, <var>z</var>³ = −<var>z</var> − 1, and <var>z</var>⁴ = −2 for <var>n</var> = 2, 3, 4.</p>
+      <p>The first count gives the trace 5 + 1 − 8 = −2. The roots of <var>T</var>² + 2<var>T</var> + 5 are −1 + 2<var>i</var> and −1 − 2<var>i</var>. In a field of size 5<sup><var>n</var></sup>, the trace is the sum of their <var>n</var>th powers, twice the real part shown. Subtract that trace from 5<sup><var>n</var></sup> + 1 for the point count.</p>
+      <p>Each power has modulus √(5<sup><var>n</var></sup>), so the picture divides by that radius to put both on the same circle each time. Twice the horizontal component before dividing is the trace, and its absolute value is bounded by twice the radius. This is the curve version of the Riemann Hypothesis. <a href="https://geodesic.mathdoc.fr/item/JRAM_1936__175_149968/">Hasse’s original proof</a> · <a href="https://swc-math.github.io/aws/2016/2016SutherlandNotes.pdf">Sutherland’s derivation, section 2.2</a></p>
+      <p><a href="count_curve_points.html">Count points one column at a time in the first field</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const polynomials = [[0],[-2,0],[1,1,0],[2,0,0,0]];
+      const buttons = document.querySelectorAll('[data-degree]');
+      const buckets = document.getElementById('buckets');
+      const total = document.getElementById('total');
+      const rotation = document.getElementById('rotation');
+      const prediction = document.getElementById('prediction');
+      const canvas = document.getElementById('plane');
+      const ctx = canvas.getContext('2d');
+
+      const mod = n => ((n%5)+5)%5;
+
+      function countPoints(n) {
+        const relation = polynomials[n-1];
+        const q = 5**n;
+        const digits = Array.from({length:q}, (_, value) => Array.from({length:n}, (_, i) => Math.floor(value/5**i)%5));
+        const encode = vector => vector.reduce((value,x,i) => value+x*5**i,0);
+        function multiply(a,b) {
+          const product = new Array(2*n-1).fill(0);
+          a.forEach((x,i) => b.forEach((y,j) => { product[i+j] += x*y; }));
+          for (let k=product.length-1; k>=n; k--) {
+            relation.forEach((c,j) => { product[k-n+j] -= c*mod(product[k]); });
+          }
+          return product.slice(0,n).map(mod);
+        }
+        const yCounts = new Uint16Array(q);
+        for (const y of digits) yCounts[encode(multiply(y,y))]++;
+        const counts = [0,0,0];
+        for (const x of digits) {
+          const cube = multiply(multiply(x,x),x);
+          const rhs = cube.map((c,i) => mod(c-x[i]+Number(i===0)));
+          counts[yCounts[encode(rhs)]]++;
+        }
+        return counts;
+      }
+
+      function plot(real, imaginary, radius) {
+        if (!ctx) return;
+        ctx.clearRect(0,0,440,440);
+        const mid = 220, r = 172;
+        const x = mid+r*real/radius, y = r*imaginary/radius;
+        ctx.strokeStyle = '#9ab1ae'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(mid,mid,r,0,2*Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(32,mid); ctx.lineTo(408,mid); ctx.moveTo(mid,32); ctx.lineTo(mid,408); ctx.stroke();
+        ctx.strokeStyle = '#397c79'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(mid,mid); ctx.lineTo(x,mid); ctx.stroke();
+        ctx.beginPath(); ctx.setLineDash([6,6]); ctx.moveTo(x,mid-y); ctx.lineTo(x,mid+y); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#205e62';
+        for (const point of [mid-y,mid+y]) { ctx.beginPath(); ctx.arc(x,point,12,0,2*Math.PI); ctx.fill(); }
+      }
+
+      function render(n) {
+        const counts = countPoints(n);
+        const q = 5**n;
+        buckets.replaceChildren(...counts.map((value,k) => {
+          const row = document.createElement('div');
+          row.className = 'bucket';
+          const label = document.createElement('span');
+          label.textContent = `x with ${k} possible y-value${k===1?'':'s'}`;
+          const number = document.createElement('strong'); number.textContent = value;
+          const track = document.createElement('div'); track.className = 'bar';
+          const bar = document.createElement('b'); bar.style.width = `${value*100/q}%`;
+          track.append(bar); row.append(label,number,track);
+          return row;
+        }));
+        const points = counts[1]+2*counts[2]+1;
+        total.replaceChildren();
+        const size = document.createElement('strong'); size.textContent = points;
+        total.append(size,' points including infinity.');
+        let real = 1, imaginary = 0;
+        for (let i=0; i<n; i++) [real,imaginary] = [-real-2*imaginary,2*real-imaginary];
+        const trace = 2*real, predicted = q+1-trace;
+        const sign = imaginary < 0 ? '−' : '+';
+        const power = document.createElement('sup'); power.textContent = n;
+        const value = `${String(real).replace('-','−')} ${sign} ${Math.abs(imaginary)}i`;
+        rotation.replaceChildren('(−1 + 2i)', power, ` = ${value}. Twice its real part gives trace ${String(trace).replace('-','−')}.`);
+        canvas.setAttribute('aria-label', `The two conjugates of ${value} after normalization to a unit circle.`);
+        prediction.textContent = predicted===points
+          ? `${q} + 1 − (${String(trace).replace('-','−')}) = ${predicted}, the same as the direct count.`
+          : 'The predicted and direct counts disagree.';
+        plot(real,imaginary,Math.sqrt(q));
+      }
+
+      for (const button of buttons) button.addEventListener('click', () => {
+        for (const item of buttons) item.setAttribute('aria-pressed', String(item===button));
+        render(Number(button.dataset.degree));
+      });
+      render(1);
+    })();
+  </script>
+</body>
+</html>

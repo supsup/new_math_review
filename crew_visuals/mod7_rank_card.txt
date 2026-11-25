@@ -1,0 +1,45 @@
+When seven becomes zero
+
+The mod-5 puzzle turned a single sum of 5 into zero. The same trick works for 7, but the smallest 6 × 6 example needs 16 ones. Start with these six rows.
+
+1 1 0 0 0 0
+1 0 1 0 0 0
+0 0 0 1 1 0
+0 1 1 1 0 0
+1 0 0 1 0 1
+0 1 1 0 1 1
+
+Multiply the columns by 1, −1, −1, 2, −2, −3. The row sums are 0, 0, 0, 0, 0, −7. The last one also becomes zero when we work modulo 7.
+
+Why the rank changes
+
+Call the first weight a. The first five equations force the weights to be a, −a, −a, 2a, −2a, −3a. The last equation asks that −7a be zero. Over fractions it forces a to be zero. Modulo 7, a is free. The rank goes from six to five.
+
+Why 16 ones is the minimum
+
+Every absolute determinant of a 5 × 5 binary board is below 7. To see this, replace 0 by +1 and 1 by −1, then border with a row and column of +1s. Subtract the new top row from each other row. The determinant of the bordered array has absolute value 32 times the original determinant. Hadamard bounds the bordered determinant by 6³, giving 6.75 for the original. Smaller square boards can be padded with identity entries. A mod-7 rank drop at size six therefore needs full rank over the fractions and a nonzero determinant divisible by 7. Expanding at a row or column with just one 1 would give a smaller determinant. So every row and column must contain at least two ones.
+
+We tested every choice of six distinct rows with total weight from 12 to 16 and at least two ones in every column. Row order preserves the number of ones and both ranks. At 12, 13, 14, 15, and 16 ones we tested 70, 2,760, 31,320, 176,406, and 615,486 boards. The first four counts gave zero rank drops. At 16 ones, 720 boards lose rank, up to reordering rows.
+
+Two exact checks agreed. One computed determinants by fraction-free elimination. The other did Gaussian elimination modulo 7 and modulo 11. For the second check, the Hadamard bound and the arithmetic–geometric mean bound the absolute determinant by (16/6)^3. So a determinant divisible by 7 in this range is either zero or nonzero modulo 11.
+
+An alternative to scanning the six-row boards
+
+Give every column a vertex. A row with two ones joins two vertices because its equation says that those column weights are negatives of each other. In a connected component, all weights are therefore determined by one weight and alternating signs. An odd cycle forces the component’s weights to zero in both fields. Each remaining component has a bipartition and supplies one free weight. This is the same reduction over the fractions and modulo 7.
+
+Let h be the number of rows with at least three ones. Full ordinary rank makes the other 6 − h equations independent. After resolving them, h free weights remain, and the heavier rows give an h × h system. Each coefficient is a sum of signs from one component. A coefficient of absolute value j ≥ 2 needs at least j same-sign vertices and one opposite-sign vertex in that component. The sum of the absolute coefficients in a residual row is at most the number of ones in its original row.
+
+With at most 15 ones, h is at most three. If h = 0, the two fields already agree. If h = 1, the remaining coefficient has absolute value at most five, so it has the same zero status in the two fields.
+
+If h = 2, the residual rows have sums of absolute coefficients bounded by four and three. Their determinant has absolute value at most 12, so the only possible nonzero multiples of 7 are ±7. With every coefficient bounded by two, the product of row lengths is at most √40, below seven. A row consisting of a single coefficient of magnitude three or four makes the determinant divisible by that number. The remaining way to reach seven is to combine a row of magnitudes (3,1) with one of magnitudes (1,2), in the corresponding columns. The first component needs at least four vertices and the other at least three. The board has only six vertices.
+
+If h = 3, each residual row has sum of absolute coefficients at most three. At most one component can have three or more vertices, because there are three components and just six vertices. Thus at most one column can have coefficients of magnitude two or three. A coefficient of magnitude three takes the whole row and gives a determinant of magnitude at most 3 × 2 = 6. If exactly one coefficient has magnitude two, expansion in that column gives at most 4 + 1 + 1 = 6. The other two cofactors each include that sparse row. If two or more coefficients have magnitude two, every cofactor includes a sparse row, so the absolute determinant is at most 2 + 2 + 2 = 6. With all coefficients bounded by one, Hadamard gives an absolute determinant at most √27. Again a nonzero determinant cannot vanish modulo 7.
+
+This proves the 16-one lower bound. The replay independently checks the smaller-dimensional prerequisite and verifies the six-row counts.
+
+Replay the independent modular check from the repository root.
+
+c++ -O3 -std=c++17 tools/check_mod7_minimum.cpp -o /tmp/check_mod7_minimum
+/tmp/check_mod7_minimum
+
+This is a finite experiment following Marlow’s mod-2 and mod-3 puzzles and the mod-5 companion at crew_visuals/when_five_becomes_zero.html.

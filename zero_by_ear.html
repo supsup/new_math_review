@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Zero by ear</title>
+<style>
+  :root {
+    --ink: #142628;
+    --soft: #4b6160;
+    --paper: #fbfdf6;
+    --pale: #e5efdf;
+    --rule: #b2c3b5;
+    --curve: #145a51;
+    --probe: #a64c2b;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+    background: #eff4e9;
+    font: 16px/1.55 system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { width: min(100% - 2rem, 62rem); margin: auto; padding: 2.5rem 0; }
+  h1, h2, p, figure { margin: 0; }
+  h1, h2, .reading { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
+  h1 { font-size: clamp(3rem, 8vw, 5.75rem); letter-spacing: -.058em; }
+  h2 { font-size: 1.65rem; }
+  .intro { max-width: 40rem; margin-top: .65rem; color: var(--soft); }
+  .workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 1.4rem;
+    padding: 1.25rem;
+    margin-top: 1.55rem;
+    border: 1px solid var(--rule);
+    border-radius: 1rem;
+    background: var(--paper);
+  }
+  fieldset { padding: 0; border: 0; margin: 0; min-width: 0; }
+  legend, .muted, figcaption { color: var(--soft); font-size: .875rem; }
+  .order-options { display: flex; flex-wrap: wrap; gap: .4rem; margin-block: .45rem .9rem; }
+  .order-options label {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    border: 1px solid var(--rule);
+    border-radius: .4rem;
+    padding: .45rem .55rem;
+    cursor: pointer;
+  }
+  .order-options label:has(input:checked) { background: var(--pale); border-color: var(--curve); }
+  input { accent-color: var(--curve); }
+  input[type="radio"], input[type="checkbox"] { margin: 0; }
+  #zoom { width: 100%; margin: .25rem 0; }
+  .zoom-label { display: flex; justify-content: space-between; gap: .5rem; margin-top: 1rem; }
+  .uneven { display: flex; align-items: center; gap: .5rem; margin-top: .55rem; }
+  .graph {
+    display: block;
+    width: 100%;
+    margin-bottom: .35rem;
+    border: 1px solid var(--rule);
+    border-radius: .55rem;
+    background: var(--paper);
+  }
+  .graph .axis { stroke: var(--rule); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .graph .root { fill: var(--paper); stroke: var(--curve); stroke-width: 2; }
+  .graph .curve { fill: none; stroke: var(--curve); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .graph .sample { fill: var(--probe); }
+  .graph .guide { stroke: var(--probe); stroke-dasharray: 4 4; fill: none; vector-effect: non-scaling-stroke; }
+  .axis-labels { display: grid; grid-template-columns: repeat(3, 1fr); padding-inline: .75rem; font: .81rem var(--mono); color: var(--soft); }
+  .axis-labels span:nth-child(2) { text-align: center; }
+  .axis-labels span:last-child { text-align: end; }
+  figcaption { margin-top: .45rem; }
+  .finding { margin: 1.1rem 0 .75rem; padding: .75rem; border-radius: .45rem; background: var(--pale); }
+  .reading { font-size: 2rem; margin-bottom: .24rem; font-variant-numeric: tabular-nums; }
+  #frequencies { margin-top: .35rem; font: .82rem var(--mono); }
+  button {
+    font: inherit;
+    color: var(--paper);
+    background: var(--curve);
+    border: 1px solid var(--curve);
+    border-radius: .45rem;
+    padding: .5rem .8rem;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .65; cursor: default; }
+  :focus-visible { outline: 2px solid var(--probe); outline-offset: 3px; }
+  #audio-status { margin-top: .35rem; }
+  details { margin-top: 1rem; border-top: 1px solid var(--rule); padding-top: .8rem; }
+  details p { margin-top: .55rem; max-width: 49rem; color: var(--soft); }
+  summary { cursor: pointer; }
+  a { color: var(--curve); }
+  @media (max-width: 45rem) {
+    .workbench { grid-template-columns: minmax(0, 1fr); padding: .85rem; gap: 1rem; }
+    main { padding-top: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Zero by ear</h1>
+    <p class="intro">A simple zero and a triple zero both cross the axis. Look closer, or listen to two notes, to hear the difference between them.</p>
+  </header>
+  <div class="workbench">
+    <figure>
+      <svg class="graph" viewBox="0 0 640 330" role="img" id="graph" aria-label="A toy function with a zero at the origin">
+        <line class="axis" x1="20" y1="165" x2="620" y2="165"></line>
+        <line class="axis" x1="320" y1="16" x2="320" y2="314"></line>
+        <path class="curve" id="curve"></path>
+        <path class="guide" id="probe-guides"></path>
+        <circle class="root" cx="320" cy="165" r="6"></circle>
+        <circle class="sample" id="near" r="5"></circle>
+        <circle class="sample" id="far" r="5"></circle>
+      </svg>
+      <div class="axis-labels" aria-hidden="true"><span id="left-label">−1</span><span>0</span><span id="right-label">1</span></div>
+      <figcaption>Two probes on the same side of the zero. One is twice as far away as the other.</figcaption>
+    </figure>
+    <section aria-labelledby="sample-title">
+      <h2 id="sample-title">One zero, three shapes</h2>
+      <fieldset>
+        <legend>Multiplicity</legend>
+        <div class="order-options">
+          <label><input type="radio" name="order" value="1" checked> Simple</label>
+          <label><input type="radio" name="order" value="2"> Double</label>
+          <label><input type="radio" name="order" value="3"> Triple</label>
+        </div>
+      </fieldset>
+      <p id="shape"></p>
+      <label class="zoom-label muted" for="zoom">Zoom toward 0 <output id="radius" for="zoom">±1</output></label>
+      <input id="zoom" type="range" min="0" max="6" step="1" value="0">
+      <label class="uneven"><input id="uneven" type="checkbox"> Make the curve asymmetric</label>
+      <div class="finding" role="status">
+        <p class="reading" id="octaves"></p>
+        <p id="shrinkage"></p>
+        <p id="frequencies"></p>
+      </div>
+      <button id="listen" type="button">Hear the two probes</button>
+      <p id="audio-status" class="muted" role="status"></p>
+    </section>
+  </div>
+  <details>
+    <summary>Why the pitch drops</summary>
+    <p>At a simple zero, halving the distance cuts the ideal value in half. At a double zero it cuts it to a quarter, and at a triple zero to an eighth. We turn those ratios into pitch. Each factor of two drops the pitch one octave.</p>
+    <p>The asymmetric curve multiplies the ideal shape by a smooth factor that tends to 1 near the root. Zoom in and the measured interval approaches the whole number of octaves again.</p>
+    <p>These shapes show what multiplicity means near a root. In the zeta card, one location can contribute more than one zero to the total count. The <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/zeta23/README.md">zeta23 formalization</a> counts simple zeros separately.</p>
+  </details>
+</main>
+<script>
+"use strict";
+
+function sample(order, zoom, uneven) {
+  const radius = 2 ** -zoom;
+  const curve = x => x ** order * (uneven ? 1 + .48 * x : 1);
+  const ratio = Math.abs(curve(radius) / curve(radius / 2));
+  return { radius, curve, ratio, octaves: Math.log2(ratio), lowerFrequency: 880 / ratio };
+}
+
+if (typeof module !== "undefined") module.exports = { sample };
+
+if (typeof document !== "undefined") {
+  const byId = id => document.getElementById(id);
+  const orders = [...document.querySelectorAll('input[name="order"]')];
+  const zoom = byId("zoom");
+  const uneven = byId("uneven");
+  const play = byId("listen");
+  const status = byId("audio-status");
+  let audio;
+  let reading;
+
+  function draw(data) {
+    const { radius, curve } = data;
+    const scale = Math.max(Math.abs(curve(-radius)), Math.abs(curve(radius)));
+    const points = Array.from({ length: 121 }, (_, index) => {
+      const fraction = (index - 60) / 60;
+      return [320 + 280 * fraction, 165 - 124 * curve(radius * fraction) / scale];
+    });
+    byId("curve").setAttribute("d", points.map(([x, y], index) =>
+      (index === 0 ? "M " : "L ") + x.toFixed(2) + " " + y.toFixed(2)).join(" "));
+    const near = points[90];
+    const far = points[120];
+    for (const [name, point] of [["near", near], ["far", far]]) {
+      byId(name).setAttribute("cx", point[0]);
+      byId(name).setAttribute("cy", point[1]);
+    }
+    byId("probe-guides").setAttribute("d", [near, far].map(([x, y]) => "M " + x + " 165 V " + y).join(" "));
+  }
+
+  function update() {
+    const order = Number(orders.find(option => option.checked).value);
+    reading = sample(order, Number(zoom.value), uneven.checked);
+    const shapes = [
+      "Crosses the axis with a slope.",
+      "Touches the axis and turns back.",
+      "Crosses the axis with a flat tangent."
+    ];
+    byId("shape").textContent = shapes[order - 1];
+    byId("graph").setAttribute("aria-label", "Toy zero of multiplicity " + order + ". " + shapes[order - 1]);
+    const radiusLabel = zoom.value === "0" ? "1" : "1/" + 2 ** Number(zoom.value);
+    byId("radius").value = "±" + radiusLabel;
+    zoom.setAttribute("aria-valuetext", "radius " + radiusLabel);
+    byId("left-label").textContent = "−" + radiusLabel;
+    byId("right-label").textContent = radiusLabel;
+    byId("octaves").textContent = reading.octaves.toFixed(2) + (reading.octaves === 1 ? " octave" : " octaves");
+    byId("shrinkage").textContent = "Halving the distance shrinks the value by a factor of " + reading.ratio.toFixed(2) + ".";
+    byId("frequencies").textContent = "880 Hz → " + Math.round(reading.lowerFrequency) + " Hz";
+    draw(reading);
+  }
+
+  function playTone(frequency, start) {
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(.0001, start);
+    gain.gain.exponentialRampToValueAtTime(.15, start + .035);
+    gain.gain.exponentialRampToValueAtTime(.0001, start + .27);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start(start);
+    oscillator.stop(start + .29);
+    return oscillator;
+  }
+
+  async function listen() {
+    const lower = reading.lowerFrequency;
+    play.disabled = true;
+    try {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) throw new Error("Audio is unavailable in this browser.");
+      audio ??= new Audio();
+      await audio.resume();
+      const start = audio.currentTime + .04;
+      playTone(880, start);
+      const last = playTone(lower, start + .36);
+      status.textContent = "Playing 880 Hz, then " + Math.round(lower) + " Hz.";
+      last.onended = () => {
+        play.disabled = false;
+        status.textContent = "";
+      };
+    } catch {
+      play.disabled = false;
+      status.textContent = "Audio couldn’t play. You can still compare the frequencies above.";
+    }
+  }
+
+  orders.forEach(option => option.addEventListener("change", update));
+  zoom.addEventListener("input", update);
+  uneven.addEventListener("change", update);
+  play.addEventListener("click", listen);
+  update();
+}
+</script>
+</body>
+</html>

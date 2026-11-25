@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Where the square root enters</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf8ee;
+      --ink: #29362d;
+      --muted: #526258;
+      --green: #2a6950;
+      --blue: #355f8b;
+      --orange: #8c5834;
+      --edge: #c6d1c4;
+      background: #e6ece2;
+      color: var(--ink);
+      font: 100%/1.55 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 58rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); background: var(--paper); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    h1 { font: clamp(2.55rem, 8vw, 4.55rem)/1.04 Georgia, serif; letter-spacing: -.045em; margin: .55rem 0 .7rem; }
+    p { max-width: 67ch; }
+    .intro, figcaption { color: var(--muted); }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1.2rem; padding: .65rem .8rem; border-radius: .35rem; border: 1px solid var(--edge); }
+    .controls div { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: .08rem .5rem; }
+    label { font-weight: 650; }
+    output, td { font-variant-numeric: tabular-nums; }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; height: 2.45rem; margin: 0; accent-color: var(--green); }
+    :focus-visible { outline: .17rem solid var(--orange); outline-offset: .15rem; }
+    figure { margin: .85rem 0; }
+    canvas { width: 100%; height: 13rem; display: block; border-radius: .35rem; background: #edf1e8; }
+    figcaption { font-size: .89rem; margin-top: .4rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+    th, td { text-align: left; border-bottom: 1px solid var(--edge); padding: .25rem .32rem; }
+    td { text-align: right; white-space: nowrap; }
+    .size { color: var(--green); }
+    .window { color: var(--blue); }
+    .duty { color: var(--orange); }
+    .trail { padding-left: 1.3rem; }
+    .trail li { padding: .36rem 0; }
+    details { border-top: 1px solid var(--edge); padding-top: .65rem; margin-top: .9rem; }
+    summary { font-weight: 650; cursor: pointer; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 34rem) { .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>Where the square root enters</h1>
+    <p class="intro">The archive’s arithmetic chain has a length <var>m</var> of roughly √<var>x</var>. One concrete use is in the window estimates. Lean takes size bounds for <var>m</var>, turns them into simpler inequalities, and passes those inequalities to the theorem that assembles the chain.</p>
+    <div class="controls">
+      <div><label for="scale">Scale log<sub>10</sub> <var>x</var></label><output id="scale-value" for="scale"></output><input id="scale" type="range" min="4" max="400" step="1" value="120"></div>
+      <div><label for="epsilon">Small exponent ε</label><output id="epsilon-value" for="epsilon"></output><input id="epsilon" type="range" min=".001" max=".019" step=".001" value=".01"></div>
+    </div>
+    <figure>
+      <canvas id="windows" role="img" aria-label="Logarithmic comparison of three ranges for chain length relative to the square root of x"></canvas>
+      <figcaption>The scale below the plot is the ratio <var>m</var>/√<var>x</var>. The dashed line is exactly √<var>x</var>. The green row feeds the blue row on the window branch. The brown row is a family requirement called <code>PageWin</code>.</figcaption>
+    </figure>
+    <table aria-label="Lower and upper bounds on m divided by the square root of x">
+      <thead><tr><th scope="col">Range for <var>m</var>/√<var>x</var></th><th scope="col">Lower</th><th scope="col">Upper</th></tr></thead>
+      <tbody>
+        <tr class="size"><th scope="row"><code>SizeM</code></th><td id="size-low"></td><td id="size-high"></td></tr>
+        <tr class="window"><th scope="row"><code>Win_at</code></th><td id="window-low"></td><td id="window-high"></td></tr>
+        <tr class="duty"><th scope="row"><code>PageWin</code></th><td id="duty-low"></td><td id="duty-high"></td></tr>
+      </tbody>
+    </table>
+    <p>The center of the green range is √(<var>x</var> δ₁) with δ₁ = <var>x</var><sup>−ε/8</sup>. Taking the square root halves that exponent correction, so the center is <var>x</var><sup>½−ε/16</sup>. <code>SizeM</code> allows a factor <var>x</var><sup>ε/100</sup> in either direction.</p>
+    <ol class="trail">
+      <li><code>FamP.sizes</code> gives <code>SizeM</code> along with the family’s other size bounds. <code>size_windows_of_thick_density</code> explicitly takes this conjunct out of the bundle and hands it to <code>size_window_at_five</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/ParConsts.lean#L31-L46">The family field</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/GlobalSchurBounds/LossesSmallShares.lean#L341-L351">Where the bound is taken out</a></li>
+      <li><code>size_window_at_five</code> uses that input to prove <var>m</var> ≤ <var>x</var><sup>½+ε/2</sup>, <var>m</var> ≥ <var>x</var><sup>½−ε</sup>, and <var>xm</var> ≤ <var>k</var>. For the first two inequalities it simply widens the exponent bounds. The third compares <var>x</var> times the upper bound for <var>m</var> to the lower bound for the rank parameter <var>k</var>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/GlobalSchurBounds/QuadraticLogDerivCongr.lean#L1390-L1428">The three inequalities in Lean</a></li>
+      <li><code>linkGLOBAL7_items</code> supplies those window facts to <code>linkCore</code>. It puts the upper bound and <var>xm</var> ≤ <var>k</var> into the error estimates, and the lower bound into the remaining size conditions. Those are fields of the <code>ChainTied</code> package that feeds the analytic window inequality. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/GlobalSchurBounds/LinkMin.lean#L711-L721">Supplying the window facts</a> · <a href="rh_window_proof_trail.html">Follow the analytic branch</a></li>
+    </ol>
+    <details>
+      <summary>Why both ends of the range matter</summary>
+      <p>One scalar growth estimate compares the error with a leading scale <var>n</var><sub>T</sub><var>m</var><var>b</var>. After dividing by this scale, one error term is <var>a</var><sub>E</sub>/(<var>m</var><var>b</var>) ≤ 2<var>x</var>/<var>m</var>, since <var>a</var><sub>E</sub> ≤ 2<var>xb</var>. The lower bound on <var>m</var> keeps this at most 2<var>x</var><sup>½+ε</sup>.</p>
+      <p>Another error term has two factors of <var>m</var> before division. After division it is 2(<var>n</var>/<var>n</var><sub>T</sub>)<var>mx</var><sup>ε</sup>. The density condition gives <var>n</var>/<var>n</var><sub>T</sub> ≤ 2<var>x</var><sup>ε/8</sup>. The upper bound on <var>m</var> then gives 4<var>x</var><sup>½+13ε/8</sup>. The two terms pull in opposite directions as the chain gets longer. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SizeWindowBrackets/GrowthBoundGivesRiemannHypothesis.lean#L109-L122">The error expression</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SizeWindowBrackets/ChainSlopeWindows/LipschitzWeightAndMinimum.lean#L507-L535">The two estimates</a></p>
+      <p>The character-family proof calls this very estimate. <code>core_gm</code> invokes <code>Deduction.ch_core</code>, which calls <code>proposition_size_bound</code> after building the leading term. This connects the two ends of the size range to the bound on the weighted prime-power sum. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/PrimitiveCosets/CoreGm.lean#L12-L22">The family comparison</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/ChCore.lean#L426-L442">The call to the scalar estimate</a></p>
+      <p>The connection goes through the data passed to <code>core_gm</code>. <code>tiedCore_of_chainTied</code> carries the error-window and remaining size fields into <code>CoreAtH</code>, and <code>core_gm</code> unpacks those fields for the call to <code>ch_core</code>. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/PrimitiveCosets/LevelGmLeOnFamilyScales.lean#L13-L30">Carrying the fields across</a> · <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/PrimitiveCosets/CoreGm.lean#L26-L60">Unpacking them for the comparison</a></p>
+    </details>
+    <details>
+      <summary>What the other square-root condition says</summary>
+      <p><code>PageWin</code> asks for <var>m</var> between √(<var>x</var> δ₁) and twice that value. It is one of several conditions bundled into the family’s <code>Duty</code>. The window calculation above uses the <code>SizeM</code> input from <code>FamP.sizes</code>. A reference to a conjunction’s type alone gives no evidence that its <code>PageWin</code> component was taken out. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Formalism/SharpRestriction/PageFix.lean#L20-L25">The separate PageWin definition</a></p>
+    </details>
+    <details>
+      <summary>Replay the Lean name and proof-link checks</summary>
+      <p>With the <code>CritLine</code> and <code>TopPlug</code> imports built at archive revision <code>6193bb5</code>, Lean 4.33.1 confirmed the direct references from <code>linkGLOBAL7_items</code> to <code>size_windows_of_thick_density</code> and onward to <code>size_window_at_five</code>, <code>winA</code>, <code>winB</code>, and <code>winL</code>. It also confirmed the character-family calls to <code>core_gm</code>, <code>ch_core</code> and <code>proposition_size_bound</code>. The two final axiom queries report <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>. <a href="../tools/rh_chain_window_desk.lean">The exact check file</a></p>
+    </details>
+    <p>One premise of the compiled implication concerns characters of finite matrix groups. <a href="green_six_matrices.html">Try its six-matrix example</a>.</p>
+  </main>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const scale = byId('scale'), epsilon = byId('epsilon'), canvas = byId('windows');
+      const ctx = canvas.getContext('2d');
+      const colors = ['#2a6950', '#355f8b', '#8c5834'];
+      const roles = ['size', 'window', 'duty'];
+      const ratio = exponent => {
+        const value = 10 ** exponent;
+        return value < .001 ? value.toExponential(3) : value.toLocaleString('en-US', { maximumFractionDigits: 4 });
+      };
+
+      function draw(ranges) {
+        if (!ctx) return;
+        const width = canvas.clientWidth, height = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width * density);
+        canvas.height = Math.round(height * density);
+        ctx.setTransform(density, 0, 0, density, 0, 0);
+        const left = 34, right = width - 27;
+        const low = Math.min(-.32, ...ranges.map(pair => pair[0])) - .04;
+        const high = Math.max(.32, ...ranges.map(pair => pair[1])) + .04;
+        const x = value => left + (value - low) * (right - left) / (high - low);
+        const step = (height - 50) / 3;
+        ctx.strokeStyle = '#9ba9a1';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x(0), 17);
+        ctx.lineTo(x(0), height - 26);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#526258';
+        ctx.textAlign = 'center';
+        ctx.font = '12px system-ui';
+        for (const tick of [low, 0, high]) ctx.fillText(ratio(tick), x(tick), height - 12);
+        for (const [i, [start, end]] of ranges.entries()) {
+          const center = 23 + step*(i + .5);
+          ctx.strokeStyle = '#ced8ca';
+          ctx.beginPath();
+          ctx.moveTo(left, center);
+          ctx.lineTo(right, center);
+          ctx.stroke();
+          ctx.strokeStyle = colors[i];
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(x(start), center);
+          ctx.lineTo(x(end), center);
+          ctx.stroke();
+          ctx.fillStyle = colors[i];
+          for (const boundary of [start, end]) {
+            ctx.beginPath();
+            ctx.arc(x(boundary), center, 3.5, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+          ctx.lineWidth = 1;
+        }
+      }
+
+      function update() {
+        const logScale = scale.valueAsNumber, eps = epsilon.valueAsNumber;
+        const product = eps * logScale, center = -product / 16, margin = product / 100;
+        const ranges = [[center - margin, center + margin], [-product, product / 2], [center, center + Math.log10(2)]];
+        byId('scale-value').textContent = logScale;
+        byId('epsilon-value').textContent = eps.toFixed(3);
+        for (const [i, [lower, upper]] of ranges.entries()) {
+          byId(roles[i] + '-low').textContent = ratio(lower);
+          byId(roles[i] + '-high').textContent = ratio(upper);
+        }
+        draw(ranges);
+      }
+      scale.addEventListener('input', update);
+      epsilon.addEventListener('input', update);
+      new ResizeObserver(update).observe(canvas);
+      update();
+    })();
+  </script>
+</body>
+</html>

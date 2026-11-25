@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two products approach three · A border-rank example</title>
+  <style>
+    :root {
+      color-scheme: dark; background: #1d1625; color: #fff4f3;
+      --muted: #dfc8dd; --line: #594861; --pink: #f7aacf; --mint: #b0f4d3; --panel: #2a1e32;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 64rem); margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) 0; }
+    h1, h2, p, figure { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 400; }
+    h1 { font-size: clamp(2.65rem, 8vw, 5.6rem); letter-spacing: -.055em; line-height: 1; margin: .55rem 0 .8rem; text-wrap: balance; }
+    h2 { font-size: clamp(1.45rem, 4vw, 2rem); }
+    .topic { color: var(--pink); font-size: .86rem; font-weight: 700; letter-spacing: .06em; }
+    .intro, .caption, details { color: var(--muted); line-height: 1.55; max-width: 65ch; }
+    a { color: var(--mint); text-underline-offset: .23em; }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 4px; }
+    .workbench { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(1rem, 4vw, 2.7rem); align-items: start; margin: 1.45rem 0; }
+    figure { background: var(--panel); border: 1px solid var(--line); border-radius: .6rem; padding: .75rem; }
+    svg { display: block; width: 100%; height: auto; }
+    .cube { fill: none; stroke: #806987; stroke-width: 2; }
+    .hint { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 3 4; }
+    .dot { transition: r .21s ease; }
+    .vertex[data-kind="target"] .dot { fill: var(--mint); }
+    .vertex[data-kind="extra"] .dot { fill: var(--pink); }
+    .vertex-label { fill: #fff4f3; font: 18px system-ui, sans-serif; }
+    figcaption { display: flex; flex-wrap: wrap; gap: .85rem; justify-content: center; color: var(--muted); font-size: .86rem; }
+    .key::before { display: inline-block; width: .66rem; height: .66rem; border-radius: 50%; margin-right: .37rem; content: ""; }
+    .key.stays::before { background: var(--mint); }
+    .key.fades::before { background: var(--pink); }
+    .epsilon { margin: .6rem 0; }
+    .epsilon label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; color: var(--muted); }
+    #epsilon-label { color: var(--pink); font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; min-height: 2.75rem; margin: .4rem 0 0; accent-color: var(--pink); }
+    .presets { display: flex; gap: .4rem; flex-wrap: wrap; }
+    button { min-height: 2.55rem; padding: .3rem .95rem; border-radius: .35rem; border: 1px solid var(--line); color: inherit; background: transparent; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: var(--pink); color: #251a27; border-color: var(--pink); font-weight: 650; }
+    button:hover { border-color: var(--pink); }
+    table { width: 100%; margin-top: .85rem; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th, td { padding: .55rem .2rem; border-bottom: 1px solid var(--line); text-align: left; }
+    th { font-weight: 550; }
+    thead th { color: var(--muted); font-size: .85rem; }
+    td:last-child, thead th:last-child { text-align: right; }
+    #live { margin-top: .75rem; }
+    details { border-top: 1px solid var(--line); margin-top: 1.3rem; padding-top: .75rem; }
+    summary { color: #fff4f3; cursor: pointer; }
+    details p { margin: .65rem 0; }
+    .formula { overflow-wrap: anywhere; color: var(--mint); }
+    @media (max-width: 44rem) { .workbench { grid-template-columns: 1fr; } }
+    @media (max-width: 24rem) { .vertex-label { font-size: 22px; } }
+    @media (prefers-reduced-motion: reduce) { .dot { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="topic">VP ≠ VNP · An example of approximation</p>
+      <h1>Two products approach three</h1>
+      <p class="intro">A polynomial needs three products in a particular model, yet two products can get arbitrarily close. Turn down the small number ε and watch the extra terms vanish.</p>
+    </header>
+
+    <div class="workbench">
+      <figure>
+        <svg viewBox="0 0 460 358" role="img" aria-labelledby="cube-title cube-desc">
+          <title id="cube-title">Eight coefficients arranged as a cube</title>
+          <desc id="cube-desc">Three target coefficients stay at one. Four extra coefficients shrink as epsilon approaches zero. The coefficient 000 stays at zero.</desc>
+          <path class="cube" d="M100 276L276 276L365 211L189 211ZM100 113L276 113L365 48L189 48ZM100 276V113M276 276V113M365 211V48M189 211V48" />
+          <g class="vertex" data-bits="000" data-kind="cancelled" transform="translate(100 276)"><circle class="hint" r="10"/><circle class="dot" r="0"/><text class="vertex-label" x="-14" y="29">000</text></g>
+          <g class="vertex" data-bits="100" data-kind="target" transform="translate(276 276)"><circle class="hint" r="13"/><circle class="dot" r="13"/><text class="vertex-label" x="-15" y="30">100</text></g>
+          <g class="vertex" data-bits="010" data-kind="target" transform="translate(189 211)"><circle class="hint" r="13"/><circle class="dot" r="13"/><text class="vertex-label" x="-37" y="-17">010</text></g>
+          <g class="vertex" data-bits="110" data-kind="extra" transform="translate(365 211)"><circle class="hint" r="13"/><circle class="dot" r="6.5"/><text class="vertex-label" x="17" y="5">110</text></g>
+          <g class="vertex" data-bits="001" data-kind="target" transform="translate(100 113)"><circle class="hint" r="13"/><circle class="dot" r="13"/><text class="vertex-label" x="-48" y="6">001</text></g>
+          <g class="vertex" data-bits="101" data-kind="extra" transform="translate(276 113)"><circle class="hint" r="13"/><circle class="dot" r="6.5"/><text class="vertex-label" x="15" y="23">101</text></g>
+          <g class="vertex" data-bits="011" data-kind="extra" transform="translate(189 48)"><circle class="hint" r="13"/><circle class="dot" r="6.5"/><text class="vertex-label" x="-44" y="-9">011</text></g>
+          <g class="vertex" data-bits="111" data-kind="extra" transform="translate(365 48)"><circle class="hint" r="13"/><circle class="dot" r="3.25"/><text class="vertex-label" x="17" y="5">111</text></g>
+        </svg>
+        <figcaption><span class="key stays">Stays at one</span><span class="key fades">Shrinks to zero</span></figcaption>
+      </figure>
+
+      <section aria-labelledby="knob-title">
+        <h2 id="knob-title">Turn ε down</h2>
+        <div class="epsilon">
+          <label for="epsilon">Approximation setting <output id="epsilon-label" for="epsilon">ε = ¼</output></label>
+          <input id="epsilon" type="range" min="0" max="5" step="1" value="2" aria-valuetext="Epsilon equals one quarter">
+        </div>
+        <div class="presets" role="group" aria-label="Jump to an approximation setting">
+          <button type="button" data-level="0" aria-pressed="false">Start at 1</button>
+          <button type="button" data-level="5" aria-pressed="false">See the limit</button>
+        </div>
+        <table aria-label="Polynomial coefficients">
+          <thead><tr><th scope="col">Bits of the term</th><th scope="col">Coefficient</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">000</th><td>0</td></tr>
+            <tr><th scope="row">100, 010, 001</th><td>1 each</td></tr>
+            <tr><th scope="row">110, 101, 011</th><td id="two-bits">1/4 each</td></tr>
+            <tr><th scope="row">111</th><td id="three-bits">1/16</td></tr>
+          </tbody>
+        </table>
+        <p class="caption" id="live" aria-live="polite">Two products produce these coefficients. At any positive ε, there are still extra terms.</p>
+      </section>
+    </div>
+
+    <details>
+      <summary>See the two products and why the limit needs three</summary>
+      <p>A separated product multiplies one linear form from each of the three groups <var>x</var>, <var>y</var>, and <var>z</var>. The bits name the subscripts. For example, 101 names <var>x</var>₁<var>y</var>₀<var>z</var>₁.</p>
+      <p class="formula">[(<var>x</var>₀ + ε<var>x</var>₁)(<var>y</var>₀ + ε<var>y</var>₁)(<var>z</var>₀ + ε<var>z</var>₁) − <var>x</var>₀<var>y</var>₀<var>z</var>₀] / ε</p>
+      <p>The two copies of the 000 term cancel. Dividing by ε leaves coefficient 1 for each term with a single 1 in its bits, ε for each term with two 1s, and ε² for 111. Only the three single-1 terms survive in the limit.</p>
+      <p>Arrange the coefficients of <var>x</var>₀ and <var>x</var>₁ as two 2 × 2 arrays over the rational numbers. They are ((0,1),(1,0)) and ((1,0),(0,0)). Every combination with coefficients <var>a</var>, <var>b</var> has determinant −<var>a</var>², so there is only one rank-one direction in the span. Two separated products would have to supply two rank-one directions to span both independent arrays. Three work, one for each surviving term. Any limit of single products still has linearly dependent arrays. Stack the two flattened arrays as rows and every 2 × 2 minor is zero before and after taking the limit.</p>
+      <p>This classical example compares tensor rank and border rank for separated products. The VP formalization counts general arithmetic circuit gates, with a related Laurent-series notion of coefficientwise approximation. <a href="https://arxiv.org/abs/math/0607647">De Silva and Lim, Theorem 5.1</a> · <a href="https://github.com/anthropics/formal-math/blob/11b6c7e/vp-vnp/Statement.lean#L51">Lean circuit model</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const slider = document.getElementById('epsilon');
+      const display = document.getElementById('epsilon-label');
+      const twoBits = document.getElementById('two-bits');
+      const threeBits = document.getElementById('three-bits');
+      const live = document.getElementById('live');
+      const vertices = document.querySelectorAll('[data-bits]');
+      const buttons = document.querySelectorAll('[data-level]');
+      const sizes = [1, 2, 4, 8, 16, 0];
+      const names = ['1', '½', '¼', '⅛', '1/16', '0'];
+
+      function format(denominator) {
+        if (denominator === 0) return '0';
+        return denominator === 1 ? '1' : `1/${denominator}`;
+      }
+
+      function show(level) {
+        const denominator = sizes[level];
+        const atLimit = denominator === 0;
+        const epsilon = atLimit ? 0 : 1 / denominator;
+        slider.value = String(level);
+        slider.setAttribute('aria-valuetext', atLimit ? 'The limit as epsilon goes to zero' : `Epsilon equals ${format(denominator)}`);
+        display.textContent = atLimit ? 'ε tends to 0' : `ε = ${names[level]}`;
+        twoBits.textContent = `${format(denominator)} each`;
+        threeBits.textContent = format(denominator * denominator);
+        for (const vertex of vertices) {
+          const weight = [...vertex.dataset.bits].filter(bit => bit === '1').length;
+          const coefficient = weight === 0 ? 0 : epsilon ** (weight - 1);
+          vertex.querySelector('.dot').setAttribute('r', String(13 * Math.sqrt(coefficient)));
+        }
+        for (const button of buttons) button.setAttribute('aria-pressed', String(Number(button.dataset.level) === level));
+        live.textContent = atLimit
+          ? 'Only three terms survive. Writing this exact polynomial as separated products takes three.'
+          : 'Two products produce these coefficients. At any positive ε, there are still extra terms.';
+      }
+
+      slider.addEventListener('input', () => show(Number(slider.value)));
+      for (const button of buttons) button.addEventListener('click', () => show(Number(button.dataset.level)));
+      show(Number(slider.value));
+    })();
+  </script>
+</body>
+</html>

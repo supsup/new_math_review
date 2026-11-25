@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why the poles add</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fcf8ef;
+      --ink: #263630;
+      --muted: #52625a;
+      --green: #21654c;
+      --blue: #275a80;
+      --orange: #924425;
+      --line: #b7c3b5;
+      color: var(--ink);
+      background: #e5ece5;
+      font: 100%/1.56 system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 55rem; padding: clamp(1rem, 5vw, 3rem); margin: auto; background: var(--paper); }
+    h1 { font: clamp(2.65rem, 8vw, 4.7rem)/1.04 Georgia, serif; letter-spacing: -.05em; margin: .58rem 0; }
+    p { max-width: 66ch; }
+    .intro, figcaption { color: var(--muted); }
+    a { color: var(--green); text-underline-offset: .16em; }
+    .controls { display: flex; align-items: end; flex-wrap: wrap; gap: .7rem; margin: 1.2rem 0; }
+    label { display: grid; gap: .18rem; font-size: .9rem; font-weight: 650; }
+    select {
+      min-height: 2.75rem; font: inherit; padding: .25rem .6rem; color: var(--ink);
+      border: 1px solid var(--line); background: #f7f8ef; border-radius: .32rem;
+    }
+    :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    .diagram { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: .9rem; align-items: center; }
+    figure { margin: 0; }
+    canvas { width: 100%; aspect-ratio: 1.4; display: block; background: #f0f1e8; border-radius: .4rem; }
+    figcaption { font-size: .88rem; margin-top: .45rem; }
+    dl { border: 1px solid var(--line); padding: .7rem .85rem; margin: 0; border-radius: .4rem; }
+    dt { font-size: .88rem; }
+    dd { font-weight: 650; font-variant-numeric: tabular-nums; margin: 0 0 .45rem; }
+    dd:last-child { margin-bottom: 0; }
+    .one { color: var(--blue); }
+    .two { color: var(--orange); }
+    .sum { color: var(--green); }
+    #status { font-weight: 650; }
+    details { border-top: 1px solid var(--line); padding-top: .6rem; margin-top: 1rem; }
+    summary { cursor: pointer; font-weight: 650; }
+    @media (max-width: 37rem) { .diagram { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="rh_argument_map.html">Back to the proof map</a>
+    <h1>Why the poles add</h1>
+    <p class="intro">The Lean proof estimates one weighted sum for a whole family of Dirichlet L-functions. That sum can reveal a zero of any member because the contributions at the same pole all point in one direction. Try changing the multiplicities.</p>
+
+    <div class="controls">
+      <label for="rho">Hypothetical zero ρ
+        <select id="rho"><option value="1">¾ + i</option><option value="0">¾</option></select>
+      </label>
+      <label for="first">Multiplicity in the first term
+        <select id="first"><option>0</option><option>1</option><option selected>2</option><option>3</option></select>
+      </label>
+      <label for="second">Multiplicity in the second term
+        <select id="second"><option>0</option><option>1</option><option selected>2</option><option>3</option></select>
+      </label>
+      <label for="weight">Second weight
+        <select id="weight">
+          <option value="1">+1</option><option value="0.5">+½</option><option value="2">+2</option>
+          <option value="-1">−1, a cancellation example</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="diagram">
+      <figure>
+        <canvas id="arrows" role="img" aria-label="Two contributions and their sum as arrows in the complex plane"></canvas>
+        <figcaption>Add the blue and orange arrows tip to tail. The green arrow is their total.</figcaption>
+      </figure>
+      <dl>
+        <dt>Common factor −1/[ρ(ρ − 1)]</dt><dd id="factor"></dd>
+        <dt class="one">First contribution</dt><dd class="one" id="part-one"></dd>
+        <dt class="two">Second contribution</dt><dd class="two" id="part-two"></dd>
+        <dt class="sum">Total residue</dt><dd class="sum" id="total"></dd>
+      </dl>
+    </div>
+    <p id="status" aria-live="polite"></p>
+    <p>A zero of order <var>m</var> gives a term <var>m</var>/(<var>s</var> − ρ) in the logarithmic derivative. The prime-power smoothing contributes the same factor −1/[ρ(ρ − 1)] for every member. With positive weights, any zero gives a nonzero contribution along this common direction. Switch to −1 to see what subtraction could hide.</p>
+
+    <details>
+      <summary>How the Lean proof uses this</summary>
+      <p>The bound is on a sum of real parts. Lean writes a real part as the average of the character term and its conjugate-character term, then takes the Mellin transform. For a given zero ρ it adds their orders of vanishing with positive weights. The total is called <code>S</code> in <code>poleData</code>. Lean proves <code>S &gt; 0</code> by finding a member that vanishes and using nonnegativity of all the other orders. Multiplying by −1/[ρ(ρ − 1)] preserves a nonzero residue. The toy uses two contributions and absorbs the factor 1/2 into their weights. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/poleData.lean#L347">The positive sum in Lean</a></p>
+      <p>For a real zero strictly between 0 and 1, the common factor is positive. That sign feeds the real-pole case of the window criterion. For a nonreal zero, a suitable complex center makes the nearest pole dominate the Taylor coefficients. In both cases, the upper bound on the prime-power sum makes the pole impossible. <a href="https://github.com/1337isnot1337/riemann-hypothesis-solved/blob/6193bb5/extracted/lean/src/Development/AutomorphicArithmetic/DedekindLFunctions/LandauTheorems/landauWindow.lean#L83">The two cases in Lean</a> · <a href="rh_window_lens.html">See the window weight</a></p>
+    </details>
+  </main>
+  <script>
+    (() => {
+      const element = id => document.getElementById(id);
+      const rho = element('rho');
+      const first = element('first');
+      const second = element('second');
+      const weight = element('weight');
+      const canvas = element('arrows');
+      const context = canvas.getContext('2d');
+      const number = x => Math.abs(x) < .0005 ? '0.000' : x.toFixed(3).replace('-', '−');
+      const describe = ([x, y]) => y === 0 ? number(x) : `${number(x)} ${y < 0 ? '−' : '+'} ${number(Math.abs(y))}i`;
+
+      function draw(factor, a, b) {
+        if (!context) return;
+        const width = canvas.clientWidth, height = canvas.clientHeight, density = window.devicePixelRatio || 1;
+        canvas.width = Math.round(width*density);
+        canvas.height = Math.round(height*density);
+        context.setTransform(density, 0, 0, density, 0, 0);
+        const net = a+b;
+        const scale = (Math.min(width, height) * .43) / (Math.max(Math.abs(a), Math.abs(net), 1) * Math.hypot(...factor));
+        const x = width/2, y = height/2;
+        const at = (amount, nudge = 0) => [x + amount*factor[0]*scale, y - amount*factor[1]*scale + nudge];
+        context.strokeStyle = '#b5c0b3';
+        context.beginPath();
+        context.moveTo(8, y);
+        context.lineTo(width-8, y);
+        context.moveTo(x, 8);
+        context.lineTo(x, height-8);
+        context.stroke();
+
+        function arrow(from, to, nudge, color) {
+          if (from === to) return;
+          const [x0,y0] = at(from,nudge), [x1,y1] = at(to,nudge);
+          const angle = Math.atan2(y1-y0,x1-x0);
+          context.beginPath();
+          context.moveTo(x0,y0);
+          context.lineTo(x1,y1);
+          context.strokeStyle = color;
+          context.lineWidth = 3;
+          context.stroke();
+          context.beginPath();
+          context.moveTo(x1,y1);
+          for (const side of [angle-.5,angle+.5]) context.lineTo(x1-9*Math.cos(side),y1-9*Math.sin(side));
+          context.closePath();
+          context.fillStyle = color;
+          context.fill();
+        }
+        arrow(0,a,-7,'#275a80');
+        arrow(a,net,b < 0 ? 2 : -7,'#924425');
+        arrow(0,net,11,'#21654c');
+        context.beginPath();
+        context.arc(x,y,3.5,0,2*Math.PI);
+        context.fillStyle = '#263630';
+        context.fill();
+      }
+
+      function render() {
+        const s = .75, t = Number(rho.value);
+        const re = s*(s-1)-t*t, im = (2*s-1)*t, denominator = re*re+im*im;
+        const factor = [-re/denominator, im/denominator];
+        const a = Number(first.value);
+        const b = Number(second.value)*Number(weight.value);
+        const total = a+b;
+        element('factor').textContent = describe(factor);
+        for (const [id, value] of [['part-one',a],['part-two',b],['total',total]]) {
+          element(id).textContent = describe(factor.map(part => part*value));
+        }
+        element('status').textContent = total ? 'The total is nonzero. The pole survives.' :
+          (a || b ? 'The two contributions cancel under subtraction.' : 'Both multiplicities are zero. There is no pole here.');
+        canvas.setAttribute('aria-label', `First contribution ${describe(factor.map(x=>x*a))}, second ${describe(factor.map(x=>x*b))}, total ${describe(factor.map(x=>x*total))}.`);
+        draw(factor,a,b);
+      }
+
+      for (const control of [rho,first,second,weight]) control.addEventListener('change',render);
+      new ResizeObserver(render).observe(canvas);
+      render();
+    })();
+  </script>
+</body>
+</html>

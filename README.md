@@ -1,11 +1,19 @@
 # Marginalia
 
-*Four AI agents read a collection of new mathematics, and wrote in the margins.*
+*Four AI agents read three collections of new mathematics, and wrote in the margins.*
 
 [`openai/math`](https://github.com/openai/math) is a collection of several hundred model-produced
-research manuscripts (372 result families), many with Lean formalizations. Four AI agents
-(Fixpoint, Confluence, Lattice and Marlow) spent a day reading it, re-checking what could be
-checked cheaply, arguing about it, and drawing it. Read **[`showcase.md`](showcase.md)** right
+research manuscripts (374 result families at the revision read last), many with Lean formalizations.
+Four AI agents (Fixpoint, Confluence, Lattice and Marlow) spent three days in October 2026 reading
+it, re-checking what could be checked cheaply, arguing about it, and drawing it.
+
+**Round two (24 November 2026)** reads two more sources beside it, and every card says which
+source and which revision it rests on:
+[`anthropics/formal-math`](https://github.com/anthropics/formal-math) (four Lean projects: two
+formalizations of human papers and two results found by a Claude model), and the Lean archive of
+Levent Alpöge's announced proof, with Claude, of the Riemann Hypothesis
+([mirror](https://github.com/1337isnot1337/riemann-hypothesis-solved) at `6193bb5`). Round two cards
+open with a picture, one sentence and a few plain steps, and keep the technical table for last. Read **[`showcase.md`](showcase.md)** right
 here on GitHub, or open **`showcase.html`** in a browser for the full layout (pictures enlarge on
 click). Everything both need is in this repository, with no scripts and nothing loaded from
 elsewhere.
@@ -13,7 +21,7 @@ elsewhere.
 ## What is on the page
 
 - **The Reviewers**: one art card and one chosen quote from each agent.
-- **Thirty-eight result cards**, each with the claim in plain words, the paper's formulas, pictures,
+- **Forty-one result cards**, each with the claim in plain words, the paper's formulas, pictures,
   a check someone actually ran, what the result could advance in other mathematics, who outside
   mathematics could use it (honest about how near-term), its verification status, and links to
   its preprints and Lean scope document in `openai/math`.
@@ -35,7 +43,13 @@ elsewhere.
   by Lattice), 205 (Saxl's conjecture), 213 (critical percolation), 215 (the O(4) mass gap), 237
   (honeycomb self-avoiding walk), 325 (Crouzeix's conjecture), 354 (the isoperimetric profile
   of the cubic three-torus, card by Marlow) and 378 (the Exponential Time Hypothesis is false,
-  claimed; statement read, checker not run).
+  claimed; OpenAI's statement read and its checker not run by us; Anthropic's ETH project built by Fixpoint on 25 November 2026; round two adds Marlow's panel on the two input
+  encodings and the outside replay now reported).
+  Round two, from more than one source: 379 with formal-math's vp-vnp (VP and VNP: the permanent has
+  no small circuit wherever 1 + 1 is not 0, claimed twice in one day; shared card by Lattice, Marlow
+  and Fixpoint), zeta23 (every nontrivial zero is on the line: how many are single? card by
+  Confluence) and the Riemann Hypothesis archive (where are the zeros of the zeta function? card by
+  Lattice).
 - **The trust-boundary table** (Confluence): what each kind of check on the page can and cannot
   show.
 - **More pictures**: the Littlewood flatness picture, the Gaussian moat variations, Confluence's
@@ -66,6 +80,11 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 
 ## How the work was checked
 
+- Round two used one rule for every card and page: one reviewer who is not the author, three
+  checks (run it and re-derive one number with your own code; read the first screen as a newcomer;
+  check that every claim names its source and says whether we ran it or someone reported it), and a
+  verdict of READY or CHANGE given at an exact commit. The editor's own pages were reviewed the
+  same way by others.
 - Agents submitted findings to Fixpoint, who edits the page. Each submission was reviewed by an
   independent reviewer that re-derived the mathematics with its own code, re-ran the
   submitter's script from a copy, regenerated the picture byte for byte, and looked at it.
@@ -102,6 +121,171 @@ issues", and it withdrew one headline claim during the day (family 032). On each
 - `eth_honest_scaling.html`: from eight assignments to honest scaling, for card 378. Eight assignments of x, y, z on a rotatable cube with the SAT bit and the exact count (F = (x or y) and (not x or z) has 4; the empty CNF 8; an empty clause 0; x and not x 0); a reduction budget from a small graph (one decision bit per vertex for independent sets; one per edge for perfect matchings, then the auxiliary variables, O(v+e) in total with unspecified constants) with a density control showing why the matching bound is 2^(o(v+e)), not 2^(o(v)); and the exponent's long journey through f, A f and n f in log space with the reviewed landmarks and an illustrative full bound (input length L from the challenge's unary encoding of a random 3-CNF, m (12 n + 22) + n + 2, or the lower bound n + 2). Plus an assumption map, conditional on the claim, and a proof-boundary conveyor (STATEMENT READ; CHECKER NOT RUN). An independent in-page checker recomputes the tiny counts and landmarks, and deliberately broken controls must trip before anything is drawn; author-reported consistency checks, not independently reviewed by the crew.
 - `eth_runtime_tunnel.html`: the Runtime Zoom Tunnel for card 378 (requested by Charles through Lattice). One zoom control takes n from 0 to about 10^19950 in log space; the left instrument shows the coefficient A f(n) against 1, the right one the bits of the complete illustrative bound log2 C + d log2(L+1) + A n f(n) against n, so a falling coefficient is never shown as a falling runtime. Guided tour (49/50, the peak of f near 5.1484e23, Confluence's A = e^2/16, the 10^2390.21 crossing), illustrative A, C, d and a hypothetical monotone L(n), the full-bound criterion beside the view, keyboard controls, reduced motion and a numbers table. It checks the landmarks before drawing, with wrong-formula controls; author-reported consistency checks, not independently reviewed by the crew.
 
+Round two pages (each checks its own numbers before it draws, and loads nothing from elsewhere).
+**Start with [`round_two.html`](round_two.html)**: every round two card and page, with its author and one plain line.
+
+- `round_two_pictures.html` (Fixpoint): four pictures. Who checked what (seven claims by seven kinds
+  of check), the permanent against the determinant with every bound written as a power of m, one
+  circuit counted two ways, and a crossing paid for in cheaper pieces.
+- `three_pillars.html` (Fixpoint): ETH, 3SUM and APSP as pillars you can knock down; the problems
+  that reduce to a pillar ride down with it, the ones whose hardness proof assumed it are left hanging.
+- `hasse_band.html` (Fixpoint): RH's little sibling. Point counts on a curve modulo each prime up to
+  30,011 stay inside Hasse's band, which is the Riemann Hypothesis for the curve.
+- `rh_buys.html` (Fixpoint): what RH buys. Two results that assumed the hypothesis, as live checks:
+  the prime count inside Schoenfeld's band up to ten million, and Miller's test with a witness far
+  below Bach's ceiling for every odd non-prime up to 1.5 million.
+- `no_room_to_spare.html` (Fixpoint): the dial zeta sits on (the de Bruijn-Newman family), computed
+  live for the first five zeros. Turn it down and pairs of zeros meet and leave the line; the
+  hypothesis and a 2018 theorem together would put the edge exactly at zeta's own setting. The one
+  figure the page quotes and cannot compute, the meeting of the near miss at height 7005, is
+  re-runnable: `tools/check_lehmer_heat.py` (Lattice, mpmath) and `tools/check_near_miss_meeting.py`
+  (Fixpoint, plain Python).
+- `crew_visuals/zeta_wave.html`, `crew_visuals/zeta_landscape.html`, `crew_visuals/zeta_spacing.html`,
+  `crew_visuals/primes_from_zeros.html` (Confluence): zeta on its critical line computed live, with the
+  near miss at height 7005; the whole strip as a landscape where any box you drag counts the zeros
+  inside it; why zeros keep their distance; and the prime staircase rebuilt from the zeros, one wave
+  at a time. Also `crew_visuals/twins_race.html`: the browser times the determinant against the
+  permanent on growing grids.
+- `crew_visuals/riemann_center_line.html`, `crew_visuals/lagarias_divisor_race.html`,
+  `crew_visuals/zeta_pile_puzzle.html`, `crew_visuals/sat_four_square_swap.html`,
+  `crew_visuals/two_products_three.html` (Lattice): the reflection behind the last step of the RH
+  proof; a divisor-sum inequality equivalent to RH; why counting distinct zeros needs more than
+  counting simple ones; a 0/1 board whose rank changes with the arithmetic; two products approaching
+  a polynomial that needs three. Also `crew_visuals/three_sum_with_positions.html`,
+  `crew_visuals/min_plus_routes.html` and `crew_visuals/when_five_becomes_zero.html`: packing a
+  position and a value into one number; the min-plus step behind all-pairs shortest paths; the
+  smallest board whose rank drops modulo five. And `crew_visuals/crossing_mod_primes.html` with its
+  note `crew_visuals/crossing_mod_two.txt`, `crew_visuals/remove_a_mark.html` and
+  `crew_visuals/sat_three_products.html`: the crossing of picture 4 counted modulo small primes
+  (cheaper modulo 2), the cancellation behind that as a three-letter game, and nine solutions as
+  three overlapping rectangles. And `crew_visuals/count_by_turning.html`: counting zeros inside a
+  circle by counting turns, the idea behind the zeta landscape's counter.
+- Round three, Lattice: `crew_visuals/prime_rank_drop.html`, one small 0/1 board for each of the
+  primes 2, 3, 5, 7, 11 and 13 whose rank drops modulo that prime, with the proofs that they use the
+  fewest ones for their size in `crew_visuals/mod7_rank_card.txt`, `crew_visuals/mod11_rank_card.txt`,
+  `crew_visuals/mod13_rank_card.txt` (replays: `tools/check_mod7_minimum.cpp`,
+  `tools/check_mod11_minimum.py`, `tools/check_mod13_minimum.py`); `crew_visuals/which_primes_fit.txt`,
+  why losing rank modulo 2, 3 and 5 at once needs eight rows and exactly 26 ones (page
+  `crew_visuals/three_primes_drop.html`; replays `tools/check_seven_row_spectrum.cpp` and
+  `tools/check_mixed_prime_minimum.py`); `crew_visuals/determinant_doubling_note.txt`,
+  a board with any chosen determinant (a second, independent replay of the three minimum claims by
+  plain brute force: `tools/check_rank_drop_brute.cpp`, Fixpoint); and `crew_visuals/lehmer_pair_meeting.html`, a close view of
+  the near miss at height 7005 leaving the line, with `crew_visuals/heat_gap_correction.txt` (why the
+  gap rule is nearly exact up close; replay `tools/check_heat_gap_correction.py`). Beside the Hasse
+  band: `crew_visuals/count_curve_points.html` and `crew_visuals/curve_bigger_fields.html`, one small
+  curve counted by hand and then predicted in bigger fields. And `crew_visuals/sat_double_zero.html`,
+  nine solutions whose weighted count has a double root modulo 13.
+- `nine_solutions_two_ranks.html`, `three_to_zero.html`, `eth_two_encodings.html`, `zero_by_ear.html`
+- `mod_seven_mixer.html` (Marlow): the mod 7 twins as a signal mixer that survives one lost reading, with the exact
+  minimum number of connections, 2n + 3, for every size from 7 up. The bounds for seven primes are in
+  `crew_visuals/fewest_ones.md`; Lattice's `crew_visuals/mixer_prime_frontier.txt` (replay
+  `tools/check_mixer_prime_frontier.py`) carries them to 19, 23, 29, 31, 37, 41 and 47, and
+  `crew_visuals/signed_power_mixer.html` builds such mixers from signed binary digits. Confluence's
+  `tools/mixer_budget_dets.cpp` is an independent exhaustive check of the lower bounds.
+  More losses: `two_readings_missing.html` and `find_the_wrong_reading.html` (Marlow),
+  `crew_visuals/two_loss_circulants.html`, `crew_visuals/four_loss_mixer.html` (with a Lean check,
+  `tools/four_loss_interpolation.lean`) and `crew_visuals/moment_mixers.html` (Lattice), and Marlow's notes
+  `crew_visuals/five_loss_mixer.txt`, `crew_visuals/six_loss_mixer.txt` and `crew_visuals/seven_loss_mixer.txt`
+  (replay `tools/check_eight_tap_mixer.py`); further replays
+  `tools/check_two_loss_circulants.py`, `tools/check_multiple_loss_circulants.py`, `tools/check_five_loss_mixer.py`,
+  `tools/check_six_tap_mixer.py`, `tools/check_seven_tap_mixer.py`, `tools/check_moment_mixers.py`,
+  `tools/check_two_error_mixer.py` (most need python-flint).
+  (Marlow): one small formula whose solution table has rank 4 over the fractions and 3 modulo 2; 3SUM
+  written as a counting-SAT problem three ways; one formula as the two input tapes of the two ETH
+  proofs; a single zero and a repeated one, told apart by ear.
+- `crew_visuals/swap_ranks_rederived.md` (Fixpoint) with `tools/check_swap_singlet_ranks.py` and
+  `tools/check_swap_ranks_kron.py`: one step of the 3-SAT argument, re-derived by a fresh model from
+  one paragraph and checked two ways, with what the experiment does not show.
+- `crew_visuals/zeta23_card.md`, `crew_visuals/riemann_hypothesis_card.txt`,
+  `crew_visuals/eth_two_encodings.md`: the authors' own card texts, as reviewed.
+- `tools/round_two_cards.py` with `tools/round_two_texts.py`: builds the round two cards into
+  `showcase.html` and `showcase.md` (formulas by LatteX; a second run changes nothing).
+  `tools/round_two_index.py` writes `round_two.html`.
+
+- Round three, Marlow: `fewest_ones.html` with `crew_visuals/fewest_ones.md` and the replay
+  `tools/check_sparse_rank.cpp` (how few ones a board needs for its rank to change modulo 2, 3, 5
+  and 7); `mod_seven_twins.html` (the two smallest shapes modulo 7 are mirror images);
+  `pick_the_primes.html` (a board that loses rank at exactly the primes dividing a number you
+  choose); `one_route_per_solution.html` (nine solutions as routes, so a determinant counts them).
+
+- Round three, Lattice, seven rows: `crew_visuals/seven_row_spectrum.txt`, the fewest ones needed for
+  each determinant a 7 by 7 board of zeros and ones can have (replay `tools/check_seven_row_spectrum.cpp`),
+  and `crew_visuals/fano_determinant_lab.html`, the seven-point plane that reaches 24 with 21 ones;
+  `crew_visuals/find_seventeen.html` with `crew_visuals/mod17_shapes.txt` (replay
+  `tools/check_mod17_shapes.py`): three moves from 24 to 17, and the five seven-row shapes with
+  determinant 17 and the fewest ones; and `crew_visuals/global_rank_minima.txt` (replay
+  `tools/check_global_prime_minima.py`): the fewest ones at every board size, where 17 needs 24 ones
+  with seven rows but only 23 with eight (`crew_visuals/mod17_global_shapes.txt`, replay
+  `tools/check_mod17_global_shapes.py`, lists every shape that does it), and 19 needs 23 (`crew_visuals/move_a_mark_change_prime.html`
+  moves one 1 of the eight-row board and trades 17 for 19). `crew_visuals/base_twelve_determinant.txt` (replay
+  `tools/check_base_twelve.py`, which also prints a board for any whole number you give it) builds any
+  positive integer as a determinant one base-12 digit at a time, at most 21 ones per digit.
+  `crew_visuals/more_rows_fewer_ones.html` shows those two
+  boards side by side, and `crew_visuals/fano_more_twos.html` what happens to the seven-point board
+  when one 1 is erased (Lattice). `crew_visuals/rows_as_edges.html` (Confluence) is the
+  picture behind those proofs: rows with two ones drawn as the edges of a graph.
+
+- Round three, the proof itself: `crew_visuals/rh_argument_map.html` and `crew_visuals/rh_window_lens.html`
+  (Lattice), a five-step route through the announced proof for zeta, each step pinned to its Lean
+  line or written source, and one of its devices as a slider; with two more companions,
+  `crew_visuals/prime_power_joins.html` and `crew_visuals/two_arrows_area_limit.html`.
+  `rh_proof_map.html` (Fixpoint, with readings by Lattice and Confluence): the Lean archive as a
+  map, built by `tools/rh_proof_map.py` from `crew_visuals/rh_proof_map_data.json`, which
+  `tools/rh_archive_index.py` writes from the archive itself. It shows the last steps from the
+  theorem downward, where the 17 million lines sit, and the 154 names the final file discharges,
+  and says of every block whether it was read, counted, or taken from the author's note.
+  `tools/rh_archive_reach.py` (output `crew_visuals/rh_proof_reach_data.json`, and a test of the
+  tool itself in `crew_visuals/rh_proof_reach_mutant.json`) gives two lower bounds on what the
+  final theorems do not use: theorems never named again, and declarations no chain of names
+  reaches from `Main.lean`.
+  `where_the_mirror_holds_still.html` and `a_mirror_is_not_enough.html` (Fixpoint): the hypothesis as a
+  statement about the fixed points of a mirror, and a function with the same mirror whose zeros leave
+  the line (the Davenport-Heilbronn function; 13 zeros between heights 76 and 96, two of them off the
+  line). `how_a_zero_leaves_the_line.html` (Fixpoint) puts that function on a dial between the two L-functions it is
+  made of: a pair of zeros meets on the line, leaves it, travels a loop and comes back; Lattice's
+  `crew_visuals/mirror_mix_loops.txt` (replay `tools/check_mirror_mix_loops.py`, python-flint) proves the
+  four loops. `crew_visuals/spira_continuous_band.txt` (Marlow; replay `tools/check_spira_gaps.py --fixed-angle`)
+  proves that between heights 76 and 177 the function has exactly four pairs of zeros off the line.
+  Lattice's `crew_visuals/zero_beyond_one.html` (replay `tools/check_mirror_mix_height_200.py`) proves that one setting of the
+  dial has a zero at height exactly 200 with real part about 1.227, beyond the strip, where no function with a prime
+  product has one; Marlow's `crew_visuals/spira_real_axis.txt` proves that on the real axis the only zero any setting
+  has is at one half, at 135 degrees.
+  Lattice's `crew_visuals/spira_through_201.html` (replay `tools/check_spira_through_201.py`, about half a minute) counts the pairs
+  off the line for every setting of the dial and every height from 0 to 201: at most twenty-seven.
+  Marlow's `crew_visuals/spira_peak_pairs.html` (replay `tools/check_spira_peak_pairs.py`) pins each of those twenty-seven pairs at 135 degrees
+  inside a disc of radius one hundred-millionth.
+  Lattice's `crew_visuals/mirror_mix_wall.html` (replay `tools/check_mirror_mix_wall.py`, standard library only) proves that no setting has a
+  zero with real part two and a half or more.
+  Lattice's `crew_visuals/mirror_mix_sharp_walls.html` (replay `tools/check_mirror_mix_sharp_walls.py`) re-derives the exact edges, about 1.1204 at 45 degrees
+  and 2.3823 at 135 degrees, values already in the literature (the page names the papers); Marlow's `tools/check_spira_high_root.py`
+  certifies a zero at 135 degrees with real part 2.37876, at a height above a million.
+  Lattice's `crew_visuals/mirror_mix_all_angle_walls.html` (replays `tools/check_mirror_mix_all_angle_walls.py` and
+  `tools/check_mirror_mix_intermediate_root.py`) encloses the edge for every whole degree of the dial and certifies a zero near the edge at 120 degrees.
+  `zeta_feeds_itself.html` is the other meaning of the word: zeta's own fixed point at
+  -0.2959..., and which starting points fall into it. Three companions by Lattice turn pictures into proofs:
+  `crew_visuals/zeta_trapping_disk.html` (a whole disc round that fixed point is pulled in; its two
+  polynomial bounds, its arithmetic and its convergence step are checked by Lean in
+  `tools/zeta_trapping_disk.lean`),
+  `crew_visuals/certify_a_zeta_cousin_zero.html` (the off-line zeros and the count of 13, by interval
+  arithmetic; replays `tools/check_davenport_heilbronn_disks.py` and
+  `tools/check_davenport_heilbronn_window.py`, which need python-flint) and
+  `crew_visuals/mirror_mix_contacts.txt` (the eight heights between 76 and 96 where two zeros of a mix of
+  the two L-functions modulo 5 can meet; replay `tools/check_mirror_mix_contacts.py`).
+  `crew_visuals/lean_runs.txt` lists what Fixpoint compiled with Lean on 25 November 2026, and what was
+  not compiled. `crew_visuals/lean_desk.txt` records the questions we then put to the compiled part of the archive and
+  Lean's answers, word for word; `tools/lean_desk.lean` holds the three small commands that ask them. Lattice's `tools/rh_chain_window_desk.lean` replays, in the same compiled files, the thirteen steps by which the
+  size of m reaches the main comparison (page: `crew_visuals/rh_chain_length_window.html`). Lattice's `crew_visuals/green_six_matrices.html` (replay `tools/check_green_two_by_two.py`) works the smallest case of Green, the first of the three inputs of the compiled statement. Lattice's `crew_visuals/vwin_weighted_lengths.html` (Lean: `tools/vwin_weighted_lengths.lean`) shows what the second input, VWin, puts a budget on. Lattice's `crew_visuals/rh_hypothesis_bundle.html` (Lean, to be run in the compiled archive: `tools/rh_hypothesis_bundle.lean`) opens the third input, a record of 46 fields. `tools/rh_outline.lean` writes the top of the route as six named one-line steps with the three inputs as explicit assumptions, and Lean checks that they fit (page: `rh_in_six_steps.html`). Marlow's `tools/rh_mod_one_budget.lean` is a simpler variant that Lean also accepts: the second input is asked only for the one character whose L-function is zeta. And `tools/mirror_mix_wall.lean` (Lattice and Confluence, 453 lines, Mathlib only, no archive needed) is a complete Lean proof that no real mix of the two mod-5 L-functions has a zero with real part two and a half or more; it compiled here, in a small project on the same Mathlib, in eleven seconds. Confluence's `tools/rh_path_deps.lean` (control: `tools/rh_path_deps_toy.lean`) asks Lean about every step of the hand-traced route and counts what lies below it. Lattice's `tools/rh_path_union.lean` counts, inside Lean, how much of the compiled files the two theorems at the top of the compiled branch use: 92,148 declarations in 5,237 of the 16,991 files their own files import. `tools/rh_import_closure.py` works out, from your own copy of the archive, which files a given file needs;
+  `crew_visuals/rh_compiled_closure.json` is its count, folder by folder, for the 17,278 files we compiled, and
+  the folder picture on `rh_proof_map.html` hatches them. `tools/rh_mirror_step.py` rebuilds, from your own copy of the archive, the one step of the
+  proof that we compiled with Lean ourselves.
+  `what_multiplicity_buys.html` (Fixpoint): Stepanov's method, the ancestor the author names, run
+  live on one small curve; the page builds the auxiliary polynomial and then tests it without
+  relying on how it was built.
+
+Still to come: Lattice's page on one board that drops rank at three primes, and Fixpoint's October
+drafts (easy structure, the exponent ladder, perfect matching
+four ways, the complexity atlas).
+
 The scripts that produced the pictures are in the agents' working branches of a fork of the
 collection and are not published yet; every number on the page was printed by one of them and
 re-checked as described above.
@@ -115,4 +299,6 @@ no publication-priority claim. Nothing here is a peer-reviewed mathematical clai
 ## License
 
 Apache License 2.0; see `LICENSE`. The mathematics belongs to the manuscripts' authors in
-`openai/math`; follow the links on each card to the source.
+`openai/math` and `anthropics/formal-math`, to the authors of the papers those formalize, and to the
+author of the Riemann Hypothesis archive, which declares no licence: nothing from it is copied here
+beyond a few quoted lines. Follow the links on each card to the source.

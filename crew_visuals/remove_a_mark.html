@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remove a mark</title>
+  <style>
+    :root {
+      color-scheme: light; background: #f7f4ea; color: #273157;
+      --blue: #334580; --blue-tint: #e5ebf9; --muted: #575d76; --paper: #fffdf5; --edge: #a9aec2;
+      font: 100% system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 61rem); margin: auto; padding: clamp(1.6rem, 6vw, 4rem) 0; }
+    h1, h2, p { margin: 0; }
+    h1 { font: clamp(2.8rem, 8vw, 5.7rem)/.98 Georgia, serif; letter-spacing: -.055em; }
+    h2 { font: 1.65rem/1.08 Georgia, serif; }
+    p, details { line-height: 1.5; }
+    .intro { color: var(--muted); max-width: 62ch; margin: .85rem 0 1.25rem; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: .55rem; margin-bottom: 1rem; }
+    label { font-weight: 650; display: grid; gap: .3rem; }
+    select, button { color: inherit; background: var(--paper); border: 1px solid var(--edge); border-radius: .38rem; font: inherit; min-height: 2.75rem; padding: .4rem .6rem; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a0442d; outline-offset: 3px; }
+    .workbench { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+    .panel { background: var(--paper); border: 1px solid var(--edge); border-radius: .65rem; padding: .9rem; }
+    .panel > p { color: var(--muted); margin: .38rem 0 .65rem; font-size: .9rem; }
+    .inputs, .outputs { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .inputs button { min-width: 2.85rem; font: 1.05rem Georgia, serif; }
+    .inputs button[aria-pressed="true"] { color: var(--paper); background: var(--blue); border-color: var(--blue); }
+    .outputs { list-style: none; padding: 0; margin: 0; }
+    .outputs li { width: 4.15rem; display: grid; justify-items: center; border: 1px solid var(--edge); border-radius: .38rem; padding: .35rem .25rem; }
+    .outputs li[data-parity="1"] { background: var(--blue-tint); border-color: var(--blue); }
+    .outputs strong { font: 1.3rem Georgia, serif; }
+    .outputs small { font-size: .75rem; color: var(--muted); text-align: center; }
+    .readout { max-width: 64ch; margin: .8rem 0 .6rem; }
+    .rank { color: var(--muted); max-width: 68ch; }
+    details { max-width: 69ch; border-top: 1px solid var(--edge); margin-top: 1rem; padding-top: .7rem; }
+    details p { margin-top: .55rem; }
+    summary { cursor: pointer; font-weight: 600; }
+    a { color: var(--blue); text-underline-offset: .18em; }
+    @media (max-width: 39rem) { .workbench { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Remove a mark</h1>
+    <p class="intro">Start with two marks, and remove one in every possible way. When the same result appears twice, the pair cancels. Try clicking <strong>AB</strong> to see what the other two choices leave behind.</p>
+    <div class="controls">
+      <label for="positions">Positions
+        <select id="positions"><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+      </label>
+      <label for="marks">Starting marks
+        <select id="marks"><option>1</option><option selected>2</option><option>3</option></select>
+      </label>
+      <label for="removed">Remove
+        <select id="removed"><option selected>1</option><option>2</option></select>
+      </label>
+    </div>
+
+    <div class="workbench">
+      <section class="panel" aria-labelledby="starts">
+        <h2 id="starts">Starting sets</h2>
+        <p>Click a set to include it or take it out.</p>
+        <div class="inputs" role="group" aria-labelledby="starts" id="inputs"></div>
+      </section>
+      <section class="panel" aria-labelledby="ends">
+        <h2 id="ends">Sets left over</h2>
+        <p>Keep the sets with an odd count.</p>
+        <ul class="outputs" id="outputs"></ul>
+      </section>
+    </div>
+
+    <p class="readout" id="readout" aria-live="polite"></p>
+    <p class="rank" id="rank"></p>
+    <details>
+      <summary>Where the rank comes from</summary>
+      <p>Imagine one matrix column per starting set and one row per possible set left over. Put a 1 where the row is a subset of the column. Adding your selected columns modulo 2 produces the output shown above.</p>
+      <p>If the rank is <var>r</var>, <var>r</var> independent columns can be turned on or off to give 2<sup><var>r</var></sup> distinct outputs. This page counts those outputs and works backward to find the rank. The crossing note counts larger matrices by adding up layers like this one. <a href="crossing_mod_two.txt">Crossing calculation modulo 2</a> · <a href="crossing_mod_primes.html">Crossing visual at odd primes</a></p>
+    </details>
+  </main>
+
+  <script>
+    (() => {
+      const positions = document.getElementById('positions');
+      const marks = document.getElementById('marks');
+      const removed = document.getElementById('removed');
+      const inputs = document.getElementById('inputs');
+      const outputs = document.getElementById('outputs');
+      const readout = document.getElementById('readout');
+      const rank = document.getElementById('rank');
+      const names = 'ABCDE';
+
+      function markLetters(mask) {
+        return [...names].filter((_, index) => mask & (1 << index)).join('');
+      }
+
+      function sets(n, size) {
+        return Array.from({length:2 ** n}, (_, mask) => mask)
+          .filter(mask => markLetters(mask).length === size)
+          .sort((a, b) => markLetters(a).localeCompare(markLetters(b)));
+      }
+
+      function refreshOptions(control, max) {
+        const value = Math.min(Number(control.value), max);
+        control.replaceChildren(...Array.from({length:max}, (_, i) => new Option(String(i + 1), String(i + 1))));
+        control.value = value;
+        return value;
+      }
+
+      function setup() {
+        const n = Number(positions.value);
+        const k = refreshOptions(marks, n);
+        const j = refreshOptions(removed, k);
+        const starts = sets(n, k);
+        const ends = sets(n, k - j);
+        const possible = new Set([0]);
+
+        for (const start of starts) {
+          const column = ends.reduce((bits, end, i) => bits | (((start & end) === end ? 1 : 0) << i), 0);
+          for (const output of [...possible]) possible.add(output ^ column);
+        }
+        rank.textContent = `Any combination of starting sets can produce one of ${possible.size} distinct outputs. This layer has rank ${Math.log2(possible.size)}.`;
+
+        const buttons = starts.map(start => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = markLetters(start);
+          button.setAttribute('aria-pressed', 'true');
+          button.addEventListener('click', () => {
+            button.setAttribute('aria-pressed', String(button.getAttribute('aria-pressed') === 'false'));
+            drawOutput();
+          });
+          return button;
+        });
+        inputs.replaceChildren(...buttons);
+
+        function drawOutput() {
+          const selected = starts.filter((_, index) => buttons[index].getAttribute('aria-pressed') === 'true');
+          const surviving = [];
+          outputs.replaceChildren(...ends.map(end => {
+            const count = selected.filter(start => (start & end) === end).length;
+            const card = document.createElement('li');
+            const name = document.createElement('strong');
+            const tally = document.createElement('small');
+            card.dataset.parity = count % 2;
+            name.textContent = markLetters(end) || '∅';
+            tally.textContent = `${count} → ${count % 2}`;
+            card.append(name, tally);
+            if (count % 2) surviving.push(markLetters(end) || 'the empty set');
+            return card;
+          }));
+          if (!selected.length) readout.textContent = 'Choose at least one starting set to see its results.';
+          else if (!surviving.length) readout.textContent = 'Every result appears an even number of times. All cancel.';
+          else if (surviving.length === 1) readout.textContent = `Only ${surviving[0]} is left.`;
+          else readout.textContent = `The sets left are ${surviving.join(', ')}.`;
+        }
+
+        drawOutput();
+      }
+
+      for (const control of [positions, marks, removed]) control.addEventListener('change', setup);
+      setup();
+    })();
+  </script>
+</body>
+</html>
