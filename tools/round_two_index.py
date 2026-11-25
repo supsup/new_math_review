@@ -26,6 +26,7 @@ GROUPS = [
         ("rh_proof_map.html", "The proof of the Riemann Hypothesis, as a map", "Fixpoint, with readings by Lattice and Confluence", "Where the last steps are, what they rest on, and where 17 million lines of Lean sit. Every block says whether it was read, counted, or taken from the author's note. Boxes marked Lean were compiled on our own machine, and the folder picture is hatched to show how much of the archive that is: about a sixth of its lines."),
         ("rh_in_six_steps.html", "Six steps from three inputs", "Fixpoint, with a simpler variant by Marlow", "The last stretch of the announced proof as an outline Lean checks: six one-line steps from three stated inputs to the Riemann Hypothesis. And a simpler version Lean also accepts, where the second input is asked for one character only. Last, a complete Lean proof with nothing assumed, by Lattice and Confluence, of one thing found on these pages: the wall at five halves."),
         ("six_finished_theorems.html", "Six finished theorems", "Fixpoint, with readings by Marlow, Lattice and Confluence", "The archive proves the published results it relies on. In the tenth of it that we compiled, six of those proofs are complete: Linnik's theorem, the Hasse norm theorem for square roots, and four more. Each card says what the Lean statement really claims and what it leaves out."),
+        ("how_far_is_each_result.html", "How far is each published result?", "Fixpoint", "One file of the archive lists 155 named statements from the literature, with a line of Lean for each. One bar for each: how many of the archive's files its proof brings with it, from 1 to 36,406, and which ones Lean has checked in our build, 100 so far. Two lean on statements the archive assumes."),
         ("a_sign_at_every_prime.html", "A sign at every prime", "Fixpoint, after a page by Lattice", "Two of the six finished theorems on numbers you choose. Is x of the form a squared minus delta times b squared? A sign at every prime decides it; the signs always multiply to +1; and when all are +1 the page looks for a and b, and finds them for every case on its map, from -30 to 30."),
         ("crew_visuals/lighter_zeta_route.txt", "What a lighter zeta proof would have to supply", "Marlow", "Where the weight sits, measured in Lean. From one explicit bound on a sum over primes, the Riemann Hypothesis needs 31 files of the archive; from families built for zeta alone, 185. The bound is another way of stating the hypothesis, and the note says so: this names the target, it does not hit it."),
         ("crew_visuals/zeta_prime_windows.html", "One smoothed sum over prime powers", "Lattice", "The sum over primes that the note above singles out, drawn on five stretches against the square root it must stay under, with the stretch up to a million certified. A finite check, and the page says what it cannot show."),
@@ -169,6 +170,8 @@ LEAN = [
      "For the one character behind zeta, the archive's test for which number fields the budget ranges over, simplified and checked. Page: crew_visuals/rh_source_build.html."),
     ("tools/rh_linnik.lean", "Fixpoint", "the archive",
      "Linnik's theorem as the archive states and proves it, with nothing assumed: prints the statement and the axioms. It needs only 517 of the archive's files. Page: how_long_to_wait.html."),
+    ("tools/rh_artin.lean", "Fixpoint", "the archive",
+     "Artin reciprocity for every number field as the archive states and proves it, with nothing assumed: prints the statement and the structure it is made of, restates the first clause in the library's own words, and prints the axioms. It needs 306 of the archive's files. Page: six_finished_theorems.html."),
     ("tools/rh_published_sweep.lean", "Fixpoint", "the archive",
      "Asks which of the published results the archive names have a finished proof among the files compiled here. Six of 41, each on the three standard axioms."),
     ("tools/li_pair_positivity.lean", "Lattice", "Mathlib",
@@ -208,8 +211,23 @@ LEAN = [
 ]
 
 
+# Seven pages to open first. Each is also listed in its own section below; this box is a short way in and is not counted.
+START = [
+    ("rh_in_six_steps.html", "The last stretch of the proof as six steps a person can read and Lean checks. It began the night with three inputs and ended with two."),
+    ("six_finished_theorems.html", "Well-known results that the archive proves on its way and that Lean has checked in what we compiled. Thirteen have been read and compared with the classical theorems; the page says by whom."),
+    ("how_far_is_each_result.html", "The 155 statements in the archive's table of results from the literature, by how much of the archive each proof brings with it, with the ones Lean has checked here marked."),
+    ("how_a_zero_leaves_the_line.html", "Turn a dial that mixes two honest functions and watch zeros leave the line, travel a loop and come back."),
+    ("how_long_to_wait.html", "What the proof's other final theorems promise: how long you wait for a prime with a given remainder."),
+    ("rh_proof_map.html", "The whole proof as a map: the route by hand, the size of everything, and what we compiled."),
+    ("crew_visuals/lean_runs.txt", "Exactly what we ran through Lean, what came out, and what we did not run. Plain text."),
+]
+
+
 def main():
     missing = []
+    for path, _ in START:
+        if not os.path.exists(os.path.join(ROOT, path)):
+            sys.exit("REFUSING to write round_two.html: the start box names a missing page, " + path)
     lean_on_disk = sorted("tools/" + f for f in os.listdir(os.path.join(ROOT, "tools")) if f.endswith(".lean"))
     if lean_on_disk != sorted(p for p, *_ in LEAN):
         sys.exit("REFUSING to write round_two.html: the list of Lean files does not match tools/: " + ", ".join(sorted(set(lean_on_disk) ^ {p for p, *_ in LEAN})))
@@ -229,6 +247,11 @@ def main():
         parts.append(f"<section><h2>{e(head)}</h2><p class=\"intro\">{e(intro)}</p><ul>{rows}</ul></section>")
     lean_rows = "".join(f'<li><a href="{e(path)}">{e(path)}</a> <span class="by">{e(who)} · needs {e(needs)}</span><br>{e(line)}</li>' for path, who, needs, line in LEAN)
     parts.append(f"<section><h2>The Lean files</h2><p class=\"intro\">Every Lean file in this repository, {len(LEAN)} of them. To run one, give the command <code>lake env lean /path/to/file.lean</code> from inside the project it needs (for the one that needs Lean alone, <code>lean /path/to/file.lean</code>). \"Needs Mathlib\" means any Lean project on the Mathlib library (we used revision 0df444a with Lean 4.33.1); each of those ran here in under a minute. \"Needs the archive\" means your own copy of the announced proof's archive, built as far as <a href=\"crew_visuals/lean_runs.txt\">the record of our Lean runs</a> describes, about three hours on one laptop. That record and <a href=\"crew_visuals/lean_desk.txt\">the desk record</a> give what the files run in the archive printed, and some of the others; where a file is in neither, its line names the page that uses it.</p><ul>{lean_rows}</ul></section>")
+    titles = {path: title for _, _, items in GROUPS for path, title, _, _ in items}      # the start box uses each page's own title
+    if any(path not in titles for path, _ in START):
+        sys.exit("REFUSING to write round_two.html: a page in the start box is not listed below")
+    start_box = ('<section><h2>Start here</h2><p class="intro">Seven pages to open first, if you open nothing else.</p><ul>'
+                 + "".join(f'<li><a href="{e(path)}">{e(titles[path])}</a><br>{e(line)}</li>' for path, line in START) + '</ul></section>')
     page = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -251,6 +274,7 @@ a {{ color:var(--accent); font-weight:bold; }} .by {{ font:12px/1 ui-monospace, 
 <body><main>
 <h1>Marginalia, round two</h1>
 <p class="sub">24 November 2026. Three sources read side by side: <b>openai/math</b>, <b>anthropics/formal-math</b>, and the Lean archive of the announced proof of the Riemann Hypothesis. {n} cards and pages, each with a picture first and a plain line here. Every page checks its own numbers before it draws and loads nothing from elsewhere.</p>
+{start_box}
 {"".join(parts)}
 <p class="foot">How these were checked: every card and page had one reviewer who was not its author, who ran it, re-derived one number with separate code, read the first screen as a newcomer, and checked that every claim names its source. The full page of cards is <a href="showcase.html">showcase.html</a>; the reading rules are in the README.</p>
 </main></body>

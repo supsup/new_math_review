@@ -1,0 +1,3348 @@
+{
+ "revision": "6193bb5",
+ "table_theorems": 194,
+ "published_lines": 155,
+ "statements": [
+  {
+   "statement": "AbMulNSt",
+   "line": "UpperTheory.LiteratureTheorems.ab_mul_n_st_of_literature",
+   "names": [
+    "GlobalTheory.abMulN_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.AbelianVarietyTorsionCardEqPowProof"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.AbelianVarietyTorsionCardEqPowProof"
+   ],
+   "unfollowed": [],
+   "table_files": 345,
+   "proof_files": 345,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "AbelianDeRham",
+   "line": "UpperTheory.LiteratureTheorems.abelian_de_rham_of_literature",
+   "names": [
+    "PositivityTheory.DualRT.abelianDeRham"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "unfollowed": [],
+   "table_files": 10567,
+   "proof_files": 10567,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "AbelianLifting",
+   "line": "UpperTheory.LiteratureTheorems.abelian_lifting_of_literature",
+   "names": [
+    "GlobalTheory.abelianScheme_hom_lifting_nilpotent_dividedPowers"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers"
+   ],
+   "unfollowed": [],
+   "table_files": 12084,
+   "proof_files": 12084,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "AlgebraicCharacterWD",
+   "line": "UpperTheory.LiteratureTheorems.algebraic_character_wd_of_literature",
+   "names": [
+    "GlobalTheory.deRham_potentiallySemistable",
+    "GlobalTheory.globalArtinReciprocity_holds",
+    "UpperTheory.Lit.CharWD.algebraicCharacterWD",
+    "UpperTheory.Lit.heckeLAdicCharacterDeRham"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.HeckeDeRham"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.HeckeLAdicCharacters.Outright"
+   ],
+   "unfollowed": [],
+   "table_files": 23828,
+   "proof_files": 23827,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ArCalc",
+   "line": "UpperTheory.LiteratureTheorems.ar_calc_of_literature",
+   "names": [
+    "GlobalTheory.ArithmeticHeightTower.ArakelovDirectHeights.arCalc_direct",
+    "PositivityTheory.ResPlug.FromRes.resK",
+    "PositivityTheory.Tls2.Pl.poincareLelong"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "unfollowed": [],
+   "table_files": 17864,
+   "proof_files": 17864,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ArDegree",
+   "line": "UpperTheory.LiteratureTheorems.ar_degree_of_literature",
+   "names": [
+    "GlobalTheory.ArithmeticHeightTower.ArakelovDirectHeights.cycleHeights_direct",
+    "GlobalTheory.Published.CycleHeights.heightProjection",
+    "PositivityTheory.Prw.arDegree_of",
+    "PositivityTheory.ResPlug.FromRes.resK",
+    "PositivityTheory.Tls2.Chern2.chernDegreeComplex",
+    "PositivityTheory.Tls2.Pl.poincareLelong"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ResidueDegreeOfIsClosedImmersion",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesGeo",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ChernDegreeComplex.ChernDegreeComplex",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ResidueDegreeOfIsClosedImmersion",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesGeo",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ChernDegreeComplex.ChernDegreeComplex",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "unfollowed": [],
+   "table_files": 18378,
+   "proof_files": 18378,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ArithHilbertSamuel",
+   "line": "UpperTheory.LiteratureTheorems.arith_hilbert_samuel_of_literature",
+   "names": [
+    "GlobalTheory.arithHilbertSamuel_of_principalisation",
+    "PositivityTheory.ResPlug.WeightsCompactStabilizer.principalisation_closed"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "unfollowed": [],
+   "table_files": 20899,
+   "proof_files": 20899,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "AutomorphicFormsFiniteGL",
+   "line": "UpperTheory.LiteratureTheorems.automorphic_forms_finite_gl_of_literature",
+   "names": [
+    "CuspFormAutomorphicBounds.automorphicFormsFiniteGL"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.FiniteGLInvariants.AffineLieInvariants.Imports"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.FiniteGLInvariants.AffineLieInvariants.Imports"
+   ],
+   "unfollowed": [],
+   "table_files": 6009,
+   "proof_files": 6009,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BaseChangeDefiniteUnitaryGroup",
+   "line": "UpperTheory.LiteratureTheorems.base_change_definite_unitary_group_of_literature",
+   "names": [
+    "UpperTheory.BaseChangeIdentities.baseChangeN",
+    "UpperTheory.BaseChangeIdentities.definiteN_of"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.DefiniteNHolds",
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.Narrow"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.DefiniteNHolds",
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.Narrow"
+   ],
+   "unfollowed": [],
+   "table_files": 36406,
+   "proof_files": 36406,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BaseChangeIsobaricTransfer",
+   "line": "UpperTheory.LiteratureTheorems.base_change_isobaric",
+   "names": [
+    "UpperTheory.BaseChangeIdentities.baseChangeN"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.DefiniteNHolds"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.DefiniteNHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 36406,
+   "proof_files": 36406,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BernsteinUnitaryProductIrreducible",
+   "line": "UpperTheory.LiteratureTheorems.bernstein_unitary_product_irreducible_of_literature",
+   "names": [
+    "PositivityTheory.RgUd.All.bernsteinUnitaryProductIrreducible"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.BernAll"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.BernAll"
+   ],
+   "unfollowed": [],
+   "table_files": 8294,
+   "proof_files": 8294,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BernsteinZelevinskyFiniteness",
+   "line": "UpperTheory.LiteratureTheorems.bernstein_zelevinsky_finiteness_of_literature",
+   "names": [
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 1249,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BhattScholzeCrystallineLattices",
+   "line": "UpperTheory.LiteratureTheorems.bhatt_scholze_crystalline_lattices_of_literature",
+   "names": [
+    "GlobalTheory.BSP.bhattScholzeIntegral",
+    "GlobalTheory.bhattScholze_coeff"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeCoefficientsOfPadicIntLattices",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeIntegral"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeCoefficientsOfPadicIntLattices",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeIntegral"
+   ],
+   "unfollowed": [],
+   "table_files": 1381,
+   "proof_files": 1381,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BhattScholzeIntegral",
+   "line": "UpperTheory.LiteratureTheorems.bhatt_scholze_integral_of_literature",
+   "names": [
+    "GlobalTheory.BSP.bhattScholzeIntegral"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeIntegral"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BhattScholzeIntegral"
+   ],
+   "unfollowed": [],
+   "table_files": 1362,
+   "proof_files": 1362,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BlochKatoLocal",
+   "line": "UpperTheory.LiteratureTheorems.bloch_kato_local_of_literature",
+   "names": [
+    "UpperTheory.Lit.blochKatoLocal"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.BlochKatoLocal"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BlochKatoLocal"
+   ],
+   "unfollowed": [],
+   "table_files": 1474,
+   "proof_files": 1473,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BorelCasselman",
+   "line": "UpperTheory.LiteratureTheorems.borel_casselman_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.borelCasselman"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HeckeLEntireAndNonzeroAtOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.BorelCasselmanHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 907,
+   "proof_files": 12,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "BrauerDegreeZero",
+   "line": "UpperTheory.LiteratureTheorems.brauer_degree_zero_of_literature",
+   "names": [
+    "GlobalTheory.BrauerZero.brauerDegreeZero"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero"
+   ],
+   "unfollowed": [],
+   "table_files": 105,
+   "proof_files": 105,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CMCurveGoodOutsidePrimeSt",
+   "line": "UpperTheory.LiteratureTheorems.cm_curve_good_outside_prime_st_of_literature",
+   "names": [
+    "GlobalTheory.Published.cmCurveGoodOutsidePrime"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmCurveGoodOutsidePrime"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmCurveGoodOutsidePrime"
+   ],
+   "unfollowed": [],
+   "table_files": 1388,
+   "proof_files": 1388,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CasselmanWallach",
+   "line": "UpperTheory.LiteratureTheorems.casselman_wallach_of_literature",
+   "names": [
+    "PositivityTheory.CWB.casselmanWallach"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.CasselmanWallach.FinalB"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.CasselmanWallach.FinalB"
+   ],
+   "unfollowed": [],
+   "table_files": 8375,
+   "proof_files": 8375,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ChebotarevDegreeOne",
+   "line": "UpperTheory.LiteratureTheorems.chebotarev_degree_one_of_literature",
+   "names": [
+    "GlobalTheory.Published.chebotarevDegreeOne'"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChebotarevDegreeOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChebotarevDegreeOne"
+   ],
+   "unfollowed": [],
+   "table_files": 290,
+   "proof_files": 290,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ChevalleyUnits",
+   "line": "UpperTheory.LiteratureTheorems.chevalley_units_of_literature",
+   "names": [
+    "GlobalTheory.Published.chevalleyUnits'"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits"
+   ],
+   "unfollowed": [],
+   "table_files": 298,
+   "proof_files": 298,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ChowFormExists",
+   "line": "UpperTheory.LiteratureTheorems.chow_form_exists_of_literature",
+   "names": [
+    "GlobalTheory.Published.chowFormExists_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChowFormIntExistsAndChowFormExists"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChowFormIntExistsAndChowFormExists"
+   ],
+   "unfollowed": [],
+   "table_files": 320,
+   "proof_files": 320,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ClozelCohomological",
+   "line": "UpperTheory.LiteratureTheorems.clozel_cohomological_of_literature",
+   "names": [
+    "PositivityTheory.Rg.Cz.clozelCohomological"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.ClozelCohomological"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.ClozelCohomological"
+   ],
+   "unfollowed": [],
+   "table_files": 4166,
+   "proof_files": 4166,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ClozelPurity",
+   "line": "UpperTheory.LiteratureTheorems.clozel_purity_of_literature",
+   "names": [
+    "PositivityTheory.Lit1.ClozelPurity.clozelPurity"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.ClozelPurity.Bridge"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.ClozelPurity.Bridge"
+   ],
+   "unfollowed": [],
+   "table_files": 2590,
+   "proof_files": 2590,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ComplexMultiplicationJSt",
+   "line": "UpperTheory.LiteratureTheorems.complex_multiplication_j_st_of_literature",
+   "names": [
+    "GlobalTheory.CompanionTheory.Published.complexMultiplicationJ"
+   ],
+   "table_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.ComplexMultiplicationJacquetShalika"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.ComplexMultiplicationJacquetShalika"
+   ],
+   "unfollowed": [],
+   "table_files": 502,
+   "proof_files": 502,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspBounded",
+   "line": "UpperTheory.LiteratureTheorems.cusp_bounded_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.cuspBounded"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.CuspDecaySobolev"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.CuspDecaySobolev"
+   ],
+   "unfollowed": [],
+   "table_files": 2796,
+   "proof_files": 2796,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspDecayBound",
+   "line": "UpperTheory.LiteratureTheorems.cusp_decay_bound_of_literature",
+   "names": [
+    "GlobalTheory.CuspGeo.cuspDecayBound"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspidalModerateGrowthRapidDecay"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspidalModerateGrowthRapidDecay"
+   ],
+   "unfollowed": [],
+   "table_files": 2795,
+   "proof_files": 2795,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspDecaySobolev",
+   "line": "UpperTheory.LiteratureTheorems.cusp_decay_sobolev_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.cuspDecaySobolev"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.CuspDecaySobolev"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.CuspDecaySobolev"
+   ],
+   "unfollowed": [],
+   "table_files": 2796,
+   "proof_files": 2796,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspFormsBoundedGL",
+   "line": "UpperTheory.LiteratureTheorems.cusp_forms_bounded_gl_of_literature",
+   "names": [
+    "UpperTheory.V.Af.cuspSpectrumGL"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.PSpecC"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.PSpecC"
+   ],
+   "unfollowed": [],
+   "table_files": 2693,
+   "proof_files": 2693,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspRapidDecay",
+   "line": "UpperTheory.LiteratureTheorems.cusp_rapid_decay_of_literature",
+   "names": [
+    "GlobalTheory.RapidDecay.cuspRapidDecay"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay"
+   ],
+   "unfollowed": [],
+   "table_files": 2797,
+   "proof_files": 2797,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspTraceClass",
+   "line": "UpperTheory.LiteratureTheorems.cusp_trace_class_of_literature",
+   "names": [
+    "PositivityTheory.Prw.cuspTraceClass_of",
+    "PositivityTheory.Prw.dixmierMalliavinFactorisation_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.DixmierMalliavin.DixmierMalliavinFactorisationHolds",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore"
+   ],
+   "unfollowed": [],
+   "table_files": 20542,
+   "proof_files": 14460,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspidalMirabolic",
+   "line": "UpperTheory.LiteratureTheorems.cuspidal_mirabolic_of_literature",
+   "names": [
+    "GlobalTheory.cuspidalMirabolic_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspidalMirabolicHolds"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.MirabolicRestriction.MirabolicInduction.CuspidalMirabolic"
+   ],
+   "unfollowed": [],
+   "table_files": 1207,
+   "proof_files": 1206,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspidalMultiplicityOne",
+   "line": "UpperTheory.LiteratureTheorems.cuspidal_multiplicity_one_of_literature",
+   "names": [
+    "PositivityTheory.jumpWindows.cuspidalMultiplicityOne"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.CuspidalMultiplicityOne"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.CuspidalMultiplicityOne"
+   ],
+   "unfollowed": [],
+   "table_files": 6998,
+   "proof_files": 6998,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CuspidalSpectrumGL",
+   "line": "UpperTheory.LiteratureTheorems.cuspidal_spectrum_gl_of_literature",
+   "names": [
+    "RfCs.cuspidalSpectrumGL"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.RegularisedThetaMirabolic.KFiniteCuspForms.CuspSp"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.RegularisedThetaMirabolic.KFiniteCuspForms.CuspSp"
+   ],
+   "unfollowed": [],
+   "table_files": 24102,
+   "proof_files": 24102,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "CycleHeights",
+   "line": "UpperTheory.LiteratureTheorems.cycle_heights_of_literature",
+   "names": [
+    "GlobalTheory.ArithmeticHeightTower.ArakelovDirectHeights.cycleHeights_direct",
+    "PositivityTheory.ResPlug.FromRes.resK",
+    "PositivityTheory.Tls2.Pl.poincareLelong"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "unfollowed": [],
+   "table_files": 17864,
+   "proof_files": 17864,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DeRhamPotSemistable",
+   "line": "UpperTheory.LiteratureTheorems.de_rham_pot_semistable_of_literature",
+   "names": [
+    "GlobalTheory.deRham_potentiallySemistable"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable"
+   ],
+   "unfollowed": [],
+   "table_files": 2272,
+   "proof_files": 2272,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DeligneRibet",
+   "line": "UpperTheory.LiteratureTheorems.deligne_ribet_of_literature",
+   "names": [
+    "PositivityTheory.PfDR.deligneRibet_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DeligneRibet.DeligneRibetHolds"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DeligneRibet.NotDvdAbsNorm"
+   ],
+   "unfollowed": [],
+   "table_files": 1378,
+   "proof_files": 1377,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DepthZeroInduction",
+   "line": "UpperTheory.LiteratureTheorems.depth_zero_induction_of_literature",
+   "names": [
+    "GlobalTheory.CompanionTheory.GeoLink.geometricLemma",
+    "GlobalTheory.DepthZeroPass.depthZeroInduction",
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.Prw.zelevinskyPolynomialRing_of",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 21511,
+   "proof_files": 15523,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DepthZeroJacquetInjective",
+   "line": "UpperTheory.LiteratureTheorems.depth_zero_jacquet_injective_of_literature",
+   "names": [
+    "GlobalTheory.DepthZeroJac.depthZeroJacquetInjective"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer"
+   ],
+   "unfollowed": [],
+   "table_files": 736,
+   "proof_files": 736,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DepthZeroSupport",
+   "line": "UpperTheory.LiteratureTheorems.depth_zero_support_of_literature",
+   "names": [
+    "GlobalTheory.SmGL.depthZeroSupport"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContractNeZero"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContractNeZero"
+   ],
+   "unfollowed": [],
+   "table_files": 747,
+   "proof_files": 747,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesClassification",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_classification_of_literature",
+   "names": [
+    "CompanionTheory.RgExh.discreteSeriesClassification"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.DsExhaust"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.DsExhaust"
+   ],
+   "unfollowed": [],
+   "table_files": 9675,
+   "proof_files": 9675,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesCover",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_cover_of_literature",
+   "names": [
+    "CompanionTheory.RgExh.discreteSeriesCover"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.DsExhaust"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.DsExhaust"
+   ],
+   "unfollowed": [],
+   "table_files": 9675,
+   "proof_files": 9675,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesCoverExists",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_cover_exists_of_literature",
+   "names": [
+    "CompanionTheory.RgDs.B.discreteSeriesCoverExists"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "unfollowed": [],
+   "table_files": 7830,
+   "proof_files": 7830,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesExists",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_exists_of_literature",
+   "names": [
+    "CompanionTheory.RgDs.B.discreteSeriesExists"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "unfollowed": [],
+   "table_files": 7830,
+   "proof_files": 7830,
+   "hops": 0,
+   "package": false,
+   "same_as": "DiscreteSeriesUpqExists"
+  },
+  {
+   "statement": "DiscreteSeriesHermitianUnique",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_hermitian_unique_of_literature",
+   "names": [
+    "PositivityTheory.Prw.discreteSeriesHermitianUnique_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesHermitianUnique"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 1534,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesLowestKType",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_lowest_k_type_of_literature",
+   "names": [
+    "PositivityTheory.Prw.discreteSeriesLowestKType_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesLowestKType"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 1853,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DiscreteSeriesUpqExists",
+   "line": "UpperTheory.LiteratureTheorems.discrete_series_upq_exists_of_literature",
+   "names": [
+    "CompanionTheory.RgDs.B.discreteSeriesUpqExists"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove"
+   ],
+   "unfollowed": [],
+   "table_files": 7830,
+   "proof_files": 7830,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DixmierMalliavinFactorisation",
+   "line": "UpperTheory.LiteratureTheorems.dixmier_malliavin_factorisation_of_literature",
+   "names": [
+    "GlobalTheory.dixmierMalliavinFactorisation_fromLibrary"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.DixmierMalliavinFactorisationFromLibrary"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PadicUnitaryWeights.DixmierMalliavin.DixmierMalliavinFactorisationHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 1097,
+   "proof_files": 1096,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DoublingMethodLocalZetaIntegrals",
+   "line": "UpperTheory.LiteratureTheorems.doubling_method",
+   "names": [
+    "GlobalTheory.RapidDecay.cuspRapidDecay",
+    "PositivityTheory.RgEis.Sp.Hd.siegelEisensteinContinuation",
+    "ResidueKilled.dm_of_two"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinResidues.AnisotropicGlobalForms.DmOfHyp",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinResidues.AnisotropicGlobalForms.DmOfHyp",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "unfollowed": [],
+   "table_files": 7713,
+   "proof_files": 7713,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "DualAbelianScheme",
+   "line": "UpperTheory.LiteratureTheorems.dual_abelian_scheme_of_literature",
+   "names": [
+    "GlobalTheory.dualAbelianScheme"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualAbelianSchemeExistsBiduality"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualAbelianSchemeExistsBiduality"
+   ],
+   "unfollowed": [],
+   "table_files": 8912,
+   "proof_files": 8912,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "EllipticMainTheoremCM",
+   "line": "UpperTheory.LiteratureTheorems.ellipticMainTheoremCM'",
+   "names": [
+    "PositivityTheory.Prw.ellipticMainTheoremCM_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.EllipticMainTheoremCM"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 1414,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "EssSquareIntegrableSegments",
+   "line": "UpperTheory.LiteratureTheorems.ess_square_integrable_segments_of_literature",
+   "names": [
+    "PositivityTheory.Exh.essSquareIntegrableSegments_of_seg",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3721,
+   "proof_files": 3721,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "FlathFactorisation",
+   "line": "UpperTheory.LiteratureTheorems.flath_factorisation_of_literature",
+   "names": [
+    "CompanionTheory.Rg.Fl.B.flathTensorProduct",
+    "CompanionTheory.Rg.Fl.B.unitaryIrreducibleAdmissible",
+    "PositivityTheory.Prw.flathFactorisation_of"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesRep"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesRep"
+   ],
+   "unfollowed": [],
+   "table_files": 5105,
+   "proof_files": 5105,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "FlathTensorProduct",
+   "line": "UpperTheory.LiteratureTheorems.flath_tensor_product_of_literature",
+   "names": [
+    "CompanionTheory.Rg.Fl.B.flathTensorProduct"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB"
+   ],
+   "unfollowed": [],
+   "table_files": 3432,
+   "proof_files": 3432,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "FontaineBcris",
+   "line": "UpperTheory.LiteratureTheorems.fontaine_bcris_of_literature",
+   "names": [
+    "GlobalTheory.MemLoc.fontaineBcris"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineBcrisBasicTheoremsProof"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineBcrisBasicTheoremsProof"
+   ],
+   "unfollowed": [],
+   "table_files": 545,
+   "proof_files": 545,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "FormalAlgebraisation",
+   "line": "UpperTheory.LiteratureTheorems.formal_algebraisation_of_literature",
+   "names": [
+    "PositivityTheory.FormalThickening.formalAlgebraisation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.Development"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.Development"
+   ],
+   "unfollowed": [],
+   "table_files": 868,
+   "proof_files": 868,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "FormalDegreeCompactDual",
+   "line": "UpperTheory.LiteratureTheorems.formal_degree_compact_dual_of_literature",
+   "names": [
+    "PositivityTheory.RgFd.B.formalDegreeCompactDual"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.DiscreteSeries.DiscreteSeriesCovers.FdTopB"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.DiscreteSeries.DiscreteSeriesCovers.FdTopB"
+   ],
+   "unfollowed": [],
+   "table_files": 7819,
+   "proof_files": 7819,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GKGlobalisation",
+   "line": "UpperTheory.LiteratureTheorems.gk_globalisation_of_literature",
+   "names": [
+    "GlobalTheory.gkGlobalisation_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalEquivalenceUnitaryGroupPQ"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalEquivalenceUnitaryGroupPQ"
+   ],
+   "unfollowed": [],
+   "table_files": 3170,
+   "proof_files": 3170,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GLHoweDuality",
+   "line": "UpperTheory.LiteratureTheorems.gl_howe_duality_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.gLHoweDuality"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HeckeLEntireAndNonzeroAtOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqRepTopVecOfUnitriangular"
+   ],
+   "unfollowed": [],
+   "table_files": 907,
+   "proof_files": 661,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GelfandKazhdanDual",
+   "line": "UpperTheory.LiteratureTheorems.gelfand_kazhdan_dual_of_literature",
+   "names": [
+    "PositivityTheory.AdelicQuotientData.jacquetShalikaRigidity",
+    "PositivityTheory.JMult1.gelfandKazhdanDual_of_rigidity",
+    "UpperTheory.V.Af.cuspSpectrumGL"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.PSpecC",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MultiplicityOneRigidity.GelfandKazhdanDualOfRigidity"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.PSpecC",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MultiplicityOneRigidity.GelfandKazhdanDualOfRigidity"
+   ],
+   "unfollowed": [],
+   "table_files": 25860,
+   "proof_files": 25860,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GenericUnitaryDualGL",
+   "line": "UpperTheory.LiteratureTheorems.generic_unitary_dual_gl_of_literature",
+   "names": [
+    "PositivityTheory.Gud.Fin.genericUnitaryDualGL_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.UnitaryDualGL.GenericUnitaryDual.GenericUnitaryDualGLHolds"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.UnitaryDualGL.GenericUnitaryDual.GenericUnitaryDualGLHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 3963,
+   "proof_files": 3963,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GenericUnlinkedGL",
+   "line": "UpperTheory.LiteratureTheorems.generic_unlinked_gl_of_literature",
+   "names": [
+    "GlobalTheory.RgGu.genericUnlinkedGL_of_segRep2",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnlinkedGL.GenericUnlinkedGLOfSegRep2"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnlinkedGL.GenericUnlinkedGLOfSegRep2"
+   ],
+   "unfollowed": [],
+   "table_files": 3453,
+   "proof_files": 3453,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GeometricLemma",
+   "line": "UpperTheory.LiteratureTheorems.geometric_restriction_of_literature",
+   "names": [
+    "GlobalTheory.CompanionTheory.GeoLink.geometricLemma"
+   ],
+   "table_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma"
+   ],
+   "unfollowed": [],
+   "table_files": 2479,
+   "proof_files": 2479,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GeometricLemmaFiltration",
+   "line": "UpperTheory.LiteratureTheorems.geometric_restriction_filtration_of_literature",
+   "names": [
+    "GlobalTheory.geometricLemmaFiltration_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GeometricLemmaFiltrationHolds"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.LocalGeometry.Imports"
+   ],
+   "unfollowed": [],
+   "table_files": 1451,
+   "proof_files": 1450,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GlobalArtinReciprocity",
+   "line": "UpperTheory.LiteratureTheorems.global_artin_reciprocity_of_literature",
+   "names": [
+    "GlobalTheory.globalArtinReciprocity_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0"
+   ],
+   "unfollowed": [],
+   "table_files": 306,
+   "proof_files": 305,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GoodChernWeil",
+   "line": "UpperTheory.LiteratureTheorems.good_chern_weil_of_literature",
+   "names": [
+    "GlobalTheory.GoodMetric.goodChernWeil"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodChernWeil"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodChernWeil"
+   ],
+   "unfollowed": [],
+   "table_files": 10614,
+   "proof_files": 10614,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GreenCuspidal",
+   "line": "UpperTheory.LiteratureTheorems.green_cuspidal_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.greenCuspidal"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HarishChandraModules"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.GreenCuspLabels.GreenCuspidal"
+   ],
+   "unfollowed": [],
+   "table_files": 7039,
+   "proof_files": 894,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GreenRegularCharacters",
+   "line": "UpperTheory.LiteratureTheorems.green_regular_characters_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.greenRegularCharacters"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.GreenRegularCharacters"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GreenCuspidalCharsByRegularCharsProofStatement"
+   ],
+   "unfollowed": [],
+   "table_files": 885,
+   "proof_files": 884,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GreenSeriesSt",
+   "line": "UpperTheory.LiteratureTheorems.green_series_st_of_literature",
+   "names": [
+    "PositivityTheory.Prw.greenSeriesSt_of",
+    "PositivityTheory.Stage1.PM.greenCuspidal"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesAut",
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HarishChandraModules"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesAut",
+    "Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.GreenCuspLabels.GreenCuspidal"
+   ],
+   "unfollowed": [],
+   "table_files": 12631,
+   "proof_files": 7661,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GrothendieckDeformation",
+   "line": "UpperTheory.LiteratureTheorems.grothendieck_deformation_of_literature",
+   "names": [
+    "GlobalTheory.Published.grothendieckDeformation_of_lifting",
+    "GlobalTheory.abelianScheme_hom_lifting_nilpotent_dividedPowers",
+    "PositivityTheory.DualRT.abelianDeRham"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrothendieckDeformationOfLifting",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrothendieckDeformationOfLifting",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "unfollowed": [],
+   "table_files": 12502,
+   "proof_files": 12502,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GrothendieckMessing",
+   "line": "UpperTheory.LiteratureTheorems.grothendieck_messing_of_literature",
+   "names": [
+    "GlobalTheory.Published.GrothendieckDeformation.grothendieckMessing",
+    "GlobalTheory.Published.grothendieckDeformation_of_lifting",
+    "GlobalTheory.abelianScheme_hom_lifting_nilpotent_dividedPowers",
+    "PositivityTheory.DualRT.abelianDeRham"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrothendieckDeformationOfLifting",
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeHomLiftingNilpotentDividedPowers",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrothendieckDeformationOfLifting",
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DualAbelianScheme.AbelianDeRhamDuality.AbelianDeRhamDuality"
+   ],
+   "unfollowed": [],
+   "table_files": 12502,
+   "proof_files": 12502,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "GrothendieckRingPolynomial",
+   "line": "UpperTheory.LiteratureTheorems.grothendieck_ring_polynomial_of_literature",
+   "names": [
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3554,
+   "proof_files": 3554,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HarishChandraAnalyticity",
+   "line": "UpperTheory.LiteratureTheorems.harish_chandra_analyticity_of_literature",
+   "names": [
+    "GlobalTheory.CompanionTheory.Hypotheses₂.harishChandra_analyticity_density"
+   ],
+   "table_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdmissibleOfIwasawaDecomposition"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdmissibleOfIwasawaDecomposition"
+   ],
+   "unfollowed": [],
+   "table_files": 2371,
+   "proof_files": 2371,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HarishChandraFinite",
+   "line": "UpperTheory.LiteratureTheorems.harish_chandra_finite_of_literature",
+   "names": [
+    "PositivityTheory.RgHf.harishChandraFinite"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.ConstantTermFiniteness.CuspidalConstantTerms.FiniteOfCuspOfConstTerm"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.ConstantTermFiniteness.CuspidalConstantTerms.FiniteOfCuspOfConstTerm"
+   ],
+   "unfollowed": [],
+   "table_files": 13393,
+   "proof_files": 13393,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HarishChandraModules",
+   "line": "UpperTheory.LiteratureTheorems.harish_chandra_modules_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.harishChandraModules"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HarishChandraModules"
+   ],
+   "proof_modules": [
+    "CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.HarishChandraModulesIndefiniteUnitaryGroup"
+   ],
+   "unfollowed": [],
+   "table_files": 7039,
+   "proof_files": 6587,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HasseNormSt",
+   "line": "UpperTheory.LiteratureTheorems.hasse_norm_st_of_literature",
+   "names": [
+    "GlobalTheory.QNorm.hasseNormSt"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormTheoremQuadraticExtension"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormTheoremQuadraticExtension"
+   ],
+   "unfollowed": [],
+   "table_files": 123,
+   "proof_files": 123,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLAdicCharacter",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_adic_character_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.heckeLAdicCharacter"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.GlobalArtinReciprocity"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.GlobalArtinReciprocity"
+   ],
+   "unfollowed": [],
+   "table_files": 1016,
+   "proof_files": 1016,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLAdicCharacterAbove",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_adic_character_above_of_literature",
+   "names": [
+    "DiscreteGroups.sglob.LConv.localConverseGL",
+    "GlobalTheory.BrauerZero.brauerDegreeZero",
+    "GlobalTheory.CompanionTheory.GeoLink.geometricLemma",
+    "GlobalTheory.DepthZeroPass.depthZeroInduction",
+    "GlobalTheory.HeckeAboveBridge.heckeLAdicCharacterAbove_of_potSemistable",
+    "GlobalTheory.Published.chevalleyUnits'",
+    "GlobalTheory.deRham_potentiallySemistable",
+    "GlobalTheory.globalArtinReciprocity_holds",
+    "O.localLanglandsExists",
+    "PositivityTheory.Exh.langlandsExhaustionGL_of_seg",
+    "PositivityTheory.Exh.langlandsMultisegments_of_seg",
+    "PositivityTheory.Exh.standardCosocleGL_of_seg",
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.Prw.zelevinskyPolynomialRing_of",
+    "PositivityTheory.RgGu.segmentRepresentation",
+    "UpperTheory.Lit.CharWD.algebraicCharacterWD",
+    "UpperTheory.Lit.heckeLAdicCharacterCrystalline_of_deRham",
+    "UpperTheory.Lit.heckeLAdicCharacterDeRham",
+    "UpperTheory.One.M.New.llOf_alt"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeLAdicCharacterAboveOfPublished",
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.HeckeDeRham",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LitCharCrys",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LlOf",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeLAdicCharacterAboveOfPublished",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LitCharCrys",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LlOf",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.HeckeLAdicCharacters.Outright",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [
+    "O.localLanglandsExists"
+   ],
+   "table_files": 30305,
+   "proof_files": 30304,
+   "hops": 1,
+   "package": true,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLAdicCharacterCrystalline",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_adic_character_crystalline_of_literature",
+   "names": [
+    "DiscreteGroups.sglob.LConv.localConverseGL",
+    "GlobalTheory.BrauerZero.brauerDegreeZero",
+    "GlobalTheory.CompanionTheory.GeoLink.geometricLemma",
+    "GlobalTheory.DepthZeroPass.depthZeroInduction",
+    "GlobalTheory.Published.chevalleyUnits'",
+    "GlobalTheory.deRham_potentiallySemistable",
+    "GlobalTheory.globalArtinReciprocity_holds",
+    "O.localLanglandsExists",
+    "PositivityTheory.Exh.langlandsExhaustionGL_of_seg",
+    "PositivityTheory.Exh.langlandsMultisegments_of_seg",
+    "PositivityTheory.Exh.standardCosocleGL_of_seg",
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.Prw.zelevinskyPolynomialRing_of",
+    "PositivityTheory.RgGu.segmentRepresentation",
+    "UpperTheory.Lit.CharWD.algebraicCharacterWD",
+    "UpperTheory.Lit.heckeLAdicCharacterCrystalline_of_deRham",
+    "UpperTheory.Lit.heckeLAdicCharacterDeRham",
+    "UpperTheory.One.M.New.llOf_alt"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.HeckeDeRham",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LitCharCrys",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LlOf",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BrauerDegreeZero",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedNeBotOfIsSubquotient",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LitCharCrys",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LlOf",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.HeckeLAdicCharacters.Outright",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [
+    "O.localLanglandsExists"
+   ],
+   "table_files": 30304,
+   "proof_files": 30303,
+   "hops": 1,
+   "package": true,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLAdicCharacterDeRham",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_adic_character_de_rham_of_literature",
+   "names": [
+    "UpperTheory.Lit.heckeLAdicCharacterDeRham"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.HeckeDeRham"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.HeckeLAdicCharacters.Outright"
+   ],
+   "unfollowed": [],
+   "table_files": 2901,
+   "proof_files": 2900,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLAdicParameterAboveAlt",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_adic_parameter_above_of_literature",
+   "names": [
+    "GlobalTheory.deRham_potentiallySemistable",
+    "GlobalTheory.globalArtinReciprocity_holds",
+    "GlobalTheory.heckeLAdicParameterAbove_of_algebraicCharacterWD_alt",
+    "UpperTheory.Lit.CharWD.algebraicCharacterWD",
+    "UpperTheory.Lit.heckeLAdicCharacterDeRham"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.GaloisRepresentations.HeckeDeRham",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.HeckeLAdicParameterAboveOfAlgebraicCharacterWDAl"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0",
+    "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamPotentiallySemistable",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.AlgebraicCharacterWD",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.HeckeLAdicParameterAboveOfAlgebraicCharacterWDAl",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.HeckeLAdicCharacters.Outright"
+   ],
+   "unfollowed": [],
+   "table_files": 29523,
+   "proof_files": 29522,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLEntireAndNonzeroAtOne",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_entire_and_nonzero_at_one_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.heckeLEntireAndNonzeroAtOne"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HeckeLEntireAndNonzeroAtOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeLEntireAndNonzeroAtOneHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 907,
+   "proof_files": 551,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeLPartialContinuation",
+   "line": "UpperTheory.LiteratureTheorems.hecke_l_partial_continuation_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.heckeLPartialContinuation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.SchurOrthogonalitySquareIntegrable"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HeckeLPartialContinuationHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 967,
+   "proof_files": 831,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HeckeTateFunctionalEquation",
+   "line": "UpperTheory.LiteratureTheorems.heckeTateFunctionalEquation'",
+   "names": [
+    "GlobalTheory.Top.heckeTateFE"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeTateFE"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.HeckeTateFunctionalEquation"
+   ],
+   "unfollowed": [],
+   "table_files": 2190,
+   "proof_files": 2189,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HermitianHassePrinciple",
+   "line": "UpperTheory.LiteratureTheorems.hermitian_hasse_principle_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.hermitianHassePrinciple"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HermitianHassePrinciple"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.HermitianHassePrincipleHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 1290,
+   "proof_files": 138,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HermitianLocalGlobal",
+   "line": "UpperTheory.LiteratureTheorems.hermitian_local_global_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.hermitianLocalGlobal"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.SchurOrthogonalitySquareIntegrable"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsOrthonormalOfUnimodular"
+   ],
+   "unfollowed": [],
+   "table_files": 967,
+   "proof_files": 137,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HilbertClassFieldJ",
+   "line": "UpperTheory.LiteratureTheorems.hilbertClassFieldJ'",
+   "names": [
+    "GlobalTheory.Laid.hcfj_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HcfjHolds"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.HilbertClassFieldJ"
+   ],
+   "unfollowed": [],
+   "table_files": 1122,
+   "proof_files": 1121,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HolomorphicDiscreteSeries",
+   "line": "UpperTheory.LiteratureTheorems.holomorphic_discrete_series_of_literature",
+   "names": [
+    "GlobalTheory.HolDS.holomorphicDiscreteSeries_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HolomorphicDiscreteSeriesHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HolomorphicDiscreteSeriesHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 3134,
+   "proof_files": 3134,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "HoweDualityReal",
+   "line": "UpperTheory.LiteratureTheorems.howe_duality_real_of_literature",
+   "names": [
+    "GlobalTheory.howeDualityReal_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HoweDualityRealHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HoweDualityRealHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 4673,
+   "proof_files": 4673,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "IdealInvariantsOneOrbitSt",
+   "line": "UpperTheory.LiteratureTheorems.ideal_invariants_one_orbit_st_of_literature",
+   "names": [
+    "PositivityTheory.Prw.idealInvariantsOneOrbitSt_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.IdealInvariantsOneOrbit"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 506,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "InducedSimpleLowestAlcove",
+   "line": "UpperTheory.LiteratureTheorems.induced_simple_lowest_alcove_of_literature",
+   "names": [
+    "GlobalTheory.Alc.inducedSimpleLowestAlcove"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeylModuleSimpleClosedLowestAlcove"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeylModuleSimpleClosedLowestAlcove"
+   ],
+   "unfollowed": [],
+   "table_files": 875,
+   "proof_files": 875,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "IrreducibleAdmissibleGL",
+   "line": "UpperTheory.LiteratureTheorems.irreducible_admissible_gl_of_literature",
+   "names": [
+    "PositivityTheory.Tls2.BZGL.irreducibleAdmissibleGL_top"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm"
+   ],
+   "unfollowed": [],
+   "table_files": 34,
+   "proof_files": 34,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "JacquetShalika",
+   "line": "UpperTheory.LiteratureTheorems.jacquet_shalika_of_literature",
+   "names": [
+    "PositivityTheory.AdelicQuotientData.jacquetShalika"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity"
+   ],
+   "unfollowed": [],
+   "table_files": 25548,
+   "proof_files": 25548,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "JacquetShalikaRigidity",
+   "line": "UpperTheory.LiteratureTheorems.jacquet_shalika_rigidity_of_literature",
+   "names": [
+    "PositivityTheory.AdelicQuotientData.jacquetShalikaRigidity"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity"
+   ],
+   "unfollowed": [],
+   "table_files": 25548,
+   "proof_files": 25548,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "KFiniteVectorsUnitary",
+   "line": "UpperTheory.LiteratureTheorems.k_finite_vectors_unitary_of_literature",
+   "names": [
+    "GlobalTheory.KFinLinkPort.kFiniteVectors_irreducibleUnitary_unitaryGroupPQ"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KFiniteVectorsIrreducibleUnitaryUnitaryGroupPQ"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KFiniteVectorsIrreducibleUnitaryUnitaryGroupPQ"
+   ],
+   "unfollowed": [],
+   "table_files": 2248,
+   "proof_files": 2248,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "KawamataViehweg",
+   "line": "UpperTheory.LiteratureTheorems.kawamata_viehweg_of_literature",
+   "names": [
+    "GlobalTheory.KVFromPair.kawamataViehweg_of_nadelVanishingPair",
+    "GlobalTheory.nefNumerics_outright",
+    "NadelVanishingSeparation.NSI.nadelVanishingAndNonKltDivisor"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KawamataViehwegOfNadelVanishingPair",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopNSI",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KawamataViehwegOfNadelVanishingPair",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopNSI",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof"
+   ],
+   "unfollowed": [],
+   "table_files": 11895,
+   "proof_files": 11895,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "KudlaSplittingSplitUnitary",
+   "line": "UpperTheory.LiteratureTheorems.kudla_splitting_split_unitary_of_literature",
+   "names": [
+    "GlobalTheory.kudlaSplittingSplitUnitary"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KudlaSplittingSplitUnitary"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.KudlaSplittingSplitUnitary"
+   ],
+   "unfollowed": [],
+   "table_files": 267,
+   "proof_files": 267,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "L2ExtensionLogCanonical",
+   "line": "UpperTheory.LiteratureTheorems.l2_extension_log_canonical_of_literature",
+   "names": [
+    "GlobalTheory.l2ExtensionLogCanonical'"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.L2ExtensionLogCanonical"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.L2ExtensionLogCanonical"
+   ],
+   "unfollowed": [],
+   "table_files": 439,
+   "proof_files": 439,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "LandherrSt",
+   "line": "UpperTheory.LiteratureTheorems.landherr_st_of_literature",
+   "names": [
+    "GlobalTheory.QNorm.landherr_and_landherrSt"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.LandherrAndLandherrSt"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.LandherrAndLandherrSt"
+   ],
+   "unfollowed": [],
+   "table_files": 159,
+   "proof_files": 159,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "LanglandsExhaustionGL",
+   "line": "UpperTheory.LiteratureTheorems.langlands_exhaustion_gl_of_literature",
+   "names": [
+    "PositivityTheory.Exh.langlandsExhaustionGL_of_seg",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3536,
+   "proof_files": 3536,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "LanglandsMultisegments",
+   "line": "UpperTheory.LiteratureTheorems.langlands_multisegments_of_literature",
+   "names": [
+    "PositivityTheory.Exh.langlandsMultisegments_of_seg",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3536,
+   "proof_files": 3536,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "Linnik",
+   "line": "UpperTheory.LiteratureTheorems.linnik_of_literature",
+   "names": [
+    "UpperTheory.Lit.linnik"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.Linnik"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.Linnik"
+   ],
+   "unfollowed": [],
+   "table_files": 517,
+   "proof_files": 517,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "LocalConverseGL",
+   "line": "UpperTheory.LiteratureTheorems.local_converse_gl_of_literature",
+   "names": [
+    "DiscreteGroups.sglob.LConv.localConverseGL"
+   ],
+   "table_modules": [
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal"
+   ],
+   "proof_modules": [
+    "Development.DiscreteGroups.GlobalIrreducibility.LConvFinal"
+   ],
+   "unfollowed": [],
+   "table_files": 1031,
+   "proof_files": 1031,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "MetaplecticRepresentation",
+   "line": "UpperTheory.LiteratureTheorems.metaplectic_representation_of_literature",
+   "names": [
+    "GlobalTheory.metaplecticRepresentation_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.MetaplecticRepresentationHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.MetaplecticRepresentationHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 52,
+   "proof_files": 52,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "MoyPrasadJacquetIso",
+   "line": "UpperTheory.LiteratureTheorems.moy_prasad_jacquet_iso_of_literature",
+   "names": [
+    "PositivityTheory.Prw.moyPrasadJacquetIso_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MoyPrasadJacquetIso"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 861,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "NadelVanishingAndNonKltDivisor",
+   "line": "UpperTheory.LiteratureTheorems.nadel_vanishing_and_non_klt_divisor_of_literature",
+   "names": [
+    "NadelVanishingSeparation.NSI.nadelVanishingAndNonKltDivisor"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopNSI"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopNSI"
+   ],
+   "unfollowed": [],
+   "table_files": 11878,
+   "proof_files": 11878,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "NefNumerics",
+   "line": "UpperTheory.LiteratureTheorems.nef_numerics_of_literature",
+   "names": [
+    "GlobalTheory.nefNumerics_outright"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof"
+   ],
+   "unfollowed": [],
+   "table_files": 527,
+   "proof_files": 527,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "PartialZetaFunctionalEquation",
+   "line": "UpperTheory.LiteratureTheorems.partial_zeta_functional_equation_of_literature",
+   "names": [
+    "PositivityTheory.Prw.partialZetaFunctionalEquation_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.PartialZetaFunctionalEquation"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 463,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "PointSeparationPair",
+   "line": "UpperTheory.LiteratureTheorems.point_separation_pair_of_literature",
+   "names": [
+    "NadelVanishingSeparation.NSI.pointSeparationPair"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopPointSep"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.NadelVanishing.TopPointSep"
+   ],
+   "unfollowed": [],
+   "table_files": 11801,
+   "proof_files": 11801,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "PoitouTateNormalised",
+   "line": "UpperTheory.LiteratureTheorems.poitou_tate_normalised_of_literature",
+   "names": [
+    "PositivityTheory.Lit1.PTN.poitouTateNormalised_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.PoitouTateDuality.PoitouTateNineTerm.PoitouTateNormalisedHolds"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.PublishedTheorems.PoitouTateDuality.PoitouTateNineTerm.PoitouTateNormalisedHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 1915,
+   "proof_files": 1915,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "Principalisation",
+   "line": "UpperTheory.LiteratureTheorems.principalisation_of_literature",
+   "names": [
+    "PositivityTheory.ResPlug.WeightsCompactStabilizer.principalisation_closed"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "unfollowed": [],
+   "table_files": 9280,
+   "proof_files": 9280,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "PrismaticDieudonneHodge",
+   "line": "UpperTheory.LiteratureTheorems.prismatic_dieudonne_hodge_of_literature",
+   "names": [
+    "UpperTheory.Lit.prismaticDieudonneHodge"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.PrismaticDieudonne.PrismaticDieudonneHodge"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.PrismaticDieudonne.PrismaticDieudonneHodge"
+   ],
+   "unfollowed": [],
+   "table_files": 10269,
+   "proof_files": 10269,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "QuadraticClassFieldTheory",
+   "line": "UpperTheory.LiteratureTheorems.quadratic_class_field_theory_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.quadraticClassFieldTheory"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HeckeLEntireAndNonzeroAtOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.EtaProdEqOfEverywhereNormDiv"
+   ],
+   "unfollowed": [],
+   "table_files": 907,
+   "proof_files": 164,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RadfordShufflePolynomial",
+   "line": "UpperTheory.LiteratureTheorems.radford_shuffle_polynomial_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.radfordShufflePolynomial"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.SchurOrthogonalitySquareIntegrable"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RadfordShufflePolynomialHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 967,
+   "proof_files": 1,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RallisInnerProductConvergent",
+   "line": "UpperTheory.LiteratureTheorems.rallis_inner_product_convergent_of_literature",
+   "names": [
+    "GlobalTheory.RapidDecay.cuspRapidDecay",
+    "PositivityTheory.RgEis.Sp.Hd.siegelEisensteinContinuation",
+    "ResidueKilled.dm_of_two",
+    "UpperTheory.Lit.Rallis.RallisIPProof.rallis_of_dm",
+    "UpperTheory.Lit.Sw47.convergent",
+    "UpperTheory.Lit.weilThetaConvergence"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.RallisDM",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinResidues.AnisotropicGlobalForms.DmOfHyp",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CuspFormsRapidDecay",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.RallisDM",
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinResidues.AnisotropicGlobalForms.DmOfHyp",
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "unfollowed": [],
+   "table_files": 20108,
+   "proof_files": 20108,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RayCharacterArtin",
+   "line": "UpperTheory.LiteratureTheorems.ray_character_artin_of_literature",
+   "names": [
+    "GlobalTheory.Published.GlobalArtinReciprocity.rayCharacterArtin",
+    "GlobalTheory.globalArtinReciprocity_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds",
+    "Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsIdealsPrimeToEqSpan"
+   ],
+   "proof_modules": [
+    "CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0",
+    "Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsIdealsPrimeToEqSpan"
+   ],
+   "unfollowed": [],
+   "table_files": 908,
+   "proof_files": 907,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RayClassFieldSt",
+   "line": "UpperTheory.LiteratureTheorems.ray_class_field_st_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.rayClassFieldSt"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.GlobalArtinReciprocity"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.GlobalArtinReciprocity"
+   ],
+   "unfollowed": [],
+   "table_files": 1016,
+   "proof_files": 1016,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RealMetaplecticRepresentation",
+   "line": "UpperTheory.LiteratureTheorems.real_metaplectic_representation_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.realMetaplecticRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.RealMetaplecticRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.ThetaLifts.Reductions.MetaplecticDerivatives.RealMetaplecticRepresentationHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 22,
+   "proof_files": 21,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "RegularAlgebraicPurity",
+   "line": "UpperTheory.LiteratureTheorems.regular_algebraic_purity_of_literature",
+   "names": [
+    "GlobalTheory.regularAlgebraicPurity_of_clozel",
+    "PositivityTheory.Lit1.ClozelPurity.clozelPurity",
+    "PositivityTheory.Rg.Cz.clozelCohomological"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.RegularAlgebraicPurityOfClozel",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.ClozelPurity.Bridge",
+    "Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.ClozelCohomological"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.RegularAlgebraicPurityOfClozel",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.ClozelPurity.Bridge",
+    "Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.ClozelCohomological"
+   ],
+   "unfollowed": [],
+   "table_files": 4188,
+   "proof_files": 4188,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SchurOrthogonalitySquareIntegrable",
+   "line": "UpperTheory.LiteratureTheorems.schur_orthogonality_square_integrable_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.schurOrthogonalitySquareIntegrable"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.SchurOrthogonalitySquareIntegrable"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SchurOrthogonalitySquareIntegrable"
+   ],
+   "unfollowed": [],
+   "table_files": 967,
+   "proof_files": 248,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SegmentRepresentation",
+   "line": "UpperTheory.LiteratureTheorems.segment_representation_of_literature",
+   "names": [
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3276,
+   "proof_files": 3276,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SemiAbelianHomExtension",
+   "line": "UpperTheory.LiteratureTheorems.semi_abelian_hom_extension_of_literature",
+   "names": [
+    "GlobalTheory.semiAbelianHomExtension_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianHomExtensionHolds"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.SemiAbelianHomExtension"
+   ],
+   "unfollowed": [],
+   "table_files": 6925,
+   "proof_files": 6923,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SemiAbelianLieSeminegative",
+   "line": "UpperTheory.LiteratureTheorems.semi_abelian_lie_seminegative_of_literature",
+   "names": [
+    "GlobalTheory.Nef.semiAbelianLieSeminegative"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianLieSeminegativeBis"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianLieSeminegativeBis"
+   ],
+   "unfollowed": [],
+   "table_files": 9572,
+   "proof_files": 9572,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SemistableReductionSt",
+   "line": "UpperTheory.LiteratureTheorems.semistable_reduction_st_of_literature",
+   "names": [
+    "GlobalTheory.SS.semistableReductionSt"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SemistableReductionPpavPadicField"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SemistableReductionPpavPadicField"
+   ],
+   "unfollowed": [],
+   "table_files": 994,
+   "proof_files": 994,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SerreHolomorphicSections",
+   "line": "UpperTheory.LiteratureTheorems.serre_holomorphic_sections_of_literature",
+   "names": [
+    "GlobalTheory.Published.serreHolomorphicSections_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SerreHolomorphicSectionsHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SerreHolomorphicSectionsHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 444,
+   "proof_files": 444,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelEisensteinContinuation",
+   "line": "UpperTheory.LiteratureTheorems.siegel_eisenstein_continuation_of_literature",
+   "names": [
+    "PositivityTheory.RgEis.Sp.Hd.siegelEisensteinContinuation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.EisensteinChartSplitting.SiegelEisensteinContinuation"
+   ],
+   "unfollowed": [],
+   "table_files": 7446,
+   "proof_files": 7446,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelKlingenDeligneRibet",
+   "line": "UpperTheory.LiteratureTheorems.siegel_klingen_deligne_ribet_of_literature",
+   "names": [
+    "PositivityTheory.PfDR.deligneRibet_holds",
+    "PositivityTheory.Prw.siegelKlingenDeligneRibet_of",
+    "PositivityTheory.Prw.siegelKlingen_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesAut",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DeligneRibet.DeligneRibetHolds"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsAvoidOne",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesAut",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.DeligneRibet.NotDvdAbsNorm"
+   ],
+   "unfollowed": [],
+   "table_files": 18908,
+   "proof_files": 8131,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelSetUnitary",
+   "line": "UpperTheory.LiteratureTheorems.siegel_set_unitary_of_literature",
+   "names": [
+    "UpperTheory.Lit.siegelSetUnitary_of_core"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta"
+   ],
+   "unfollowed": [],
+   "table_files": 8420,
+   "proof_files": 8420,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelToroidalIntegral",
+   "line": "UpperTheory.LiteratureTheorems.siegel_toroidal_integral_of_literature",
+   "names": [
+    "GlobalTheory.siegelToroidalIntegral_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SiegelToroidalIntegralHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.SiegelToroidalIntegralHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 18219,
+   "proof_files": 18219,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelWeilUnitaryConvergent",
+   "line": "UpperTheory.LiteratureTheorems.siegel_weil_unitary_convergent_of_literature",
+   "names": [
+    "UpperTheory.Lit.Sw47.convergent"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree"
+   ],
+   "unfollowed": [],
+   "table_files": 20019,
+   "proof_files": 20019,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SiegelWeilUnitarySchrodinger",
+   "line": "UpperTheory.LiteratureTheorems.siegel_weil_unitary_schrodinger_of_literature",
+   "names": [
+    "PositivityTheory.SiegelWeilCoefficients.field"
+   ],
+   "table_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.IntegralUnitCoefficients.CoefND"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.IntegralUnitCoefficients.CoefND"
+   ],
+   "unfollowed": [],
+   "table_files": 18384,
+   "proof_files": 18384,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "SquareIntegrableSegment",
+   "line": "UpperTheory.LiteratureTheorems.square_integrable_segment_of_literature",
+   "names": [
+    "PositivityTheory.Exh.essSquareIntegrableSegments_of_seg",
+    "PositivityTheory.Prw.squareIntegrableSegment_of",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 15676,
+   "proof_files": 15676,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "StandardCosocleGL",
+   "line": "UpperTheory.LiteratureTheorems.standard_cosocle_gl_of_literature",
+   "names": [
+    "PositivityTheory.Exh.standardCosocleGL_of_seg",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 3536,
+   "proof_files": 3536,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "StandardFunctorsFiniteLength",
+   "line": "UpperTheory.LiteratureTheorems.standard_functors_finite_length_of_literature",
+   "names": [
+    "PositivityTheory.Tls2.BZGL.standardFunctorsFiniteLength_top"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopStd"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopStd"
+   ],
+   "unfollowed": [],
+   "table_files": 1240,
+   "proof_files": 1240,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "StoneVonNeumann",
+   "line": "UpperTheory.LiteratureTheorems.stone_von_neumann_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.stoneVonNeumann"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HermitianHassePrinciple"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.PlaneFormNondegenerate"
+   ],
+   "unfollowed": [],
+   "table_files": 1290,
+   "proof_files": 3,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "StrongApproxSU",
+   "line": "UpperTheory.LiteratureTheorems.strong_approx_su_of_literature",
+   "names": [
+    "GlobalTheory.StrongApproxSUProof.strongApproxSU"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsTailTer"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsTailTer"
+   ],
+   "unfollowed": [],
+   "table_files": 3760,
+   "proof_files": 3760,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "TemperedProductOfSquareIntegrable",
+   "line": "UpperTheory.LiteratureTheorems.tempered_product_of_square_integrable_of_literature",
+   "names": [
+    "GlobalTheory.CompanionTheory.GeoLink.geometricLemma",
+    "PositivityTheory.Exh.essSquareIntegrableSegments_of_seg",
+    "PositivityTheory.Exh.langlandsExhaustionGL_of_seg",
+    "PositivityTheory.Exh.langlandsMultisegments_of_seg",
+    "PositivityTheory.Exh.standardCosocleGL_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.RgGu.segmentRepresentation",
+    "PositivityTheory.Tls2.BZGL.irreducibleAdmissibleGL_top",
+    "PositivityTheory.Tls2.BZGL.standardFunctorsFiniteLength_top",
+    "UpperTheory.Lit.Cas.temperedProduct"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.GlnTemp",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopStd",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.GlnTemp",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.EssSquareIntegrableSegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LanglandsMultisegmentsOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopStd",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 17687,
+   "proof_files": 3738,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ThetaRationalInvariance",
+   "line": "UpperTheory.LiteratureTheorems.theta_rational_invariance_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.thetaRationalInvariance"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HermitianHassePrinciple"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.ThetaRationalInvarianceHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 1290,
+   "proof_files": 1202,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ToroidalCompactification",
+   "line": "UpperTheory.LiteratureTheorems.toroidal_compactification_of_literature",
+   "names": [
+    "GlobalTheory.toroidalCompactification_holds"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToroidalCompactificationHolds"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToroidalCompactificationHolds"
+   ],
+   "unfollowed": [],
+   "table_files": 20273,
+   "proof_files": 20273,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ToroidalForFanKS",
+   "line": "UpperTheory.LiteratureTheorems.toroidal_for_fan_ks_of_literature",
+   "names": [
+    "GlobalTheory.TorKSField.toroidalForFanKS"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToroidalCompactificationFanLogKodairaSpencerIso"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToroidalCompactificationFanLogKodairaSpencerIso"
+   ],
+   "unfollowed": [],
+   "table_files": 20169,
+   "proof_files": 20169,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "TotallyDisjointProductIrreducible",
+   "line": "UpperTheory.LiteratureTheorems.totally_disjoint_product_irreducible_of_literature",
+   "names": [
+    "GlobalTheory.geometricLemma_of_filtration",
+    "PositivityTheory.Geo.geometricLemmaFiltration",
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.RgGu.segmentRepresentation",
+    "PositivityTheory.SlGl.totallyDisjointProductIrreducible_of_parts"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GeometricSplitting.Imports",
+    "Development.WeilBound.CoreStatements.TotallyDisjointProducts.SLGLProductIrreducibility.TdpFill",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.TotallyDisjointProductIrreducibleOfPolynomialRin",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GeometricSplitting.Imports",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 17551,
+   "proof_files": 3601,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "UnitaryIrreducibleAdmissible",
+   "line": "UpperTheory.LiteratureTheorems.unitary_irreducible_admissible_of_literature",
+   "names": [
+    "CompanionTheory.Rg.Fl.B.unitaryIrreducibleAdmissible"
+   ],
+   "table_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB"
+   ],
+   "proof_modules": [
+    "CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.FinalB"
+   ],
+   "unfollowed": [],
+   "table_files": 3432,
+   "proof_files": 3432,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "UnlinkedProductIrreducible",
+   "line": "UpperTheory.LiteratureTheorems.unlinked_product_irreducible_of_literature",
+   "names": [
+    "GlobalTheory.TotDisjUnlinked.main",
+    "GlobalTheory.geometricLemma_of_filtration",
+    "PositivityTheory.Geo.geometricLemmaFiltration",
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.RgGu.segmentRepresentation",
+    "PositivityTheory.SlGl.totallyDisjointProductIrreducible_of_parts"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsPowValEqZpow",
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GeometricSplitting.Imports",
+    "Development.WeilBound.CoreStatements.TotallyDisjointProducts.SLGLProductIrreducibility.TdpFill",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsPowValEqZpow",
+    "Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.TotallyDisjointProductIrreducibleOfPolynomialRin",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GeometricSplitting.Imports",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 17552,
+   "proof_files": 3602,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "UnramifiedDoublingGL",
+   "line": "UpperTheory.LiteratureTheorems.unramified_doubling_gl_of_literature",
+   "names": [
+    "GlobalTheory.UnramDoublingProof.unramifiedDoublingGL"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsCommensuratedKO"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsCommensuratedKO"
+   ],
+   "unfollowed": [],
+   "table_files": 1939,
+   "proof_files": 1939,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "UnusedSlot72",
+   "line": "UpperTheory.LiteratureTheorems.siegel_eisenstein_simple_pole",
+   "names": [],
+   "table_modules": [],
+   "proof_modules": [],
+   "unfollowed": [],
+   "table_files": 0,
+   "proof_files": 0,
+   "hops": 0,
+   "package": false,
+   "same_as": "True"
+  },
+  {
+   "statement": "VolGe",
+   "line": "UpperTheory.LiteratureTheorems.vol_ge_of_literature",
+   "names": [
+    "GlobalTheory.ArithmeticHeightTower.ArakelovDirectHeights.arCalc_direct",
+    "GlobalTheory.VolBr.volGe_of_hilbertSamuel",
+    "GlobalTheory.arithHilbertSamuel_of_principalisation",
+    "GlobalTheory.nefNumerics_outright",
+    "PositivityTheory.ResPlug.FromRes.resK",
+    "PositivityTheory.ResPlug.WeightsCompactStabilizer.principalisation_closed",
+    "PositivityTheory.Tls2.Pl.poincareLelong"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.VolGeOfHilbertSamuel",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.VolGeOfHilbertSamuel",
+    "Development.WeilBound.CoreStatements.PublishedTheorems.NefNumerics.NefRiemannRoch.NefLineBundleNumericalTheoremsProof",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PlugResK",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.CycleHeightFormulas.CycleHeightsDirect",
+    "Development.WeilBound.CoreStatements.TemperedRepresentationTheory.PoincareLelong.PoincareLelongInv"
+   ],
+   "unfollowed": [],
+   "table_files": 27835,
+   "proof_files": 27835,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "VolNef",
+   "line": "UpperTheory.LiteratureTheorems.vol_nef_of_literature",
+   "names": [
+    "GlobalTheory.Published.ArithHilbertSamuel.volNef",
+    "GlobalTheory.arithHilbertSamuel_of_principalisation",
+    "PositivityTheory.ResPlug.WeightsCompactStabilizer.principalisation_closed"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SmallSecTensTriv",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArithHilbertSamuelOfPrincipalisation",
+    "Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SmallSecTensTriv",
+    "Development.WeilBound.CoreStatements.ResolutionCharZero.PrincipalisationClosed"
+   ],
+   "unfollowed": [],
+   "table_files": 20899,
+   "proof_files": 20899,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeberRayFieldSt",
+   "line": "UpperTheory.LiteratureTheorems.weber_ray_field_st_of_literature",
+   "names": [
+    "PositivityTheory.Prw.weberRayFieldSt_holds"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiagonalMulMemCongruenceSubgroup"
+   ],
+   "unfollowed": [],
+   "table_files": 16171,
+   "proof_files": 1481,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeilRepresentationExists",
+   "line": "UpperTheory.LiteratureTheorems.weil_representation_exists_of_literature",
+   "names": [
+    "UpperTheory.Lit.weilRepresentationExists_pair"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilEx"
+   ],
+   "proof_modules": [
+    "Development.WeilBound.ThetaLifts.Reductions.WeilPairs.WeilPairExistence.WeilEx"
+   ],
+   "unfollowed": [],
+   "table_files": 8124,
+   "proof_files": 8123,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeilRepresentationUnitaryPair",
+   "line": "UpperTheory.LiteratureTheorems.weil_representation_unitary_pair_of_literature",
+   "names": [
+    "GlobalTheory.weilRepresentationUnitaryPair"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ImportsBis"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ImportsBis"
+   ],
+   "unfollowed": [],
+   "table_files": 2303,
+   "proof_files": 2303,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeilSiegelFormulaUnitary",
+   "line": "UpperTheory.LiteratureTheorems.weil_siegel_formula_unitary_of_literature",
+   "names": [
+    "UpperTheory.Lit.Sw47.weilUnitary"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.FockAnisoFree"
+   ],
+   "unfollowed": [],
+   "table_files": 20019,
+   "proof_files": 20019,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeilThetaConvergence",
+   "line": "UpperTheory.LiteratureTheorems.weil_theta_convergence_of_literature",
+   "names": [
+    "UpperTheory.Lit.weilThetaConvergence"
+   ],
+   "table_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicArithmetic.ThetaCorrespondence.WeilRepresentation.WeilTheta"
+   ],
+   "unfollowed": [],
+   "table_files": 8420,
+   "proof_files": 8420,
+   "hops": 0,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "WeylBranching",
+   "line": "UpperTheory.LiteratureTheorems.weyl_branching_of_literature",
+   "names": [
+    "PositivityTheory.Stage1.PM.weylBranching"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.StandardPublishedResults.StandardTheoremStatements.HeckeLEntireAndNonzeroAtOne"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.FoundationProofs.BranchesAlongOfIrreducible"
+   ],
+   "unfollowed": [],
+   "table_files": 907,
+   "proof_files": 627,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "ZelevinskyPolynomialRing",
+   "line": "UpperTheory.LiteratureTheorems.zelevinsky_polynomial_ring_of_literature",
+   "names": [
+    "PositivityTheory.Groth.grothendieckRingPolynomial_of_seg",
+    "PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds",
+    "PositivityTheory.Prw.zelevinskyPolynomialRing_of",
+    "PositivityTheory.RgGu.segmentRepresentation"
+   ],
+   "table_modules": [
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "proof_modules": [
+    "Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness",
+    "Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.BridgesMore",
+    "Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.GrothendieckRingPolynomialOfSeg",
+    "Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation"
+   ],
+   "unfollowed": [],
+   "table_files": 21501,
+   "proof_files": 15512,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  },
+  {
+   "statement": "principalPolarisationOneSection",
+   "line": "UpperTheory.LiteratureTheorems.principal_polarisation_one_section_of_literature",
+   "names": [
+    "GlobalTheory.AbLaw.principalPolarisation_unique_section"
+   ],
+   "table_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PrincipalPolarisationUniqueSection"
+   ],
+   "proof_modules": [
+    "Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.FinrankSectionsPrincipalPolarisationEqOne"
+   ],
+   "unfollowed": [],
+   "table_files": 377,
+   "proof_files": 375,
+   "hops": 1,
+   "package": false,
+   "same_as": null
+  }
+ ],
+ "other_lines": [
+  "UpperTheory.LiteratureTheorems.carU_above_l_of_literature",
+  "UpperTheory.LiteratureTheorems.carU_local_global_of_literature",
+  "UpperTheory.LiteratureTheorems.cheb_of_literature",
+  "UpperTheory.LiteratureTheorems.cusp_u_of_literature",
+  "UpperTheory.LiteratureTheorems.eis_bl_of_literature",
+  "UpperTheory.LiteratureTheorems.fargues_exact_of_literature",
+  "UpperTheory.LiteratureTheorems.global_euler_char_of_literature",
+  "UpperTheory.LiteratureTheorems.global_finiteness_of_literature",
+  "UpperTheory.LiteratureTheorems.greenberg_wiles_of_literature",
+  "UpperTheory.LiteratureTheorems.ht_card_of_literature",
+  "UpperTheory.LiteratureTheorems.join_out_of_literature",
+  "UpperTheory.LiteratureTheorems.literature_automorphy",
+  "UpperTheory.LiteratureTheorems.literature_cohomology",
+  "UpperTheory.LiteratureTheorems.literature_local",
+  "UpperTheory.LiteratureTheorems.literature_nonexistence",
+  "UpperTheory.LiteratureTheorems.localEulerChar_alt_alt",
+  "UpperTheory.LiteratureTheorems.local_euler_char_k_of_literature",
+  "UpperTheory.LiteratureTheorems.local_finiteness_k_of_literature",
+  "UpperTheory.LiteratureTheorems.local_finiteness_of_literature",
+  "UpperTheory.LiteratureTheorems.local_langlands_gl_recT_exists_of_literature",
+  "UpperTheory.LiteratureTheorems.local_langlands_recT_exists_of_literature",
+  "UpperTheory.LiteratureTheorems.local_tate_duality_k_of_literature",
+  "UpperTheory.LiteratureTheorems.local_tate_duality_of_literature",
+  "UpperTheory.LiteratureTheorems.logDerivOne",
+  "UpperTheory.LiteratureTheorems.nef_rr_of_literature",
+  "UpperTheory.LiteratureTheorems.pair_u_of_literature",
+  "UpperTheory.LiteratureTheorems.poincare_lelong_inv_of_literature",
+  "UpperTheory.LiteratureTheorems.principalisation_char_zero_of_literature",
+  "UpperTheory.LiteratureTheorems.published_results_analytic",
+  "UpperTheory.LiteratureTheorems.published_results_arithmetic",
+  "UpperTheory.LiteratureTheorems.published_results_eigen",
+  "UpperTheory.LiteratureTheorems.published_results_first",
+  "UpperTheory.LiteratureTheorems.published_results_local",
+  "UpperTheory.LiteratureTheorems.resolution_char_zero_of_literature",
+  "UpperTheory.LiteratureTheorems.siegelWeilU_unitary_convergent_of_literature",
+  "UpperTheory.LiteratureTheorems.siegel_weil_std_of_literature",
+  "UpperTheory.LiteratureTheorems.theta_integrals_agree_and_local_matching_of_literature",
+  "UpperTheory.LiteratureTheorems.unramified_orthogonality_of_literature",
+  "UpperTheory.LiteratureTheorems.zarhin_statement"
+ ]
+}

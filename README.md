@@ -137,6 +137,11 @@ Round two pages (each checks its own numbers before it draws, and loads nothing 
 - `six_finished_theorems.html` (Fixpoint, with readings by Marlow, Lattice and Confluence): six published results that the
   archive proves and that are complete in the part we compiled (Linnik's theorem among them), each with what its Lean statement
   really says. Replay: `tools/rh_published_sweep.lean`, `tools/rh_linnik.lean`.
+- `how_far_is_each_result.html` (Fixpoint): the 155 statements in the archive's table of published results, by how many of the
+  archive's files are reached when the row points to a proof, whether Lean has checked it here, and whether its line leans on an assumed statement.
+  Written by `tools/rh_published_ladder.py` from `crew_visuals/rh_published_scan2.json` (made by `tools/rh_published_scan2.py`)
+  and `crew_visuals/rh_published_proved.txt`. `tools/rh_published_direct_gen.py` writes the check that proves a statement by the
+  theorem its line leads to. `tools/rh_artin.lean` replays the archive's proof of Artin reciprocity.
 - `a_sign_at_every_prime.html` (Fixpoint, after Lattice's `crew_visuals/quadratic_norm_signs.html`): two of those six on whole numbers
   you choose: the sign at every prime, the product law, and a solution when every sign is +1. Checked against
   `tools/check_sign_at_every_prime.py`, a separate search-only program.

@@ -1,0 +1,103 @@
+# beyond the 17,280 files we had already compiled, 1,840 more (19 for Green's classification, then 1,821) took the number of statements checked to 43, 6,952 more took it to 78, and 3,343 more to 92; counted one at a time by the first scan, as new files for each table line, those 92 would have asked for 41,242. Last, 115 files chosen by the proof's own count took it to 100.
+# Two of the names, DiscreteSeriesExists and DiscreteSeriesUpqExists, are one statement: the archive defines the first to be the second.
+AbMulNSt
+BernsteinZelevinskyFiniteness  # direct
+BhattScholzeCrystallineLattices
+BhattScholzeIntegral
+BlochKatoLocal
+BorelCasselman
+BrauerDegreeZero
+CMCurveGoodOutsidePrimeSt
+CasselmanWallach
+ChebotarevDegreeOne
+ChevalleyUnits
+ChowFormExists
+ClozelCohomological
+ClozelPurity
+ComplexMultiplicationJSt
+CuspBounded
+CuspDecayBound
+CuspDecaySobolev
+CuspFormsBoundedGL
+CuspRapidDecay
+CuspidalMirabolic
+DeRhamPotSemistable
+DeligneRibet
+DepthZeroJacquetInjective
+DepthZeroSupport
+DiscreteSeriesClassification
+DiscreteSeriesCover
+DiscreteSeriesCoverExists
+DiscreteSeriesExists
+DiscreteSeriesHermitianUnique  # direct
+DiscreteSeriesLowestKType  # direct
+DiscreteSeriesUpqExists
+DixmierMalliavinFactorisation
+EllipticMainTheoremCM  # direct
+EssSquareIntegrableSegments
+FinitenessOfHermitianClasses  # outside the table
+FlathFactorisation
+FlathTensorProduct
+FontaineBcris
+FormalAlgebraisation
+FormalDegreeCompactDual
+GKGlobalisation
+GLHoweDuality
+GenericUnitaryDualGL
+GenericUnlinkedGL
+GeometricLemma
+GeometricLemmaFiltration
+GlobalArtinReciprocity
+GreenCuspidal
+GreenRegularCharacters
+GrothendieckRingPolynomial
+HarishChandraAnalyticity
+HarishChandraModules
+HasseNormSt
+HeckeLAdicCharacter
+HeckeLAdicCharacterDeRham
+HeckeLEntireAndNonzeroAtOne
+HeckeLPartialContinuation
+HeckeTateFunctionalEquation
+HermitianHassePrinciple
+HermitianLocalGlobal
+HilbertClassFieldJ
+HolomorphicDiscreteSeries
+HoweDualityReal
+IdealInvariantsOneOrbitSt  # direct
+InducedSimpleLowestAlcove
+IrreducibleAdmissibleGL
+KFiniteVectorsUnitary
+KudlaSplittingSplitUnitary
+L2ExtensionLogCanonical
+LandherrSt
+LanglandsExhaustionGL
+LanglandsMultisegments
+Linnik
+LocalConverseGL
+MetaplecticRepresentation
+MoyPrasadJacquetIso  # direct
+NefNumerics
+PartialZetaFunctionalEquation  # direct
+PoitouTateNormalised
+QuadraticClassFieldTheory
+RadfordShufflePolynomial
+RayCharacterArtin
+RayClassFieldSt
+RealMetaplecticRepresentation
+RegularAlgebraicPurity
+SchurOrthogonalitySquareIntegrable
+SegmentRepresentation
+SemistableReductionSt
+SerreHolomorphicSections
+StandardCosocleGL
+StandardFunctorsFiniteLength
+StoneVonNeumann
+StrongApproxSU
+ThetaRationalInvariance
+UnitaryIrreducibleAdmissible
+UnramifiedDoublingGL
+WeberRayFieldSt  # direct
+WeilRepresentationUnitaryPair
+WeylBranching
+principalPolarisationOneSection

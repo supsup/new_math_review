@@ -879,4 +879,270 @@ FORTY-THREE PUBLISHED STATEMENTS, ONE BY ONE. After the build of 1,821 further f
 'pub_principalPolarisationOneSection' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 
+SEVENTY-EIGHT PUBLISHED STATEMENTS. After the second extra build (6,952 further files; lake build exit 0 in 4,416 s) the same generator restated the archive's line for every statement whose proof files were then all built, 78 of them, and Lean, run in the compiled project (17 seconds, no error), printed:
+
+'pub_AbMulNSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BhattScholzeIntegral' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BhattScholzeCrystallineLattices' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BlochKatoLocal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BorelCasselman' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BrauerDegreeZero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CMCurveGoodOutsidePrimeSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CasselmanWallach' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChebotarevDegreeOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChevalleyUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChowFormExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ClozelPurity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ComplexMultiplicationJSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspBounded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspDecayBound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspDecaySobolev' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspFormsBoundedGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspRapidDecay' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspidalMirabolic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DeligneRibet' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DepthZeroJacquetInjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DepthZeroSupport' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesCoverExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesUpqExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DixmierMalliavinFactorisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FlathTensorProduct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_UnitaryIrreducibleAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FlathFactorisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FontaineBcris' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FormalAlgebraisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FormalDegreeCompactDual' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GKGlobalisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GLHoweDuality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GeometricLemma' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GeometricLemmaFiltration' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GlobalArtinReciprocity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GreenCuspidal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GreenRegularCharacters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HarishChandraAnalyticity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HarishChandraModules' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HasseNormSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLAdicCharacter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLEntireAndNonzeroAtOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLPartialContinuation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeTateFunctionalEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HermitianHassePrinciple' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HermitianLocalGlobal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HilbertClassFieldJ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HolomorphicDiscreteSeries' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_InducedSimpleLowestAlcove' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_IrreducibleAdmissibleGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_KFiniteVectorsUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_KudlaSplittingSplitUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_L2ExtensionLogCanonical' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LandherrSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_Linnik' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LocalConverseGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_MetaplecticRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_NefNumerics' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_PoitouTateNormalised' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_QuadraticClassFieldTheory' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RadfordShufflePolynomial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RayCharacterArtin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RayClassFieldSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RealMetaplecticRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SchurOrthogonalitySquareIntegrable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SegmentRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SemistableReductionSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SerreHolomorphicSections' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StandardFunctorsFiniteLength' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StoneVonNeumann' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StrongApproxSU' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ThetaRationalInvariance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_UnramifiedDoublingGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_WeilRepresentationUnitaryPair' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_WeylBranching' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_principalPolarisationOneSection' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+
+NINETY-TWO PUBLISHED STATEMENTS. After the third extra build (3,343 further files; lake build exit 0 in 2,183 s) the same generator restated the archive's line for every statement whose proof files were then all built, 92 of them, and Lean, run in the compiled project (20 seconds, no error), printed:
+
+'pub_AbMulNSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BhattScholzeIntegral' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BhattScholzeCrystallineLattices' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BlochKatoLocal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BorelCasselman' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_BrauerDegreeZero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CMCurveGoodOutsidePrimeSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CasselmanWallach' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChebotarevDegreeOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChevalleyUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ChowFormExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ClozelCohomological' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ClozelPurity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ComplexMultiplicationJSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspBounded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspDecayBound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspDecaySobolev' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspFormsBoundedGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspRapidDecay' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_CuspidalMirabolic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DeRhamPotSemistable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DeligneRibet' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DepthZeroJacquetInjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DepthZeroSupport' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesClassification' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesCover' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesCoverExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DiscreteSeriesUpqExists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_DixmierMalliavinFactorisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_EssSquareIntegrableSegments' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FlathTensorProduct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_UnitaryIrreducibleAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FlathFactorisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FontaineBcris' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FormalAlgebraisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_FormalDegreeCompactDual' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GKGlobalisation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GLHoweDuality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GenericUnitaryDualGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GenericUnlinkedGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GeometricLemma' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GeometricLemmaFiltration' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GlobalArtinReciprocity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GreenCuspidal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GreenRegularCharacters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_GrothendieckRingPolynomial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HarishChandraAnalyticity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HarishChandraModules' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HasseNormSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLAdicCharacter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLAdicCharacterDeRham' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLEntireAndNonzeroAtOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeLPartialContinuation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HeckeTateFunctionalEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HermitianHassePrinciple' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HermitianLocalGlobal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HilbertClassFieldJ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HolomorphicDiscreteSeries' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_HoweDualityReal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_InducedSimpleLowestAlcove' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_IrreducibleAdmissibleGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_KFiniteVectorsUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_KudlaSplittingSplitUnitary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_L2ExtensionLogCanonical' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LandherrSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LanglandsExhaustionGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LanglandsMultisegments' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_Linnik' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_LocalConverseGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_MetaplecticRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_NefNumerics' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_PoitouTateNormalised' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_QuadraticClassFieldTheory' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RadfordShufflePolynomial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RayCharacterArtin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RayClassFieldSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RealMetaplecticRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_RegularAlgebraicPurity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SchurOrthogonalitySquareIntegrable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SegmentRepresentation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SemistableReductionSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_SerreHolomorphicSections' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StandardCosocleGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StandardFunctorsFiniteLength' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StoneVonNeumann' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_StrongApproxSU' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_ThetaRationalInvariance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_UnramifiedDoublingGL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_WeilRepresentationUnitaryPair' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_WeylBranching' depends on axioms: [propext, Classical.choice, Quot.sound]
+'pub_principalPolarisationOneSection' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+
+EIGHT MORE, PROVED DIRECTLY. After 115 further files (lake build exit 0 in 157 s), the file written by tools/rh_published_direct_gen.py, run in the compiled project (4 seconds, no error), printed:
+
+'direct_PartialZetaFunctionalEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_IdealInvariantsOneOrbitSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_MoyPrasadJacquetIso' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_BernsteinZelevinskyFiniteness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_EllipticMainTheoremCM' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_WeberRayFieldSt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_DiscreteSeriesHermitianUnique' depends on axioms: [propext, Classical.choice, Quot.sound]
+'direct_DiscreteSeriesLowestKType' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+
+ARTIN RECIPROCITY. tools/rh_artin.lean, run in the compiled project (4 seconds, no error), printed:
+
+GlobalTheory.globalArtinReciprocity_holds : GlobalTheory.Published.GlobalArtinReciprocity
+def GlobalTheory.Published.GlobalArtinReciprocity : Prop :=
+∀ (E Ω : Type) [inst : Field E] [inst_1 : NumberField E] [inst_2 : Field Ω] [inst_3 : Algebra E Ω] [IsAlgClosure E Ω],
+  ∃ art, GlobalTheory.HeckeGal.IsGlobalArtin art
+structure GlobalTheory.HeckeGal.IsGlobalArtin {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω]
+  (art : Neutral.B1.Ideles E →* GlobalTheory.HeckeGal.Gab E Ω) : Prop
+number of parameters: 7
+fields:
+  GlobalTheory.HeckeGal.IsGlobalArtin.quot : IsOpenQuotientMap ⇑art
+  GlobalTheory.HeckeGal.IsGlobalArtin.ker : art.ker =
+      ((Neutral.B1.diagUnits E).range ⊔ GlobalTheory.HeckeGal.infConn E).topologicalClosure
+  GlobalTheory.HeckeGal.IsGlobalArtin.ine : ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E))
+      (A : ValuationSubring Ω),
+      Formalism.ConjugateSelfDual.IsPlaceOver A v →
+        ∀ (g : GlobalTheory.HeckeGal.Gab E Ω),
+          (∃ x, Formalism.L2.Host.IsUnitAt v x ∧ art ((Neutral.B1.localIdele E v) x) = g) ↔
+            ∃ σ ∈ ReciprocityTheory.Gal.Ine A, (GlobalTheory.HeckeGal.toAb E Ω) σ = g
+  GlobalTheory.HeckeGal.IsGlobalArtin.frob : ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E))
+      (A : ValuationSubring Ω),
+      Formalism.ConjugateSelfDual.IsPlaceOver A v →
+        ∀ (g : GlobalTheory.HeckeGal.Gab E Ω),
+          (∃ x, Formalism.L2.Host.IsUnifAt v x ∧ art ((Neutral.B1.localIdele E v) x) = g) ↔
+            ∃ σ,
+              Formalism.ConjugateSelfDual.IsFrob A (Formalism.ConjugateSelfDual.normV v) σ ∧
+                (GlobalTheory.HeckeGal.toAb E Ω) σ⁻¹ = g
+  GlobalTheory.HeckeGal.IsGlobalArtin.dec : ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E))
+      (A : ValuationSubring Ω),
+      Formalism.ConjugateSelfDual.IsPlaceOver A v →
+        (art.comp (Neutral.B1.localIdele E v)).range.topologicalClosure =
+          Subgroup.map (GlobalTheory.HeckeGal.toAb E Ω) (ReciprocityTheory.Gal.Dec A)
+constructor:
+  GlobalTheory.HeckeGal.IsGlobalArtin.mk {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω]
+    {art : Neutral.B1.Ideles E →* GlobalTheory.HeckeGal.Gab E Ω} (quot : IsOpenQuotientMap ⇑art)
+    (ker : art.ker = ((Neutral.B1.diagUnits E).range ⊔ GlobalTheory.HeckeGal.infConn E).topologicalClosure)
+    (ine :
+      ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E)) (A : ValuationSubring Ω),
+        Formalism.ConjugateSelfDual.IsPlaceOver A v →
+          ∀ (g : GlobalTheory.HeckeGal.Gab E Ω),
+            (∃ x, Formalism.L2.Host.IsUnitAt v x ∧ art ((Neutral.B1.localIdele E v) x) = g) ↔
+              ∃ σ ∈ ReciprocityTheory.Gal.Ine A, (GlobalTheory.HeckeGal.toAb E Ω) σ = g)
+    (frob :
+      ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E)) (A : ValuationSubring Ω),
+        Formalism.ConjugateSelfDual.IsPlaceOver A v →
+          ∀ (g : GlobalTheory.HeckeGal.Gab E Ω),
+            (∃ x, Formalism.L2.Host.IsUnifAt v x ∧ art ((Neutral.B1.localIdele E v) x) = g) ↔
+              ∃ σ,
+                Formalism.ConjugateSelfDual.IsFrob A (Formalism.ConjugateSelfDual.normV v) σ ∧
+                  (GlobalTheory.HeckeGal.toAb E Ω) σ⁻¹ = g)
+    (dec :
+      ∀ (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers E)) (A : ValuationSubring Ω),
+        Formalism.ConjugateSelfDual.IsPlaceOver A v →
+          (art.comp (Neutral.B1.localIdele E v)).range.topologicalClosure =
+            Subgroup.map (GlobalTheory.HeckeGal.toAb E Ω) (ReciprocityTheory.Gal.Dec A)) :
+    GlobalTheory.HeckeGal.IsGlobalArtin art
+@[reducible] def GlobalTheory.HeckeGal.Gab : (E Ω : Type) →
+  [inst : Field E] → [inst_1 : Field Ω] → [Algebra E Ω] → Type :=
+fun E Ω [Field E] [Field Ω] [Algebra E Ω] => TopologicalAbelianization (Formalism.ConjugateSelfDual.G E Ω)
+def GlobalTheory.HeckeGal.toAb : (E Ω : Type) →
+  [inst : Field E] →
+    [inst_1 : Field Ω] → [inst_2 : Algebra E Ω] → Formalism.ConjugateSelfDual.G E Ω →* GlobalTheory.HeckeGal.Gab E Ω :=
+fun E Ω [Field E] [Field Ω] [Algebra E Ω] =>
+  QuotientGroup.mk' (commutator (Formalism.ConjugateSelfDual.G E Ω)).topologicalClosure
+def GlobalTheory.HeckeGal.infConn : (E : Type) →
+  [inst : Field E] → [inst_1 : NumberField E] → Subgroup (Neutral.B1.Ideles E) :=
+fun E [Field E] [NumberField E] =>
+  Subgroup.map
+    (Units.map
+      (MonoidHom.inl (NumberField.InfiniteAdeleRing E)
+        (IsDedekindDomain.FiniteAdeleRing (NumberField.RingOfIntegers E) E)))
+    (Subgroup.connectedComponentOfOne (NumberField.InfiniteAdeleRing E)ˣ)
+'GlobalTheory.globalArtinReciprocity_holds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'artin_map_onto_continuous_open' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+
 Asked by Lattice (chat 34789, 34832, 34909, 34913), Confluence (34782, 34912), Marlow (34910) and Fixpoint. Run by Fixpoint, 25 November 2026.
