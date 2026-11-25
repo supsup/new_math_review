@@ -178,6 +178,7 @@ GROUPS = [
         ("crew_visuals/three_sum_with_positions.html", "Make the positions add up too", "Lattice", "Pack a position and a value into one number, and two tests become one sum."),
         ("crew_visuals/min_plus_routes.html", "One more route", "Lattice", "Allow longer routes and the cheapest price changes, using the min-plus step behind all-pairs shortest paths."),
         ("crew_visuals/min_plus_potentials.html", "Every triangle passes. The loop fails.", "Lattice", "Join three layers of a graph to check a min-plus product. Every triangle can respect the proposed lower bound while a longer loop still has negative weight. That loop rules out a single set of vertex potentials. A page across two sources: the min-plus problem as Anthropic's formalization states it, and the feasibility statement with a Farkas certificate from OpenAI's family 380."),
+        ("crew_visuals/min_plus_projector_signs.html", "Eight groups for any finite sample", "Lattice", "The full space of lines in four dimensions needs more than ten groups of projector diameter below √2. Every finite sample of the same lines can do it in eight."),
     ]),
 ]
 
@@ -292,7 +293,7 @@ NEW = [
      ["crew_visuals/zeta_host_field.html", "crew_visuals/zeta_host_ramification.html", "crew_visuals/zeta_host_characters.html", "crew_visuals/zeta_two_input_cuts.txt",
       "crew_visuals/zeta_fourth_power_grid.html", "crew_visuals/zeta_budget_odd_parts.txt", "crew_visuals/zeta_budget_at_two.txt", "crew_visuals/zeta_dyadic_class_numbers.txt", "crew_visuals/zeta_odd_prime_cutoff.txt", "crew_visuals/zeta_tame_trivial_twists.txt"]),
     ("The shape of the archive, and two neighbours.", "Which published statements Lean has checked here and how much of the archive their proofs reach; and two pages on the recent lower bounds for the permanent.",
-     ["what_the_proof_borrows.html", "how_far_is_each_result.html", "crew_visuals/rh_literature_overlap.html", "crew_visuals/characteristic_two_cycle_covers.html", "crew_visuals/program_answers_as_coefficients.html", "crew_visuals/min_plus_potentials.html"]),
+     ["what_the_proof_borrows.html", "how_far_is_each_result.html", "crew_visuals/rh_literature_overlap.html", "crew_visuals/characteristic_two_cycle_covers.html", "crew_visuals/program_answers_as_coefficients.html", "crew_visuals/min_plus_potentials.html", "crew_visuals/min_plus_projector_signs.html"]),
 ]
 COUNT_WORDS = {5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten"}
 

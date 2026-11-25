@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eight groups for any finite sample</title>
+<style>
+  :root {
+    color-scheme:light;
+    --paper:#f5efe3; --panel:#fffaf0; --ink:#3a2c23; --muted:#6c5547;
+    --line:#d8c2ac; --accent:#7b412e; --first:#9a4e2b; --second:#2e6560;
+    background:var(--paper); color:var(--ink); font:100%/1.6 system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark) {
+    :root {
+      color-scheme:dark;
+      --paper:#29211b; --panel:#342921; --ink:#fff2e2; --muted:#dbc5b2;
+      --line:#735b49; --accent:#ffc299; --first:#f3ac7c; --second:#7fd1bc;
+    }
+  }
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; }
+  main { max-width:56rem; margin:auto; padding:clamp(1rem,5vw,3.5rem); }
+  a { color:var(--accent); text-underline-offset:.18em; }
+  a:focus-visible,input:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+  h1,h2 { font-family:Georgia,serif; font-weight:400; text-wrap:balance; }
+  h1 { max-width:16ch; font-size:clamp(2.7rem,8vw,5.2rem); line-height:.97; letter-spacing:-.045em; margin:.66rem 0 .9rem; }
+  h2 { font-size:1.63rem; line-height:1.15; margin:1.34rem 0 .45rem; }
+  p { max-width:68ch; margin:.6rem 0; overflow-wrap:anywhere; }
+  .intro,.note { color:var(--muted); }
+  .lab {
+    display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:clamp(.6rem,3vw,1.4rem);
+    align-items:center; margin:1.15rem 0;
+    background:var(--panel); border:1px solid var(--line); border-radius:.4rem;
+    padding:clamp(.8rem,3vw,1.3rem);
+  }
+  @media (max-width:560px) { .lab { grid-template-columns:minmax(0,1fr); } }
+  canvas { display:block; width:min(100%,15rem); aspect-ratio:1; margin:auto; }
+  label { display:block; font-weight:650; }
+  input[type=range] { width:100%; min-height:2rem; margin:0; accent-color:var(--accent); }
+  output { color:var(--accent); font-variant-numeric:tabular-nums; }
+  .note { min-height:3.2em; }
+</style>
+</head>
+<body>
+<main>
+  <a href="min_plus_potentials.html">Every triangle passes. The loop fails.</a>
+  <h1>Eight groups for any finite sample</h1>
+  <p class="intro">The full space of lines in four dimensions needs more than ten groups of projector diameter below <span class="lattex" data-tex="\sqrt{2}\text{.}" style="display:inline-block;width:1.554em;max-width:100%;vertical-align:-0.245em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -41.68 62.16 51.48" width="62.16" height="51.48" role="img" aria-label="the square root of 2 .">
+  <g fill="currentColor">
+    <path d="M667 922 L829 922 L829 854 L713 854 L413 -265 L371 -265 L138 319 L34 279 L18 307 L177 417 L197 417 L395 -93 L399 -93 L667 922 Z" transform="translate(0 -2.8) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(31.76 0) scale(0.04 -0.04)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(51.56 0) scale(0.04 -0.04)"/>
+    <rect x="31.76" y="-39.68" width="19.8" height="2.72"/>
+  </g>
+</svg></span> Every finite sample of the same lines can do it in eight. <a href="https://github.com/openai/math/blob/3344da59991ed94f9ba711217b29c1d760badfa6/lean/docs/156.md">OpenAI’s Borsuk result for the full space</a>.</p>
+
+  <h2>Group by three signs</h2>
+  <p>Rotate the finite sample so every line has all four coordinates nonzero. You can do this with a tiny rotation because each zero coordinate can be avoided and there are only finitely many to avoid. Choose the direction on each line whose fourth coordinate is positive. The signs of the other three coordinates give eight possible groups.</p>
+  <p>Two directions in the same group agree in all four signs. Each coordinate product is positive, so the dot product is positive. Their lines are therefore closer than perpendicular lines. Since a finite group has only finitely many pairs, even its farthest pair has projector distance below <span class="lattex" data-tex="\sqrt{2}\text{.}" style="display:inline-block;width:1.554em;max-width:100%;vertical-align:-0.245em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -41.68 62.16 51.48" width="62.16" height="51.48" role="img" aria-label="the square root of 2 .">
+  <g fill="currentColor">
+    <path d="M667 922 L829 922 L829 854 L713 854 L413 -265 L371 -265 L138 319 L34 279 L18 307 L177 417 L197 417 L395 -93 L399 -93 L667 922 Z" transform="translate(0 -2.8) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(31.76 0) scale(0.04 -0.04)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(51.56 0) scale(0.04 -0.04)"/>
+    <rect x="31.76" y="-39.68" width="19.8" height="2.72"/>
+  </g>
+</svg></span></p>
+
+  <h2>Why the full space is different</h2>
+  <p>Pairs of lines can get arbitrarily close to perpendicular while every pair still falls short of perpendicular. Diameter uses the supremum of the distances, which can reach <span class="lattex" data-tex="\sqrt{2}" style="display:inline-block;width:1.371em;max-width:100%;vertical-align:-0.245em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -41.68 54.84 51.48" width="54.84" height="51.48" role="img" aria-label="the square root of 2">
+  <g fill="currentColor">
+    <path d="M667 922 L829 922 L829 854 L713 854 L413 -265 L371 -265 L138 319 L34 279 L18 307 L177 417 L197 417 L395 -93 L399 -93 L667 922 Z" transform="translate(0 -2.8) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(31.76 0) scale(0.04 -0.04)"/>
+    <rect x="31.76" y="-39.68" width="19.8" height="2.72"/>
+  </g>
+</svg></span> without any pair reaching it. Move the slider toward zero to see the gap shrink.</p>
+  <section class="lab" aria-label="Bring two lines closer to perpendicular">
+    <div>
+      <label for="tilt">Tilt toward the diagonal <output id="tilt-value" for="tilt">0.10</output></label>
+      <input id="tilt" type="range" min="0" max="100" value="10">
+      <p>Projector distance <output id="distance" for="tilt">1.386</output><br>
+        Gap below the diameter <output id="gap" for="tilt">0.028</output></p>
+      <p id="description" class="note" aria-live="polite">Both directions lie strictly within the same quadrant.</p>
+    </div>
+    <canvas id="lines" role="img" aria-label="Two directions in one coordinate plane" aria-describedby="description"></canvas>
+  </section>
+  <p>Here the directions are <span class="lattex" data-tex="(1,t)" style="display:inline-block;width:1.9687em;max-width:100%;vertical-align:-0.246em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.2 -31.44 78.7467 41.28" width="78.7467" height="41.28" role="img" aria-label="( 1 , t )">
+  <g fill="currentColor">
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(14.28 0) scale(0.04 -0.04)"/>
+    <path d="M70 -132 L58 -107 Q77 -99 96 -86 Q115 -74 128 -50 Q141 -26 141 14 Q125 8 110 8 Q81 8 68 24 Q55 40 55 62 Q55 86 71 103 Q87 121 117 121 Q155 121 174 97 Q194 74 194 33 Q194 -9 180 -38 Q167 -67 147 -85 Q127 -103 106 -114 Q85 -125 70 -132 Z" transform="translate(34.08 0) scale(0.04 -0.04)"/>
+    <path d="M317 467 L309 428 L208 428 L149 130 Q149 130 145 111 Q142 93 142 80 Q142 72 145 65 Q149 59 159 59 Q181 59 199 72 Q218 85 244 119 L264 104 Q250 85 230 58 Q210 31 182 11 Q154 -9 114 -9 Q83 -9 68 6 Q53 21 53 44 Q53 57 56 75 Q59 94 60 101 L128 428 L71 428 L75 449 Q107 466 128 482 Q150 498 169 524 Q189 550 214 593 L244 593 L216 467 L317 467 Z" transform="translate(50.5467 0) scale(0.04 -0.04)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(64.0667 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span> and <span class="lattex" data-tex="(t,1)" style="display:inline-block;width:1.9687em;max-width:100%;vertical-align:-0.246em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.2 -31.44 78.7467 41.28" width="78.7467" height="41.28" role="img" aria-label="( t , 1 )">
+  <g fill="currentColor">
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M317 467 L309 428 L208 428 L149 130 Q149 130 145 111 Q142 93 142 80 Q142 72 145 65 Q149 59 159 59 Q181 59 199 72 Q218 85 244 119 L264 104 Q250 85 230 58 Q210 31 182 11 Q154 -9 114 -9 Q83 -9 68 6 Q53 21 53 44 Q53 57 56 75 Q59 94 60 101 L128 428 L71 428 L75 449 Q107 466 128 482 Q150 498 169 524 Q189 550 214 593 L244 593 L216 467 L317 467 Z" transform="translate(14.28 0) scale(0.04 -0.04)"/>
+    <path d="M70 -132 L58 -107 Q77 -99 96 -86 Q115 -74 128 -50 Q141 -26 141 14 Q125 8 110 8 Q81 8 68 24 Q55 40 55 62 Q55 86 71 103 Q87 121 117 121 Q155 121 174 97 Q194 74 194 33 Q194 -9 180 -38 Q167 -67 147 -85 Q127 -103 106 -114 Q85 -125 70 -132 Z" transform="translate(27.8 0) scale(0.04 -0.04)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(44.2667 0) scale(0.04 -0.04)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(64.0667 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span> in a coordinate plane. Normalizing and taking the Frobenius distance between the projectors gives <span class="lattex" data-tex="\sqrt{2}\,(1-t^2)/(1+t^2)\text{.}" style="display:inline-block;width:8.3326em;max-width:100%;vertical-align:-0.246em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -41.68 333.3022 51.52" width="333.3022" height="51.52" role="img" aria-label="the square root of 2 ( 1 - t squared ) / ( 1 + t squared ) .">
+  <g fill="currentColor">
+    <path d="M667 922 L829 922 L829 854 L713 854 L413 -265 L371 -265 L138 319 L34 279 L18 307 L177 417 L197 417 L395 -93 L399 -93 L667 922 Z" transform="translate(0 -2.8) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(31.76 0) scale(0.04 -0.04)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(58.2267 0) scale(0.04 -0.04)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(72.5067 0) scale(0.04 -0.04)"/>
+    <path d="M658 225 L62 225 L62 293 L658 293 L658 225 Z" transform="translate(101.1956 0) scale(0.04 -0.04)"/>
+    <path d="M317 467 L309 428 L208 428 L149 130 Q149 130 145 111 Q142 93 142 80 Q142 72 145 65 Q149 59 159 59 Q181 59 199 72 Q218 85 244 119 L264 104 Q250 85 230 58 Q210 31 182 11 Q154 -9 114 -9 Q83 -9 68 6 Q53 21 53 44 Q53 57 56 75 Q59 94 60 101 L128 428 L71 428 L75 449 Q107 466 128 482 Q150 498 169 524 Q189 550 214 593 L244 593 L216 467 L317 467 Z" transform="translate(138.8844 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(153.0044 -14.4) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(168.4644 0) scale(0.04 -0.04)"/>
+    <path d="M351 709 L91 -89 L35 -89 L296 709 L351 709 Z" transform="translate(182.7444 0) scale(0.04 -0.04)"/>
+    <path d="M45 270 Q45 437 117 555 Q190 673 311 736 L327 710 Q218 636 172 529 Q127 423 127 270 Q127 117 172 10 Q218 -96 327 -170 L311 -196 Q190 -133 117 -15 Q45 103 45 270 Z" transform="translate(198.1844 0) scale(0.04 -0.04)"/>
+    <path d="M426 0 L80 0 L80 28 Q151 28 180 43 Q209 58 209 95 L209 518 Q209 544 202 555 Q195 567 176 567 Q161 567 129 563 Q97 559 74 551 L74 584 L268 639 L297 639 L297 95 Q297 58 327 43 Q357 28 426 28 L426 0 Z" transform="translate(212.4644 0) scale(0.04 -0.04)"/>
+    <path d="M658 225 L396 225 L396 -40 L324 -40 L324 225 L62 225 L62 293 L324 293 L324 558 L396 558 L396 293 L658 293 L658 225 Z" transform="translate(241.1533 0) scale(0.04 -0.04)"/>
+    <path d="M317 467 L309 428 L208 428 L149 130 Q149 130 145 111 Q142 93 142 80 Q142 72 145 65 Q149 59 159 59 Q181 59 199 72 Q218 85 244 119 L264 104 Q250 85 230 58 Q210 31 182 11 Q154 -9 114 -9 Q83 -9 68 6 Q53 21 53 44 Q53 57 56 75 Q59 94 60 101 L128 428 L71 428 L75 449 Q107 466 128 482 Q150 498 169 524 Q189 550 214 593 L244 593 L216 467 L317 467 Z" transform="translate(278.8422 0) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(292.9622 -14.4) scale(0.028 -0.028)"/>
+    <path d="M312 270 Q312 103 239 -15 Q167 -133 46 -196 L30 -170 Q140 -96 185 10 Q230 117 230 270 Q230 423 185 529 Q140 636 30 710 L46 736 Q167 673 239 555 Q312 437 312 270 Z" transform="translate(308.4222 0) scale(0.04 -0.04)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(322.7022 0) scale(0.04 -0.04)"/>
+    <rect x="31.76" y="-39.68" width="19.8" height="2.72"/>
+  </g>
+</svg></span></p>
+  <h2>From groups to a distance table</h2>
+  <p>For each group, add the distance from the row point to the group and the distance from the column point to the same group. The true distance is at most this sum plus the group’s diameter, by taking a detour through the group. If the row point is in the group, its term vanishes and the sum is at most the true distance.</p>
+  <p>Keep the smallest sum across all groups. The group containing the row ensures the result stays below the true distance. The largest group diameter bounds how far below it can fall. Eight terms therefore suffice to beat the full diameter on every finite sample.</p>
+  <p>If every line’s projector is within <var>δ</var> of a sampled projector, give each line the group of its nearest sample. Distances within a group can grow by at most <span class="lattex" data-tex="2\delta" style="display:inline-block;width:1.066em;max-width:100%;vertical-align:-0.064em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.48 -30.4 42.64 32.96" width="42.64" height="32.96" role="img" aria-label="2 δ">
+  <g fill="currentColor">
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M509 629 Q509 609 499 597 Q490 585 472 577 L461 577 Q433 608 400 632 Q367 657 314 657 Q277 657 263 646 Q250 636 250 618 Q250 594 270 573 Q291 552 321 527 Q352 503 382 470 Q412 438 432 391 Q453 345 453 280 Q453 199 423 132 Q394 65 335 25 Q277 -14 189 -14 Q113 -14 80 31 Q47 76 47 146 Q47 239 78 307 Q109 375 164 413 Q220 452 291 457 L293 465 Q275 481 253 502 Q232 524 216 551 Q200 579 200 612 Q200 644 216 663 Q232 683 256 693 Q281 703 305 706 Q330 710 346 710 Q385 710 422 702 Q460 694 484 676 Q509 659 509 629 Z M381 257 Q381 295 371 327 Q361 359 344 387 Q279 386 223 363 Q167 341 132 296 Q98 251 98 180 Q98 134 124 102 Q151 70 207 70 Q248 70 288 87 Q328 104 354 144 Q381 185 381 257 Z" transform="translate(19.8 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span>, one extra hop at each end. The full-space result therefore puts the best ten-group diameter for the sample within <span class="lattex" data-tex="2\delta" style="display:inline-block;width:1.066em;max-width:100%;vertical-align:-0.064em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-0.48 -30.4 42.64 32.96" width="42.64" height="32.96" role="img" aria-label="2 δ">
+  <g fill="currentColor">
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(0 0) scale(0.04 -0.04)"/>
+    <path d="M509 629 Q509 609 499 597 Q490 585 472 577 L461 577 Q433 608 400 632 Q367 657 314 657 Q277 657 263 646 Q250 636 250 618 Q250 594 270 573 Q291 552 321 527 Q352 503 382 470 Q412 438 432 391 Q453 345 453 280 Q453 199 423 132 Q394 65 335 25 Q277 -14 189 -14 Q113 -14 80 31 Q47 76 47 146 Q47 239 78 307 Q109 375 164 413 Q220 452 291 457 L293 465 Q275 481 253 502 Q232 524 216 551 Q200 579 200 612 Q200 644 216 663 Q232 683 256 693 Q281 703 305 706 Q330 710 346 710 Q385 710 422 702 Q460 694 484 676 Q509 659 509 629 Z M381 257 Q381 295 371 327 Q361 359 344 387 Q279 386 223 363 Q167 341 132 296 Q98 251 98 180 Q98 134 124 102 Q151 70 207 70 Q248 70 288 87 Q328 104 354 144 Q381 185 381 257 Z" transform="translate(19.8 0) scale(0.04 -0.04)"/>
+  </g>
+</svg></span> of <span class="lattex" data-tex="\sqrt{2}\text{.}" style="display:inline-block;width:1.554em;max-width:100%;vertical-align:-0.245em;line-height:0"><svg style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -41.68 62.16 51.48" width="62.16" height="51.48" role="img" aria-label="the square root of 2 .">
+  <g fill="currentColor">
+    <path d="M667 922 L829 922 L829 854 L713 854 L413 -265 L371 -265 L138 319 L34 279 L18 307 L177 417 L197 417 L395 -93 L399 -93 L667 922 Z" transform="translate(0 -2.8) scale(0.04 -0.04)"/>
+    <path d="M464 160 L432 0 L38 0 L38 34 L190 186 Q240 237 273 278 Q306 320 322 362 Q339 404 339 456 Q339 512 305 545 Q272 579 214 579 Q165 579 130 558 Q96 537 68 481 L44 491 Q67 564 117 604 Q167 644 240 644 Q297 644 340 622 Q383 601 407 562 Q432 524 432 471 Q432 427 413 386 Q395 346 358 303 Q322 260 269 206 L137 81 L137 76 L207 79 L346 79 Q386 79 402 97 Q418 115 435 160 L464 160 Z" transform="translate(31.76 0) scale(0.04 -0.04)"/>
+    <path d="M183 50 Q183 27 167 9 Q151 -8 121 -8 Q91 -8 76 9 Q62 26 62 51 Q62 77 78 95 Q94 114 122 114 Q151 114 167 95 Q183 76 183 50 Z" transform="translate(51.56 0) scale(0.04 -0.04)"/>
+    <rect x="31.76" y="-39.68" width="19.8" height="2.72"/>
+  </g>
+</svg></span></p>
+</main>
+<script>
+(() => {
+  const tilt = document.getElementById('tilt');
+  const canvas = document.getElementById('lines');
+  const context = canvas.getContext('2d');
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const format = value => value > 0 && value < .001 ? value.toExponential(2) : value.toFixed(3);
+
+  function update() {
+    const t = Number(tilt.value) / 100;
+    const gap = Math.SQRT2 * 2 * t * t / (1 + t * t);
+    document.getElementById('tilt-value').value = t.toFixed(2);
+    document.getElementById('distance').value = format(Math.SQRT2 - gap);
+    document.getElementById('gap').value = format(gap);
+    document.getElementById('description').textContent = t === 0
+      ? 'At zero, the two directions lie on the axes and are perpendicular.'
+      : t === 1 ? 'At one, the two directions agree and the distance is zero.'
+      : 'Both directions lie strictly within the same quadrant.';
+
+    const size = canvas.clientWidth;
+    const density = devicePixelRatio || 1;
+    canvas.width = canvas.height = Math.round(size * density);
+    context.scale(density, density);
+    const style = getComputedStyle(canvas);
+    const origin = size * .15;
+    const end = size * .90;
+    const length = size * .70;
+    context.beginPath();
+    context.moveTo(origin, size - end);
+    context.lineTo(origin, size - origin);
+    context.lineTo(end, size - origin);
+    context.strokeStyle = style.getPropertyValue('--line');
+    context.lineWidth = 1.4;
+    context.stroke();
+    const scale = length / Math.hypot(1, t);
+    for (const [x, y, color] of [[1, t, '--first'], [t, 1, '--second']]) {
+      context.beginPath();
+      context.moveTo(origin, size - origin);
+      context.lineTo(origin + x * scale, size - origin - y * scale);
+      context.strokeStyle = style.getPropertyValue(color);
+      context.lineWidth = 4;
+      context.lineCap = 'round';
+      context.stroke();
+    }
+  }
+  tilt.addEventListener('input', update);
+  media.addEventListener('change', update);
+  new ResizeObserver(update).observe(canvas);
+  update();
+})();
+</script>
+</body>
+</html>
